@@ -1,0 +1,60 @@
+﻿<Window x:Class="PrivateWin10.Windows.Reminder"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:local="clr-namespace:PrivateWin10.Windows"
+        xmlns:Behaviors="clr-namespace:Behaviors"
+        WindowStartupLocation="CenterOwner"
+        mc:Ignorable="d"
+        Title="Reminder" Width="500" Height="350" ShowInTaskbar="False">
+    <i:Interaction.Behaviors>
+        <Behaviors:HideCloseButtonOnWindow />
+    </i:Interaction.Behaviors>
+    <Grid>
+        <Grid x:Name="Page_About" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="White">
+            <Grid Margin="30,30,30,0" VerticalAlignment="Stretch">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="150"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Ellipse Name="About_Ellipse" Grid.Column="0" Canvas.Left="135" Canvas.Top="25" Width="120" Height="120" Margin="0,4,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" SnapsToDevicePixels="true">
+                        <Shape.Fill>
+                            <LinearGradientBrush StartPoint="0.5,1" EndPoint="0.5,0">
+                                <GradientBrush.GradientStops>
+                                    <GradientStop Offset="0" Color="#00A0E0"/>
+                                    <GradientStop Offset="1" Color="#003090"/>
+                                </GradientBrush.GradientStops>
+                            </LinearGradientBrush>
+                        </Shape.Fill>
+                    </Ellipse>
+                    <Path Grid.Column="0" Width="88" Height="88" Margin="0,16,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Data="{StaticResource Icon_Major}" Fill="White" IsHitTestVisible="false" SnapsToDevicePixels="true" Stretch="Uniform"/>
+
+                    <Label Name="lblTitle" Grid.Column="2" Height="37" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Private Win10" FontSize="24" FontWeight="SemiBold"/>
+                    <StackPanel Margin="0,37,0,0" Grid.Column="2" VerticalAlignment="Top" Orientation="Horizontal">
+                        <Label Name="lblVersion" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Version:" FontSize="16"/>
+                        <Label Name="lblVerNum" Grid.Column="0" Margin="-3,0,0,0" VerticalAlignment="Top" Content="0.Xa" Cursor="Hand" FontSize="16"/>
+                    </StackPanel>
+                    <Label Name="lblAuthor" Grid.Column="2" Margin="0,67,0,0" VerticalAlignment="Top" Content="Author: David Xanatos" FontSize="16"/>
+                    <Label x:Name="lblCopyright" Grid.Column="2" Margin="0,97,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Copyright © 2018-2019 David Xanatos" FontSize="16"/>
+                </Grid>
+                <StackPanel Orientation="Vertical" Grid.Row="2">
+                    <Label x:Name="lblText" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="If you like Private Winten, please support the project" FontSize="16"/>
+                    <!--Label MouseDown="lblLink_MouseDown" x:Name="lblSupportLink" Grid.Column="0" Margin="0,0,0,0" VerticalAlignment="Top" Content="https://www.patreon.com/DavidXanatos" Cursor="Hand" FontSize="16" Style="{StaticResource Link}"/-->
+                    <StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Label x:Name="lblSupport" Grid.Column="0" Margin="0,0,0,0" VerticalAlignment="Top" Content="OK, I'll support it 😀" Cursor="Hand" FontSize="16" Style="{StaticResource Link}" MouseDown="LblSupport_MouseDown"/>
+                        <Label x:Name="lblClose" Grid.Column="0" Margin="25,0,0,0" VerticalAlignment="Top" Content="May be an other time 😢" Cursor="Hand" FontSize="16" Style="{StaticResource Link}" MouseDown="LblClose_MouseDown"/>
+                    </StackPanel>
+                    <Label x:Name="lblInfo" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Supportets don't get this notificaiton 😉" FontSize="14"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

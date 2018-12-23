@@ -1,0 +1,76 @@
+﻿<Window x:Class="PrivateWin10.Windows.SetupWnd"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PrivateWin10.Windows"
+        WindowStartupLocation="CenterOwner"
+        mc:Ignorable="d"
+        Title="Private Win10 Initial Setup" Width="500" Height="250">
+
+    <FrameworkElement.Resources>
+        <DrawingImage x:Key="Icon_Start">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Start}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <DrawingImage x:Key="Icon_Firewall">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Firewall}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+    </FrameworkElement.Resources>
+
+    <Grid Margin="0,0,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!--ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,0,0" VerticalScrollBarVisibility="Auto"-->
+        <WrapPanel Grid.Row="0" Orientation="Vertical">
+            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
+                <Grid Margin="0,5,0,5">
+                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Start}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <TextBlock Name="lblStartup"  HorizontalAlignment="Left" Margin="40,25,0,0"  TextWrapping="Wrap" Text="Startup Behavioure" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <StackPanel Orientation="Vertical" Margin="35,45,0,0">
+                        <CheckBox Name="chkAutoStart"  Content="Autostart at logon" HorizontalAlignment="Left" Margin="0,5,0,0" VerticalAlignment="Top" IsChecked="True" Click="ChkAutoStart_Click"/>
+                        <CheckBox Name="chkService"  Content="Install Service (priv10)" HorizontalAlignment="Left" Margin="15,5,0,0" VerticalAlignment="Top"/>
+                        <CheckBox Name="chkNoUAC"  Content="Bypass UAC prompt" HorizontalAlignment="Left" Margin="0,5,0,0" VerticalAlignment="Top"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+
+            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
+                <Grid Margin="0,5,0,5">
+                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Firewall}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <TextBlock Name="lblFirewall" HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Windows Firewall Option" VerticalAlignment="Top" FontWeight="Bold"/>
+
+                    <StackPanel Orientation="Vertical" Margin="35,45,0,0">
+                        <CheckBox Name="chkUseFW"  Content="Manage Windows Firewall" HorizontalAlignment="Left" Margin="0,5,0,0" VerticalAlignment="Top" IsChecked="True" Click="ChkUseFW_Click"/>
+                        <CheckBox Name="chkNotifyFW"  Content="Show blocked connection atemps" HorizontalAlignment="Left" Margin="15,5,0,0" VerticalAlignment="Top" IsChecked="True"/>
+                    </StackPanel>
+                    
+                    
+                </Grid>
+            </Grid>
+        </WrapPanel>
+
+        <Grid Grid.Row="1" Margin="0,10,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="1" Name="btnOK" IsDefault="True" Margin="10,0,10,0" Content="Ok" Width="100" VerticalAlignment="Bottom" Click="BtnOK_Click" />
+            <Button Grid.Column="2" IsCancel="True" Margin="10,0,10,0" Content="Cancel" Width="100" VerticalAlignment="Center" />
+        </Grid>
+    </Grid>
+    
+</Window>

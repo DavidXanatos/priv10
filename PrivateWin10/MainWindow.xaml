@@ -1,0 +1,142 @@
+﻿<Window x:Class="PrivateWin10.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PrivateWin10"
+        mc:Ignorable="d"
+        Title="Private Win10" Height="485" Width="1000" MinWidth="800" MinHeight="485" Closing="Window_Closing" Closed="Window_Closed" Activated="Window_Activated" Loaded="Window_Loaded">
+
+    <FrameworkElement.Resources>
+        <Style x:Key="SidePanel" TargetType="{x:Type TabControl}">
+            <Setter Property="FrameworkElement.OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Control.Background" Value="#FF334444"/>
+        </Style>
+
+        <Style x:Key="SidePanelItem" TargetType="{x:Type TabItem}">
+            <Setter Property="local:MouseDownHelper.IsEnabled" Value="true"/>
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabItem}">
+                        <Grid Margin="0,0,0,0">
+                            <Border Name="Border" Width="48" Height="48" Margin="0,0,0,0" Background="{StaticResource SidePanel.Back}" BorderBrush="Gray" BorderThickness="0,0,0,0" CornerRadius="0,0,0,0">
+                                <ContentPresenter x:Name="ContentSite" Margin="2,2,2,2" HorizontalAlignment="Center" VerticalAlignment="Center" ContentSource="Header"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="TabItem.IsSelected" Value="true">
+                                <Setter Property="FrameworkElement.Margin" Value="0,0,0,0"/>
+                                <Setter TargetName="Border" Property="Border.BorderBrush" Value="#FF000000"/>
+                                <Setter TargetName="Border" Property="Border.Background" Value="{StaticResource SidePanel.Back}"/>
+                                <Setter TargetName="Border" Property="Border.CornerRadius" Value="0,0,0,0"/>
+                            </Trigger>
+                            <Trigger Property="UIElement.IsMouseOver" Value="true">
+                                <Setter TargetName="Border" Property="Border.Background" Value="{StaticResource SidePanel.Hover}"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="TabItem.IsSelected" Value="true"/>
+                                    <Condition Property="UIElement.IsMouseOver" Value="true"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Border" Property="Border.Background" Value="{StaticResource SidePanel.Back}"/>
+                            </MultiTrigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="local:MouseDownHelper.IsMouseLeftButtonDown" Value="true"/>
+                                    <Condition Property="UIElement.IsMouseOver" Value="true"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Border" Property="Border.Background" Value="{StaticResource SidePanel.Back}"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </FrameworkElement.Resources>
+    
+    <Grid x:Name="Main" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Margin="0,0,0,0" Background="White">
+        <Grid Width="48" HorizontalAlignment="Left" Background="{StaticResource SidePanel.Back}"/>
+        <TabControl x:Name="SidePanel" Width="50" Margin="-2,-1,0,0" HorizontalAlignment="Left" VerticalAlignment="Stretch" TabStripPlacement="Left">
+
+            <TabItem KeyDown="SidePanel_Click" MouseLeftButtonUp="SidePanel_Click" x:Name="PanelItem_Overview" Style="{StaticResource SidePanelItem}">
+                <HeaderedContentControl.Header>
+                    <StackPanel>
+                        <Image x:Name="PanelItem_Overview_Image" Width="32" Height="32" IsHitTestVisible="false" SnapsToDevicePixels="true"/>
+                        <Path x:Name="PanelItem_Overview_Pin" Width="4" Height="24" Margin="-43,-32,0,0" Fill="{StaticResource SidePanel.Pin}" IsHitTestVisible="false" RenderOptions.EdgeMode="Aliased">
+                            <Path.Data>
+                                <RectangleGeometry Rect="0,0 4,24"/>
+                            </Path.Data>
+                        </Path>
+                    </StackPanel>
+                </HeaderedContentControl.Header>
+            </TabItem>
+
+            <TabItem KeyDown="SidePanel_Click" MouseLeftButtonUp="SidePanel_Click" x:Name="PanelItem_Privacy" Style="{StaticResource SidePanelItem}">
+                <HeaderedContentControl.Header>
+                    <StackPanel>
+                        <Image x:Name="PanelItem_Privacy_Image" Width="32" Height="32" IsHitTestVisible="false" SnapsToDevicePixels="true"/>
+                        <Path x:Name="PanelItem_Privacy_Pin" Width="4" Height="24" Margin="-43,-32,0,0" Fill="{StaticResource SidePanel.Pin}" IsHitTestVisible="false" RenderOptions.EdgeMode="Aliased">
+                            <Path.Data>
+                                <RectangleGeometry Rect="0,0 4,24"/>
+                            </Path.Data>
+                        </Path>
+                    </StackPanel>
+                </HeaderedContentControl.Header>
+            </TabItem>
+
+            <TabItem KeyDown="SidePanel_Click" MouseLeftButtonUp="SidePanel_Click" x:Name="PanelItem_Firewall" Style="{StaticResource SidePanelItem}">
+                <HeaderedContentControl.Header>
+                    <StackPanel>
+                        <Image x:Name="PanelItem_Firewall_Image" Width="32" Height="32" IsHitTestVisible="false" SnapsToDevicePixels="true"/>
+                        <Path x:Name="PanelItem_Firewall_Pin" Width="4" Height="24" Margin="-43,-32,0,0" Fill="{StaticResource SidePanel.Pin}" IsHitTestVisible="false" RenderOptions.EdgeMode="Aliased">
+                            <Path.Data>
+                                <RectangleGeometry Rect="0,0 4,24"/>
+                            </Path.Data>
+                        </Path>
+                    </StackPanel>
+                </HeaderedContentControl.Header>
+            </TabItem>
+
+            <!--TabItem KeyDown="SidePanel_Click" MouseLeftButtonUp="SidePanel_Click" x:Name="PanelItem_VPN" Style="{StaticResource SidePanelItem}">
+                <HeaderedContentControl.Header>
+                    <StackPanel>
+                        <Image x:Name="PanelItem_VPN_Image" Width="32" Height="32" IsHitTestVisible="false" SnapsToDevicePixels="true"/>
+                        <Path x:Name="PanelItem_VPN_Pin" Width="4" Height="24" Margin="-43,-32,0,0" Fill="{StaticResource SidePanel.Pin}" IsHitTestVisible="false" RenderOptions.EdgeMode="Aliased">
+                            <Path.Data>
+                                <RectangleGeometry Rect="0,0 4,24"/>
+                            </Path.Data>
+                        </Path>
+                    </StackPanel>
+                </HeaderedContentControl.Header>
+            </-->
+            
+            <TabItem KeyDown="SidePanel_Click" MouseLeftButtonUp="SidePanel_Click" x:Name="PanelItem_Settings" Style="{StaticResource SidePanelItem}">
+                <HeaderedContentControl.Header>
+                    <StackPanel>
+                        <Image x:Name="PanelItem_Settings_Image" Width="32" Height="32" IsHitTestVisible="false" SnapsToDevicePixels="true"/>
+                        <Path x:Name="PanelItem_Settings_Pin" Width="4" Height="24" Margin="-43,-32,0,0" Fill="{StaticResource SidePanel.Pin}" IsHitTestVisible="false" RenderOptions.EdgeMode="Aliased">
+                            <Path.Data>
+                                <RectangleGeometry Rect="0,0 4,24"/>
+                            </Path.Data>
+                        </Path>
+                    </StackPanel>
+                </HeaderedContentControl.Header>
+            </TabItem>
+
+            <TabItem KeyDown="SidePanel_Click" MouseLeftButtonUp="SidePanel_Click" x:Name="PanelItem_About" Style="{StaticResource SidePanelItem}">
+                <HeaderedContentControl.Header>
+                    <StackPanel>
+                        <Image x:Name="PanelItem_About_Image" Width="32" Height="32" IsHitTestVisible="false" SnapsToDevicePixels="true"/>
+                        <Path x:Name="PanelItem_About_Pin" Width="4" Height="24" Margin="-43,-32,0,0" Fill="{StaticResource SidePanel.Pin}" IsHitTestVisible="false" RenderOptions.EdgeMode="Aliased">
+                            <Path.Data>
+                                <RectangleGeometry Rect="0,0 4,24"/>
+                            </Path.Data>
+                        </Path>
+                    </StackPanel>
+                </HeaderedContentControl.Header>
+            </TabItem>
+            
+        </TabControl>
+    </Grid>
+</Window>

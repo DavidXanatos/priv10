@@ -1,0 +1,182 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:controls="clr-namespace:PrivateWin10.Controls" 
+             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.AeroLite" 
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" x:Class="PrivateWin10.Controls.ProgramControl">
+
+    <UserControl.Resources>
+
+
+        <!--Storyboard x:Key="FlashButton" RepeatBehavior="Forever">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="button">
+                <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0.2"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:2" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+        </>
+        <Storyboard x:Key="ChangeColor">
+            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Panel.Background).(SolidColorBrush.Color)" Storyboard.TargetName="grid">
+                <EasingColorKeyFrame KeyTime="0:0:1" Value="Red"/>
+            </ColorAnimationUsingKeyFrames>
+        </Storyboard-->
+        <Storyboard x:Key="RecoverColor">
+            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="rect">
+                <EasingColorKeyFrame KeyTime="0:0:1" Value="#00000000"/>
+            </ColorAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <DrawingBrush Stretch="UniformToFill" ViewportUnits="Absolute" Viewport="0,0,20,20" TileMode="Tile" x:Key="Stripes">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#808080">
+                        <GeometryDrawing.Geometry>
+                            <GeometryGroup FillRule="Nonzero">
+                                <PathGeometry Figures="M0,0 L100,0 L100,100 L0,100"/>
+                            </GeometryGroup>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#ffff80">
+                        <GeometryDrawing.Geometry>
+                            <GeometryGroup FillRule="Nonzero">
+                                <PathGeometry Figures="M0,0 L25,0 L100,75 L100,100 L75,100 L0,25 L0,0 M75,0 L100,25 L100,0 M0,75 L25,100 L0,100"/>
+                            </GeometryGroup>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+    </UserControl.Resources>
+
+    <Grid x:Name="grid" Background="White">
+        <Rectangle x:Name="rect" Fill="#00000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="64"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Image x:Name="icon" Grid.Column="0" HorizontalAlignment="Left" Height="48" Margin="2,2,0,0" VerticalAlignment="Top" Width="48"
+                   MouseLeftButtonDown="icon_MouseLeftButtonDown"
+                   />
+                <TextBox x:Name="name" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,3,3,0" VerticalAlignment="Top" Height="Auto"
+                     BorderBrush="Transparent"
+                     IsReadOnly="True" LostFocus="name_LostFocus" MouseDoubleClick="name_MouseDoubleClick" KeyDown="name_KeyDown"
+                     />
+                <ComboBox x:Name="category" Grid.Column="2" HorizontalAlignment="Right" Margin="2,3,3,0" VerticalAlignment="Top" MinWidth ="150" Width="Auto" 
+                    IsReadOnly="True"
+                    IsEditable="True"
+                    Height="25"
+                    SelectionChanged="category_SelectionChanged">
+                    <ComboBox.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ComboBox.GroupStyle>
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Content}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </Grid>
+
+            <Grid Margin="52,28,2,0" HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0" x:Name="info" Content="Label" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center"/>
+
+                <WrapPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,0" HorizontalAlignment="Right" Background="Transparent" VerticalAlignment="Center">
+                    <CheckBox x:Name="chkNotify" Content="Notify" Margin="2,0,2,0" VerticalAlignment="Center" IsThreeState="True" Click="chkNotify_Click"/>
+                    <ComboBox x:Name="cmbAccess" Grid.Column="2" Margin="2,0,0,0" VerticalAlignment="Center" MinWidth ="125" Width="Auto" 
+                      SelectionChanged="cmbAccess_SelectionChanged"/>
+                    <!--Button x:Name="btnCustimize" Height="20" Width="70" Content="Customize" Margin="2,2,2,2" Padding="0,0,0,0" VerticalAlignment="Center" Click="btnCustimize_Click" mah:ControlsHelper.ContentCharacterCasing="Upper"/-->
+                </WrapPanel>
+            </Grid>
+
+            <ToggleButton x:Name="btnIDs" Height="13" MinHeight="13" Width="48" Margin="2,51,0,0" Padding="0,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Click="btnIDs_Click" ToolTip="Show Modules">
+                <ToggleButton.Template>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border x:Name="Frame" Background="White" CornerRadius="6" BorderBrush="Gray" BorderThickness="2">
+                            <ContentPresenter Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <Image Source="{StaticResource Icon_Collapse}" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Frame" Property="Background" Value="LightGray" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <Image Source="{StaticResource Icon_Expand}" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Frame" Property="BorderBrush" Value="Black" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </ToggleButton.Template>
+            </ToggleButton>
+
+            <!--TextBox x:Name="info" HorizontalAlignment="Stretch" Margin="2,36,2,2" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" IsReadOnly="True"/-->
+            <!--Expander Name="expander" Grid.Row="1" IsExpanded="False" Header="" Margin="2,-20,2,2"-->
+            <Grid x:Name="progArea" Grid.Row="1" Margin="2,2,2,2" MaxHeight="380">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <DataGrid x:Name="progGrid" AutoGenerateColumns="False" IsReadOnly="true" HorizontalScrollBarVisibility="Visible" MouseDoubleClick="progGrid_MouseDoubleClick" GridLinesVisibility="All">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Grid.Column="0" Margin="2,0,2,0" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Icon}" />
+                                        <!--TextBlock Grid.Column="1" Height="16" HorizontalAlignment="Left" Margin="2,0,2,0" VerticalAlignment="Center" Text="{Binding Name}" /-->
+                                    </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                        <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Width="70" Margin="2,0,2,0">
+                        <Button x:Name="btnAdd" Height="20" Content="Add" Margin="0,2,0,2" Padding="0,0,0,0" VerticalAlignment="Top" Click="btnAdd_Click"/>
+                        <Button x:Name="btnSplit" Height="20" Content="Split" Margin="0,2,0,2" Padding="0,0,0,0" Click="btnSplit_Click"  VerticalAlignment="Top"/>
+                        <Button x:Name="btnRemove" Height="20" Content="Remove" Margin="0,2,0,2" Padding="0,0,0,0" VerticalAlignment="Top" Click="btnRemove_Click"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="PrivateWin10.Pages.PrivacyPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PrivateWin10.Pages"
+             mc:Ignorable="d" >
+    <Grid Margin="48,0,0,0">
+        <ScrollViewer Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="200" Margin="5,5,5,180" VerticalScrollBarVisibility="Auto">
+            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Name="catGrid">
+
+            </Grid>
+        </ScrollViewer>
+
+        <!--TextBox Height="119" HorizontalAlignment="Stretch" Margin="220,50,13,290" Name="textBox1" VerticalAlignment="Top" />
+        <DataGrid AutoGenerateColumns="False" HorizontalAlignment="Stretch" Margin="220,176,13,12" Name="dataGrid1" VerticalAlignment="Stretch" /-->
+
+        <!--TabControl HorizontalAlignment="Left" Height="175" VerticalAlignment="Bottom" Width="200" Margin="5,5,5,5">
+            <TabItem Header="TabItem">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="TabItem">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+        </-->
+
+        <Grid Margin="210,0,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="235" MaxWidth="300" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" MinWidth="100" />
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid Margin="0,5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Name="groupeGrid">
+
+                </Grid>
+            </ScrollViewer>
+
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+
+            <ScrollViewer Grid.Column="2" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid Margin="0,5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Name="tweakGrid">
+
+                </Grid>
+            </ScrollViewer>
+
+        </Grid>
+        <!--TextBlock HorizontalAlignment="Left" Margin="465,280,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Bottom" Height="170" Width="222"/-->
+        
+    </Grid>
+</UserControl>

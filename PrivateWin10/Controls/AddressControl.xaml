@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="PrivateWin10.Controls.AddressControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PrivateWin10.Controls"
+             mc:Ignorable="d" >
+    <Grid Height="125" VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Name="gridSelect" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <RadioButton Name="radAny" Grid.Column="0" Content="Any Address" HorizontalAlignment="Left" Margin="2,2" VerticalAlignment="Top" Checked="radAny_Checked"/>
+            <RadioButton Name="radCustom" Grid.Column="1" Content="Selected Addresses:" HorizontalAlignment="Left" Margin="2,2" VerticalAlignment="Top" Checked="radAny_Checked"/>
+        </Grid>
+        <Grid Name="gridCustom" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ListBox Name="lstAddr" HorizontalAlignment="Stretch" Margin="2,2" Grid.Column="0" VerticalAlignment="Stretch" MouseDoubleClick="lstAddr_MouseDoubleClick" />
+            <!--StackPanel Grid.Column="1">
+                <Button Name="btnAdd" Content="Add" Margin="2,2" VerticalAlignment="Top" HorizontalAlignment="Stretch" Click="btnAdd_Click" />
+                <Button Name="btnEdit" Content="Edit" Margin="2,2" VerticalAlignment="Top" HorizontalAlignment="Stretch" Click="btnEdit_Click" />
+                <Button Name="btnRemove" Content="Remove" Margin="2,2" VerticalAlignment="Top" HorizontalAlignment="Stretch" Click="btnRemove_Click" />
+            </-->
+        </Grid>
+        <Grid Name="gridEdit"  Grid.Row="2" Visibility="Collapsed">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ComboBox Name="cmbEdit" Grid.Column="0" Margin="2,2,0,2" IsEditable="True" VerticalAlignment="Center" HorizontalAlignment="Stretch" Text=""/>
+            <Button Name="btnOk" Grid.Column="1" Content="Ok" HorizontalAlignment="Left" Margin="2,2" VerticalAlignment="Center" Width="Auto" Style="{DynamicResource SquareButtonStyle}" Click="btnOk_Click" />
+        </Grid>
+    </Grid>
+</UserControl>

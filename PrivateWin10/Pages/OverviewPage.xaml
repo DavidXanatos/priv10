@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="PrivateWin10.Pages.OverviewPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PrivateWin10.Pages"
+             mc:Ignorable="d" 
+             MinHeight="400" MinWidth="400">
+    
+    <FrameworkElement.Resources>
+        <DrawingImage x:Key="Icon_Start">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Start}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <DrawingImage x:Key="Icon_Privacy">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Privacy}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        
+        <DrawingImage x:Key="Icon_Firewall">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Firewall}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+    </FrameworkElement.Resources>
+
+    <Grid Margin="48,0,0,0">
+        <!--ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,0,0" VerticalScrollBarVisibility="Auto"-->
+        <WrapPanel Grid.Row="0" Orientation="Vertical">
+            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
+                <Grid Margin="0,5,0,5">
+                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Start}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <TextBlock Name="lblStartup"  HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Operation Status" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <StackPanel Orientation="Vertical" Margin="50,45,0,0">
+                        <StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal">
+                            <Label Name="lblRunning" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Running as:" FontSize="16"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+
+            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
+                <Grid Margin="0,5,0,5">
+                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Firewall}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <TextBlock Name="lblFirewall" HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Windows Firewall" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <StackPanel Orientation="Vertical" Margin="50,45,0,0">
+                        <StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal">
+                            <Label Name="lblFirewallStatus" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Firewall status:" FontSize="16"/>
+                            <Label Name="lblFirewallInfo" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="" FontSize="16"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+
+            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
+                <Grid Margin="0,5,0,5">
+                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Privacy}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <TextBlock Name="lblPrivacy" HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Privacy Option" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <StackPanel Orientation="Vertical" Margin="0,45,0,0">
+
+
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </WrapPanel>
+    </Grid>
+</UserControl>

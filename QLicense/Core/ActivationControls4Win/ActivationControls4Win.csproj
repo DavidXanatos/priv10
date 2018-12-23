@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DDF06EAC-02DF-4BDA-A883-98B856BC1765}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>QLicense.Windows.Controls</RootNamespace>
+    <AssemblyName>QLicense.Windows.Controls</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>ActivationControls4Win.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="LicenseActivateControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LicenseActivateControl.Designer.cs">
+      <DependentUpon>LicenseActivateControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LicenseGeneratedEventArgs.cs" />
+    <Compile Include="LicenseInfoControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LicenseInfoControl.Designer.cs">
+      <DependentUpon>LicenseInfoControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LicenseSettingsValidatingEventArgs.cs" />
+    <Compile Include="LicenseSettingsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LicenseSettingsControl.Designer.cs">
+      <DependentUpon>LicenseSettingsControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LicenseStringContainer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LicenseStringContainer.Designer.cs">
+      <DependentUpon>LicenseStringContainer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="LicenseActivateControl.resx">
+      <DependentUpon>LicenseActivateControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LicenseActivateControl.zh-Hans.resx">
+      <DependentUpon>LicenseActivateControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LicenseInfoControl.resx">
+      <DependentUpon>LicenseInfoControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LicenseInfoControl.zh-Hans.resx">
+      <DependentUpon>LicenseInfoControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LicenseSettingsControl.resx">
+      <DependentUpon>LicenseSettingsControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LicenseSettingsControl.zh-Hans.resx">
+      <DependentUpon>LicenseSettingsControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LicenseStringContainer.resx">
+      <DependentUpon>LicenseStringContainer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LicenseStringContainer.zh-Hans.resx">
+      <DependentUpon>LicenseStringContainer.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\QLicense\QLicense.csproj">
+      <Project>{1980e43f-c5e4-4a2b-95a6-1aebdc7ee2b7}</Project>
+      <Name>QLicense</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ActivationControls4Win.snk" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,70 @@
+﻿<UserControl x:Class="PrivateWin10.Pages.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PrivateWin10.Pages"
+             mc:Ignorable="d" 
+             MinHeight="400" MinWidth="400">
+
+    <FrameworkElement.Resources>
+        <DrawingImage x:Key="Icon_Start">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Start}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <DrawingImage x:Key="Icon_Firewall">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Firewall}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+    </FrameworkElement.Resources>
+
+    <Grid Margin="48,0,0,0">
+        <!--ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,0,0" VerticalScrollBarVisibility="Auto"-->
+        <WrapPanel Grid.Row="0" Orientation="Vertical">
+            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
+                <Grid Margin="0,5,0,5">
+                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Start}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <TextBlock Name="lblStartup"  HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Startup Behavioure" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <StackPanel Orientation="Vertical" Margin="0,45,0,0">
+                        <CheckBox Name="chkTray"  Content="Show Tray Icon" HorizontalAlignment="Left" Margin="20,5,0,0" VerticalAlignment="Top" Click="chkTray_Click"/>
+                        <CheckBox Name="chkAutoStart"  Content="Autostart at logon" HorizontalAlignment="Left" Margin="20,5,0,0" VerticalAlignment="Top" Click="chkAutoStart_Click"/>
+                        <CheckBox Name="chkService"  Content="Install Service (priv10)" HorizontalAlignment="Left" Margin="20,5,0,0" VerticalAlignment="Top" Click="chkService_Click"/>
+                        <CheckBox Name="chkNoUAC"  Content="Bypass UAC prompt" HorizontalAlignment="Left" Margin="20,5,0,0" VerticalAlignment="Top" Click="chkNoUAC_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+
+            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
+                <Grid Margin="0,5,0,5">
+                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Firewall}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <TextBlock Name="lblFirewall" HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Windows Firewall Option" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <StackPanel Orientation="Vertical" Margin="0,45,0,0">
+
+                        <CheckBox Name="chkUseFW"  Content="Manage Windows Firewall" HorizontalAlignment="Left" Margin="20,5,0,0" VerticalAlignment="Top" Click="ChkUseFW_Click"/>
+                        <CheckBox Name="chkNotifyFW"  Content="Show blocked connection atemps" HorizontalAlignment="Left" Margin="35,5,0,0" VerticalAlignment="Top" Click="chkNotifyFW_Click"/>
+
+                        <Label Name="lblMode" Margin="20,5,0,0" Content="Filtering Mode"/>
+                        <RadioButton Name="radWhitelist" Margin="35,5,0,0" VerticalAlignment="Top"  Content="White-List Mode (recommended)" Checked="radMode_Checked"/>
+                        <RadioButton Name="radBlacklist" Margin="35,5,0,0" VerticalAlignment="Top" Content="Black-List Mode (default)" Checked="radMode_Checked"/>
+                        <RadioButton Name="radDisabled" Margin="35,5,0,0" VerticalAlignment="Top" Content="Disable Windows Firewall" Checked="radMode_Checked"/>
+
+                        <Label Name="lblAudit" Margin="20,5,0,0" VerticalAlignment="Top" Content="Audit Policy (Should be set to All)"/>
+                        <ComboBox Name="cmbAudit" HorizontalAlignment="Left" Margin="60,0,0,0" VerticalAlignment="Top" Width="150" SelectionChanged="cmbAudit_SelectionChanged">
+                            <ComboBoxItem Name="lblAuditAll" Content="Blocked &amp; Allowed"/>
+                            <ComboBoxItem Name="lblAuditBlock" Content="Blocked Only"/>
+                            <ComboBoxItem Name="lblAuditNone" Content="Disabled"/>
+                        </ComboBox>
+
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </WrapPanel>
+    </Grid>
+</UserControl>
