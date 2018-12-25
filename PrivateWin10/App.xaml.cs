@@ -172,6 +172,8 @@ namespace PrivateWin10
 
                 engine.Start();
 
+                Console.WriteLine("... engine started.");
+
                 client.Connect();
             }
 
@@ -209,6 +211,8 @@ namespace PrivateWin10
 
                 return;
             }*/
+
+            Console.WriteLine("Preparing GUI...");
 
             var app = new App();
             app.InitializeComponent();

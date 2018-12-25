@@ -50,24 +50,37 @@ namespace PrivateWin10
 
         public void Run()
         {
+            Console.WriteLine("Entered Engine::Run");
+
             mDispatcher = Dispatcher.CurrentDispatcher;
 
+            Console.WriteLine("Initializing program list...");
             programs = new ProgramList();
-            if(!UwpFunc.IsWindows7OrLower)
+            if (!UwpFunc.IsWindows7OrLower)
+            {
+                Console.WriteLine("Initializing app manager...");
                 appMgr = new AppManager();
+            }
+            Console.WriteLine("Initializing firewall...");
             firewall = new Firewall();
 
+            Console.WriteLine("Loading program list...");
             programs.LoadList();
 
+            Console.WriteLine("Loading firewall rules...");
             firewall.LoadRules(true);
-            if(App.GetConfigInt("Startup", "LoadLog", 1) != 0)
+            Console.WriteLine("Loading connection log...");
+            if (App.GetConfigInt("Startup", "LoadLog", 1) != 0)
                 firewall.LoadLogAsync();
             firewall.WatchConnections();
 
+            Console.WriteLine("Setting up IPC host...");
             App.host = new PipeHost();
             App.host.Listen();
 
             mStarted.Set();
+
+            Console.WriteLine("Starting engine timer...");
 
             mTimer.Tick += new EventHandler(OnTimer_Tick);
             mTimer.Interval = new TimeSpan(0, 0, 0, 0, 10*1000); // every 10 seconds
@@ -75,8 +88,11 @@ namespace PrivateWin10
 
             Dispatcher.Run();
 
+            Console.WriteLine("Saving program list...");
             programs.StoreList();
 
+
+            Console.WriteLine("Shuttin down IPC host...");
             App.host.Close();
 
             //mFinished.Set();

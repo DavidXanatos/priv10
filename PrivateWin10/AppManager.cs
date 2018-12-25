@@ -57,7 +57,10 @@ public class AppManager
             string appPackageID = name.ToLower() + "_" + publisher;
             string appSID = PackageIDToSid(appPackageID).ToLower();
 
-            Apps.Add(package.InstalledLocation.Path.ToLower(), appSID);
+            if (Apps.ContainsKey(package.InstalledLocation.Path.ToLower()))
+                AppLog.Line("Warning an app with the path: {0} is already listed", package.InstalledLocation.Path.ToLower());
+            else
+                Apps.Add(package.InstalledLocation.Path.ToLower(), appSID);
 
             AppInfo? info = GetInfo(path, name, appPackageID, appSID);
             if (info != null)
@@ -65,7 +68,10 @@ public class AppManager
                 AppInfo old_info;
                 if (AppInfos.TryGetValue(appSID, out old_info))
                     continue;
-                AppInfos.Add(appSID, info.Value);
+                if (AppInfos.ContainsKey(appSID))
+                    AppLog.Line("Warning an app with the SID: {0} is already listed", appSID);
+                else
+                    AppInfos.Add(appSID, info.Value);
             }
         }
     }
