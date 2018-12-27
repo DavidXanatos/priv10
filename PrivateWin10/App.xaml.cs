@@ -30,7 +30,7 @@ namespace PrivateWin10
         public static string[] args = null;
         public static string exePath = "";
         public static string mVersion = "0.0";
-        public static string mName = "Private Winten";
+        public static string mName = "Private WinTen";
         public static string mSvcName = "priv10";
         public static string appPath = "";
         public static int mSession = 0;
@@ -184,7 +184,7 @@ namespace PrivateWin10
 
             /*if (TestArg("-console-debug"))
             {
-                Console.WriteLine("Private Winten reporting for duty, sir!");
+                Console.WriteLine("Private WinTen reporting for duty, sir!");
                 Console.WriteLine("");
 
                 for (bool running = true; running;)

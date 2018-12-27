@@ -1,6 +1,7 @@
 ﻿using PrivateWin10.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,8 @@ namespace PrivateWin10.Windows
     {
         protected FirewallRule Rule;
 
+        private readonly RuleWindowViewModel viewModel;
+
         public RuleWindow(List<ProgramList.ID> ids, FirewallRule rule)
         {
             InitializeComponent();
@@ -29,7 +32,11 @@ namespace PrivateWin10.Windows
             Rule = rule;
             bool bNew = Rule.guid == Guid.Empty;
 
-            txtName.Text = Rule.Name;
+            viewModel = new RuleWindowViewModel();
+            DataContext = viewModel;
+
+            //txtName.Text = Rule.Name;
+            viewModel.RuleName = Rule.Name;
             cmbGroupe.ItemsSource = GroupeModel.GetInstance().Groupes;
             WpfFunc.CmbSelect(cmbGroupe, Rule.Grouping);
             if (cmbGroupe.SelectedItem == null)
@@ -46,7 +53,8 @@ namespace PrivateWin10.Windows
 
             cmbAction.Items.Add(new ContentControl() { Content = Translate.fmt("str_allow"), Tag = Firewall.Actions.Allow });
             cmbAction.Items.Add(new ContentControl() { Content = Translate.fmt("str_block"), Tag = Firewall.Actions.Block });
-            WpfFunc.CmbSelect(cmbAction, Rule.Action.ToString());
+            //WpfFunc.CmbSelect(cmbAction, Rule.Action.ToString());
+            viewModel.RuleAction = WpfFunc.CmbPick(cmbAction, Rule.Action.ToString());
 
             if (Rule.Profile == (int)Firewall.Profiles.All)
             {
@@ -78,7 +86,7 @@ namespace PrivateWin10.Windows
                 chkWiFi.IsChecked = ((Rule.Interface & (int)Firewall.Interfaces.Wireless) != 0);
             }
 
-            if(bNew)
+            if (bNew)
                 cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_inandout"), Tag = Firewall.Directions.Bidirectiona });
             cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_outbound"), Tag = Firewall.Directions.Outboun });
             cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_inbound"), Tag = Firewall.Directions.Inbound });
@@ -91,22 +99,23 @@ namespace PrivateWin10.Windows
                 if (name != null)
                     cmbProtocol.Items.Add(new ContentControl() { Content = i.ToString() + " - " + name, Tag = i });
             }
-            if (!WpfFunc.CmbSelect(cmbProtocol, Rule.Protocol.ToString()))
-                cmbProtocol.Text = Rule.Protocol.ToString();
+            //if (!WpfFunc.CmbSelect(cmbProtocol, Rule.Protocol.ToString()))
+            //    cmbProtocol.Text = Rule.Protocol.ToString();
+            viewModel.Protocol = WpfFunc.CmbPick(cmbProtocol, Rule.Protocol.ToString());
+            if(viewModel.Protocol == null)
+                viewModel.ProtocolTxt = Rule.Protocol.ToString();
 
-            cmbDestPorts.Items.Add(new ContentControl() { Content = Translate.fmt("port_any"), Tag = "*" });
-            cmbSrcPorts.Items.Add(new ContentControl() { Content = Translate.fmt("port_any"), Tag = "*" });
-            foreach (string specialPort in FirewallRule.SpecialPorts) {
-                cmbDestPorts.Items.Add(new ContentControl() { Content = specialPort, Tag = specialPort });
-                cmbSrcPorts.Items.Add(new ContentControl() { Content = specialPort, Tag = specialPort });
-            }
-            if (!WpfFunc.CmbSelect(cmbDestPorts, Rule.RemotePorts) && Rule.RemotePorts != null)
-                cmbDestPorts.Text = Rule.RemotePorts;
-            if (!WpfFunc.CmbSelect(cmbSrcPorts, Rule.LocalPorts) && Rule.LocalPorts != null)
-                cmbSrcPorts.Text = Rule.LocalPorts;
+            UpdatePorts();
 
             addrDest.Address = Rule.RemoteAddresses;
             addrSrc.Address = Rule.LocalAddresses;
+
+            WpfFunc.LoadWnd(this, "Rule");
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            WpfFunc.StoreWnd(this, "Rule");
         }
 
         private void cmbProgram_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -121,7 +130,7 @@ namespace PrivateWin10.Windows
             switch (id.Type)
             {
                 case ProgramList.Types.Service:
-                    txtService.Text = MiscFunc.GetServiceName(id.Name) + " (" + id.Name + ")";
+                    txtService.Text = ServiceHelper.GetServiceName(id.Name) + " (" + id.Name + ")";
                     break;
                 case ProgramList.Types.App:
                     txtApp.Text = AppManager.SidToPackageID(id.Name);
@@ -145,20 +154,32 @@ namespace PrivateWin10.Windows
             chkWiFi.IsEnabled = radNicCustom.IsChecked == true;
         }
 
-        int curProtocol = -1;
+        int? curProtocol = null;
+
+        private static int? ParseProtocol(string Value)
+        {
+            Value = TextHelpers.Split2(Value, "-").Item1;
+            int prot;
+            if (int.TryParse(Value, out prot) && prot >= 0 && prot <= 255)
+                return prot;
+            return null;
+        }
+
 
         private void cmbProtocol_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ContentControl protocol = (cmbProtocol.SelectedItem as ContentControl);
-            int protType = (int)NetFunc.KnownProtocols.Any;
+            int? protType;
             if (protocol == null)
-                protType = MiscFunc.parseInt(TextHelpers.Split2(cmbProtocol.Text, "-").Item1, (int)NetFunc.KnownProtocols.Any);
+                protType = ParseProtocol(cmbProtocol.Text);
             else
                 protType = (int)protocol.Tag;
 
             if (curProtocol == protType)
                 return;
             curProtocol = protType;
+            if (curProtocol == null)
+                return;
 
             if (protType == (int)FirewallRule.KnownProtocols.TCP || protType == (int)FirewallRule.KnownProtocols.UDP)
                 tabParams.SelectedItem = tabPorts;
@@ -178,6 +199,9 @@ namespace PrivateWin10.Windows
             }
             else
                 tabParams.SelectedItem = tabNone;
+
+            UpdatePorts();
+            someThing_Changed(sender, e);
         }
 
         private void cmbProtocol_TextChanged(object sender, TextChangedEventArgs e)
@@ -185,21 +209,96 @@ namespace PrivateWin10.Windows
             cmbProtocol_SelectionChanged(null, null);
         }
 
-        private void btnOK_Click(object sender, RoutedEventArgs e)
+        private void CmbDirection_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdatePorts();
+            someThing_Changed(sender, e);
+        }
+
+        private void UpdatePorts()
+        {
+            cmbRemotePorts.Items.Clear();
+            cmbLocalPorts.Items.Clear();
+
+            if (curProtocol == (int)FirewallRule.KnownProtocols.TCP || curProtocol == (int)FirewallRule.KnownProtocols.UDP)
+            {
+                cmbRemotePorts.Items.Add(new ContentControl() { Content = Translate.fmt("port_any"), Tag = "*" });
+                cmbLocalPorts.Items.Add(new ContentControl() { Content = Translate.fmt("port_any"), Tag = "*" });
+
+                if (Rule.Direction == Firewall.Directions.Outboun)
+                {
+                    if (curProtocol == (int)FirewallRule.KnownProtocols.TCP)
+                    {
+                        cmbRemotePorts.Items.Add(new ContentControl() { Content = "IPHTTPS", Tag = "IPHTTPS" });
+                    }
+                }
+                else if (Rule.Direction == Firewall.Directions.Inbound)
+                {
+                    if (curProtocol == (int)FirewallRule.KnownProtocols.TCP)
+                    {
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = "IPHTTPS", Tag = "IPHTTPS" });
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = "RPC-EPMap", Tag = "RPC-EPMap" });
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = "RPC", Tag = "RPC" });
+                    }
+                    else if (curProtocol == (int)FirewallRule.KnownProtocols.UDP)
+                    {
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = "Teredo", Tag = "Teredo" });
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = "Ply2Disc", Tag = "Ply2Disc" });
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = "mDNS", Tag = "mDNS" });
+                    }
+                }
+
+                //if (!WpfFunc.CmbSelect(cmbRemotePorts, Rule.RemotePorts) && Rule.RemotePorts != null)
+                //    cmbRemotePorts.Text = Rule.RemotePorts;
+                viewModel.RemotePort = WpfFunc.CmbPick(cmbRemotePorts, Rule.RemotePorts == null ? "*" : Rule.RemotePorts);
+                if (viewModel.RemotePort == null)
+                    viewModel.RemotePortTxt = Rule.RemotePorts;
+
+                //if (!WpfFunc.CmbSelect(cmbLocalPorts, Rule.LocalPorts) && Rule.LocalPorts != null)
+                //    cmbLocalPorts.Text = Rule.LocalPorts;
+                viewModel.LocalPort = WpfFunc.CmbPick(cmbLocalPorts, Rule.LocalPorts == null ? "*" : Rule.LocalPorts);
+                if (viewModel.LocalPort == null)
+                    viewModel.LocalPortTxt = Rule.LocalPorts;
+            }
+        }
+
+        private bool checkAll()
         {
             if (txtName.Text.Length == 0)
-                return;
+                return false;
 
             if (cmbProgram.SelectedItem == null)
-                return;
+                return false;
 
             if (cmbAction.SelectedItem == null)
-                return;
+                return false;
 
             if (cmbDirection.SelectedItem == null)
-                return;
+                return false;
 
-            // todo add error messages
+            if (curProtocol == null)
+                return false;
+
+            if (curProtocol == (int)FirewallRule.KnownProtocols.TCP || curProtocol == (int)FirewallRule.KnownProtocols.UDP)
+            {
+                string reason = "";
+                if (cmbRemotePorts.SelectedItem == null && !RuleWindow.ValidatePorts(cmbRemotePorts.Text, ref reason))
+                    return false;
+                if (cmbLocalPorts.SelectedItem == null && !RuleWindow.ValidatePorts(cmbLocalPorts.Text, ref reason))
+                    return false;
+            }
+            else if (Rule.Protocol == (int)FirewallRule.KnownProtocols.ICMP || Rule.Protocol == (int)FirewallRule.KnownProtocols.ICMPv6)
+            {
+                // ToDo: Validate ICMP values
+            }
+
+            return true;
+        }
+
+        private void btnOK_Click(object sender, RoutedEventArgs e)
+        {
+            if (!checkAll())
+                return;
 
             Rule.Name = txtName.Text;
             Rule.Grouping = cmbGroupe.Text;
@@ -250,30 +349,25 @@ namespace PrivateWin10.Windows
 
             Rule.Direction = (Firewall.Directions)(cmbDirection.SelectedItem as ContentControl).Tag;
 
-            if (cmbProtocol.SelectedItem == null)
-                Rule.Protocol = MiscFunc.parseInt(cmbProtocol.Text);
-            else
+            Rule.Protocol = curProtocol.Value;
+            if (Rule.Protocol == (int)FirewallRule.KnownProtocols.TCP || Rule.Protocol == (int)FirewallRule.KnownProtocols.UDP)
             {
-                Rule.Protocol = (int)(cmbProtocol.SelectedItem as ContentControl).Tag;
-                if (Rule.Protocol == (int)FirewallRule.KnownProtocols.TCP || Rule.Protocol == (int)FirewallRule.KnownProtocols.UDP)
-                {
-                    if (cmbDestPorts.SelectedItem != null)
-                        Rule.RemotePorts = (string)((cmbDestPorts.SelectedItem as ContentControl).Tag);
-                    else
-                        Rule.RemotePorts = cmbDestPorts.Text;
+                if (cmbRemotePorts.SelectedItem != null)
+                    Rule.RemotePorts = (string)((cmbRemotePorts.SelectedItem as ContentControl).Tag);
+                else
+                    Rule.RemotePorts = cmbRemotePorts.Text.Replace(" ", ""); // white spaces are not valid
 
-                    if (cmbSrcPorts.SelectedItem != null)
-                        Rule.LocalPorts = (string)((cmbSrcPorts.SelectedItem as ContentControl).Tag);
-                    else
-                        Rule.LocalPorts = cmbSrcPorts.Text;
-                }
-                else if (Rule.Protocol == (int)FirewallRule.KnownProtocols.ICMP || Rule.Protocol == (int)FirewallRule.KnownProtocols.ICMPv6)
-                {
-                    if (cmbICMP.SelectedItem != null)
-                        Rule.IcmpTypesAndCodes = (string)((cmbICMP.SelectedItem as ContentControl).Tag);
-                    else
-                        Rule.IcmpTypesAndCodes = cmbICMP.Text;
-                }
+                if (cmbLocalPorts.SelectedItem != null)
+                    Rule.LocalPorts = (string)((cmbLocalPorts.SelectedItem as ContentControl).Tag);
+                else
+                    Rule.LocalPorts = cmbLocalPorts.Text.Replace(" ", ""); // white spaces are not valid
+            }
+            else if (Rule.Protocol == (int)FirewallRule.KnownProtocols.ICMP || Rule.Protocol == (int)FirewallRule.KnownProtocols.ICMPv6)
+            {
+                if (cmbICMP.SelectedItem != null)
+                    Rule.IcmpTypesAndCodes = (string)((cmbICMP.SelectedItem as ContentControl).Tag);
+                else
+                    Rule.IcmpTypesAndCodes = cmbICMP.Text.Replace(" ", ""); // white spaces are not valid
             }
 
             Rule.RemoteAddresses = addrDest.Address;
@@ -288,5 +382,177 @@ namespace PrivateWin10.Windows
             if (chkPrivate.IsChecked != true && chkDomain.IsChecked != true && chkPublic.IsChecked != true)
                 (sender as CheckBox).IsChecked = true;
         }
+
+        private static int? ParsePort(string Value)
+        {
+            int Port;
+            if (int.TryParse(Value, out Port) && Port >= 0x0000 && Port <= 0xFFFF)
+                return Port;
+            return null;
+        }
+
+        public static bool ValidatePorts(string Ports, ref string reason)
+        {
+            bool? duplicates = false;
+            List<string> ValueList = WpfFunc.SplitAndValidate(Ports, ref duplicates);
+            if (ValueList == null)
+            {
+                if (duplicates == true)
+                    reason = Translate.fmt("err_duplicate_value");
+                else 
+                    reason = Translate.fmt("err_empty_value");
+                return false;
+            }
+
+            foreach (string Value in ValueList)
+            {
+                string[] strTemp = Value.Split('-');
+                if (strTemp.Length == 1)
+                {
+                    if (ParsePort(strTemp[0]) == null)
+                    {
+                        reason = Translate.fmt("err_invallid_port");
+                        return false;
+                    }
+                }
+                else if (strTemp.Length == 2)
+                {
+                    int? PortL = ParsePort(strTemp[0]);
+                    int? PortR = ParsePort(strTemp[1]);
+                    if (PortL == null || PortR == null)
+                    {
+                        reason = Translate.fmt("err_invallid_port");
+                        return false;
+                    }
+
+                    if (!(PortL.GetValueOrDefault() < PortR.GetValueOrDefault()))
+                    {
+                        reason = Translate.fmt("err_invalid_range");
+                        return false;
+                    }
+                }
+                else
+                {
+                    reason = Translate.fmt("err_invalid_range");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private void someThing_Changed(object sender, RoutedEventArgs e)
+        {
+            btnOK.IsEnabled = checkAll();
+        }
+    }
+
+    public class RuleWindowViewModel : WpfFunc.ViewModelHelper, IDataErrorInfo
+    {
+        public RuleWindowViewModel()
+        {
+        }
+
+        public string this[string propName]
+        {
+            get
+            {
+                if (propName == "RuleName")
+                {
+                    if (this.RuleName == null || this.RuleName.Length == 0)
+                        return "Rule Name must be set";
+                }
+                else if (propName == "RuleAction")
+                {
+                    if (curAction == null)
+                        return "Rule Action must be set";
+                }
+                else if (propName == "ProtocolTxt")
+                {
+                    if (curProtocol == null)
+                    {
+                        int prot;
+                        if (!int.TryParse(ProtocolTxt, out prot) || prot < 0 || prot > 255)
+                            return "Invalid protocol value";
+                    }
+                }
+                else if (propName == "LocalPortTxt")
+                {
+                    string reason = "";
+                    if (curLocalPort == null && !RuleWindow.ValidatePorts(curLocalPortTxt, ref reason)) // we can only select valid items
+                        return reason;
+                }
+                else if (propName == "RemotePortTxt")
+                {
+                    string reason = "";
+                    if (curRemotePort == null && !RuleWindow.ValidatePorts(curRemotePortTxt, ref reason)) // we can only select valid items
+                        return reason;
+                }
+                return null;
+            }
+        }
+
+        public string Error { get { return string.Empty; } }
+
+
+        string curRuleName = "";
+        public string RuleName
+        {
+            get { return curRuleName; }
+            set { SetProperty("RuleName", value, ref curRuleName); }
+        }
+
+        ContentControl curAction = null;
+        public ContentControl RuleAction
+        {
+            get { return curAction; }
+            set { SetProperty("RuleAction", value, ref curAction); }
+        }
+
+        ContentControl curProtocol = null;
+        public ContentControl Protocol
+        {
+            get { return curProtocol; }
+            set { SetPropertyCmb("Protocol", value, ref curProtocol, ref curProtocolTxt); }
+        }
+
+        string curProtocolTxt = "";
+        public string ProtocolTxt
+        {
+            get { return curProtocolTxt; }
+            set { SetProperty("ProtocolTxt", value, ref curProtocolTxt); }
+        }
+
+        ContentControl curLocalPort = null;
+        public ContentControl LocalPort
+        {
+            get { return curLocalPort; }
+            set { SetPropertyCmb("LocalPort", value, ref curLocalPort, ref curLocalPortTxt); }
+        }
+
+        string curLocalPortTxt = "";
+        public string LocalPortTxt
+        {
+            get { return curLocalPortTxt; }
+            set { SetProperty("LocalPortTxt", value, ref curLocalPortTxt); }
+        }
+
+        ContentControl curRemotePort = null;
+        public ContentControl RemotePort
+        {
+            get { return curRemotePort; }
+            set { SetPropertyCmb("RemotePort", value, ref curRemotePort, ref curRemotePortTxt); }
+        }
+
+        string curRemotePortTxt = "";
+        public string RemotePortTxt
+        {
+            get { return curRemotePortTxt; }
+            set { SetProperty("RemotePortTxt", value, ref curRemotePortTxt); }
+        }
+
+        // ToDo: add ICMP validation
+
+        // Note: IP-Address validation is done in the address control itself
+
     }
 }

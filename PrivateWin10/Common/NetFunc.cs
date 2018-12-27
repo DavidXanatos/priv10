@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Numerics;
 
+
 public class NetFunc
 {
     public static BigInteger IpToInt(IPAddress ip)
@@ -30,6 +31,15 @@ public class NetFunc
         else
             type = 6;
         List<Byte> ipFormat = bytes.ToList();
+        ipFormat.Reverse();
+        ipFormat.Add(0);
+        return new BigInteger(ipFormat.ToArray());
+    }
+
+    public static BigInteger MaxIPofType(int type)
+    {
+        IPAddress ip = (type == 4) ? IPAddress.Parse("255.255.255.255") : IPAddress.Parse("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
+        List<Byte> ipFormat = ip.GetAddressBytes().ToList();
         ipFormat.Reverse();
         ipFormat.Add(0);
         return new BigInteger(ipFormat.ToArray());
@@ -475,6 +485,7 @@ public class NetFunc
         // else // todo
         return string.Join(",", IpRanges.ToArray());
     }
+    
 }
 
 // Why is that not defined in the apropriate headers?

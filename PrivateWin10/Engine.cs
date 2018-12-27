@@ -258,7 +258,7 @@ namespace PrivateWin10
         public List<AppManager.AppInfo> GetAllApps()
         {
             return mDispatcher.Invoke(new Func<List<AppManager.AppInfo>>(() => {
-                return appMgr.GetAllApps();
+                return appMgr != null ? appMgr.GetAllApps() : new List<AppManager.AppInfo>();
             }));
         }
 

@@ -155,10 +155,15 @@ namespace PrivateWin10
                 image.Tag = new Tuple<DrawingImage, DrawingImage>(new DrawingImage(new GeometryDrawing(brushOn, null, geometry)), new DrawingImage(new GeometryDrawing(brushOff, null, geometry)));
             }
 
+#if DEBUG
+            SwitchPage("Firewall");
+#else
             SwitchPage("Overview");
+#endif
+
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             WpfFunc.StoreWnd(this, "Main");
 

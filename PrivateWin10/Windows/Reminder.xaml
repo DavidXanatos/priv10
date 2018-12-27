@@ -46,13 +46,15 @@
                     <Label x:Name="lblCopyright" Grid.Column="2" Margin="0,97,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Copyright © 2018-2019 David Xanatos" FontSize="16"/>
                 </Grid>
                 <StackPanel Orientation="Vertical" Grid.Row="2">
-                    <Label x:Name="lblText" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="If you like Private Winten, please support the project" FontSize="16"/>
+                    <Label x:Name="lblText" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="If you like Private WinTen, please support the project" FontSize="16"/>
                     <!--Label MouseDown="lblLink_MouseDown" x:Name="lblSupportLink" Grid.Column="0" Margin="0,0,0,0" VerticalAlignment="Top" Content="https://www.patreon.com/DavidXanatos" Cursor="Hand" FontSize="16" Style="{StaticResource Link}"/-->
                     <StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal" HorizontalAlignment="Center">
                         <Label x:Name="lblSupport" Grid.Column="0" Margin="0,0,0,0" VerticalAlignment="Top" Content="OK, I'll support it 😀" Cursor="Hand" FontSize="16" Style="{StaticResource Link}" MouseDown="LblSupport_MouseDown"/>
                         <Label x:Name="lblClose" Grid.Column="0" Margin="25,0,0,0" VerticalAlignment="Top" Content="May be an other time 😢" Cursor="Hand" FontSize="16" Style="{StaticResource Link}" MouseDown="LblClose_MouseDown"/>
                     </StackPanel>
                     <Label x:Name="lblInfo" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Supportets don't get this notificaiton 😉" FontSize="14"/>
+
+                    <Label x:Name="lblNoWarry" Margin="0,16,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" HorizontalContentAlignment="Center" Content="Don't worry this is just a friendly reminder, everything keeps working as usual." FontSize="10"/>
                 </StackPanel>
             </Grid>
         </Grid>

@@ -108,7 +108,13 @@ namespace PrivateWin10
             mStrings.Add("str_admin", "Admininstrator");
             mStrings.Add("str_user", "User");
             mStrings.Add("lbl_run_svc", "; service installed");
-            
+            mStrings.Add("err_empty_value", "Value can not be empty");
+            mStrings.Add("err_duplicate_value", "Value can not be duplicated");
+            mStrings.Add("err_invalid_range", "Invalid Range value");
+            mStrings.Add("err_invallid_port", "Invalid Port value");
+            mStrings.Add("err_invalid_ip", "Invalid IP Address");
+            mStrings.Add("err_invalid_subnet", "Invalid IP Subnet");
+
 
 
 

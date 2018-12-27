@@ -21,6 +21,7 @@ namespace PrivateWin10.ViewModels
         {
             if (mInstance == null)
                 mInstance = new ServiceModel();
+            mInstance.Reload();
             return mInstance;
         }
 
@@ -29,10 +30,15 @@ namespace PrivateWin10.ViewModels
         public ServiceModel()
         {
             Services = new ObservableCollection<Service>();
+        }
+
+        public void Reload()
+        {
+            Services.Clear();
 
             Services.Add(new Service() { Content = Translate.fmt("svc_all"), Value="*", Groupe = Translate.fmt("lbl_selec") });
 
-            foreach (ServiceController svc in ServiceController.GetServices().OrderBy(x => x.DisplayName))
+            foreach (ServiceHelper.ServiceInfo svc in ServiceHelper.GetAllServices().OrderBy(x => x.DisplayName))
                 Services.Add(new Service() { Value = svc.ServiceName, Content = svc.DisplayName + " (" + svc.ServiceName + ")", Groupe = Translate.fmt("lbl_known") });
         }
 

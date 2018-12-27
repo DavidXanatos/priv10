@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,20 +10,70 @@ using PrivateWin10;
 
 public class WpfFunc
 {
-    static public bool CmbSelect(ComboBox box, string tag)
+    public class ViewModelHelper : INotifyPropertyChanged//, IDisposable
+    {
+        /*public void Dispose()
+        {
+        }*/
+
+        protected void SetProperty<T>(string Name, T newValue, ref T curValue)
+        {
+            if (Equals(newValue, curValue))
+                return;
+            curValue = newValue;
+            RaisePropertyChanged(Name);
+        }
+
+        protected void SetPropertyCmb(string Name, ContentControl newValue, ref ContentControl curValue, ref string curText)
+        {
+            SetProperty(Name, newValue, ref curValue);
+            if (curValue != null)
+                curText = curValue.Content.ToString();
+        }
+
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Raises the PropertyChanged event if needed.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that changed.</param>
+        protected virtual void RaisePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion
+    }
+
+    static public ContentControl CmbPick(ComboBox box, string tag)
     {
         if (tag == null)
-            return false;
+            return null;
         for (int i = 0; i < box.Items.Count; i++)
         {
             ContentControl item = (box.Items[i] as ContentControl);
             if (item.Tag.ToString().Equals(tag))
-            {
-                box.SelectedIndex = i;
-                return true;
-            }
+                return item;
+        }
+        return null;
+    }
+
+    static public bool CmbSelect(ComboBox box, string tag)
+    {
+        ContentControl item = CmbPick(box, tag);
+        if (item != null)
+        {
+            box.SelectedItem = item;
+            return true;
         }
         return false;
+
     }
 
     public static void StoreWnd(Window wnd, string name)
@@ -48,4 +99,25 @@ public class WpfFunc
             wnd.Height = MiscFunc.parseInt(WH.Item2);
         }
     }
+
+    public static List<string> SplitAndValidate(string Values, ref bool? duplicate)
+    {
+        if (Values == null)
+            return null;
+        List<string> ValueList = new List<string>();
+        foreach (string Value in Values.Split(','))
+        {
+            string temp = Value.Trim();
+            if (duplicate != null && ValueList.Contains(temp))
+            {
+                duplicate = true;
+                return null;
+            }
+            ValueList.Add(temp);
+        }
+        if (ValueList.Count == 0)
+            return null;
+        return ValueList;
+    }
+
 }

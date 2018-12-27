@@ -36,7 +36,7 @@ namespace PrivateWin10.Pages
             if (App.lic.LicenseStatus == LicenseStatus.UNDEFINED)
             {
                 lblUser.Content = TextHelpers.Split2(System.Security.Principal.WindowsIdentity.GetCurrent().Name, "\\").Item2;
-                lblSupporting.Content = "why are you not supporting Private Winten? 😢";
+                lblSupporting.Content = "why are you not supporting Private WinTen? 😢";
             }
             else if (App.lic.LicenseStatus == LicenseStatus.VALID)
             {
@@ -49,7 +49,7 @@ namespace PrivateWin10.Pages
                 else
                 {
                     lblUser.Content = App.lic.LicenseName;
-                    lblSupporting.Content = "is supporting Private Winten, great! 😀";
+                    lblSupporting.Content = "is supporting Private WinTen, great! 😀";
                 }
             }
             else

@@ -204,10 +204,16 @@ namespace PrivateWin10.Windows
                         break;*/
                     case (int)FirewallRule.KnownProtocols.TCP:
                     case (int)FirewallRule.KnownProtocols.UDP:
+                        rule.LocalPorts = "*";
                         rule.RemotePorts = entry.Entry.RemotePort.ToString();
                         break;
                 }
+                rule.LocalAddresses = "*";
                 rule.RemoteAddresses = entry.Entry.RemoteAddress.ToString();
+            }
+            else
+            {
+                rule.Direction = Firewall.Directions.Bidirectiona;
             }
 
             RuleWindow ruleWnd = new RuleWindow(new List<ProgramList.ID>() { id }, rule);

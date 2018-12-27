@@ -1,15 +1,14 @@
-﻿<Window x:Class="PrivateWin10.Windows.RuleWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PrivateWin10.Windows"
         xmlns:controls="clr-namespace:PrivateWin10.Controls"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" x:Class="PrivateWin10.Windows.RuleWindow"
         mc:Ignorable="d"
-        Title="RuleWindow" MinHeight="600" MinWidth="410" Height="600" Width="800">
-    <Window.Resources>
-
-    </Window.Resources>
+        d:DataContext="{d:DesignInstance local:RuleWindowViewModel}"
+        Title="RuleWindow" MinHeight="600" MinWidth="410" Height="600" Width="800" Closing="Window_Closing">
 
     <Grid>
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" >
@@ -23,15 +22,15 @@
                         <StackPanel Margin="2,2">
                             <Grid>
                                 <TextBlock Margin="0,5,0,2" Text="Name" VerticalAlignment="Top" />
-                                <TextBox Margin="50,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" Name="txtName" />
+                                <TextBox Margin="50,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="{Binding RuleName, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" x:Name="txtName" TextChanged="someThing_Changed" />
                             </Grid>
                             <Grid>
                                 <TextBlock Margin="0,5,0,2" Text="Groupe" VerticalAlignment="Top" />
-                                <ComboBox Margin="50,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="" Name="cmbGroupe" />
+                                <ComboBox Margin="50,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="" x:Name="cmbGroupe" />
                             </Grid>
-                            <TextBox Margin="0,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Text="" TextWrapping="Wrap" AcceptsReturn="True" Height="64"  Name="txtInfo">
+                            <TextBox Margin="0,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Text="" TextWrapping="Wrap" AcceptsReturn="True" Height="64"  x:Name="txtInfo">
                                 <TextBox.Style>
-                                    <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                    <Style xmlns:sys="clr-namespace:System;assembly=mscorlib" TargetType="{x:Type TextBox}">
                                         <Style.Resources>
                                             <VisualBrush x:Key="HintBrush" AlignmentX="Left" AlignmentY="Top" Stretch="None">
                                                 <VisualBrush.Visual>
@@ -59,19 +58,19 @@
                         <StackPanel Margin="2,0,2,0">
                             <Grid>
                                 <TextBlock Margin="0,5,0,2" Text="Program" VerticalAlignment="Top" />
-                                <ComboBox Name="cmbProgram"  Margin="75,2,0,2" VerticalAlignment="Top" Text="" SelectionChanged="cmbProgram_SelectionChanged"/>
+                                <ComboBox x:Name="cmbProgram"  Margin="75,2,0,2" VerticalAlignment="Top" Text="" SelectionChanged="cmbProgram_SelectionChanged"/>
                             </Grid>
                             <Grid>
                                 <TextBlock Margin="0,5,0,2" Text="Path"  VerticalAlignment="Top" />
-                                <TextBox Name="txtPath" Margin="75,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
+                                <TextBox x:Name="txtPath" Margin="75,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
                             </Grid>
                             <Grid>
                                 <TextBlock Margin="0,5,0,2" Text="Service"  VerticalAlignment="Top" />
-                                <TextBox Name="txtService" Margin="75,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
+                                <TextBox x:Name="txtService" Margin="75,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
                             </Grid>
                             <Grid>
                                 <TextBlock Margin="0,5,0,2" Text="App"  VerticalAlignment="Top" />
-                                <TextBox Name="txtApp" Margin="75,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
+                                <TextBox x:Name="txtApp" Margin="75,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
                             </Grid>
                         </StackPanel>
                     </GroupBox>
@@ -80,7 +79,7 @@
 
                             <Grid>
                                 <TextBlock Margin="0,5,0,2" Text="Action"  VerticalAlignment="Top" />
-                                <ComboBox Name="cmbAction"  Margin="100,2,0,2" VerticalAlignment="Top" Text=""/>
+                                <ComboBox x:Name="cmbAction"  Margin="100,2,0,2" VerticalAlignment="Top" SelectedItem="{Binding RuleAction, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" SelectionChanged="someThing_Changed"/>
                             </Grid>
 
                             <Grid Margin="0,4,0,2" VerticalAlignment="Top">
@@ -95,11 +94,11 @@
                                     <RowDefinition Height="20"/>
                                 </Grid.RowDefinitions>
 
-                                <RadioButton Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" GroupName="Profile" Name="radProfileAll" Content="All Profiles" VerticalAlignment="Top" Checked="profile_Checked" />
-                                <RadioButton Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" GroupName="Profile" Name="radProfileCustom" Content="Selected:" VerticalAlignment="Top" Checked="profile_Checked" />
-                                <CheckBox Grid.Row="1" Grid.Column="1" Name="chkPublic" Content="Public" HorizontalAlignment="Left" VerticalAlignment="Top" Unchecked="chkProfile_Unchecked"/>
-                                <CheckBox Grid.Row="1" Grid.Column="2" Name="chkDomain" Content="Domain" HorizontalAlignment="Left" VerticalAlignment="Top" Unchecked="chkProfile_Unchecked"/>
-                                <CheckBox Grid.Row="1" Grid.Column="3" Name="chkPrivate" Content="Private" HorizontalAlignment="Left" VerticalAlignment="Top" Unchecked="chkProfile_Unchecked"/>
+                                <RadioButton Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" GroupName="Profile" x:Name="radProfileAll" Content="All Profiles" VerticalAlignment="Top" Checked="profile_Checked" />
+                                <RadioButton Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" GroupName="Profile" x:Name="radProfileCustom" Content="Selected:" VerticalAlignment="Top" Checked="profile_Checked" />
+                                <CheckBox Grid.Row="1" Grid.Column="1" x:Name="chkPublic" Content="Public" HorizontalAlignment="Left" VerticalAlignment="Top" Unchecked="chkProfile_Unchecked"/>
+                                <CheckBox Grid.Row="1" Grid.Column="2" x:Name="chkDomain" Content="Domain" HorizontalAlignment="Left" VerticalAlignment="Top" Unchecked="chkProfile_Unchecked"/>
+                                <CheckBox Grid.Row="1" Grid.Column="3" x:Name="chkPrivate" Content="Private" HorizontalAlignment="Left" VerticalAlignment="Top" Unchecked="chkProfile_Unchecked"/>
                             </Grid>
 
                             <Grid Margin="0,4,0,2" VerticalAlignment="Top">
@@ -114,11 +113,11 @@
                                     <RowDefinition Height="20"/>
                                 </Grid.RowDefinitions>
 
-                                <RadioButton Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" GroupName="Interface" Name="radNicAll" Content="All Interfaces Types" VerticalAlignment="Top" Checked="interface_Checked" />
-                                <RadioButton Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" GroupName="Interface" Name="radNicCustom" Content="Specific Types:" VerticalAlignment="Top" Checked="interface_Checked" />
-                                <CheckBox Grid.Row="1" Grid.Column="1" Name="chkLAN" Content="LAN" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                                <CheckBox Grid.Row="1" Grid.Column="2" Name="chkVPN" Content="VPN" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                                <CheckBox Grid.Row="1" Grid.Column="3" Name="chkWiFi" Content="WiFi" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                <RadioButton Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" GroupName="Interface" x:Name="radNicAll" Content="All Interfaces Types" VerticalAlignment="Top" Checked="interface_Checked" />
+                                <RadioButton Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" GroupName="Interface" x:Name="radNicCustom" Content="Specific Types:" VerticalAlignment="Top" Checked="interface_Checked" />
+                                <CheckBox Grid.Row="1" Grid.Column="1" x:Name="chkLAN" Content="LAN" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                <CheckBox Grid.Row="1" Grid.Column="2" x:Name="chkVPN" Content="VPN" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                <CheckBox Grid.Row="1" Grid.Column="3" x:Name="chkWiFi" Content="WiFi" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                             </Grid>
                         </StackPanel>
                     </GroupBox>
@@ -127,14 +126,14 @@
                         <StackPanel Margin="2,0,2,0">
                             <Grid>
                                 <TextBlock Margin="0,5,0,2" Text="Direction"  VerticalAlignment="Top" />
-                                <ComboBox Name="cmbDirection" Margin="100,2,0,2" VerticalAlignment="Top" Text=""/>
+                                <ComboBox x:Name="cmbDirection" Margin="100,2,0,2" VerticalAlignment="Top" Text="" SelectionChanged="CmbDirection_SelectionChanged"/>
                             </Grid>
                             <Grid>
                                 <TextBlock Margin="0,5,0,2" Text="Protocol"  VerticalAlignment="Top" />
-                                <ComboBox Name="cmbProtocol" Margin="100,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="" SelectionChanged="cmbProtocol_SelectionChanged" TextBoxBase.TextChanged="cmbProtocol_TextChanged"/>
+                                <ComboBox x:Name="cmbProtocol" Margin="100,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="{Binding ProtocolTxt, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" SelectionChanged="cmbProtocol_SelectionChanged" TextBoxBase.TextChanged="cmbProtocol_TextChanged"/>
                             </Grid>
 
-                            <TabControl Name="tabParams" Margin="0,4,0,0" Height="60">
+                            <TabControl x:Name="tabParams" Margin="0,4,0,0" Height="60">
                                 <TabControl.ItemContainerStyle>
                                     <Style TargetType="{x:Type TabItem}">
                                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -161,29 +160,27 @@
                                     </Style>
                                 </TabControl.Style>
                                 <TabItem Header="TabItem">
-                                    <Grid >
-                                    </Grid>
+                                    <Grid />
                                 </TabItem>
-                                <TabItem Header="" Name="tabPorts">
+                                <TabItem Header="" x:Name="tabPorts">
                                     <StackPanel>
                                         <Grid>
                                             <TextBlock Margin="0,5,0,2" Text="Local Ports:"  VerticalAlignment="Top" />
-                                            <ComboBox Name="cmbSrcPorts" Margin="100,2,0,2" IsEditable="True" VerticalAlignment="Top" Text=""/>
+                                            <ComboBox x:Name="cmbLocalPorts" Margin="100,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="{Binding LocalPortTxt, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" SelectedItem="{Binding LocalPort}" TextBoxBase.TextChanged="someThing_Changed" SelectionChanged="someThing_Changed"/>
                                         </Grid>
                                         <Grid>
                                             <TextBlock Margin="0,5,0,2" Text="Remote Ports:"  VerticalAlignment="Top" />
-                                            <ComboBox Name="cmbDestPorts" Margin="100,2,0,2" IsEditable="True" VerticalAlignment="Top" Text=""/>
+                                            <ComboBox x:Name="cmbRemotePorts" Margin="100,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="{Binding RemotePortTxt, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" SelectedItem="{Binding RemotePort}" TextBoxBase.TextChanged="someThing_Changed" SelectionChanged="someThing_Changed"/>
                                         </Grid>
                                     </StackPanel>
                                 </TabItem>
-                                <TabItem Header="" Name="tabNone">
-                                    <Grid >
-                                    </Grid>
+                                <TabItem Header="" x:Name="tabNone">
+                                    <Grid />
                                 </TabItem>
-                                <TabItem Header="" Name="tabICMP">
+                                <TabItem Header="" x:Name="tabICMP">
                                     <Grid >
                                         <TextBlock Margin="0,5,0,2" Text="ICMP Types:"  VerticalAlignment="Top" />
-                                        <ComboBox  Name="cmbICMP" Margin="100,2,0,2" IsEditable="True" VerticalAlignment="Top" Text=""/>
+                                        <ComboBox  x:Name="cmbICMP" Margin="100,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="" TextBoxBase.TextChanged="someThing_Changed" SelectionChanged="someThing_Changed"/>
                                     </Grid>
                                 </TabItem>
                             </TabControl>
@@ -203,7 +200,7 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="1" Name="btnOK" IsDefault="True" Margin="10,0,10,0" Content="Ok" Width="100" VerticalAlignment="Bottom" Click="btnOK_Click" />
+                    <Button Grid.Column="1" x:Name="btnOK" IsDefault="True" Margin="10,0,10,0" Content="Ok" Width="100" VerticalAlignment="Bottom" Click="btnOK_Click" />
                     <Button Grid.Column="2" IsCancel="True" Margin="10,0,10,0" Content="Cancel" Width="100" VerticalAlignment="Center" />
                 </Grid>
             </Grid>

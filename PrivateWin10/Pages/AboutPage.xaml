@@ -49,7 +49,7 @@
                     </StackPanel>
                     <StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal">
                         <Label Name="lblUser" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Some User" FontSize="16"/>
-                        <Label Name="lblSupporting" Grid.Column="0" Margin="-3,0,0,0" VerticalAlignment="Top" Content="is supporting Private Winten" Cursor="Hand" FontSize="16"/>
+                        <Label Name="lblSupporting" Grid.Column="0" Margin="-3,0,0,0" VerticalAlignment="Top" Content="is supporting Private WinTen" Cursor="Hand" FontSize="16"/>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Margin="0,0,0,32" VerticalAlignment="Bottom" Orientation="Horizontal">

@@ -12,20 +12,11 @@ public static class ServiceHelper
 {
     private const int STANDARD_RIGHTS_REQUIRED = 0xF0000;
     private const int SERVICE_WIN32_OWN_PROCESS = 0x00000010;
-
+    private const int ERROR_INSUFFICIENT_BUFFER = 0x0000007a;
     private const uint SERVICE_NO_CHANGE = 0xFFFFFFFF;
+    private const int SC_STATUS_PROCESS_INFO = 0;
 
-    [StructLayout(LayoutKind.Sequential)]
-    private class SERVICE_STATUS
-    {
-        public int dwServiceType = 0;
-        public ServiceState dwCurrentState = 0;
-        public int dwControlsAccepted = 0;
-        public int dwWin32ExitCode = 0;
-        public int dwServiceSpecificExitCode = 0;
-        public int dwCheckPoint = 0;
-        public int dwWaitHint = 0;
-    }
+
 
     #region OpenSCManager
     [DllImport("advapi32.dll", EntryPoint = "OpenSCManagerW", ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
@@ -54,8 +45,48 @@ public static class ServiceHelper
     #endregion
 
     #region QueryServiceStatus
-    [DllImport("advapi32.dll")]
+    [StructLayout(LayoutKind.Sequential)]
+    private class SERVICE_STATUS
+    {
+        public int dwServiceType = 0;
+        public ServiceState dwCurrentState = 0;
+        public int dwControlsAccepted = 0;
+        public int dwWin32ExitCode = 0;
+        public int dwServiceSpecificExitCode = 0;
+        public int dwCheckPoint = 0;
+        public int dwWaitHint = 0;
+    }
+
+    [DllImport("advapi32.dll", SetLastError = true)]
     private static extern int QueryServiceStatus(IntPtr hService, SERVICE_STATUS lpServiceStatus);
+    #endregion
+
+    #region QueryServiceStatusEx
+    [StructLayout(LayoutKind.Sequential)]
+    internal sealed class SERVICE_STATUS_PROCESS
+    {
+        [MarshalAs(UnmanagedType.U4)]
+        public uint dwServiceType;
+        [MarshalAs(UnmanagedType.U4)]
+        public uint dwCurrentState;
+        [MarshalAs(UnmanagedType.U4)]
+        public uint dwControlsAccepted;
+        [MarshalAs(UnmanagedType.U4)]
+        public uint dwWin32ExitCode;
+        [MarshalAs(UnmanagedType.U4)]
+        public uint dwServiceSpecificExitCode;
+        [MarshalAs(UnmanagedType.U4)]
+        public uint dwCheckPoint;
+        [MarshalAs(UnmanagedType.U4)]
+        public uint dwWaitHint;
+        [MarshalAs(UnmanagedType.U4)]
+        public uint dwProcessId;
+        [MarshalAs(UnmanagedType.U4)]
+        public uint dwServiceFlags;
+    }
+
+    [DllImport("advapi32.dll", SetLastError = true)]
+    internal static extern bool QueryServiceStatusEx(IntPtr hService, int infoLevel, IntPtr lpBuffer, uint cbBufSize, out uint pcbBytesNeeded);
     #endregion
 
     #region DeleteService
@@ -278,6 +309,43 @@ public static class ServiceHelper
         return status.dwCurrentState;
     }
 
+    public static int GetServiceProcessId(string serviceName)
+    {
+        IntPtr scm = OpenSCManager(ScmAccessRights.Connect);
+        IntPtr zero = IntPtr.Zero;
+        IntPtr service = IntPtr.Zero;
+
+        try
+        {
+            service = OpenService(scm, serviceName, ServiceAccessRights.QueryStatus);
+
+            UInt32 dwBytesAlloc = 0;
+            UInt32 dwBytesNeeded = 36;
+            do
+            {
+                dwBytesAlloc = dwBytesNeeded;
+                // Allocate required buffer and call again.
+                zero = Marshal.AllocHGlobal((int)dwBytesAlloc);
+                if (QueryServiceStatusEx(service, SC_STATUS_PROCESS_INFO, zero, dwBytesAlloc, out dwBytesNeeded))
+                {
+                    var ssp = new SERVICE_STATUS_PROCESS();
+                    Marshal.PtrToStructure(zero, ssp);
+                    return (int)ssp.dwProcessId;
+                }
+                // retry with new size info
+            } while (Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER && dwBytesAlloc < dwBytesNeeded);
+        }
+        finally
+        {
+            if (zero != IntPtr.Zero)
+                Marshal.FreeHGlobal(zero);
+            if(service != IntPtr.Zero)
+                CloseServiceHandle(service);
+            CloseServiceHandle(scm);
+        }
+        return -1;
+    }
+
     private static bool WaitForServiceStatus(IntPtr service, ServiceState waitStatus, ServiceState desiredStatus)
     {
         SERVICE_STATUS status = new SERVICE_STATUS();
@@ -408,5 +476,118 @@ public static class ServiceHelper
         Normal = 0x00000001,
         Severe = 0x00000002,
         Critical = 0x00000003
+    }
+
+    #region GetProcessTimes
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    static extern bool GetProcessTimes(IntPtr hProcess, out long lpCreationTime, out long lpExitTime, out long lpKernelTime, out long lpUserTime);
+    #endregion
+
+    public class ServiceInfo{
+        public ServiceInfo(ServiceController sc)
+        {
+            ServiceName = sc.ServiceName;
+            DisplayName = sc.DisplayName;
+            LastKnownPID = (sc.Status == ServiceControllerStatus.Stopped) ? -1 : GetServiceProcessId(sc.ServiceName);
+        }
+        public string ServiceName;
+        public string DisplayName;
+        public int LastKnownPID;
+    }
+
+    private static DateTime ServiceCacheTime = DateTime.MinValue;
+    private static MultiValueDictionary<int, ServiceInfo> ServiceCacheByPID = new MultiValueDictionary<int, ServiceInfo>();
+    private static Dictionary<string, ServiceInfo> ServiceCache = new Dictionary<string, ServiceInfo>();
+    private static ReaderWriterLockSlim ServiceCacheLock = new ReaderWriterLockSlim();
+
+
+    private static void RefreshServices()
+    {
+        ServiceCacheLock.EnterWriteLock();
+        ServiceCacheTime = DateTime.Now;
+        ServiceCache.Clear();
+        ServiceCacheByPID.Clear();
+        foreach (ServiceController sc in ServiceController.GetServices())
+        {
+            ServiceInfo info = new ServiceInfo(sc);
+            if(!ServiceCache.ContainsKey(sc.ServiceName)) // should not happen but in case
+                ServiceCache.Add(sc.ServiceName, info);
+            if (info.LastKnownPID != -1)
+                ServiceCacheByPID.Add(info.LastKnownPID, info); 
+        }
+        // this takes roughly 30 ms
+        ServiceCacheLock.ExitWriteLock();
+    }
+
+    public static List<ServiceInfo> GetServicesByPID(int pid)
+    {
+        bool doUpdate = false;
+        if (pid == -1) // -1 means get all and we always want a fresh list
+            doUpdate = true;
+        else 
+        {
+            long RawCreationTime;
+            long RawExitTime;
+            long RawKernelTime;
+            long RawUserTime;
+
+            IntPtr processHandle = System.Diagnostics.Process.GetProcessById(pid).Handle;
+            GetProcessTimes(processHandle, out RawCreationTime, out RawExitTime, out RawKernelTime, out RawUserTime);
+
+            ServiceCacheLock.EnterReadLock();
+            doUpdate = ServiceCacheTime < DateTime.FromFileTimeUtc(RawCreationTime);
+            ServiceCacheLock.ExitReadLock();
+        }
+        if (doUpdate)
+            RefreshServices();
+
+        ServiceCacheLock.EnterReadLock();
+        List<ServiceInfo> values;
+        if (pid == -1)
+            values = ServiceCacheByPID.GetAllValues();
+        else if (!ServiceCacheByPID.TryGetValue(pid, out values))
+            values = null;
+        ServiceCacheLock.ExitReadLock();
+        return (values != null && values.Count == 0) ? null : values;
+    }
+
+    public static List<ServiceInfo> GetAllServices()
+    {
+        ServiceCacheLock.EnterReadLock();
+        bool doUpdate = ServiceCacheTime < DateTime.Now.AddSeconds(-30);
+        ServiceCacheLock.ExitReadLock();
+        if (doUpdate)
+            RefreshServices();
+
+        ServiceCacheLock.EnterReadLock();
+        List<ServiceInfo> list = ServiceCache.Values.ToList();
+        ServiceCacheLock.ExitReadLock();
+        return list;
+    }
+
+    public static string GetServiceName(string name)
+    {
+        if (name == null || name.Length == 0)
+            return "";
+
+        ServiceCacheLock.EnterReadLock();
+        ServiceInfo info = null;
+        bool found = ServiceCache.TryGetValue(name, out info);
+        ServiceCacheLock.ExitReadLock();
+
+        if (!found)
+        {
+            ServiceController sc = new ServiceController(name);
+            try { info = new ServiceInfo(sc); } catch { }
+            sc.Close();
+
+            ServiceCacheLock.EnterWriteLock();
+            if (info != null && !ServiceCache.ContainsKey(sc.ServiceName)) // should not happen but in case
+                ServiceCache.Add(sc.ServiceName, info);
+            ServiceCacheLock.ExitWriteLock();
+        }
+
+        return info.DisplayName;
     }
 }

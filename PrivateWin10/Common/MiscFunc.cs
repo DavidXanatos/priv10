@@ -198,35 +198,17 @@ static class MiscFunc
         return (descr != null && descr.Length > 0) ? descr : "";
     }
 
-    private static Dictionary<int, Tuple<string, UInt64>> ServicePidCache = new Dictionary<int, Tuple<string, UInt64>>();
-    private static ReaderWriterLockSlim ServicePidCacheLock = new ReaderWriterLockSlim();
-
-    public static string GetServiceNameByPID(int pid)
+    
+    /*public static string GetServiceNameByPID(int pid)
     {
-        Tuple<string, UInt64> temp;
-        ServicePidCacheLock.EnterReadLock();
-        if (ServicePidCache.TryGetValue(pid, out temp))
-        {
-            if (temp.Item2 > GetTickCount64())
-            {
-                ServicePidCacheLock.ExitReadLock();
-                return temp.Item1;
-            }
-            ServicePidCache.Remove(pid);
-        }
-        ServicePidCacheLock.ExitReadLock();
-
         ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT Name FROM Win32_Service WHERE ProcessId = " + pid);
         foreach (ManagementObject queryObj in searcher.Get())
         {
             string ret = queryObj["Name"].ToString();
-            ServicePidCacheLock.EnterWriteLock();
-            ServicePidCache.Add(pid, new Tuple<string, UInt64>(ret, GetTickCount64() + 1 * 60 * 1000)); // cahce values for 1 minutes
-            ServicePidCacheLock.ExitWriteLock();
             return ret;
         }
         return null;
-    }
+    }*/
 
     public static bool StrCmp(string value, string test)
     {
@@ -237,27 +219,15 @@ static class MiscFunc
         return value.Equals(test, StringComparison.OrdinalIgnoreCase);
     }
 
-    public static string GetServiceName(string name)
+    /*public static string GetServiceName(string name)
     {
-        /*ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT DisplayName FROM Win32_Service WHERE Name = \"" + name + "\"");
+        ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT DisplayName FROM Win32_Service WHERE Name = \"" + name + "\"");
         foreach (ManagementObject queryObj in searcher.Get())
         {
             return queryObj["DisplayName"].ToString();
         }
-        return "";*/
-        if (name == null || name.Length == 0)
-            return "";
-
-        string ret = "";
-        ServiceController sc = new ServiceController(name);
-        try
-        {
-            ret = sc.DisplayName;
-        }
-        catch { }
-        sc.Close();
-        return ret;
-    }
+        return "";
+    }*/
 
     [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
     public static extern int SHLoadIndirectString(string pszSource, StringBuilder pszOutBuf, int cchOutBuf, IntPtr ppvReserved);

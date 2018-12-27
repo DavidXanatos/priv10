@@ -135,6 +135,10 @@ namespace PrivateWin10.Pages
             App.cb.ChangeNotification += OnChange;
 
             this.processScroll.PreviewKeyDown += process_KeyEventHandler;
+
+            CheckPrograms();
+            CheckRules();
+            CheckLogLines();
         }
 
         bool IsHidden = true;
@@ -635,6 +639,7 @@ namespace PrivateWin10.Pages
             UpdateIDs(true);
             UpdateRules(true);
             UpdateConnections(true);
+            CheckPrograms();
         }
 
         private List<ProgramList.ID> GetIDs()
@@ -811,6 +816,7 @@ namespace PrivateWin10.Pages
                 UpdateIDs(true);
                 UpdateRules(true);
                 UpdateConnections(true);
+                CheckPrograms();
             }
         }
 
@@ -888,214 +894,6 @@ namespace PrivateWin10.Pages
                 SuspendChange--;
             }
         }
-
-        public class LogItem: INotifyPropertyChanged
-        {
-            public Program.LogEntry Entry;
-
-            public LogItem(Program.LogEntry entry) {
-                Entry = entry;
-            }
-
-            void DoUpdate()
-            {
-                NotifyPropertyChanged(null);
-            }
-
-            public ImageSource Icon { get { return ImgFunc.GetIcon(Entry.mID.Path, 16); } }
-
-            public string Name { get { return Entry.mID.GetDisplayName(); } }
-            public string Program { get { return Entry.mID.AsString(); } }
-            public string TimeStamp { get { return Entry.TimeStamp.ToString("HH:mm:ss dd.MM.yyyy"); } }
-            public string Action { get {
-                    switch (Entry.Action)
-                    {
-                        case Firewall.Actions.Allow:            return Translate.fmt("str_allow");
-                        case Firewall.Actions.Block:            return Translate.fmt("str_block");
-                        default:                                return Translate.fmt("str_undefined");
-                    }
-                } }
-
-            public string Direction { get {
-                    switch (Entry.Direction)
-                    {
-                        case Firewall.Directions.Inbound:   return Translate.fmt("str_inbound");
-                        case Firewall.Directions.Outboun:   return Translate.fmt("str_outbound");
-                        default:                            return Translate.fmt("str_undefined");
-                    }
-                } }
-            public string Protocol { get { return NetFunc.Protocol2Str(Entry.Protocol); } }
-            public string DestAddress { get { return Entry.RemoteAddress; } }
-            public string DestPorts { get { return Entry.RemotePort.ToString(); } }
-            public string SrcAddress { get { return Entry.LocalAddress; } }
-            public string SrcPorts { get { return Entry.LocalPort.ToString(); } }
-
-            public string ActionColor { get {
-                    switch (Entry.Action)
-                    {
-                        case Firewall.Actions.Allow:            return "green";
-                        case Firewall.Actions.Block:            return "red";
-                        default:                                return "";
-                    }
-                } }
-            
-
-            #region INotifyPropertyChanged Members
-
-            public event PropertyChangedEventHandler PropertyChanged;
-
-            #endregion
-
-            #region Private Helpers
-
-            private void NotifyPropertyChanged(string propertyName)
-            {
-                if (PropertyChanged != null)
-                {
-                    PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-                }
-            }
-
-            #endregion
-        }
-
-        public class RuleItem: INotifyPropertyChanged
-        {
-            public FirewallRule Rule;
-
-            public RuleItem(FirewallRule rule)
-            {
-                Rule = rule;
-            }
-
-            void DoUpdate()
-            {
-                NotifyPropertyChanged(null);
-            }
-
-            public ImageSource Icon { get { return ImgFunc.GetIcon(Rule.mID.Path, 16); } }
-
-            public string Name { get { return Rule.Name; } }
-            public string Program { get { return Rule.mID.AsString(); } }
-            public string Grouping
-            {
-                get
-                {
-                    if (Rule.Grouping != null && Rule.Grouping.Substring(0, 1) == "@")
-                        return MiscFunc.GetResourceStr(Rule.Grouping);
-                    return Rule.Grouping;
-                }
-            }
-            public string Enabled { get { return Translate.fmt(Rule.Enabled ? "str_enabled" : "str_disabled"); } }
-
-            public string DisabledColor { get { return Rule.Enabled ? "" : "gray"; } }
-
-            public string Profiles
-            {
-                get
-                {
-                    if (Rule.Profile == (int)Firewall.Profiles.All)
-                        return Translate.fmt("str_all");
-                    else
-                    {
-                        List<string> profiles = new List<string>();
-                        if ((Rule.Profile & (int)Firewall.Profiles.Private) != 0)
-                            profiles.Add(Translate.fmt("str_private"));
-                        if ((Rule.Profile & (int)Firewall.Profiles.Domain) != 0)
-                            profiles.Add(Translate.fmt("str_domain"));
-                        if ((Rule.Profile & (int)Firewall.Profiles.Public) != 0)
-                            profiles.Add(Translate.fmt("str_public"));
-                        return string.Join(",", profiles.ToArray().Reverse());
-                    }
-                }
-            }
-            public string Action
-            {
-                get
-                {
-                    switch (Rule.Action)
-                    {
-                        case Firewall.Actions.Allow: return Translate.fmt("str_allow");
-                        case Firewall.Actions.Block: return Translate.fmt("str_block");
-                        default: return Translate.fmt("str_undefined");
-                    }
-                }
-            }
-
-            public string ActionColor
-            {
-                get
-                {
-                    switch (Rule.Action)
-                    {
-                        case Firewall.Actions.Allow: return "green";
-                        case Firewall.Actions.Block: return "red";
-                        default: return "";
-                    }
-                }
-            }
-
-            public string Direction
-            {
-                get
-                {
-                    switch (Rule.Direction)
-                    {
-                        case Firewall.Directions.Inbound: return Translate.fmt("str_inbound");
-                        case Firewall.Directions.Outboun: return Translate.fmt("str_outbound");
-                        default: return Translate.fmt("str_undefined");
-                    }
-                }
-            }
-            public string Protocol { get { return NetFunc.Protocol2Str(Rule.Protocol); }  }
-            public string DestAddress { get { return Rule.RemoteAddresses; } }
-            public string DestPorts { get { return Rule.RemotePorts; } }
-            public string SrcAddress { get { return Rule.LocalAddresses; } }
-            public string SrcPorts { get { return Rule.LocalPorts; } }
-
-            public string ICMPOptions { get { return Rule.IcmpTypesAndCodes; } }
-
-            public string Interfaces
-            {
-                get
-                {
-                    if (Rule.Interface == (int)Firewall.Interfaces.All)
-                        return Translate.fmt("str_all");
-                    else
-                    {
-                        List<string> interfaces = new List<string>();
-                        if ((Rule.Profile & (int)Firewall.Interfaces.Lan) != 0)
-                            interfaces.Add(Translate.fmt("str_lan"));
-                        if ((Rule.Profile & (int)Firewall.Interfaces.RemoteAccess) != 0)
-                            interfaces.Add(Translate.fmt("str_ras"));
-                        if ((Rule.Profile & (int)Firewall.Interfaces.Wireless) != 0)
-                            interfaces.Add(Translate.fmt("str_wifi"));
-                        return string.Join(",", interfaces.ToArray().Reverse());
-                    }
-                }
-            }
-
-            public string EdgeTraversal { get { return Rule.EdgeTraversal.ToString(); } }
-        
-            #region INotifyPropertyChanged Members
-
-            public event PropertyChangedEventHandler PropertyChanged;
-
-            #endregion
-
-            #region Private Helpers
-
-            private void NotifyPropertyChanged(string propertyName)
-            {
-                if (PropertyChanged != null)
-                {
-                    PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-                }
-            }
-
-            #endregion
-        }
-
 
         private void chkAll_Click(object sender, RoutedEventArgs e)
         {
@@ -1224,8 +1022,14 @@ namespace PrivateWin10.Pages
 
         private void btnCreateRule_Click(object sender, RoutedEventArgs e)
         {
+            if (mCurPrograms.Count == 0)
+                return;
             FirewallRule rule = new FirewallRule() { guid = Guid.Empty, Profile = (int)Firewall.Profiles.All, Interface = (int)Firewall.Interfaces.All, Enabled = true };
+            rule.Name = Translate.fmt("custom_rule", mCurPrograms[0].Program.GetMainID().GetDisplayName());
             rule.Grouping = FirewallRule.RuleGroupe;
+            rule.Direction = Firewall.Directions.Bidirectiona;
+            if (mCurPrograms.Count == 1)
+                rule.mID = mCurPrograms[0].Program.GetMainID();
             ShowRuleWindow(rule);
         }
 
@@ -1361,5 +1165,288 @@ namespace PrivateWin10.Pages
 
             // no editing
         }*/
+
+        private void CheckPrograms()
+        {
+            bool GlobalSelected = false;
+            int SelectedCount = 0;
+            foreach (ProgramControl ctrl in mCurPrograms)
+            {
+                if (ctrl.Program.GetMainID().Type == ProgramList.Types.Global || ctrl.Program.GetMainID().Type == ProgramList.Types.System)
+                    GlobalSelected = true;
+                else
+                    SelectedCount++;
+            }
+
+            btnCreateRule.IsEnabled = SelectedCount >= 1;
+            btnMerge.IsEnabled = (SelectedCount >= 2 && !GlobalSelected);
+            btnRemove.IsEnabled = (SelectedCount >= 1 && !GlobalSelected);
+        }
+
+        private void CheckRules()
+        {
+            int SelectedCount = 0;
+            int EnabledCount = 0;
+            int DisabledCount = 0;
+            int AllowingCount = 0;
+            int BlockingCount = 0;
+
+            foreach (RuleItem item in ruleGrid.SelectedItems)
+            {
+                SelectedCount++;
+                if (item.Rule.Enabled)
+                    EnabledCount++;
+                else
+                    DisabledCount++;
+                if (item.Rule.Action == Firewall.Actions.Allow)
+                    AllowingCount++;
+                if (item.Rule.Action == Firewall.Actions.Block)
+                    BlockingCount++;
+            }
+
+            btnEnableRule.IsEnabled = DisabledCount >= 1;
+            btnDisableRule.IsEnabled = EnabledCount >= 1;
+            btnRemoveRule.IsEnabled = SelectedCount >= 1;
+            btnBlockRule.IsEnabled = AllowingCount >= 1;
+            btnAllowRule.IsEnabled = BlockingCount >= 1;
+            btnEditRule.IsEnabled = SelectedCount == 1;
+            btnCloneRule.IsEnabled = SelectedCount >= 1;
+        }
+
+        private void CheckLogLines()
+        {
+            btnMkRule.IsEnabled = consGrid.SelectedItems.Count == 1;
+        }
+
+        private void RuleGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CheckRules();
+        }
+
+        private void ConsGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CheckLogLines();
+        }
+    }
+
+    public class LogItem : INotifyPropertyChanged
+    {
+        public Program.LogEntry Entry;
+
+        public LogItem(Program.LogEntry entry)
+        {
+            Entry = entry;
+        }
+
+        void DoUpdate()
+        {
+            NotifyPropertyChanged(null);
+        }
+
+        public ImageSource Icon { get { return ImgFunc.GetIcon(Entry.mID.Path, 16); } }
+
+        public string Name { get { return Entry.mID.GetDisplayName(); } }
+        public string Program { get { return Entry.mID.AsString(); } }
+        public string TimeStamp { get { return Entry.TimeStamp.ToString("HH:mm:ss dd.MM.yyyy"); } }
+        public string Action
+        {
+            get
+            {
+                switch (Entry.Action)
+                {
+                    case Firewall.Actions.Allow: return Translate.fmt("str_allow");
+                    case Firewall.Actions.Block: return Translate.fmt("str_block");
+                    default: return Translate.fmt("str_undefined");
+                }
+            }
+        }
+
+        public string Direction
+        {
+            get
+            {
+                switch (Entry.Direction)
+                {
+                    case Firewall.Directions.Inbound: return Translate.fmt("str_inbound");
+                    case Firewall.Directions.Outboun: return Translate.fmt("str_outbound");
+                    default: return Translate.fmt("str_undefined");
+                }
+            }
+        }
+        public string Protocol { get { return NetFunc.Protocol2Str(Entry.Protocol); } }
+        public string DestAddress { get { return Entry.RemoteAddress; } }
+        public string DestPorts { get { return Entry.RemotePort.ToString(); } }
+        public string SrcAddress { get { return Entry.LocalAddress; } }
+        public string SrcPorts { get { return Entry.LocalPort.ToString(); } }
+
+        public string ActionColor
+        {
+            get
+            {
+                if(Entry.Type == PrivateWin10.Program.LogEntry.Types.RuleError) return "yellow";
+                switch (Entry.Action)
+                {
+                    case Firewall.Actions.Allow: return "green";
+                    case Firewall.Actions.Block: return "red";
+                    default: return "";
+                }
+            }
+        }
+
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        #endregion
+
+        #region Private Helpers
+
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion
+    }
+
+    public class RuleItem : INotifyPropertyChanged
+    {
+        public FirewallRule Rule;
+
+        public RuleItem(FirewallRule rule)
+        {
+            Rule = rule;
+        }
+
+        void DoUpdate()
+        {
+            NotifyPropertyChanged(null);
+        }
+
+        public ImageSource Icon { get { return ImgFunc.GetIcon(Rule.mID.Path, 16); } }
+
+        public string Name { get { return Rule.Name; } }
+        public string Program { get { return Rule.mID.AsString(); } }
+        public string Grouping
+        {
+            get
+            {
+                if (Rule.Grouping != null && Rule.Grouping.Substring(0, 1) == "@")
+                    return MiscFunc.GetResourceStr(Rule.Grouping);
+                return Rule.Grouping;
+            }
+        }
+        public string Enabled { get { return Translate.fmt(Rule.Enabled ? "str_enabled" : "str_disabled"); } }
+
+        public string DisabledColor { get { return Rule.Enabled ? "" : "gray"; } }
+
+        public string Profiles
+        {
+            get
+            {
+                if (Rule.Profile == (int)Firewall.Profiles.All)
+                    return Translate.fmt("str_all");
+                else
+                {
+                    List<string> profiles = new List<string>();
+                    if ((Rule.Profile & (int)Firewall.Profiles.Private) != 0)
+                        profiles.Add(Translate.fmt("str_private"));
+                    if ((Rule.Profile & (int)Firewall.Profiles.Domain) != 0)
+                        profiles.Add(Translate.fmt("str_domain"));
+                    if ((Rule.Profile & (int)Firewall.Profiles.Public) != 0)
+                        profiles.Add(Translate.fmt("str_public"));
+                    return string.Join(",", profiles.ToArray().Reverse());
+                }
+            }
+        }
+        public string Action
+        {
+            get
+            {
+                switch (Rule.Action)
+                {
+                    case Firewall.Actions.Allow: return Translate.fmt("str_allow");
+                    case Firewall.Actions.Block: return Translate.fmt("str_block");
+                    default: return Translate.fmt("str_undefined");
+                }
+            }
+        }
+
+        public string ActionColor
+        {
+            get
+            {
+                switch (Rule.Action)
+                {
+                    case Firewall.Actions.Allow: return "green";
+                    case Firewall.Actions.Block: return "red";
+                    default: return "";
+                }
+            }
+        }
+
+        public string Direction
+        {
+            get
+            {
+                switch (Rule.Direction)
+                {
+                    case Firewall.Directions.Inbound: return Translate.fmt("str_inbound");
+                    case Firewall.Directions.Outboun: return Translate.fmt("str_outbound");
+                    default: return Translate.fmt("str_undefined");
+                }
+            }
+        }
+        public string Protocol { get { return NetFunc.Protocol2Str(Rule.Protocol); } }
+        public string DestAddress { get { return Rule.RemoteAddresses; } }
+        public string DestPorts { get { return Rule.RemotePorts; } }
+        public string SrcAddress { get { return Rule.LocalAddresses; } }
+        public string SrcPorts { get { return Rule.LocalPorts; } }
+
+        public string ICMPOptions { get { return Rule.IcmpTypesAndCodes; } }
+
+        public string Interfaces
+        {
+            get
+            {
+                if (Rule.Interface == (int)Firewall.Interfaces.All)
+                    return Translate.fmt("str_all");
+                else
+                {
+                    List<string> interfaces = new List<string>();
+                    if ((Rule.Profile & (int)Firewall.Interfaces.Lan) != 0)
+                        interfaces.Add(Translate.fmt("str_lan"));
+                    if ((Rule.Profile & (int)Firewall.Interfaces.RemoteAccess) != 0)
+                        interfaces.Add(Translate.fmt("str_ras"));
+                    if ((Rule.Profile & (int)Firewall.Interfaces.Wireless) != 0)
+                        interfaces.Add(Translate.fmt("str_wifi"));
+                    return string.Join(",", interfaces.ToArray().Reverse());
+                }
+            }
+        }
+
+        public string EdgeTraversal { get { return Rule.EdgeTraversal.ToString(); } }
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        #endregion
+
+        #region Private Helpers
+
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion
     }
 }

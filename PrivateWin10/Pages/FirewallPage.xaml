@@ -201,7 +201,7 @@
                         <ColumnDefinition Width="150"/>
                     </Grid.ColumnDefinitions>
                     <GroupBox Header="Firewall Rules">
-                    <DataGrid Name="ruleGrid" AutoGenerateColumns="False" IsReadOnly="true" MouseDoubleClick="ruleGrid_MouseDoubleClick" GridLinesVisibility="All">
+                    <DataGrid Name="ruleGrid" AutoGenerateColumns="False" IsReadOnly="true" MouseDoubleClick="ruleGrid_MouseDoubleClick" GridLinesVisibility="All" SelectionChanged="RuleGrid_SelectionChanged">
                         <i:Interaction.Behaviors>
                             <Behaviors:WPFDataGridConfigurationBehavior x:Name="ruleCols"/>
                         </i:Interaction.Behaviors>
@@ -312,7 +312,7 @@
                         <ColumnDefinition Width="150"/>
                     </Grid.ColumnDefinitions>
                     <GroupBox Header="Connection Log">
-                    <DataGrid Name="consGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All">
+                    <DataGrid Name="consGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="ConsGrid_SelectionChanged">
                         <i:Interaction.Behaviors>
                             <Behaviors:WPFDataGridConfigurationBehavior x:Name="consCols"/>
                         </i:Interaction.Behaviors>
@@ -342,6 +342,9 @@
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding ActionColor}" Value="green">
                                                 <Setter Property="Background" Value="LightGreen"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ActionColor}" Value="yellow">
+                                                <Setter Property="Background" Value="Yellow"></Setter>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>

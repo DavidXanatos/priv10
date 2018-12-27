@@ -65,7 +65,7 @@ namespace PrivateWin10
                 switch (Type)
                 {
                     case ProgramList.Types.System: DescrStr = Translate.fmt("name_system"); break;
-                    case ProgramList.Types.Service: DescrStr = MiscFunc.GetServiceName(Name); break;
+                    case ProgramList.Types.Service: DescrStr = ServiceHelper.GetServiceName(Name); break;
                     case ProgramList.Types.Program: DescrStr = MiscFunc.GetExeName(Path); break;
                     case ProgramList.Types.App: DescrStr = App.engine != null ? App.engine.appMgr.GetAppName(Name) : ""; break;
                     default:

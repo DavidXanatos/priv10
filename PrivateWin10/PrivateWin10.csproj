@@ -95,6 +95,7 @@
     <Compile Include="Common\IconExtractor.cs" />
     <Compile Include="Common\ImgFunc.cs" />
     <Compile Include="Common\MiscFunc.cs" />
+    <Compile Include="Common\MultiValueDictionary.cs" />
     <Compile Include="Common\MyLicense.cs" />
     <Compile Include="Common\NetFunc.cs" />
     <Compile Include="Common\ServiceHelper.cs" />

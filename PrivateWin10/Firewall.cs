@@ -210,10 +210,17 @@ namespace PrivateWin10
                         return null;
                 }
 
-                if (Path.GetFileName(path).Equals("svchost.exe", StringComparison.OrdinalIgnoreCase))
+                //if (Path.GetFileName(path).Equals("svchost.exe", StringComparison.OrdinalIgnoreCase))
+                List<ServiceHelper.ServiceInfo> Services = ServiceHelper.GetServicesByPID(processId);
+                if (Services != null) 
                 {
                     type = ProgramList.Types.Service;
-                    name = MiscFunc.GetServiceNameByPID(processId);
+                    if (Services.Count > 1)
+                    {
+                        // ToDo: handle teh case Services.length > 1 !!!!
+                        Console.WriteLine("Non unique service " + Services.Count);
+                    }
+                    name = Services[0].ServiceName;
                 }
                 else
                 {
@@ -293,13 +300,13 @@ namespace PrivateWin10
                 string[] strTemp = range.Split('-');
                 if (strTemp.Length == 1)
                 {
-                    if (strTemp.Contains("/")) // ip/net
+                    if (strTemp[0].Contains("/")) // ip/net
                     {
                         string[] strTemp2 = strTemp[0].Split('/');
                         int temp;
                         BigInteger num1 = NetFunc.IpStrToInt(strTemp2[0], out temp);
-                        int pow = MiscFunc.parseInt(strTemp[1]);
-                        BigInteger num2 = num1 + new BigInteger(2) ^ pow;
+                        int pow = MiscFunc.parseInt(strTemp2[1]);
+                        BigInteger num2 = num1 + BigInteger.Pow(new BigInteger(2), pow);
 
                         if (type == temp && num1 <= numIP && numIP <= num2)
                             return true;
