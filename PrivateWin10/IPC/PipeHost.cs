@@ -16,12 +16,13 @@ namespace PrivateWin10.IPC
         protected class PipeListener : PipeIPC<NamedPipeServerStream>
         {
             public event EventHandler<EventArgs> Connected;
+            private bool forceClose = false;
 
             public PipeListener(string pipeName)
             {
                 PipeSecurity pipeSa = new PipeSecurity();
                 pipeSa.SetAccessRule(new PipeAccessRule(new SecurityIdentifier(FileOps.SID_Worls), PipeAccessRights.FullControl, AccessControlType.Allow));
-                int buffLen = 2*1024*1024; // 2MB buffer should beplany ;)
+                int buffLen = 2*1024*1024; // 2MB buffer should be plany ;)
                 pipeStream = new NamedPipeServerStream(pipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous, buffLen, buffLen, pipeSa);
                 pipeStream.BeginWaitForConnection(new AsyncCallback(PipeConnected), null);
             }
@@ -29,8 +30,21 @@ namespace PrivateWin10.IPC
             protected void PipeConnected(IAsyncResult asyncResult)
             {
                 pipeStream.EndWaitForConnection(asyncResult);
+                if (forceClose)
+                {
+                    pipeStream.Disconnect(); 
+                    return;
+                }
                 Connected?.Invoke(this, new EventArgs());
                 initAsyncReader();   
+            }
+
+            override
+            public void Close()
+            {
+                // Note: there does not seam to be a way to abort WaitForConnection, so we set a flag and let the pipe disconnect right after connct.
+                forceClose = true;
+                base.Close();
             }
         }
 
@@ -97,7 +111,11 @@ namespace PrivateWin10.IPC
 
             //try
             {
-                if (call.func == "GetFilteringMode")
+                if (call.func == "GetVersion")
+                {
+                    call.args = App.mVersion;
+                }
+                else if (call.func == "GetFilteringMode")
                 {
                     call.args = App.engine.GetFilteringMode();
                 }

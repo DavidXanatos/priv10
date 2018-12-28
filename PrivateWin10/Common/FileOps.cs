@@ -144,7 +144,7 @@ class FileOps
     public static string SID_Local = "S-1-2-0"; //	Local
     public static string SID_Console = "S-1-2-1"; //	Console Logon
     public static string SID_OwnerID = "S-1-3-0"; //	Creator Owner ID
-    public static string SID_GroupeID = "S-1-3-1"; //	Creator Group ID
+    public static string SID_GroupID = "S-1-3-1"; //	Creator Group ID
     public static string SID_OwnerSvr = "S-1-3-2"; //	Creator Owner Server
     public static string SID_CreatorSvr = "S-1-3-3"; //	Creator Group Server
     public static string SID_OwnerRights = "S-1-3-4"; //	Owner Rights

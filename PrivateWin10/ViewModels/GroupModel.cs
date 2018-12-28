@@ -11,36 +11,36 @@ using System.Windows.Controls;
 
 namespace PrivateWin10.ViewModels
 {
-    public class GroupeModel
+    public class GroupModel
     {
-        private static GroupeModel mInstance = null;
-        public static GroupeModel GetInstance()
+        private static GroupModel mInstance = null;
+        public static GroupModel GetInstance()
         {
             if (mInstance == null)
-                mInstance = new GroupeModel();
+                mInstance = new GroupModel();
             return mInstance;
         }
 
-        public ObservableCollection<ContentControl> Groupes { get; set; }
+        public ObservableCollection<ContentControl> Groups { get; set; }
 
-        public GroupeModel()
+        public GroupModel()
         {
-            Groupes = new ObservableCollection<ContentControl>();
+            Groups = new ObservableCollection<ContentControl>();
 
-            HashSet<string> knownGroupes = new HashSet<string>();
+            HashSet<string> knownGroups = new HashSet<string>();
             foreach (FirewallRule rule in App.itf.GetRules())
             {
                 if(rule.Grouping != null && rule.Grouping.Length > 0)
-                    knownGroupes.Add(rule.Grouping);
+                    knownGroups.Add(rule.Grouping);
             }
 
-            foreach (string groupe in knownGroupes)
+            foreach (string group in knownGroups)
             {
-                string temp = groupe;
+                string temp = group;
                 if (temp.Substring(0, 1) == "@")
                     temp = MiscFunc.GetResourceStr(temp);
 
-                Groupes.Add(new ContentControl() { Tag = groupe, Content = temp});
+                Groups.Add(new ContentControl() { Tag = group, Content = temp});
             }
         }
     }

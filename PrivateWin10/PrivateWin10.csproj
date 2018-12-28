@@ -101,7 +101,7 @@
     <Compile Include="Common\ServiceHelper.cs" />
     <Compile Include="Common\TextHelpers.cs" />
     <Compile Include="Common\TokenManipulator.cs" />
-    <Compile Include="Common\TrayIcon.cs" />
+    <Compile Include="TrayIcon.cs" />
     <Compile Include="Common\UwpFunc.cs" />
     <Compile Include="Common\WinConsole.cs" />
     <Compile Include="Common\WpfFunc.cs" />
@@ -116,8 +116,8 @@
     <Compile Include="Controls\TweakControl.xaml.cs">
       <DependentUpon>TweakControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\TweakGroupe.xaml.cs">
-      <DependentUpon>TweakGroupe.xaml</DependentUpon>
+    <Compile Include="Controls\TweakGroup.xaml.cs">
+      <DependentUpon>TweakGroup.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Converters\ToggleSwitchOffsetConverter.cs" />
     <Compile Include="Engine.cs" />
@@ -132,7 +132,7 @@
     <Compile Include="Pages\IUserPage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ViewModels\AppModel.cs" />
-    <Compile Include="ViewModels\GroupeModel.cs" />
+    <Compile Include="ViewModels\GroupModel.cs" />
     <Compile Include="ViewModels\ServiceModel.cs" />
     <Compile Include="Windows\InputWnd.xaml.cs">
       <DependentUpon>InputWnd.xaml</DependentUpon>
@@ -208,7 +208,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Controls\TweakGroupe.xaml">
+    <Page Include="Controls\TweakGroup.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

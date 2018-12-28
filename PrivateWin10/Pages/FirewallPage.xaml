@@ -42,7 +42,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Label Content="Sort:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
+                        <Label Name="lblSort" Content="Sort:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
                         <ComboBox Name="cmbSoft" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center" MinWidth ="100" Width="Auto"  Grid.Column="1" 
                                   SelectionChanged="cmbSoft_SelectionChanged"/>
                     </Grid>
@@ -51,7 +51,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Label Content="Type" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
+                        <Label Name="lblType" Content="Type" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
                         <ComboBox Name="cmbFilter" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center" MinWidth ="100" Width="Auto"  Grid.Column="1" 
                                   IsEditable="True"
                                   Height="25"
@@ -86,7 +86,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Label Content="Filter" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
+                        <Label Name="lblFilter" Content="Filter" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
                         <TextBox Name="txtFilter" HorizontalAlignment="Left" Height="23" Margin="0,2,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" MinWidth ="150" Width="Auto" Grid.Column="1" TextChanged="txtFilter_TextChanged">
                             <TextBox.Style>
                                 <Style BasedOn="{StaticResource MetroTextBox}" TargetType="{x:Type TextBox}">
@@ -200,7 +200,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="150"/>
                     </Grid.ColumnDefinitions>
-                    <GroupBox Header="Firewall Rules">
+                    <GroupBox Name="grpRules" Header="Firewall Rules">
                     <DataGrid Name="ruleGrid" AutoGenerateColumns="False" IsReadOnly="true" MouseDoubleClick="ruleGrid_MouseDoubleClick" GridLinesVisibility="All" SelectionChanged="RuleGrid_SelectionChanged">
                         <i:Interaction.Behaviors>
                             <Behaviors:WPFDataGridConfigurationBehavior x:Name="ruleCols"/>
@@ -266,7 +266,7 @@
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <Expander  Grid.Row="0" IsExpanded="True" Header="Tools" Margin="2,0,2,2">
+                            <Expander Name="grpRuleTools" Grid.Row="0" IsExpanded="True" Header="Tools" Margin="2,0,2,2">
                                 <StackPanel>
                                     <Button Name="btnCreateRule" Margin="2,2,2,2" Content="Create Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnCreateRule_Click"/>
                                     <Button Name="btnEnableRule" Margin="2,2,2,2" Content="Enable Rules" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnEnableRule_Click"/>
@@ -278,10 +278,10 @@
                                     <Button Name="btnCloneRule" Margin="2,2,2,2" Content="Clone Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnCloneRule_Click"/>
                                 </StackPanel>
                             </Expander>
-                            <Expander  Grid.Row="1" IsExpanded="True" Header="View Options" Margin="2,2,2,0">
+                            <Expander Name="grpRuleView" Grid.Row="1" IsExpanded="True" Header="View Options" Margin="2,2,2,0">
                                 <StackPanel>
                                     <CheckBox Content="Hide Disabled" Name="chkNoDisabled" Click="chkNoDisabled_Click"/>
-                                    <Label Margin="2,2,2,2" Content="Filter Rules" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
+                                    <Label Name="lblFilterRules" Margin="2,2,2,2" Content="Filter Rules" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
                                     <TextBox Margin="2,2,2,2" Name="txtRuleFilter" HorizontalAlignment="Stretch" Height="24" VerticalAlignment="Top" TextWrapping="Wrap" Text="" TextChanged="txtRuleFilter_TextChanged" >
                                         <TextBox.Style>
                                             <Style BasedOn="{StaticResource MetroTextBox}" TargetType="{x:Type TextBox}">
@@ -311,7 +311,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="150"/>
                     </Grid.ColumnDefinitions>
-                    <GroupBox Header="Connection Log">
+                    <GroupBox Name="grpLog" Header="Connection Log">
                     <DataGrid Name="consGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="ConsGrid_SelectionChanged">
                         <i:Interaction.Behaviors>
                             <Behaviors:WPFDataGridConfigurationBehavior x:Name="consCols"/>
@@ -366,7 +366,7 @@
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <Expander  Grid.Row="0" IsExpanded="True" Header="Tools" Margin="2,0,2,2">
+                            <Expander Name="grpLogTools" Grid.Row="0" IsExpanded="True" Header="Tools" Margin="2,0,2,2">
                                 <StackPanel>
                                     <!--Button Name="btnMkllow" Margin="2,2,2,2" Content="Create Allow Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkAllow_Click"/>
                                     <Button Name="btnMkBlock" Margin="2,2,2,2" Content="Create Block Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkBlock_Click"/-->
@@ -374,15 +374,15 @@
                                     <Button Name="btnClearLog" Margin="2,2,2,2" Content="Clear Log" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnClearLog_Click"/>
                                 </StackPanel>
                             </Expander>
-                            <Expander  Grid.Row="1" IsExpanded="True" Header="View Options" Margin="2,2,2,0">
+                            <Expander Name="grpLogView" Grid.Row="1" IsExpanded="True" Header="View Options" Margin="2,2,2,0">
                                 <StackPanel>
-                                    <Label Margin="2,2,2,2" Content="Show Connections" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
+                                    <Label Name="lblShowCons" Margin="2,2,2,2" Content="Show Connections" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
                                     <ComboBox Margin="2,2,2,2" Name="cmbConTypes" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Stretch" Text="" SelectionChanged="cmbConTypes_SelectionChanged">
                                         <ComboBoxItem Content="All"/>
                                         <ComboBoxItem Content="Blocked"/>
                                         <ComboBoxItem Content="Allowed"/>
                                     </ComboBox>
-                                    <Label Margin="2,2,2,2" Content="Fitler Connections" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
+                                    <Label Name="lblFilterCons" Margin="2,2,2,2" Content="Fitler Connections" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
                                     <TextBox Margin="2,2,2,2" Name="txtConFilter" HorizontalAlignment="Stretch" Height="24" VerticalAlignment="Top" TextWrapping="Wrap" Text="" TextChanged="txtConFilter_TextChanged" >
                                         <TextBox.Style>
                                             <Style BasedOn="{StaticResource MetroTextBox}" TargetType="{x:Type TextBox}">

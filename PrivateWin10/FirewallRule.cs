@@ -354,7 +354,7 @@ namespace PrivateWin10
         }
 
 
-        public const string RuleGroupe = "PrivateWin10";
+        public const string RuleGroup = "PrivateWin10";
         public const string RulePrefix = "priv10";
         public const string TempRulePrefix = "priv10temp";
         public const string AllowAllName = "Allow All Network";
@@ -368,7 +368,7 @@ namespace PrivateWin10
         {
             FirewallRule rule = new FirewallRule(id);
             rule.Name = MakeRuleName(AllowAllName, expiration != 0);
-            rule.Grouping = RuleGroupe;
+            rule.Grouping = RuleGroup;
             rule.Action = Firewall.Actions.Allow;
             rule.Direction = direction;
             rule.Enabled = true;
@@ -380,7 +380,7 @@ namespace PrivateWin10
         {
             FirewallRule rule = new FirewallRule(id);
             rule.Name = MakeRuleName(AllowLan, expiration != 0);
-            rule.Grouping = RuleGroupe;
+            rule.Grouping = RuleGroup;
             rule.Action = Firewall.Actions.Allow;
             rule.Direction = direction;
             rule.Enabled = true;
@@ -393,7 +393,7 @@ namespace PrivateWin10
         {
             FirewallRule rule = new FirewallRule(id);
             rule.Name = MakeRuleName(BlockInet, expiration != 0);
-            rule.Grouping = RuleGroupe;
+            rule.Grouping = RuleGroup;
             rule.Action = Firewall.Actions.Block;
             rule.Direction = direction;
             rule.Enabled = true;
@@ -406,7 +406,7 @@ namespace PrivateWin10
         {
             FirewallRule rule = new FirewallRule(id);
             rule.Name = MakeRuleName(BlockAllName, expiration != 0);
-            rule.Grouping = RuleGroupe;
+            rule.Grouping = RuleGroup;
             rule.Action = Firewall.Actions.Block;
             rule.Direction = direction;
             rule.Enabled = true;

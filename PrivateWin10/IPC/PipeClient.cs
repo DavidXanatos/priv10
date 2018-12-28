@@ -91,7 +91,7 @@ namespace PrivateWin10.IPC
             mDispatcher = Dispatcher.CurrentDispatcher;
         }
 
-        public bool Connect(int TimeOut = 10000)
+        public bool DoConnect(int TimeOut = 10000)
         {
             if (clientPipe != null)
                 return false;
@@ -112,6 +112,21 @@ namespace PrivateWin10.IPC
             };
 
             return true;
+        }
+
+        public bool Connect(int TimeOut = 10000)
+        {
+            // Note: when we close a IPC host without terminating its process we are left with some still active listeners, so we test communication and reconnect if needed
+            for (long endTime = (long)MiscFunc.GetTickCount64() + (long)TimeOut; TimeOut > 0; TimeOut = (int)(endTime - (long)MiscFunc.GetTickCount64()))
+            {
+                if (!DoConnect(TimeOut))
+                    continue;
+
+                string version = RemoteExec("GetVersion", null, "");
+                if (version.Length > 0)
+                    return true;
+            }
+            return false;
         }
 
         public T RemoteExec<T>(string fx, object args, T defRet)

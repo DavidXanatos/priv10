@@ -36,22 +36,22 @@ namespace PrivateWin10.ViewModels
         {
             Services.Clear();
 
-            Services.Add(new Service() { Content = Translate.fmt("svc_all"), Value="*", Groupe = Translate.fmt("lbl_selec") });
+            Services.Add(new Service() { Content = Translate.fmt("svc_all"), Value="*", Group = Translate.fmt("lbl_selec") });
 
             foreach (ServiceHelper.ServiceInfo svc in ServiceHelper.GetAllServices().OrderBy(x => x.DisplayName))
-                Services.Add(new Service() { Value = svc.ServiceName, Content = svc.DisplayName + " (" + svc.ServiceName + ")", Groupe = Translate.fmt("lbl_known") });
+                Services.Add(new Service() { Value = svc.ServiceName, Content = svc.DisplayName + " (" + svc.ServiceName + ")", Group = Translate.fmt("lbl_known") });
         }
 
         public class Service : ContentControl
         {
             public string Value { get; set; }
-            public string Groupe { get; set; }
+            public string Group { get; set; }
         }
 
         public IEnumerable GetServices()
         {
             ListCollectionView lcv = new ListCollectionView(Services);
-            lcv.GroupDescriptions.Add(new PropertyGroupDescription("Groupe"));
+            lcv.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
             return lcv;
         }
     }

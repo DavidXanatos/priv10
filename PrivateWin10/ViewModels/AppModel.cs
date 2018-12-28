@@ -33,7 +33,7 @@ namespace PrivateWin10.ViewModels
         public class App : ContentControl
         {
             public string Value { get; set; }
-            public string Groupe { get; set; }
+            public string Group { get; set; }
         }
 
         public IEnumerable GetApps()
@@ -41,11 +41,11 @@ namespace PrivateWin10.ViewModels
             Apps.Clear();
             foreach (AppManager.AppInfo app in PrivateWin10.App.itf.GetAllApps())
             {
-                Apps.Add(new App() { Content = app.Name + " (" + app.ID + ")", Value = app.SID, Groupe = Translate.fmt("lbl_known") });
+                Apps.Add(new App() { Content = app.Name + " (" + app.ID + ")", Value = app.SID, Group = Translate.fmt("lbl_known") });
             }
 
             ListCollectionView lcv = new ListCollectionView(Apps);
-            lcv.GroupDescriptions.Add(new PropertyGroupDescription("Groupe"));
+            lcv.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
             return lcv;
         }
     }

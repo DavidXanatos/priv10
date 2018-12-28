@@ -12,7 +12,7 @@
     <Grid x:Name="grid">
         <Rectangle x:Name="rect" Fill="#00000000" HorizontalAlignment="Stretch" Height="100" VerticalAlignment="Top"/>
         <Wpf:ToggleSwitch x:Name="toggle" Content="" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Top" Width="78"/>
-        <Label x:Name="label" Content="Label" HorizontalAlignment="Left" Margin="10,0,78,0" VerticalAlignment="Top"/>
+        <Label x:Name="label" Content="" HorizontalAlignment="Left" Margin="10,0,78,0" VerticalAlignment="Top"/>
         <TextBox x:Name="info" HorizontalAlignment="Stretch" Margin="2,28,2,2" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" IsReadOnly="True"/>
     </Grid>
 

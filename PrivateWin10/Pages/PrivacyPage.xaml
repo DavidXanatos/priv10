@@ -33,7 +33,7 @@
             </Grid.ColumnDefinitions>
 
             <ScrollViewer Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <Grid Margin="0,5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Name="groupeGrid">
+                <Grid Margin="0,5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Name="groupGrid">
 
                 </Grid>
             </ScrollViewer>

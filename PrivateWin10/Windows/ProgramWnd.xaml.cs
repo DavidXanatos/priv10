@@ -29,7 +29,7 @@ namespace PrivateWin10.Windows
 
         public class PathEntry : ContentControl
         {
-            public string Groupe { get; set; }
+            public string Group { get; set; }
         }
 
         int SuspendChange = 0;
@@ -38,6 +38,16 @@ namespace PrivateWin10.Windows
         {
             InitializeComponent();
 
+            this.Title = Translate.fmt("wnd_program");
+
+            this.grpProgram.Header = Translate.fmt("lbl_program");
+            this.radProgram.Content = Translate.fmt("lbl_exe");
+            this.radService.Content = Translate.fmt("lbl_svc");
+            this.radApp.Content = Translate.fmt("lbl_app");
+
+            this.btnOK.Content = Translate.fmt("lbl_ok");
+            this.btnCancel.Content = Translate.fmt("lbl_cancel");
+
             ID = id;
 
             SuspendChange++;
@@ -45,20 +55,20 @@ namespace PrivateWin10.Windows
             Paths = new ObservableCollection<PathEntry>();
 
             ListCollectionView lcv = new ListCollectionView(Paths);
-            lcv.GroupDescriptions.Add(new PropertyGroupDescription("Groupe"));
+            lcv.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
             cmbPath.ItemsSource = lcv;
 
-            Paths.Add(new PathEntry() { Content = Translate.fmt("pro_browse"), Tag="*", Groupe = Translate.fmt("lbl_selec") });
-            PathEntry itemAll = new PathEntry() { Content = Translate.fmt("pro_all"), Tag = null, Groupe = Translate.fmt("lbl_selec") };
+            Paths.Add(new PathEntry() { Content = Translate.fmt("pro_browse"), Tag="*", Group = Translate.fmt("lbl_selec") });
+            PathEntry itemAll = new PathEntry() { Content = Translate.fmt("pro_all"), Tag = null, Group = Translate.fmt("lbl_selec") };
             Paths.Add(itemAll);
 
             if (ID != null && ID.Path.Length > 0)
             {
                 PathEntry itemPath;
                 if (ID.Path.Equals("system"))
-                    itemPath = new PathEntry() { Content = Translate.fmt("pro_sys"), Tag = ID.Path, Groupe = Translate.fmt("lbl_selec") };
+                    itemPath = new PathEntry() { Content = Translate.fmt("pro_sys"), Tag = ID.Path, Group = Translate.fmt("lbl_selec") };
                 else
-                    itemPath = new PathEntry() { Content = ID.Path, Tag = ID.Path, Groupe = Translate.fmt("lbl_known") };
+                    itemPath = new PathEntry() { Content = ID.Path, Tag = ID.Path, Group = Translate.fmt("lbl_known") };
                 Paths.Add(itemPath);
                 cmbPath.SelectedItem = itemPath;
             }
@@ -206,7 +216,7 @@ namespace PrivateWin10.Windows
                 }
                 if (cmbPath.SelectedItem == null)
                 {
-                    PathEntry path = new PathEntry() { Content = FileName, Tag = FileName, Groupe = Translate.fmt("lbl_known") };
+                    PathEntry path = new PathEntry() { Content = FileName, Tag = FileName, Group = Translate.fmt("lbl_known") };
                     Paths.Add(path);
                     cmbPath.SelectedItem = path;
                 }

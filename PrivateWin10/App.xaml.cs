@@ -124,7 +124,7 @@ namespace PrivateWin10
                     if (!AdminFunc.IsAdministrator())
                     {
                         Console.WriteLine("Trying to obtain Administrative proivilegs...");
-                        if (AdminFunc.SkipUacRun(mName))
+                        if (AdminFunc.SkipUacRun(mName, App.args))
                             return;
 
                         Console.WriteLine("Trying to start with 'runas'...");

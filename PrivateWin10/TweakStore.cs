@@ -22,7 +22,7 @@ namespace PrivateWin10
 
             // *** Telemetry ***
 
-            Groupe telemetry = new Groupe("Disable Telemetry");
+            Group telemetry = new Group("Disable Telemetry");
             telemetryCat.Add(telemetry);
             telemetry.Add(new Tweak("Minimize Telemetry", TweakType.SetGPO, WinVer.Win10EE)
             {
@@ -63,7 +63,7 @@ namespace PrivateWin10
 
 
             // *** AppCompat ***
-            Groupe appExp = new Groupe("Disable Application Expirience");
+            Group appExp = new Group("Disable Application Expirience");
             telemetryCat.Add(appExp);
             appExp.Add(new Tweak("Disable Application Expirience Tasks", TweakType.DisableTask, WinVer.Win6) // or 7?
             {
@@ -100,7 +100,7 @@ namespace PrivateWin10
             });
             // Disable file usbceip.dll
 
-            Groupe ceip = new Groupe("Disable CEIP");
+            Group ceip = new Group("Disable CEIP");
             telemetryCat.Add(ceip);
             ceip.Add(new Tweak("Turn of CEIP", TweakType.SetGPO, WinVer.Win6)
             {
@@ -132,7 +132,7 @@ namespace PrivateWin10
 
             // *** Error Repoering ***
 
-            Groupe werr = new Groupe("Disable Error Reporting");
+            Group werr = new Group("Disable Error Reporting");
             telemetryCat.Add(werr);
             werr.Add(new Tweak("Turn off Windows Error Reporting", TweakType.SetRegistry, WinVer.Win6)
             {
@@ -167,7 +167,7 @@ namespace PrivateWin10
 
             // *** Other Diagnostics ***
 
-            Groupe diag = new Groupe("Other Diagnostics");
+            Group diag = new Group("Other Diagnostics");
             telemetryCat.Add(diag);
             diag.Add(new Tweak("Turn of MSDT", TweakType.SetGPO, WinVer.Win7)
             {
@@ -215,7 +215,7 @@ namespace PrivateWin10
 
             // *** Disabel Cortana ***
 
-            Groupe cortana = new Groupe("Disabel Cortana");
+            Group cortana = new Group("Disabel Cortana");
             searchCat.Add(cortana);
             cortana.Add(new Tweak("Disabel Cortana", TweakType.SetGPO, WinVer.Win10)
             {
@@ -233,7 +233,7 @@ namespace PrivateWin10
 
             // *** Disabel Web Search ***
 
-            Groupe webSearch = new Groupe("Disabel Online Search");
+            Group webSearch = new Group("Disabel Online Search");
             searchCat.Add(webSearch);
             webSearch.Add(new Tweak("Disabel Web Search", TweakType.SetGPO, WinVer.WinXP)
             {
@@ -258,7 +258,7 @@ namespace PrivateWin10
 
             // *** Disabel Search ***
 
-            Groupe search = new Groupe("Disabel Search");
+            Group search = new Group("Disabel Search");
             searchCat.Add(search);
             search.Add(new Tweak("Disable Windows Search Service", TweakType.DisableService, WinVer.Win6)
             {
@@ -295,7 +295,7 @@ namespace PrivateWin10
 
             // *** Disabel Deffender ***
 
-            Groupe defender = new Groupe("Disabel Deffender");
+            Group defender = new Group("Disabel Deffender");
             defenderCat.Add(defender);
             defender.Add(new Tweak("Turn off Windows Deffender", TweakType.SetGPO, WinVer.Win6)
             {
@@ -319,7 +319,7 @@ namespace PrivateWin10
 
             // *** Silence Deffender ***
 
-            Groupe defender2 = new Groupe("Silence Deffender");
+            Group defender2 = new Group("Silence Deffender");
             defenderCat.Add(defender2);
             defender2.Add(new Tweak("Disable Enhanced Notifications", TweakType.SetGPO, WinVer.Win6)
             {
@@ -345,7 +345,7 @@ namespace PrivateWin10
 
             // *** Disable SmartScreen ***
 
-            Groupe screen = new Groupe("Disable SmartScreen");
+            Group screen = new Group("Disable SmartScreen");
             defenderCat.Add(screen);
             screen.Add(new Tweak("Turn off SmartScreen", TweakType.SetGPO, WinVer.Win8)
             {
@@ -392,7 +392,7 @@ namespace PrivateWin10
 
             // *** MRT-Tool ***
 
-            Groupe mrt = new Groupe("Silence MRT-Tool");
+            Group mrt = new Group("Silence MRT-Tool");
             defenderCat.Add(mrt);
             mrt.Add(new Tweak("Don't Report Infections", TweakType.SetGPO, WinVer.Win2k)
             {
@@ -415,7 +415,7 @@ namespace PrivateWin10
 
             // *** Disable Advertizement ***
 
-            Groupe privacy = new Groupe("Disable Advertizement");
+            Group privacy = new Group("Disable Advertizement");
             privacyCat.Add(privacy);
             privacy.Add(new Tweak("Turn off Advertising ID", TweakType.SetGPO, WinVer.Win81)
             {
@@ -466,7 +466,7 @@ namespace PrivateWin10
 
             // *** No Lock Screen ***
 
-            Groupe lockScr = new Groupe("Disable Lock Screen");
+            Group lockScr = new Group("Disable Lock Screen");
             privacyCat.Add(lockScr);
             lockScr.Add(new Tweak("Don't use Lock Screen", TweakType.SetGPO, WinVer.Win8)
             {
@@ -490,7 +490,7 @@ namespace PrivateWin10
 
             // *** No Personalization ***
 
-            Groupe spying = new Groupe("No Personalization");
+            Group spying = new Group("No Personalization");
             privacyCat.Add(spying);
             spying.Add(new Tweak("Diable input personalization", TweakType.SetGPO, WinVer.Win8)
             {
@@ -534,7 +534,7 @@ namespace PrivateWin10
 
             // *** Disable Location ***
 
-            Groupe location = new Groupe("Protect Location");
+            Group location = new Group("Protect Location");
             privacyCat.Add(location);
             location.Add(new Tweak("Disable Location Provider", TweakType.SetGPO, WinVer.Win7)
             {
@@ -553,7 +553,7 @@ namespace PrivateWin10
 
             // *** No Registration ***
 
-            Groupe privOther = new Groupe("No Registration");
+            Group privOther = new Group("No Registration");
             privacyCat.Add(privOther);
             privOther.Add(new Tweak("Disable KMS GenTicket", TweakType.SetGPO, WinVer.Win10)
             {
@@ -571,7 +571,7 @@ namespace PrivateWin10
 
             // *** No Push Notifications ***
 
-            Groupe push = new Groupe("No Push Notifications");
+            Group push = new Group("No Push Notifications");
             privacyCat.Add(push);
             push.Add(new Tweak("Disable Cloud Notification", TweakType.SetGPO, WinVer.Win8)
             {
@@ -600,7 +600,7 @@ namespace PrivateWin10
 
             // *** Disable OneDrive ***
 
-            Groupe onedrive = new Groupe("Disable OneDrive");
+            Group onedrive = new Group("Disable OneDrive");
             accountCat.Add(onedrive);
             onedrive.Add(new Tweak("Disable OneDrive Usage", TweakType.SetGPO, WinVer.Win10) // WinVer.Win7
             {
@@ -619,7 +619,7 @@ namespace PrivateWin10
 
             // *** No Microsoft Accounts ***
 
-            Groupe account = new Groupe("No Microsoft Accounts");
+            Group account = new Group("No Microsoft Accounts");
             accountCat.Add(account);
             account.Add(new Tweak("Disable Microsoft Accounts", TweakType.SetGPO, WinVer.Win8) // or 10?
             {
@@ -636,7 +636,7 @@ namespace PrivateWin10
 
             // *** No Settings Sync ***
 
-            Groupe sync = new Groupe("No Settings Sync");
+            Group sync = new Group("No Settings Sync");
             accountCat.Add(sync);
             sync.Add(new Tweak("Disable Settings Sync", TweakType.SetGPO, WinVer.Win8)
             {
@@ -660,7 +660,7 @@ namespace PrivateWin10
 
             // *** No Find My Device ***
 
-            Groupe find = new Groupe("No Find My Device");
+            Group find = new Group("No Find My Device");
             accountCat.Add(find);
             find.Add(new Tweak("Don't Allow FindMyDevice", TweakType.SetGPO, WinVer.Win8)
             {
@@ -672,7 +672,7 @@ namespace PrivateWin10
 
             // *** No Cloud Clipboard ***
 
-            Groupe ccb = new Groupe("No Cloud Clipboard");
+            Group ccb = new Group("No Cloud Clipboard");
             accountCat.Add(ccb);
             ccb.Add(new Tweak("Disable Cloud Clipboard", TweakType.SetGPO, WinVer.Win1809)
             {
@@ -684,7 +684,7 @@ namespace PrivateWin10
 
             // *** No Cloud Messges ***
 
-            Groupe msgbak = new Groupe("No Cloud Messges");
+            Group msgbak = new Group("No Cloud Messges");
             accountCat.Add(msgbak);
             msgbak.Add(new Tweak("Don't Sync Messages", TweakType.SetGPO, WinVer.Win1709)
             {
@@ -703,7 +703,7 @@ namespace PrivateWin10
 
             // *** Disable Activity Feed ***
 
-            Groupe feed = new Groupe("Disable Activity Feed");
+            Group feed = new Group("Disable Activity Feed");
             accountCat.Add(feed);
             feed.Add(new Tweak("Disable Activity Feed", TweakType.SetGPO, WinVer.Win1709)
             {
@@ -727,7 +727,7 @@ namespace PrivateWin10
 
             // *** No Cross Device Expirience ***
 
-            Groupe cdp = new Groupe("No Cross Device Expirience");
+            Group cdp = new Group("No Cross Device Expirience");
             accountCat.Add(cdp);
             cdp.Add(new Tweak("Disable Cross Device Expirience", TweakType.SetGPO, WinVer.Win10)
             {
@@ -750,7 +750,7 @@ namespace PrivateWin10
 
             // *** Disable Driver Update ***
 
-            Groupe drv = new Groupe("Disable Driver Update");
+            Group drv = new Group("Disable Driver Update");
             miscCat.Add(drv);
             drv.Add(new Tweak("Don't Update Drivers With", TweakType.SetGPO, WinVer.Win10)
             {
@@ -768,7 +768,7 @@ namespace PrivateWin10
 
             // *** No Explorer AutoComplete ***
 
-            Groupe ac = new Groupe("No Explorer AutoComplete");
+            Group ac = new Group("No Explorer AutoComplete");
             miscCat.Add(ac);
             ac.Add(new Tweak("Disable Auto Suggest", TweakType.SetGPO, WinVer.Win2k)
             {
@@ -780,7 +780,7 @@ namespace PrivateWin10
 
             // *** No Speech Updates ***
 
-            Groupe speech = new Groupe("No Speech Updates");
+            Group speech = new Group("No Speech Updates");
             miscCat.Add(speech);
             speech.Add(new Tweak("Don't Update SpeechModel", TweakType.SetGPO, WinVer.Win10)
             {
@@ -792,7 +792,7 @@ namespace PrivateWin10
 
             // *** No Font Updates ***
 
-            Groupe font = new Groupe("No Font Updates");
+            Group font = new Group("No Font Updates");
             miscCat.Add(font);
             font.Add(new Tweak("Don't Update Fonts", TweakType.SetGPO, WinVer.Win10)
             {
@@ -804,7 +804,7 @@ namespace PrivateWin10
 
             // *** No Certificat Updates ***
 
-            Groupe cert = new Groupe("No Certificat Updates");
+            Group cert = new Group("No Certificat Updates");
             miscCat.Add(cert);
             cert.Add(new Tweak("Disable Certificate Auto Update", TweakType.SetGPO, WinVer.WinXP)
             {
@@ -816,7 +816,7 @@ namespace PrivateWin10
 
             // *** Disable NtpClient ***
 
-            Groupe ntp = new Groupe("Disable NtpClient");
+            Group ntp = new Group("Disable NtpClient");
             miscCat.Add(ntp);
             ntp.Add(new Tweak("Disable NTP Client", TweakType.SetGPO, WinVer.WinXP)
             {
@@ -828,7 +828,7 @@ namespace PrivateWin10
 
             // *** Disable Net Status ***
 
-            Groupe ncsi = new Groupe("Disable Net Status");
+            Group ncsi = new Group("Disable Net Status");
             miscCat.Add(ncsi);
             ncsi.Add(new Tweak("Disable Active Probeing", TweakType.SetGPO, WinVer.Win6)
             {
@@ -840,7 +840,7 @@ namespace PrivateWin10
 
             // *** Disable Teredo IPv6 ***
 
-            Groupe teredo = new Groupe("Disable Teredo (IPv6)");
+            Group teredo = new Group("Disable Teredo (IPv6)");
             miscCat.Add(teredo);
             teredo.Add(new Tweak("Disable Teredo Tunneling", TweakType.SetGPO, WinVer.Win7)
             {
@@ -852,7 +852,7 @@ namespace PrivateWin10
 
             // *** Disable Delivery Optimisations ***
 
-            Groupe dodm = new Groupe("No Delivery Optimisations");
+            Group dodm = new Group("No Delivery Optimisations");
             miscCat.Add(dodm);
             dodm.Add(new Tweak("Disable Delivery Optimisations", TweakType.SetGPO, WinVer.Win10)
             {
@@ -864,7 +864,7 @@ namespace PrivateWin10
 
             // *** Disable Map Updates ***
 
-            Groupe map = new Groupe("Disable Map Updates");
+            Group map = new Group("Disable Map Updates");
             miscCat.Add(map);
             map.Add(new Tweak("Turn off unsolicited Maps Downloads", TweakType.SetGPO, WinVer.Win10)
             {
@@ -882,7 +882,7 @@ namespace PrivateWin10
 
             // *** No Internet OpenWith ***
 
-            Groupe iopen = new Groupe("No Internet OpenWith");
+            Group iopen = new Group("No Internet OpenWith");
             miscCat.Add(iopen);
             iopen.Add(new Tweak("Disable Internet OpenWith", TweakType.SetGPO, WinVer.WinXPto7)
             {
@@ -901,7 +901,7 @@ namespace PrivateWin10
 
             // *** Lockdown Edge ***
 
-            Groupe edge = new Groupe("Lockdown Edge");
+            Group edge = new Group("Lockdown Edge");
             miscCat.Add(edge);
             edge.Add(new Tweak("Don't Update Compatyblity Lists", TweakType.SetGPO, WinVer.Win10)
             {
@@ -967,7 +967,7 @@ namespace PrivateWin10
 
             // *** Lockdown IE ***
 
-            Groupe ie = new Groupe("Lockdown IE");
+            Group ie = new Group("Lockdown IE");
             miscCat.Add(ie);
             ie.Add(new Tweak("Disable Enchanced AddressBar Sugestions", TweakType.SetGPO, WinVer.Win7)
             {
@@ -1050,7 +1050,7 @@ namespace PrivateWin10
 
             // *** Disable Store ***
 
-            Groupe store = new Groupe("Disable Store");
+            Group store = new Group("Disable Store");
             appCat.Add(store);
             store.Add(new Tweak("Disable Store Apps", TweakType.SetGPO, WinVer.Win10)
             {
@@ -1075,7 +1075,7 @@ namespace PrivateWin10
 
             // *** Lockdown Apps ***
 
-            Groupe apps = new Groupe("Lockdown Apps");
+            Group apps = new Group("Lockdown Apps");
             appCat.Add(apps);
             apps.Add(new Tweak("Don't Let Apps Access AccountInfo", TweakType.SetGPO, WinVer.Win10)
             {
@@ -1184,7 +1184,7 @@ namespace PrivateWin10
 
             // *** No Mail and People ***
 
-            Groupe mail = new Groupe("Block Mail and People");
+            Group mail = new Group("Block Mail and People");
             appCat.Add(mail);
             mail.Add(new Tweak("Disable Mail App", TweakType.SetGPO, WinVer.Win10)
             {

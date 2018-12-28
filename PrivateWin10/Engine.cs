@@ -10,7 +10,7 @@ using System.Windows.Threading;
 
 namespace PrivateWin10
 {
-    public class Engine : IPCInterface
+    public class Engine : IPCInterface//, IDisposable
     {
         public ProgramList programs;
         public Firewall firewall;
@@ -47,6 +47,10 @@ namespace PrivateWin10
             //mFinished.WaitOne();
         }
 
+        /*public void Dispose()
+        {
+            
+        }*/
 
         public void Run()
         {
@@ -87,6 +91,10 @@ namespace PrivateWin10
             mTimer.Start();
 
             Dispatcher.Run();
+
+            mTimer.Stop();
+
+            firewall.WatchConnections(false);
 
             Console.WriteLine("Saving program list...");
             programs.StoreList();

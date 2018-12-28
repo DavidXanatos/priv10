@@ -28,10 +28,10 @@ namespace PrivateWin10.ViewModels
             }
 
             foreach (string cat in knownCats)
-                Categorys.Add(new Category() { Content = cat, Tag = cat, Groupe = Translate.fmt("cat_cats") });
+                Categorys.Add(new Category() { Content = cat, Tag = cat, Group = Translate.fmt("cat_cats") });
 
-            Categorys.Add(new Category() { SpecialCat = Category.Special.SetNone, Content = Translate.fmt("cat_none"), Tag = "", Groupe = Translate.fmt("cat_other") });
-            Categorys.Add(new Category() { SpecialCat = Category.Special.AddNew, Content = Translate.fmt("cat_new"), Tag = true, Groupe = Translate.fmt("cat_other") });
+            Categorys.Add(new Category() { SpecialCat = Category.Special.SetNone, Content = Translate.fmt("cat_none"), Tag = "", Group = Translate.fmt("cat_other") });
+            Categorys.Add(new Category() { SpecialCat = Category.Special.AddNew, Content = Translate.fmt("cat_new"), Tag = true, Group = Translate.fmt("cat_other") });
 
         }
 
@@ -45,13 +45,13 @@ namespace PrivateWin10.ViewModels
                 Separator
             }
             public Special SpecialCat = Special.No;
-            public string Groupe { get; set; }
+            public string Group { get; set; }
         }
 
         public IEnumerable GetCategorys()
         {
             ListCollectionView lcv = new ListCollectionView(Categorys);
-            lcv.GroupDescriptions.Add(new PropertyGroupDescription("Groupe"));
+            lcv.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
             return lcv;
         }
     }

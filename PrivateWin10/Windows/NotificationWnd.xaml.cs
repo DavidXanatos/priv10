@@ -25,6 +25,16 @@ namespace PrivateWin10.Windows
         {
             InitializeComponent();
 
+            this.Title = Translate.fmt("wnd_notify");
+            this.btnPrev.Content = Translate.fmt("lbl_prev");
+            this.btnNext.Content = Translate.fmt("lbl_next");
+            this.lblRemember.Content = Translate.fmt("lbl_remember");
+            this.btnIgnore.Content = Translate.fmt("lbl_ignore");
+            this.btnApply.Content = Translate.fmt("lbl_apply");
+            this.consGrid.Columns[0].Header = Translate.fmt("lbl_protocol");
+            this.consGrid.Columns[1].Header = Translate.fmt("lbl_ip_port");
+            this.consGrid.Columns[2].Header = Translate.fmt("lbl_time_stamp");
+
             this.Topmost = true;
 
             cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_none"), Tag = Program.Config.AccessLevels.Unconfigured });
@@ -189,7 +199,7 @@ namespace PrivateWin10.Windows
             FirewallRule rule = new FirewallRule() { guid = Guid.Empty, Profile = (int)Firewall.Profiles.All, Interface = (int)Firewall.Interfaces.All, Enabled = true };
             rule.mID = id;
             rule.Name = Translate.fmt("custom_rule", id.GetDisplayName());
-            rule.Grouping = FirewallRule.RuleGroupe;
+            rule.Grouping = FirewallRule.RuleGroup;
             rule.Expiration = expiration;
 
             if (entry != null)

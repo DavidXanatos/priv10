@@ -155,11 +155,7 @@ namespace PrivateWin10
                 image.Tag = new Tuple<DrawingImage, DrawingImage>(new DrawingImage(new GeometryDrawing(brushOn, null, geometry)), new DrawingImage(new GeometryDrawing(brushOff, null, geometry)));
             }
 
-#if DEBUG
-            SwitchPage("Firewall");
-#else
-            SwitchPage("Overview");
-#endif
+            SwitchPage(App.GetConfig("GUI", "CurPage", "Overview"));
 
         }
 
@@ -195,6 +191,7 @@ namespace PrivateWin10
             }
 
             string name = TextHelpers.get2nd((sender as Control).Name, "_");
+            App.SetConfig("GUI", "CurPage", name);
             SwitchPage(name);
         }
 

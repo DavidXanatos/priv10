@@ -17,9 +17,9 @@ using System.Windows.Shapes;
 namespace PrivateWin10
 {
     /// <summary>
-    /// Interaction logic for TweakGroupe.xaml
+    /// Interaction logic for TweakGroup.xaml
     /// </summary>
-    public partial class TweakGroupe : UserControl
+    public partial class TweakGroup : UserControl
     {
         public event RoutedEventHandler Click;
         public event RoutedEventHandler ReqSU;
@@ -30,19 +30,19 @@ namespace PrivateWin10
             public int enabled = 0;
         }
 
-        Groupe myGroupe;
+        Group myGroup;
 
         Dictionary<TweakType, ContentControl> boxes = new Dictionary<TweakType, ContentControl>();
 
-        public TweakGroupe(Groupe groupe)
+        public TweakGroup(Group group)
         {
-            myGroupe = groupe;
+            myGroup = group;
 
             InitializeComponent();
 
             Dictionary<TweakType, TweakStat> tweaks = new Dictionary<TweakType, TweakStat>();
 
-            foreach (Tweak tweak in groupe.Tweaks)
+            foreach (Tweak tweak in group.Tweaks)
             {
                 if (!tweak.IsAvailable())
                     continue;
@@ -128,7 +128,7 @@ namespace PrivateWin10
 
             bool state = (bool)(sender as ToggleSwitch).IsChecked;
 
-            foreach (Tweak tweak in myGroupe.Tweaks)
+            foreach (Tweak tweak in myGroup.Tweaks)
             {
                 if (!tweak.IsAvailable())
                     continue;
@@ -145,7 +145,7 @@ namespace PrivateWin10
             TweakType type = (TweakType)(sender as CheckBox).Tag;
             bool state = (bool)(sender as CheckBox).IsChecked;
 
-            foreach (Tweak tweak in myGroupe.Tweaks)
+            foreach (Tweak tweak in myGroup.Tweaks)
             {
                 if (!tweak.IsAvailable())
                     continue;
@@ -166,7 +166,7 @@ namespace PrivateWin10
 
             int active = 0;
             int selected = 0;
-            foreach (Tweak tweak in myGroupe.Tweaks)
+            foreach (Tweak tweak in myGroup.Tweaks)
             {
                 if (!tweak.IsAvailable())
                     continue;

@@ -532,9 +532,15 @@ public static class ServiceHelper
             long RawKernelTime;
             long RawUserTime;
 
-            IntPtr processHandle = System.Diagnostics.Process.GetProcessById(pid).Handle;
-            GetProcessTimes(processHandle, out RawCreationTime, out RawExitTime, out RawKernelTime, out RawUserTime);
-
+            try
+            {
+                IntPtr processHandle = System.Diagnostics.Process.GetProcessById(pid).Handle;
+                GetProcessTimes(processHandle, out RawCreationTime, out RawExitTime, out RawKernelTime, out RawUserTime);
+            }
+            catch
+            {
+                return null;
+            }
             ServiceCacheLock.EnterReadLock();
             doUpdate = ServiceCacheTime < DateTime.FromFileTimeUtc(RawCreationTime);
             ServiceCacheLock.ExitReadLock();

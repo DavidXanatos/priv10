@@ -48,6 +48,14 @@ namespace PrivateWin10.Controls
         {
             InitializeComponent();
 
+            chkNotify.Content = Translate.fmt("lbl_notify");
+            btnAdd.Content = Translate.fmt("lbl_add");
+            btnSplit.Content = Translate.fmt("lbl_split");
+            btnRemove.Content = Translate.fmt("lbl_remove");
+
+            progGrid.Columns[1].Header = Translate.fmt("lbl_name");
+            progGrid.Columns[2].Header = Translate.fmt("lbl_progam");
+
             SuspendChange++;
 
             progArea.Visibility = Visibility.Collapsed;
@@ -190,7 +198,7 @@ namespace PrivateWin10.Controls
             string Value;
             if (cat.SpecialCat == CategoryModel.Category.Special.AddNew)
             {
-                InputWnd wnd = new InputWnd(Translate.fmt("msg_cat_name"), "Some Category", App.mName);
+                InputWnd wnd = new InputWnd(Translate.fmt("msg_cat_name"), Translate.fmt("msg_cat_some"), App.mName);
                 if (wnd.ShowDialog() != true || wnd.Value.Length == 0)
                     return;
 
@@ -206,7 +214,7 @@ namespace PrivateWin10.Controls
                 }
                 if (!found)
                 {
-                    CatModel.Categorys.Insert(0, new CategoryModel.Category() { Content = Value, Groupe = Translate.fmt("cat_cats") });
+                    CatModel.Categorys.Insert(0, new CategoryModel.Category() { Content = Value, Group = Translate.fmt("cat_cats") });
                     category.SelectedIndex = 0;
                 }
             }

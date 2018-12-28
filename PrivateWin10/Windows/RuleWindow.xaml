@@ -18,15 +18,15 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <WrapPanel Orientation="Vertical">
-                    <GroupBox Margin="5,5,5,5" Header="Firewall Rule" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="380">
+                    <GroupBox Name="grpRule" Margin="5,5,5,5" Header="Firewall Rule" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="380">
                         <StackPanel Margin="2,2">
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Text="Name" VerticalAlignment="Top" />
+                                <TextBlock Margin="0,5,0,2" Name="lblName" Text="Name" VerticalAlignment="Top" />
                                 <TextBox Margin="50,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="{Binding RuleName, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" x:Name="txtName" TextChanged="someThing_Changed" />
                             </Grid>
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Text="Groupe" VerticalAlignment="Top" />
-                                <ComboBox Margin="50,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="" x:Name="cmbGroupe" />
+                                <TextBlock Margin="0,5,0,2" Name="lblGroup" Text="Group" VerticalAlignment="Top" />
+                                <ComboBox Margin="50,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="" x:Name="cmbGroup" />
                             </Grid>
                             <TextBox Margin="0,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Text="" TextWrapping="Wrap" AcceptsReturn="True" Height="64"  x:Name="txtInfo">
                                 <TextBox.Style>
@@ -54,31 +54,31 @@
                             </TextBox>
                         </StackPanel>
                     </GroupBox>
-                    <GroupBox Margin="5,5,5,5" Header="Program" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Width="380">
+                    <GroupBox Name="grpProgram" Margin="5,5,5,5" Header="Program" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Width="380">
                         <StackPanel Margin="2,0,2,0">
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Text="Program" VerticalAlignment="Top" />
-                                <ComboBox x:Name="cmbProgram"  Margin="75,2,0,2" VerticalAlignment="Top" Text="" SelectionChanged="cmbProgram_SelectionChanged"/>
+                                <TextBlock Margin="0,5,0,2" Name="lblProgram" Text="Program" VerticalAlignment="Top" />
+                                <ComboBox x:Name="cmbProgram"  Margin="100,2,0,2" VerticalAlignment="Top" Text="" SelectionChanged="cmbProgram_SelectionChanged"/>
                             </Grid>
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Text="Path"  VerticalAlignment="Top" />
-                                <TextBox x:Name="txtPath" Margin="75,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
+                                <TextBlock Margin="0,5,0,2" Name="lblExecutable" Text="Executable"  VerticalAlignment="Top" />
+                                <TextBox x:Name="txtPath" Margin="100,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
                             </Grid>
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Text="Service"  VerticalAlignment="Top" />
-                                <TextBox x:Name="txtService" Margin="75,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
+                                <TextBlock Margin="0,5,0,2" Name="lblService" Text="Only Services"  VerticalAlignment="Top" />
+                                <TextBox x:Name="txtService" Margin="100,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
                             </Grid>
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Text="App"  VerticalAlignment="Top" />
-                                <TextBox x:Name="txtApp" Margin="75,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
+                                <TextBlock Margin="0,5,0,2" Name="lblApp" Text="Only App Package"  VerticalAlignment="Top" />
+                                <TextBox x:Name="txtApp" Margin="100,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
                             </Grid>
                         </StackPanel>
                     </GroupBox>
-                    <GroupBox Margin="5,5,5,5"  Header="Action &amp; Scope" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Width="380">
+                    <GroupBox Margin="5,5,5,5" Name="grpAction" Header="Action &amp; Scope" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Width="380">
                         <StackPanel Margin="2,0,2,0">
 
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Text="Action"  VerticalAlignment="Top" />
+                                <TextBlock Margin="0,5,0,2" Name="lblAction" Text="Action"  VerticalAlignment="Top" />
                                 <ComboBox x:Name="cmbAction"  Margin="100,2,0,2" VerticalAlignment="Top" SelectedItem="{Binding RuleAction, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" SelectionChanged="someThing_Changed"/>
                             </Grid>
 
@@ -122,14 +122,14 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Margin="5,5,5,5" Header="Network Properties" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Width="380">
+                    <GroupBox Name="grpNetwork" Margin="5,5,5,5" Header="Network Properties" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Width="380">
                         <StackPanel Margin="2,0,2,0">
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Text="Direction"  VerticalAlignment="Top" />
+                                <TextBlock Margin="0,5,0,2" Name="lblDirection" Text="Direction"  VerticalAlignment="Top" />
                                 <ComboBox x:Name="cmbDirection" Margin="100,2,0,2" VerticalAlignment="Top" Text="" SelectionChanged="CmbDirection_SelectionChanged"/>
                             </Grid>
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Text="Protocol"  VerticalAlignment="Top" />
+                                <TextBlock Margin="0,5,0,2" Name="lblProtocol" Text="Protocol"  VerticalAlignment="Top" />
                                 <ComboBox x:Name="cmbProtocol" Margin="100,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="{Binding ProtocolTxt, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" SelectionChanged="cmbProtocol_SelectionChanged" TextBoxBase.TextChanged="cmbProtocol_TextChanged"/>
                             </Grid>
 
@@ -165,11 +165,11 @@
                                 <TabItem Header="" x:Name="tabPorts">
                                     <StackPanel>
                                         <Grid>
-                                            <TextBlock Margin="0,5,0,2" Text="Local Ports:"  VerticalAlignment="Top" />
+                                            <TextBlock Margin="0,5,0,2" Name="lblLocalPorts"  Text="Local Ports:"  VerticalAlignment="Top" />
                                             <ComboBox x:Name="cmbLocalPorts" Margin="100,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="{Binding LocalPortTxt, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" SelectedItem="{Binding LocalPort}" TextBoxBase.TextChanged="someThing_Changed" SelectionChanged="someThing_Changed"/>
                                         </Grid>
                                         <Grid>
-                                            <TextBlock Margin="0,5,0,2" Text="Remote Ports:"  VerticalAlignment="Top" />
+                                            <TextBlock Margin="0,5,0,2" Name="lblRemotePorts" Text="Remote Ports:"  VerticalAlignment="Top" />
                                             <ComboBox x:Name="cmbRemotePorts" Margin="100,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="{Binding RemotePortTxt, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" SelectedItem="{Binding RemotePort}" TextBoxBase.TextChanged="someThing_Changed" SelectionChanged="someThing_Changed"/>
                                         </Grid>
                                     </StackPanel>
@@ -179,15 +179,15 @@
                                 </TabItem>
                                 <TabItem Header="" x:Name="tabICMP">
                                     <Grid >
-                                        <TextBlock Margin="0,5,0,2" Text="ICMP Types:"  VerticalAlignment="Top" />
+                                        <TextBlock Name="lblICMP"  Margin="0,5,0,2" Text="ICMP Types:"  VerticalAlignment="Top" />
                                         <ComboBox  x:Name="cmbICMP" Margin="100,2,0,2" IsEditable="True" VerticalAlignment="Top" Text="" TextBoxBase.TextChanged="someThing_Changed" SelectionChanged="someThing_Changed"/>
                                     </Grid>
                                 </TabItem>
                             </TabControl>
                             <StackPanel>
-                                <TextBlock Margin="0,11,0,2" Text="Local Addresses:"  VerticalAlignment="Top" />
+                                <TextBlock Margin="0,11,0,2" Name="lblLocalIP" Text="Local Addresses:"  VerticalAlignment="Top" />
                                 <controls:AddressControl x:Name="addrSrc" VerticalAlignment="Top" HorizontalAlignment="Stretch"/>
-                                <TextBlock Margin="0,11,0,2" Text="Remote Addresses:"  VerticalAlignment="Top" />
+                                <TextBlock Margin="0,11,0,2" Name="lblRemoteIP" Text="Remote Addresses:"  VerticalAlignment="Top" />
                                 <controls:AddressControl x:Name="addrDest" VerticalAlignment="Top" HorizontalAlignment="Stretch" IsRemote="True"/>
                             </StackPanel>
                         </StackPanel>
@@ -201,7 +201,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="1" x:Name="btnOK" IsDefault="True" Margin="10,0,10,0" Content="Ok" Width="100" VerticalAlignment="Bottom" Click="btnOK_Click" />
-                    <Button Grid.Column="2" IsCancel="True" Margin="10,0,10,0" Content="Cancel" Width="100" VerticalAlignment="Center" />
+                    <Button Grid.Column="2" x:Name="btnCancel" IsCancel="True" Margin="10,0,10,0" Content="Cancel" Width="100" VerticalAlignment="Center" />
                 </Grid>
             </Grid>
         </ScrollViewer>

@@ -22,7 +22,7 @@ namespace PrivateWin10.Pages
     public partial class PrivacyPage : UserControl, IUserPage
     {
         private Dictionary<string, TweakControl> myTweaks = new Dictionary<string, TweakControl>();
-        private Dictionary<string, TweakGroupe> myGroupes = new Dictionary<string, TweakGroupe>();
+        private Dictionary<string, TweakGroup> myGroups = new Dictionary<string, TweakGroup>();
 
         public bool showAll = false; // todo
 
@@ -79,13 +79,13 @@ namespace PrivateWin10.Pages
             if (MessageBox.Show(string.Format("Apply all {0} tweaks?", cat.Label), "Private Win10", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return;
 
-            for (int i = 0; i < cat.Groupes.Count; ++i)
+            for (int i = 0; i < cat.Groups.Count; ++i)
             {
-                Groupe groupe = cat.Groupes[i];
-                if (!groupe.IsAvailable())
+                Group group = cat.Groups[i];
+                if (!group.IsAvailable())
                     continue;
 
-                foreach (Tweak tweak in groupe.Tweaks)
+                foreach (Tweak tweak in group.Tweaks)
                 {
                     if (!tweak.IsAvailable())
                         continue;
@@ -106,64 +106,64 @@ namespace PrivateWin10.Pages
                 curBtn.Background = new SolidColorBrush(((bool)curBtn.IsChecked) ? Color.FromArgb(255, 230, 240, 255) : Color.FromArgb(255, 235, 235, 235));
             }
 
-            this.groupeGrid.Children.Clear();
-            this.groupeGrid.RowDefinitions.Clear();
+            this.groupGrid.Children.Clear();
+            this.groupGrid.RowDefinitions.Clear();
 
             this.tweakGrid.Children.Clear();
             this.tweakGrid.RowDefinitions.Clear();
 
-            for (int i = 0; i < cat.Groupes.Count; ++i)
+            for (int i = 0; i < cat.Groups.Count; ++i)
             {
-                Groupe groupe = cat.Groupes[i];
-                if (!showAll && !groupe.IsAvailable())
+                Group group = cat.Groups[i];
+                if (!showAll && !group.IsAvailable())
                     continue;
-                TweakGroupe item;
-                if (!myGroupes.TryGetValue(groupe.Label, out item))
+                TweakGroup item;
+                if (!myGroups.TryGetValue(group.Label, out item))
                 {
-                    item = new TweakGroupe(groupe);
-                    myGroupes.Add(groupe.Label, item);
-                    //item.MouseDown += new MouseButtonEventHandler(groupe_Click);
-                    item.Click += new RoutedEventHandler(groupe_Click);
+                    item = new TweakGroup(group);
+                    myGroups.Add(group.Label, item);
+                    //item.MouseDown += new MouseButtonEventHandler(group_Click);
+                    item.Click += new RoutedEventHandler(group_Click);
                     item.ReqSU += new RoutedEventHandler(req_su);
                 }
-                item.label.Content = groupe.Label;
-                item.Tag = groupe;
+                item.label.Content = group.Label;
+                item.Tag = group;
                 item.VerticalAlignment = VerticalAlignment.Top;
                 item.HorizontalAlignment = HorizontalAlignment.Stretch;
                 item.Margin = new Thickness(1, 1, 1, 1);
 
-                if (!groupe.IsAvailable())
+                if (!group.IsAvailable())
                     item.toggle.IsEnabled = false;
 
-                this.groupeGrid.Children.Add(item);
+                this.groupGrid.Children.Add(item);
                 RowDefinition row = new RowDefinition();
                 row.Height = new GridLength(item.Height + 2);
-                this.groupeGrid.RowDefinitions.Add(row);
-                Grid.SetRow(item, groupeGrid.RowDefinitions.Count - 1);
+                this.groupGrid.RowDefinitions.Add(row);
+                Grid.SetRow(item, groupGrid.RowDefinitions.Count - 1);
                 //Grid.SetColumn(item, 1);
             }
         }
 
-        void groupe_Click(object sender, RoutedEventArgs e)
+        void group_Click(object sender, RoutedEventArgs e)
         {
-            Groupe groupe = (Groupe)(sender as TweakGroupe).Tag;
+            Group group = (Group)(sender as TweakGroup).Tag;
 
-            foreach (TweakGroupe curBtn in this.groupeGrid.Children)
+            foreach (TweakGroup curBtn in this.groupGrid.Children)
                 curBtn.SetFocus(curBtn == sender);
 
             this.tweakGrid.Children.Clear();
             this.tweakGrid.RowDefinitions.Clear();
 
-            for (int i = 0; i < groupe.Tweaks.Count; ++i)
+            for (int i = 0; i < group.Tweaks.Count; ++i)
             {
-                Tweak tweak = groupe.Tweaks[i];
+                Tweak tweak = group.Tweaks[i];
                 if (!showAll && !tweak.IsAvailable())
                     continue;
                 TweakControl item;
-                if (!myTweaks.TryGetValue(groupe.Label + "|" + tweak.Label, out item))
+                if (!myTweaks.TryGetValue(group.Label + "|" + tweak.Label, out item))
                 {
                     item = new TweakControl(tweak);
-                    myTweaks.Add(groupe.Label + "|" + tweak.Label, item);
+                    myTweaks.Add(group.Label + "|" + tweak.Label, item);
                     //item.MouseDown += new MouseButtonEventHandler(tweak_Click);
                     item.Click += new RoutedEventHandler(tweak_Click);
                     item.ReqSU += new RoutedEventHandler(req_su);

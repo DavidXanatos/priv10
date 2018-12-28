@@ -30,7 +30,7 @@ namespace PrivateWin10.IPC
         public event EventHandler<byte[]> DataReceived;
         public event EventHandler<EventArgs> PipeClosed;
 
-        public void Close()
+        public virtual void Close()
         {
             if (!pipeStream.IsConnected)
                 return;

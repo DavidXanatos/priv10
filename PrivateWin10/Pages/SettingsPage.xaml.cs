@@ -26,6 +26,26 @@ namespace PrivateWin10.Pages
         {
             InitializeComponent();
 
+            this.lblStartup.Text = Translate.fmt("lbl_startup_options");
+            this.chkTray.Content = Translate.fmt("chk_show_tray");
+            this.chkAutoStart.Content = Translate.fmt("chk_autorun");
+            this.chkService.Content = Translate.fmt("chk_instal_svc");
+            this.chkNoUAC.Content = Translate.fmt("chk_no_uac");
+
+            this.lblFirewall.Text = Translate.fmt("lbl_firewall_options");
+            this.chkUseFW.Content = Translate.fmt("chk_manage_fw");
+            this.chkNotifyFW.Content = Translate.fmt("chk_show_notify");
+            this.lblMode.Content = Translate.fmt("lbl_filter_mode");
+            this.radWhitelist.Content = Translate.fmt("chk_fw_whitelist");
+            this.radBlacklist.Content = Translate.fmt("chk_fw_blacklist");
+            this.radDisabled.Content = Translate.fmt("chk_fw_disable");
+            this.lblAudit.Content = Translate.fmt("chk_audit_policy");
+
+            this.lblAuditAll.Content = Translate.fmt("lbl_audit_all");
+            this.lblAuditBlock.Content = Translate.fmt("lbl_audit_blocked");
+            this.lblAuditNone.Content = Translate.fmt("lbl_audit_off");
+
+
             Refresh();
         }
 
@@ -50,12 +70,6 @@ namespace PrivateWin10.Pages
             chkAutoStart.IsChecked = App.IsAutoStart();
             chkService.IsChecked = App.svc.IsInstalled();
             chkNoUAC.IsChecked = AdminFunc.IsSkipUac(App.mName);
-
-            if (!AdminFunc.IsAdministrator())
-            {
-                chkService.IsEnabled = false;
-                chkNoUAC.IsEnabled = false;
-            }
 
             chkUseFW.IsChecked = App.GetConfigInt("Firewall", "Enabled", 0) != 0;
 
@@ -94,6 +108,7 @@ namespace PrivateWin10.Pages
         private void chkTray_Click(object sender, RoutedEventArgs e)
         {
             if (bHold) return;
+
             App.SetConfig("Startup", "Tray", chkTray.IsChecked == true);
             App.mTray.Visible = chkTray.IsChecked == true;
         }
@@ -101,20 +116,58 @@ namespace PrivateWin10.Pages
         private void chkAutoStart_Click(object sender, RoutedEventArgs e)
         {
             if (bHold) return;
+
             App.AutoStart(chkAutoStart.IsChecked == true);
         }
 
         private void chkService_Click(object sender, RoutedEventArgs e)
         {
+            if (bHold) return;
+
+            if (!AdminFunc.IsAdministrator())
+            {
+                if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.mName), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    App.Restart(true);
+                return;
+            }
+
+            App.client.Close();
             if (chkService.IsChecked == true)
-                App.svc.Install();
+            {
+                if (App.engine != null)
+                {
+                    App.engine.Stop();
+
+                    App.engine = null;
+                }
+
+                App.svc.Install(true);
+            }
             else
+            {
                 App.svc.Uninstall();
+
+                if (App.engine == null)
+                {
+                    App.engine = new Engine();
+
+                    App.engine.Start();
+                }
+            }
+            App.client.Connect();
         }
 
         private void chkNoUAC_Click(object sender, RoutedEventArgs e)
         {
             if (bHold) return;
+
+            if (!AdminFunc.IsAdministrator())
+            {
+                if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.mName), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    App.Restart(true);
+                return;
+            }
+
             AdminFunc.SkipUacEnable(App.mName, chkNoUAC.IsChecked == true);
         }
 

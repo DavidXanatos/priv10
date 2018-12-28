@@ -67,6 +67,72 @@ namespace PrivateWin10.Pages
         {
             InitializeComponent();
 
+            this.btnAdd.Content = Translate.fmt("btn_add_prog");
+            this.btnMerge.Content = Translate.fmt("btn_merge_progs");
+            this.btnRemove.Content = Translate.fmt("btn_del_progs");
+            this.btnCleanup.Content = Translate.fmt("btn_cleanup_list");
+            this.chkNoLocal.Content = Translate.fmt("chk_ignore_local");
+
+            this.lblSort.Content = Translate.fmt("lbl_sort");
+            this.lblType.Content = Translate.fmt("lbl_type");
+            this.lblFilter.Content = Translate.fmt("lbl_filter");
+
+            this.btnReload.Content = Translate.fmt("btn_reload");
+            this.chkAll.Content = Translate.fmt("chk_all");
+
+            this.grpRules.Header = Translate.fmt("grp_firewall");
+            this.grpLog.Header = Translate.fmt("gtp_con_log");
+            this.grpRuleTools.Header = Translate.fmt("grp_tools");
+            this.grpLogTools.Header = Translate.fmt("grp_tools");
+            this.grpRuleView.Header = Translate.fmt("grp_view");
+            this.grpLogView.Header = Translate.fmt("grp_view");
+
+            this.btnCreateRule.Content = Translate.fmt("btn_mk_rule");
+            this.btnEnableRule.Content = Translate.fmt("btn_enable_rule");
+            this.btnDisableRule.Content = Translate.fmt("btn_disable_rule");
+            this.btnRemoveRule.Content = Translate.fmt("btn_enable_rule");
+            this.btnBlockRule.Content = Translate.fmt("btn_block_rule");
+            this.btnAllowRule.Content = Translate.fmt("btn_allow_rule");
+            this.btnEditRule.Content = Translate.fmt("btn_edit_rule");
+            this.btnCloneRule.Content = Translate.fmt("btn_clone_rule");
+
+            this.chkNoDisabled.Content = Translate.fmt("chk_hide_disabled");
+            this.lblFilterRules.Content = Translate.fmt("lbl_filter_rules");
+
+            this.btnMkRule.Content = Translate.fmt("btn_mk_rule");
+            this.btnClearLog.Content = Translate.fmt("btn_clear_log");
+            this.lblShowCons.Content = Translate.fmt("lbl_show_cons");
+            this.lblFilterCons.Content = Translate.fmt("lbl_filter_cons");
+
+            this.ruleGrid.Columns[1].Header = Translate.fmt("lbl_name");
+            this.ruleGrid.Columns[2].Header = Translate.fmt("lbl_group");
+            this.ruleGrid.Columns[3].Header = Translate.fmt("lbl_enabled");
+            this.ruleGrid.Columns[4].Header = Translate.fmt("lbl_profiles");
+            this.ruleGrid.Columns[5].Header = Translate.fmt("lbl_action");
+            this.ruleGrid.Columns[6].Header = Translate.fmt("lbl_direction");
+            this.ruleGrid.Columns[7].Header = Translate.fmt("lbl_protocol");
+            this.ruleGrid.Columns[8].Header = Translate.fmt("lbl_remote_ip");
+            this.ruleGrid.Columns[9].Header = Translate.fmt("lbl_local_ip");
+            this.ruleGrid.Columns[10].Header = Translate.fmt("lbl_remote_port");
+            this.ruleGrid.Columns[11].Header = Translate.fmt("lbl_local_port");
+            this.ruleGrid.Columns[11].Header = Translate.fmt("lbl_icmp");
+            this.ruleGrid.Columns[12].Header = Translate.fmt("lbl_interfaces");
+            this.ruleGrid.Columns[13].Header = Translate.fmt("lbl_edge");
+            this.ruleGrid.Columns[14].Header = Translate.fmt("lbl_program");
+
+            this.consGrid.Columns[1].Header = Translate.fmt("lbl_name");
+            this.consGrid.Columns[2].Header = Translate.fmt("lbl_time_stamp");
+            this.consGrid.Columns[3].Header = Translate.fmt("lbl_action");
+            this.consGrid.Columns[4].Header = Translate.fmt("lbl_direction");
+            this.consGrid.Columns[5].Header = Translate.fmt("lbl_protocol");
+            this.consGrid.Columns[6].Header = Translate.fmt("lbl_remote_ip");
+            this.consGrid.Columns[7].Header = Translate.fmt("lbl_remote_port");
+            this.consGrid.Columns[8].Header = Translate.fmt("lbl_local_ip");
+            this.consGrid.Columns[9].Header = Translate.fmt("lbl_local_port");
+            this.consGrid.Columns[10].Header = Translate.fmt("lbl_program");
+
+
+
             double progColHeight = MiscFunc.parseDouble(App.GetConfig("GUI", "FirewallProgsWidth", "0.0"));
             if (progColHeight > 0.0)
                 progsCol.Width = new GridLength(progColHeight, GridUnitType.Pixel);
@@ -116,7 +182,7 @@ namespace PrivateWin10.Pages
             Filters = new ObservableCollection<CatEntry>();
 
             ListCollectionView lcv = new ListCollectionView(Filters);
-            lcv.GroupDescriptions.Add(new PropertyGroupDescription("Groupe"));
+            lcv.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
             cmbFilter.ItemsSource = lcv;
 
             mCatFilter = App.GetConfig("GUI", "CategoryFilter", mCatFilter);
@@ -179,7 +245,7 @@ namespace PrivateWin10.Pages
 
         public class Category : ContentControl
         {
-            public string Groupe { get; set; }
+            public string Group { get; set; }
         }
 
         public class CatEntry : ContentControl
@@ -187,12 +253,12 @@ namespace PrivateWin10.Pages
             public bool? IsSelected { get; set; }
             public Visibility IsCheckVisible { get { return IsCheckable ? Visibility.Visible : Visibility.Collapsed; } }
             public bool IsCheckable { get; set; }
-            public string Groupe { get; set; }
+            public string Group { get; set; }
         }
 
         public ObservableCollection<CatEntry> Filters;
 
-        private void AddCatItem(string text, string groupe, object tag)
+        private void AddCatItem(string text, string group, object tag)
         {
             Filters.Add(new CatEntry
             {
@@ -200,7 +266,7 @@ namespace PrivateWin10.Pages
                 IsSelected = false,
                 Content = text,
                 Tag = tag,
-                Groupe = groupe
+                Group = group
             });
         }
 
@@ -1026,7 +1092,7 @@ namespace PrivateWin10.Pages
                 return;
             FirewallRule rule = new FirewallRule() { guid = Guid.Empty, Profile = (int)Firewall.Profiles.All, Interface = (int)Firewall.Interfaces.All, Enabled = true };
             rule.Name = Translate.fmt("custom_rule", mCurPrograms[0].Program.GetMainID().GetDisplayName());
-            rule.Grouping = FirewallRule.RuleGroupe;
+            rule.Grouping = FirewallRule.RuleGroup;
             rule.Direction = Firewall.Directions.Bidirectiona;
             if (mCurPrograms.Count == 1)
                 rule.mID = mCurPrograms[0].Program.GetMainID();
@@ -1126,7 +1192,7 @@ namespace PrivateWin10.Pages
 
             rule.mID = item.Entry.mID;
             rule.Name = Translate.fmt("custom_rule", item.Entry.mID.GetDisplayName());
-            rule.Grouping = FirewallRule.RuleGroupe;
+            rule.Grouping = FirewallRule.RuleGroup;
 
             rule.Direction = item.Entry.Direction;
             rule.Protocol = item.Entry.Protocol;

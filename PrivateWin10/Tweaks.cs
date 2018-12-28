@@ -371,7 +371,7 @@ namespace PrivateWin10
     {
         public string Label = "";
 
-        public List<Groupe> Groupes = new List<Groupe>();
+        public List<Group> Groups = new List<Group>();
 
         [field: NonSerialized]
         public event EventHandler<EventArgs> StatusChanged;
@@ -383,18 +383,18 @@ namespace PrivateWin10
 
         public bool IsAvailable()
         {
-            foreach (Groupe groupe in Groupes)
+            foreach (Group group in Groups)
             {
-                if (groupe.IsAvailable())
+                if (group.IsAvailable())
                     return true;
             }
             return false;
         }
 
-        public void Add(Groupe groupe)
+        public void Add(Group group)
         {
-            groupe.StatusChanged += OnStatusChanged;
-            Groupes.Add(groupe);
+            group.StatusChanged += OnStatusChanged;
+            Groups.Add(group);
         }
 
         void OnStatusChanged(object sender, EventArgs arg)
@@ -404,7 +404,7 @@ namespace PrivateWin10
     }
 
     [Serializable()]
-    public class Groupe
+    public class Group
     {
         public string Label = "";
 
@@ -413,7 +413,7 @@ namespace PrivateWin10
         [field: NonSerialized]
         public event EventHandler<EventArgs> StatusChanged;
 
-        public Groupe(string label)
+        public Group(string label)
         {
             Label = label;
         }
@@ -508,7 +508,7 @@ namespace PrivateWin10
             return "Unknown";
         }
 
-        // Note: on windows 10 1803 services running under the system account can not access groupe policy objects
+        // Note: on windows 10 1803 services running under the system account can not access group policy objects
 
         public bool Apply(bool user = false)
         {

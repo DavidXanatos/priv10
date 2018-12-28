@@ -15,9 +15,9 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <GroupBox Margin="5,5,5,5" Header="Program" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <GroupBox Name="grpProgram" Margin="5,5,5,5" Header="Program" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid Margin="2,0,2,0">
-                        <RadioButton Name="radProgram" Margin="0,5,0,2" Content="Process Executable"  VerticalAlignment="Top" Checked="radType_Checked" />
+                        <RadioButton Name="radProgram" Margin="0,5,0,2" Content="Executable"  VerticalAlignment="Top" Checked="radType_Checked" />
                         <ComboBox Name="cmbPath"  Margin="125,2,0,2" 
                                   IsEditable="True" 
                                   IsReadOnly="True" 
@@ -92,7 +92,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="1" Name="btnOK" IsDefault="True" Margin="10,0,10,0" Content="Ok" Width="100" VerticalAlignment="Bottom" Click="btnOK_Click" />
-                    <Button Grid.Column="2" IsCancel="True" Margin="10,0,10,0" Content="Cancel" Width="100" VerticalAlignment="Center" />
+                    <Button Grid.Column="2" Name="btnCancel" IsCancel="True" Margin="10,0,10,0" Content="Cancel" Width="100" VerticalAlignment="Center" />
                 </Grid>
             </Grid>
         <!--/-->

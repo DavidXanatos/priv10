@@ -2,7 +2,30 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+### ToDo's
+- prevent starting of multiple instances
+- add option to block/unblock internet access from tray
+- add tweak restore mechanism
+- make overvioew page usefull
+
+
+## [0.1d] - 2018-12-28
+
+### Added
+- save last open page and open it on restart
+- all setings can now enabled when running not as dmin, wne a admin only seting is to be chaged the cleint prompts fo a restart
+- finish localizations upport
+
+### Fixed
+- fixed issue in retriving service by PID
+- UAC bypass messing with -autorun argument
+
+### Changed
+- improved emabling and disabling of execution as service
+
+
 ## [0.1c] - 2018-12-27
+
 ### Added
 - buttons in the firewallwindow get enabled/disabled based on list selection
 - rule validation for the rule window

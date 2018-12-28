@@ -29,7 +29,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Button x:Name="btnPrev" Grid.Column="0" Content="Previouse" HorizontalAlignment="Left" Margin="2,2,2,2" VerticalAlignment="Stretch" Width="75" Click="btnPrev_Click"/>
-                <TextBlock x:Name="lblIndex" Text="Index" Grid.Column="1" HorizontalAlignment="Center" Margin="2,2,2,2" VerticalAlignment="Center"/>
+                <TextBlock x:Name="lblIndex" Text="0/0" Grid.Column="1" HorizontalAlignment="Center" Margin="2,2,2,2" VerticalAlignment="Center"/>
                 <Button x:Name="btnNext" Grid.Column="2" Content="Next" HorizontalAlignment="Right" Margin="2,2,2,2" VerticalAlignment="Stretch" Width="75" Click="btnNext_Click"/>
             </Grid>
 
@@ -61,7 +61,7 @@
             </GroupBox>
 
             <Grid Grid.Row="2">
-                <Label Content="Remember:" HorizontalAlignment="Left" Margin="2,2,2,2" VerticalAlignment="Center"/>
+                <Label x:Name ="lblRemember" Content="Remember:" HorizontalAlignment="Left" Margin="2,2,2,2" VerticalAlignment="Center"/>
                 <ComboBox x:Name="cmbRemember"  Margin="100,2,2,2" VerticalAlignment="Center" Text=""/>
             </Grid>
             <Grid Grid.Row="3">

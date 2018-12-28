@@ -29,6 +29,48 @@ namespace PrivateWin10.Windows
         {
             InitializeComponent();
 
+            this.Title = Translate.fmt("wnd_rule");
+
+            this.grpRule.Header = Translate.fmt("lbl_rule");
+            this.lblName.Text = Translate.fmt("lbl_name");
+            this.lblGroup.Text = Translate.fmt("lbl_group");
+
+            this.grpProgram.Header = Translate.fmt("lbl_program");
+            this.lblProgram.Text = Translate.fmt("lbl_program");
+            this.lblExecutable.Text = Translate.fmt("lbl_exe");
+            this.lblService.Text = Translate.fmt("lbl_svc");
+            this.lblApp.Text = Translate.fmt("lbl_app");
+
+            this.grpAction.Header = Translate.fmt("grp_action");
+            this.lblAction.Text = Translate.fmt("lbl_action");
+
+            this.radProfileAll.Content = Translate.fmt("lbl_prof_all");
+            this.radProfileCustom.Content = Translate.fmt("lbl_prof_sel");
+            this.chkPublic.Content = Translate.fmt("lbl_prof_pub");
+            this.chkDomain.Content = Translate.fmt("lbl_prof_dmn");
+            this.chkPrivate.Content = Translate.fmt("lbl_prof_priv");
+
+            this.radNicAll.Content = Translate.fmt("lbl_itf_all");
+            this.radNicCustom.Content = Translate.fmt("lbl_itf_select");
+            this.chkLAN.Content = Translate.fmt("lbl_itf_lan");
+            this.chkVPN.Content = Translate.fmt("lbl_itf_vpn");
+            this.chkWiFi.Content = Translate.fmt("lbl_itf_wifi");
+
+            this.grpNetwork.Header = Translate.fmt("grp_network");
+            this.lblDirection.Text = Translate.fmt("lbl_direction");
+            this.lblProtocol.Text = Translate.fmt("lbl_protocol");
+
+            this.lblLocalPorts.Text = Translate.fmt("lbl_local_port");
+            this.lblRemotePorts.Text = Translate.fmt("lbl_remote_port");
+
+            this.lblICMP.Text = Translate.fmt("lbl_icmp");
+
+            this.lblLocalIP.Text = Translate.fmt("lbl_local_ip");
+            this.lblRemoteIP.Text = Translate.fmt("lbl_remote_ip");
+
+            this.btnOK.Content = Translate.fmt("lbl_ok");
+            this.btnCancel.Content = Translate.fmt("lbl_cancel");
+
             Rule = rule;
             bool bNew = Rule.guid == Guid.Empty;
 
@@ -37,10 +79,10 @@ namespace PrivateWin10.Windows
 
             //txtName.Text = Rule.Name;
             viewModel.RuleName = Rule.Name;
-            cmbGroupe.ItemsSource = GroupeModel.GetInstance().Groupes;
-            WpfFunc.CmbSelect(cmbGroupe, Rule.Grouping);
-            if (cmbGroupe.SelectedItem == null)
-                cmbGroupe.Text = Rule.Grouping;
+            cmbGroup.ItemsSource = GroupModel.GetInstance().Groups;
+            WpfFunc.CmbSelect(cmbGroup, Rule.Grouping);
+            if (cmbGroup.SelectedItem == null)
+                cmbGroup.Text = Rule.Grouping;
             txtInfo.Text = Rule.Description;
 
             foreach (ProgramList.ID id in ids)
@@ -301,7 +343,7 @@ namespace PrivateWin10.Windows
                 return;
 
             Rule.Name = txtName.Text;
-            Rule.Grouping = cmbGroupe.Text;
+            Rule.Grouping = cmbGroup.Text;
             Rule.Description = txtInfo.Text;
 
             Rule.mID = ((cmbProgram.SelectedItem as ContentControl).Tag as ProgramList.ID);

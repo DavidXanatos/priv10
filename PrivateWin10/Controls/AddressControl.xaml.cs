@@ -82,6 +82,10 @@ namespace PrivateWin10.Controls
         {
             InitializeComponent();
 
+            radAny.Content = Translate.fmt("lbl_any_ip");
+            radCustom.Content = Translate.fmt("lbl_selected_ip");
+            btnOk.Content = Translate.fmt("lbl_ok");
+
             viewModel = new AddressViewModel();
             DataContext = viewModel;
         }
