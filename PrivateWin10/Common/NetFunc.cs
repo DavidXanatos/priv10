@@ -52,7 +52,7 @@ public class NetFunc
         Any = 256
     }
 
-    public static string Protocol2Str(int Protocol, string unkStr = "Unknow")
+    /*public static string Protocol2Str(int Protocol, string unkStr = "Unknow")
     {
         switch (Protocol)
         {
@@ -202,9 +202,9 @@ public class NetFunc
             case 256: return "Unspecifyed";
             default: return unkStr;
         }
-    }
+    }*/
 
-    public static string Protocol2SStr(int Protocol)
+    public static string Protocol2Str(int Protocol)
     {
         switch (Protocol)
         {

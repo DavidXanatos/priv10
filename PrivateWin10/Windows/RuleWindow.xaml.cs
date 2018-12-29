@@ -137,7 +137,7 @@ namespace PrivateWin10.Windows
             cmbProtocol.Items.Add(new ContentControl() { Content = Translate.fmt("pro_any"), Tag = (int)NetFunc.KnownProtocols.Any });
             for (int i = (int)NetFunc.KnownProtocols.Min; i <= (int)NetFunc.KnownProtocols.Max; i++)
             {
-                string name = NetFunc.Protocol2Str(i, null);
+                string name = NetFunc.Protocol2Str(i);
                 if (name != null)
                     cmbProtocol.Items.Add(new ContentControl() { Content = i.ToString() + " - " + name, Tag = i });
             }

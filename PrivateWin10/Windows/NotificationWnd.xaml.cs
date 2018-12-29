@@ -321,7 +321,7 @@ namespace PrivateWin10.Windows
                 Entry = entry;
             }
 
-            public string Protocol { get { return NetFunc.Protocol2SStr(Entry.Protocol) + (Entry.Direction == Firewall.Directions.Inbound ? " <<<" : " >>>"); } }
+            public string Protocol { get { return NetFunc.Protocol2Str(Entry.Protocol) + (Entry.Direction == Firewall.Directions.Inbound ? " <<<" : " >>>"); } }
 
             public string Address { get { if (Entry.RemoteAddress == null || Entry.RemoteAddress.Length == 0) return ""; return Entry.RemoteAddress + ":" + Entry.RemotePort.ToString(); } }
 

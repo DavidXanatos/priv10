@@ -8,6 +8,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - add tweak restore mechanism
 - make overvioew page usefull
 
+## [0.1e] - 2018-12-29
+
+### Fixed
+- localization string screwup in firewall page
+- englich fixed by ViVek
+- polish translation by ViVek
+
 
 ## [0.1d] - 2018-12-28
 

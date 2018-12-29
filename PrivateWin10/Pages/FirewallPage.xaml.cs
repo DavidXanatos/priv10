@@ -90,7 +90,7 @@ namespace PrivateWin10.Pages
             this.btnCreateRule.Content = Translate.fmt("btn_mk_rule");
             this.btnEnableRule.Content = Translate.fmt("btn_enable_rule");
             this.btnDisableRule.Content = Translate.fmt("btn_disable_rule");
-            this.btnRemoveRule.Content = Translate.fmt("btn_enable_rule");
+            this.btnRemoveRule.Content = Translate.fmt("btn_remove_rule");
             this.btnBlockRule.Content = Translate.fmt("btn_block_rule");
             this.btnAllowRule.Content = Translate.fmt("btn_allow_rule");
             this.btnEditRule.Content = Translate.fmt("btn_edit_rule");
@@ -115,10 +115,10 @@ namespace PrivateWin10.Pages
             this.ruleGrid.Columns[9].Header = Translate.fmt("lbl_local_ip");
             this.ruleGrid.Columns[10].Header = Translate.fmt("lbl_remote_port");
             this.ruleGrid.Columns[11].Header = Translate.fmt("lbl_local_port");
-            this.ruleGrid.Columns[11].Header = Translate.fmt("lbl_icmp");
-            this.ruleGrid.Columns[12].Header = Translate.fmt("lbl_interfaces");
-            this.ruleGrid.Columns[13].Header = Translate.fmt("lbl_edge");
-            this.ruleGrid.Columns[14].Header = Translate.fmt("lbl_program");
+            this.ruleGrid.Columns[12].Header = Translate.fmt("lbl_icmp");
+            this.ruleGrid.Columns[13].Header = Translate.fmt("lbl_interfaces");
+            this.ruleGrid.Columns[14].Header = Translate.fmt("lbl_edge");
+            this.ruleGrid.Columns[15].Header = Translate.fmt("lbl_program");
 
             this.consGrid.Columns[1].Header = Translate.fmt("lbl_name");
             this.consGrid.Columns[2].Header = Translate.fmt("lbl_time_stamp");

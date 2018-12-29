@@ -173,9 +173,10 @@ namespace PrivateWin10
             mStrings.Add("grp_tools", "Tools");
             mStrings.Add("grp_view", "View Options");
             mStrings.Add("btn_mk_rule", "Create Rule");
-            mStrings.Add("btn_edit_rule", "Enable Rules");
+            mStrings.Add("btn_edit_rule", "Edit Rules");
+            mStrings.Add("btn_remove_rule", "Remove Rules");
             mStrings.Add("btn_disable_rule", "Disable Rules");
-            mStrings.Add("btn_enable_rule", "Remove Rule");
+            mStrings.Add("btn_enable_rule", "Enable Rule");
             mStrings.Add("btn_block_rule", "Set Blocking");
             mStrings.Add("btn_allow_rule", "Set Allowing");
             mStrings.Add("btn_clone_rule", "Clone Rule");
