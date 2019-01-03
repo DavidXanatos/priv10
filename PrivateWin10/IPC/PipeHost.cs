@@ -46,6 +46,8 @@ namespace PrivateWin10.IPC
                 forceClose = true;
                 base.Close();
             }
+
+            public int SessionID = -1;
         }
 
         private Dispatcher mDispatcher;
@@ -66,6 +68,16 @@ namespace PrivateWin10.IPC
             return true;
         }
 
+        public int CountSessions(int SessionID)
+        {
+            int count = 0;
+            foreach (PipeListener serverPipes in serverPipes) {
+                if (serverPipes.SessionID == SessionID)
+                    count++;
+            }
+            return count;
+        }
+
         public void AddListener()
         {
             PipeListener serverPipe = new PipeListener(PipeListener.Name);
@@ -73,7 +85,23 @@ namespace PrivateWin10.IPC
 
             serverPipe.DataReceived += (sndr, data) => {
                 mDispatcher.BeginInvoke(new Action(() => {
-                    Process(serverPipe, data);
+                    RemoteCall call = PipeListener.ByteArrayToObject(data);
+
+                    if (call.func == "InitSession")
+                    {
+                        int SessionId = (int)call.args;
+
+                        IPCSession session = new IPCSession();
+                        session.version = App.mVersion;
+                        session.duplicate = CountSessions(SessionId) > 0;
+                        call.args = session;
+
+                        serverPipe.SessionID = SessionId;
+                    }
+                    else
+                        call = Process(call);
+
+                    serverPipe.Send(PipeListener.ObjectToByteArray(call));
                 }));
             };
 
@@ -103,19 +131,11 @@ namespace PrivateWin10.IPC
             return (T)(((object[])args)[index]);
         }
 
-        protected void Process(PipeListener pipe, byte[] data)
+        protected RemoteCall Process(RemoteCall call)
         {
-            string t = Thread.CurrentThread.Name;
-
-            RemoteCall call = PipeListener.ByteArrayToObject(data);
-
             //try
             {
-                if (call.func == "GetVersion")
-                {
-                    call.args = App.mVersion;
-                }
-                else if (call.func == "GetFilteringMode")
+                if (call.func == "GetFilteringMode")
                 {
                     call.args = App.engine.GetFilteringMode();
                 }
@@ -175,6 +195,10 @@ namespace PrivateWin10.IPC
                 {
                     call.args = App.engine.RemoveRule((FirewallRule)call.args);
                 }
+                else if (call.func == "BlockInternet")
+                {
+                    call.args = App.engine.BlockInternet((bool)call.args);
+                }
                 else if (call.func == "ClearLog")
                 {
                     call.args = App.engine.ClearLog((bool)call.args);
@@ -215,7 +239,7 @@ namespace PrivateWin10.IPC
                 AppLog.Line("Error in {0}: {1}", MiscFunc.GetCurrentMethod(), err.Message);
                 call.args = err;
             }*/
-            pipe.Send(PipeListener.ObjectToByteArray(call));
+            return call;
         }
 
         public void SendPushNotification(string func, object args)

@@ -209,6 +209,9 @@ namespace PrivateWin10
             mStrings.Add("lbl_audit_blocked", "Blocked Only");
             mStrings.Add("lbl_audit_off", "Disabled");
             mStrings.Add("wnd_setup", "Private WinTen Initial Setup");
+            mStrings.Add("mnu_exit", "E&xit");
+            mStrings.Add("mnu_block", "&Block Internet");
+            mStrings.Add("msg_dupliate_session", "An other instance is already running.");
 
 
 

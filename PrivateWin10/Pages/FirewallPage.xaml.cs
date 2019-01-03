@@ -346,7 +346,8 @@ namespace PrivateWin10.Pages
                 item = AddProgramItem(prog);
             }
 
-            if (args.entry.Type == Program.LogEntry.Types.RuleError)
+            //Note: windows firewall doesn't block localhost acces so we ignore it
+            if (args.entry.Type == Program.LogEntry.Types.RuleError && !NetFunc.IsLocalHost(args.entry.RemoteAddress))
                 item.SetError(true);
 
             if (chkNoLocal.IsChecked != true || (!NetFunc.IsLocalHost(args.entry.RemoteAddress) && !NetFunc.IsMultiCast(args.entry.RemoteAddress)))
@@ -1339,7 +1340,7 @@ namespace PrivateWin10.Pages
                 }
             }
         }
-        public string Protocol { get { return NetFunc.Protocol2Str(Entry.Protocol); } }
+        public string Protocol { get { return (Entry.Protocol == (int)NetFunc.KnownProtocols.Any) ? Translate.fmt("pro_any") : NetFunc.Protocol2Str(Entry.Protocol); } }
         public string DestAddress { get { return Entry.RemoteAddress; } }
         public string DestPorts { get { return Entry.RemotePort.ToString(); } }
         public string SrcAddress { get { return Entry.LocalAddress; } }
@@ -1467,7 +1468,7 @@ namespace PrivateWin10.Pages
                 }
             }
         }
-        public string Protocol { get { return NetFunc.Protocol2Str(Rule.Protocol); } }
+        public string Protocol { get { return (Rule.Protocol == (int)NetFunc.KnownProtocols.Any) ? Translate.fmt("pro_any") : NetFunc.Protocol2Str(Rule.Protocol); } }
         public string DestAddress { get { return Rule.RemoteAddresses; } }
         public string DestPorts { get { return Rule.RemotePorts; } }
         public string SrcAddress { get { return Rule.LocalAddresses; } }

@@ -8,6 +8,14 @@ using System.ServiceModel.Description;
 
 namespace PrivateWin10.IPC
 {
+    [Serializable()]
+    public class IPCSession
+    {
+        public string version;
+        public bool duplicate;
+    }
+
+
     [ServiceContract(CallbackContract = typeof(IPCCallback), SessionMode = SessionMode.Required)]
     public interface IPCInterface
     {
@@ -55,6 +63,9 @@ namespace PrivateWin10.IPC
 
         [OperationContract]
         bool RemoveRule(FirewallRule rule);
+
+        [OperationContract]
+        bool BlockInternet(bool bBlock);
 
         [OperationContract]
         bool ClearLog(bool ClearSecLog);

@@ -240,10 +240,10 @@
                             </DataGridTextColumn>
                             <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" />
                             <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" />
-                            <DataGridTextColumn Header="Remote Address" Binding="{Binding DestAddress}" />
-                            <DataGridTextColumn Header="Local Address" Binding="{Binding SrcAddress}" />
-                            <DataGridTextColumn Header="Remote Ports" Binding="{Binding DestPorts}" />
-                            <DataGridTextColumn Header="Local Ports" Binding="{Binding SrcPorts}" />
+                            <DataGridTextColumn Width="150" Header="Remote Address" Binding="{Binding DestAddress}" />
+                            <DataGridTextColumn Width="150" Header="Local Address" Binding="{Binding SrcAddress}" />
+                            <DataGridTextColumn Width="150" Header="Remote Ports" Binding="{Binding DestPorts}" />
+                            <DataGridTextColumn Width="150" Header="Local Ports" Binding="{Binding SrcPorts}" />
                             <DataGridTextColumn Header="ICMP Options" Binding="{Binding ICMPOptions}" />
                             <DataGridTextColumn Header="Interfaces" Binding="{Binding Interfaces}" />
                             <DataGridTextColumn Header="Edge Traversal" Binding="{Binding EdgeTraversal}" />
@@ -352,10 +352,10 @@
                             </DataGridTextColumn>
                             <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" />
                             <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" />
-                            <DataGridTextColumn Header="Remote Address" Binding="{Binding DestAddress}" />
-                            <DataGridTextColumn Header="Remote Ports" Binding="{Binding DestPorts}" />
-                            <DataGridTextColumn Header="Local Address" Binding="{Binding SrcAddress}" />
-                            <DataGridTextColumn Header="Local Ports" Binding="{Binding SrcPorts}" />
+                            <DataGridTextColumn Width="150" Header="Remote Address" Binding="{Binding DestAddress}" />
+                            <DataGridTextColumn Width="150" Header="Remote Ports" Binding="{Binding DestPorts}" />
+                            <DataGridTextColumn Width="150" Header="Local Address" Binding="{Binding SrcAddress}" />
+                            <DataGridTextColumn Width="150" Header="Local Ports" Binding="{Binding SrcPorts}" />
                             <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
                         </DataGrid.Columns>
                     </DataGrid>

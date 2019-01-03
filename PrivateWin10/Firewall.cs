@@ -212,7 +212,7 @@ namespace PrivateWin10
 
                 //if (Path.GetFileName(path).Equals("svchost.exe", StringComparison.OrdinalIgnoreCase))
                 List<ServiceHelper.ServiceInfo> Services = ServiceHelper.GetServicesByPID(processId);
-                if (Services != null) 
+                if (Services != null)
                 {
                     type = ProgramList.Types.Service;
                     if (Services.Count > 1)
@@ -225,7 +225,7 @@ namespace PrivateWin10
                 else
                 {
                     name = App.engine.appMgr != null ? App.engine.appMgr.GetAppPackage(path) : null;
-                    if(name != null)
+                    if (name != null)
                         type = ProgramList.Types.App;
                     else
                         type = ProgramList.Types.Program;
@@ -249,7 +249,7 @@ namespace PrivateWin10
 
         private void ClearPrivRules(Program prog)
         {
-            foreach(FirewallRule rule in prog.Rules.Values.ToList())
+            foreach (FirewallRule rule in prog.Rules.Values.ToList())
             {
                 if (rule.Name.IndexOf(FirewallRule.RulePrefix) == 0) // Note: all imternal rules start with priv10 - 
                 {
@@ -420,7 +420,7 @@ namespace PrivateWin10
                     prog.config.CurAccess = Program.Config.AccessLevels.FullAccess;
                 else if ((MergedStat.AllowLan & (int)Directions.Outboun) != 0 && (!StrictTest || ((MergedStat.AllowLan & (int)Directions.Inbound) != 0 && (MergedStat.AllowLan & (int)Directions.Inbound) != 0)))
                     prog.config.CurAccess = Program.Config.AccessLevels.LocalOnly;
-                else if (enabledCound > 0) 
+                else if (enabledCound > 0)
                     prog.config.CurAccess = Program.Config.AccessLevels.CustomConfig;
             }
 
@@ -446,7 +446,7 @@ namespace PrivateWin10
                     switch (prog.config.NetAccess)
                     {
                         case Program.Config.AccessLevels.FullAccess:
-                            
+
                             // add and enable allow all rule
                             UpdateRule(FirewallRule.MakeAllowRule(id, direction), true);
                             break;
@@ -455,15 +455,15 @@ namespace PrivateWin10
                             // create block rule only of we operate in blacklist mode
                             //if (GetFilteringMode() == FilteringModes.BlackList)
                             //{
-                                //add and enable block rules for the internet
-                                UpdateRule(FirewallRule.MakeBlockInetRule(id, direction), true);
+                            //add and enable block rules for the internet
+                            UpdateRule(FirewallRule.MakeBlockInetRule(id, direction), true);
                             //}
-                            
+
                             //add and enable allow rules for the lan
                             UpdateRule(FirewallRule.MakeAllowLanRule(id, direction), true);
                             break;
                         case Program.Config.AccessLevels.BlockAccess:
-                            
+
                             // add and enable broad block rules
                             UpdateRule(FirewallRule.MakeBlockRule(id, direction), true);
                             break;
@@ -493,7 +493,7 @@ namespace PrivateWin10
             try
             {
                 //for (int i = eventLog.Entries.Count-1; i > 0; i--)
-                foreach(EventLogEntry logEntry in eventLog.Entries)
+                foreach (EventLogEntry logEntry in eventLog.Entries)
                 {
                     //EventLogEntry entry = eventLog.Entries[i];
                     if (logEntry.InstanceId != (long)EventIDs.Allowed && logEntry.InstanceId != (long)EventIDs.Blocked)
@@ -523,7 +523,7 @@ namespace PrivateWin10
                     string src_ip = ReplacementStrings[3];
                     int src_port = MiscFunc.parseInt(ReplacementStrings[4]);
                     string dest_ip = ReplacementStrings[5];
-                    int dest_port = MiscFunc.parseInt(ReplacementStrings[6]) ;
+                    int dest_port = MiscFunc.parseInt(ReplacementStrings[6]);
                     int protocol = MiscFunc.parseInt(ReplacementStrings[7]);
 
                     Program.LogEntry entry = new Program.LogEntry(id, action, direction, src_ip, src_port, dest_ip, dest_port, protocol, processId, logEntry.TimeGenerated);
@@ -555,7 +555,7 @@ namespace PrivateWin10
 
         public bool LoadRules(bool CleanUp = false)
         {
-            if(App.engine.appMgr != null)
+            if (App.engine.appMgr != null)
                 App.engine.appMgr.LoadApps();
 
             foreach (Program prog in App.engine.programs.Progs.Values)
@@ -563,8 +563,15 @@ namespace PrivateWin10
             mAllRules.Clear();
 
             List<INetFwRule2> entries = new List<INetFwRule2>();
-            foreach (INetFwRule2 entry in mFirewallPolicy.Rules)
-                entries.Add(entry);
+            try
+            {
+                foreach (INetFwRule2 entry in mFirewallPolicy.Rules)
+                    entries.Add(entry);
+            }
+            catch // firewall service is deisabled :/
+            {
+                return false;
+            }
 
             foreach (INetFwRule2 entry in entries)
             {
@@ -667,11 +674,27 @@ namespace PrivateWin10
             {
                 prog.Rules.Remove(rule.guid);
 
-                if(!silent)
+                if (!silent)
                     App.engine.NotifyChange(prog);
             }
 
             return true;
+        }
+
+        public bool BlockInternet(bool bBlock)
+        {
+            bool ret = true;
+            Program prog = App.engine.programs.GetProgram(new ProgramList.ID(ProgramList.Types.Global), true);
+            if (bBlock)
+            {
+                ret &= UpdateRule(FirewallRule.MakeBlockRule(prog.GetMainID(), Directions.Inbound), true);
+                ret &= UpdateRule(FirewallRule.MakeBlockRule(prog.GetMainID(), Directions.Outboun), true);
+            }
+            else
+            {
+                ClearPrivRules(prog);
+            }
+            return ret;
         }
 
         public int CleanUpRules(bool bAll = false)

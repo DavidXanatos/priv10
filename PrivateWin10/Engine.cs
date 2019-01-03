@@ -235,6 +235,13 @@ namespace PrivateWin10
             }));
         }
 
+        public bool BlockInternet(bool bBlock)
+        {
+            return mDispatcher.Invoke(new Func<bool>(() => {
+                return firewall.BlockInternet(bBlock);
+            }));
+        }
+
         public bool ClearLog(bool ClearSecLog)
         {
             return mDispatcher.Invoke(new Func<bool>(() => {

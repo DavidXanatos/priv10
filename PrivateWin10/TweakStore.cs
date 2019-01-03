@@ -213,11 +213,11 @@ namespace PrivateWin10
             Categorys.Add(searchCat);
 
 
-            // *** Disabel Cortana ***
+            // *** Disable Cortana ***
 
-            Group cortana = new Group("Disabel Cortana");
+            Group cortana = new Group("Disable Cortana");
             searchCat.Add(cortana);
-            cortana.Add(new Tweak("Disabel Cortana", TweakType.SetGPO, WinVer.Win10)
+            cortana.Add(new Tweak("Disable Cortana", TweakType.SetGPO, WinVer.Win10)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
                 Name = "AllowCortana",
@@ -231,11 +231,11 @@ namespace PrivateWin10
             });
 
 
-            // *** Disabel Web Search ***
+            // *** Disable Web Search ***
 
-            Group webSearch = new Group("Disabel Online Search");
+            Group webSearch = new Group("Disable Online Search");
             searchCat.Add(webSearch);
-            webSearch.Add(new Tweak("Disabel Web Search", TweakType.SetGPO, WinVer.WinXP)
+            webSearch.Add(new Tweak("Disable Web Search", TweakType.SetGPO, WinVer.WinXP)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
                 Name = "DisableWebSearch",
@@ -256,9 +256,9 @@ namespace PrivateWin10
             // Block in firewall: searchUI.exe 
 
 
-            // *** Disabel Search ***
+            // *** Disable Search ***
 
-            Group search = new Group("Disabel Search");
+            Group search = new Group("Disable Search");
             searchCat.Add(search);
             search.Add(new Tweak("Disable Windows Search Service", TweakType.DisableService, WinVer.Win6)
             {
@@ -285,19 +285,19 @@ namespace PrivateWin10
 
             /*  
             *  #########################################
-            *              Windows Deffender
+            *              Windows Defender
             *  #########################################
             */
 
-            Category defenderCat = new Category("Windows Deffender");
+            Category defenderCat = new Category("Windows Defender");
             Categorys.Add(defenderCat);
 
 
-            // *** Disabel Deffender ***
+            // *** Disable Defender ***
 
-            Group defender = new Group("Disabel Deffender");
+            Group defender = new Group("Disable Defender");
             defenderCat.Add(defender);
-            defender.Add(new Tweak("Turn off Windows Deffender", TweakType.SetGPO, WinVer.Win6)
+            defender.Add(new Tweak("Turn off Windows Defender", TweakType.SetGPO, WinVer.Win6)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\Windows Defender",
                 Name = "DisableAntiSpyware",
@@ -317,9 +317,9 @@ namespace PrivateWin10
             });
 
 
-            // *** Silence Deffender ***
+            // *** Silence Defender ***
 
-            Group defender2 = new Group("Silence Deffender");
+            Group defender2 = new Group("Silence Defender");
             defenderCat.Add(defender2);
             defender2.Add(new Tweak("Disable Enhanced Notifications", TweakType.SetGPO, WinVer.Win6)
             {
@@ -405,11 +405,11 @@ namespace PrivateWin10
 
             /*  
             *  #########################################
-            *          Privacy & Advertizement
+            *          Privacy & Advertisement
             *  #########################################
             */
 
-            Category privacyCat = new Category("Privacy & Advertizement");
+            Category privacyCat = new Category("Privacy & Advertisement");
             Categorys.Add(privacyCat);
 
 

@@ -116,10 +116,11 @@ namespace PrivateWin10
 
             client = new PipeClient();
 
-            if (!AdminFunc.IsDebugging())
+            //if (!AdminFunc.IsDebugging())
             {
                 Console.WriteLine("Trying to connect to Engine...");
-                if (!client.Connect(1000))
+                int conRes = client.Connect(1000);
+                if (conRes == 0)
                 {
                     if (!AdminFunc.IsAdministrator())
                     {
@@ -152,7 +153,7 @@ namespace PrivateWin10
                         {
                             Console.WriteLine("Trying to connect to service...");
 
-                            if(client.Connect())
+                            if (client.Connect() != 0)
                                 Console.WriteLine("Connected to service...");
                             else
                                 Console.WriteLine("Failed to connect to service...");
@@ -160,6 +161,11 @@ namespace PrivateWin10
                         else
                             Console.WriteLine("Failed to start service...");
                     }
+                }
+                else if (conRes == -1)
+                {
+                    MessageBox.Show(Translate.fmt("msg_dupliate_session", mName), mName);
+                    return; // no point in cintinuing without admin rights or an already running engine
                 }
             }
 

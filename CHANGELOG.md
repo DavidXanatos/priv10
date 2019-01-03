@@ -3,17 +3,33 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### ToDo's
-- prevent starting of multiple instances
-- add option to block/unblock internet access from tray
 - add tweak restore mechanism
 - make overvioew page usefull
+
+
+## [0.1f] - 2019-01-03
+
+### Added
+- italian translation by garf02
+- prevent starting of multiple instances inside the same user session
+- add option to block/unblock internet access from tray
+
+### Fixed
+- not showing proepr "any protocol" string in lists
+- rule violating actions are not colored yellow
+- fixed ptiv10 failed to start when firewalls ervice was disabled
+
+### Changed
+- poer and Ip columns doesn't autoresize anymore
 
 ## [0.1e] - 2018-12-29
 
 ### Fixed
 - localization string screwup in firewall page
-- englich fixed by ViVek
-- polish translation by ViVek
+- englich fixed by spamtrash
+
+### Added
+- polish translation by spamtrash (programyzadarmo.net.pl)
 
 
 ## [0.1d] - 2018-12-28

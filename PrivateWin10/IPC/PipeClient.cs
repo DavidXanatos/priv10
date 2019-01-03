@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Pipes;
 using System.Linq;
 using System.Text;
@@ -114,7 +115,7 @@ namespace PrivateWin10.IPC
             return true;
         }
 
-        public bool Connect(int TimeOut = 10000)
+        public int Connect(int TimeOut = 10000, bool mNoDouble = false)
         {
             // Note: when we close a IPC host without terminating its process we are left with some still active listeners, so we test communication and reconnect if needed
             for (long endTime = (long)MiscFunc.GetTickCount64() + (long)TimeOut; TimeOut > 0; TimeOut = (int)(endTime - (long)MiscFunc.GetTickCount64()))
@@ -122,18 +123,18 @@ namespace PrivateWin10.IPC
                 if (!DoConnect(TimeOut))
                     continue;
 
-                string version = RemoteExec("GetVersion", null, "");
-                if (version.Length > 0)
-                    return true;
+                IPCSession session = RemoteExec<IPCSession>("InitSession", Process.GetCurrentProcess().SessionId, null);
+                if (session != null)
+                    return (mNoDouble || session.duplicate == false) ? 1 : -1;
             }
-            return false;
+            return 0;
         }
 
         public T RemoteExec<T>(string fx, object args, T defRet)
         {
             try
             {
-                if (clientPipe == null && !Connect())
+                if (clientPipe == null && Connect(3000, true) == 0)
                     throw new Exception("Connection Failed");
 
                 return (T)(clientPipe.RemoteExec(fx, args));
@@ -233,6 +234,11 @@ namespace PrivateWin10.IPC
         public bool RemoveRule(FirewallRule rule)
         {
             return RemoteExec("RemoveRule", rule, false);
+        }
+
+        public bool BlockInternet(bool bBlock)
+        {
+            return RemoteExec("BlockInternet", bBlock, false);
         }
 
         public bool ClearLog(bool ClearSecLog)

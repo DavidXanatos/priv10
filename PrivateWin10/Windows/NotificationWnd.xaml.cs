@@ -64,7 +64,7 @@ namespace PrivateWin10.Windows
             WpfFunc.StoreWnd(this, "Notify");
         }
 
-        int curIndex = 0;
+        int curIndex = -1;
         private SortedDictionary<ProgramList.ID, Tuple<Program, List<Program.LogEntry>>> mEvents = new SortedDictionary<ProgramList.ID, Tuple<Program, List<Program.LogEntry>>>();
         private List<ProgramList.ID> mEventList = new List<ProgramList.ID>();
 
@@ -82,14 +82,21 @@ namespace PrivateWin10.Windows
 
             list.Item2.Add(entry);
 
-            if (curIndex >= mEventList.Count)
+            int oldIndex = curIndex;
+
+            if (curIndex < 0)
+                curIndex = 0;
+            else if (curIndex >= mEventList.Count)
                 curIndex = mEventList.Count - 1;
 
             UpdateIndex();
 
+            // don't update if the event is for a different entry
             int index =  mEventList.FindIndex((x) => { return id.CompareTo(x) == 0; });
-            if (curIndex == index)
-                LoadCurrent();
+            if (curIndex != index)
+                return;
+
+            LoadCurrent(oldIndex == curIndex);
         }
 
         private void UpdateIndex()
@@ -97,12 +104,15 @@ namespace PrivateWin10.Windows
             lblIndex.Text = string.Format("{0}/{1}", curIndex + 1, mEventList.Count);
         }
 
-        private void LoadCurrent()
+        private void LoadCurrent(bool bUpdate = false)
         {
-            Program.Config.AccessLevels NetAccess = Program.Config.AccessLevels.Unconfigured;
+            if (!bUpdate)
+            {
+                Program.Config.AccessLevels NetAccess = Program.Config.AccessLevels.Unconfigured;
 
-            cmbAccess.Background = ProgramControl.GetAccessColor(NetAccess);
-            WpfFunc.CmbSelect(cmbAccess, NetAccess.ToString());
+                cmbAccess.Background = ProgramControl.GetAccessColor(NetAccess);
+                WpfFunc.CmbSelect(cmbAccess, NetAccess.ToString());
+            }
 
             btnApply.IsEnabled = false;
 
@@ -173,7 +183,7 @@ namespace PrivateWin10.Windows
                 curIndex = mEventList.Count - 1;
             if (curIndex < 0)
             {
-                curIndex = 0;
+                curIndex = -1;
                 this.Close();
                 return;
             }
