@@ -194,7 +194,7 @@ namespace PrivateWin10
 
                     Progs.Add(entry.guid, entry);
                     foreach (ID id in entry.IDs)
-                        try { byID.Add(id, entry); } catch(Exception e) { }
+                        try { byID.Add(id, entry); } catch { }
                 }
             }
             catch (Exception err)

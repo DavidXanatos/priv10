@@ -43,9 +43,9 @@
                     <Grid Grid.Row="0">
                         <!--TextBlock Name="lblName" Text="Name" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,2,38,2" VerticalAlignment="Top"/-->
                         <Image Name="imgIcon" Grid.Column="0" HorizontalAlignment="Right" Height="48" Margin="2,2,2,2" VerticalAlignment="Top" Width="48"/>
-                        <TextBlock Name="lblPID" Text="PID:1234" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,2,52,2" VerticalAlignment="Top"/>
+                        <TextBlock Name="lblPID" Text="PID:1234" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,2,52,2" VerticalAlignment="Top" />
                         <TextBlock Name="lblSubName" Text="Sub Name" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,18,52,2" VerticalAlignment="Top" TextWrapping="Wrap"/>
-                        <TextBlock Name="lblPath" Text="Path" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,38,52,2" VerticalAlignment="Top" TextWrapping="Wrap"/>
+                        <TextBlock Name="lblPath" Text="Path" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,38,52,2" VerticalAlignment="Top" TextWrapping="Wrap"  Cursor="Hand" TextDecorations="Underline" MouseDown="LblPath_MouseDown"/>
                     </Grid>
                     <Grid Grid.Row="1">
                         <!--ListBox Name="lstEvents" HorizontalAlignment="Stretch" Margin="2,2,2,2" Grid.Column="0" VerticalAlignment="Stretch"/-->

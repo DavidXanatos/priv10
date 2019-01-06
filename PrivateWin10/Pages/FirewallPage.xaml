@@ -220,7 +220,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                            <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}"/>
                             <DataGridTextColumn Header="Grouping" Binding="{Binding Grouping}" />
                             <DataGridTextColumn Header="Enabled" Binding="{Binding Enabled}" />
                             <DataGridTextColumn Header="Profiles" Binding="{Binding Profiles}" />
@@ -331,7 +331,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                            <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}" />
                             <DataGridTextColumn Header="Time Stamp" Binding="{Binding TimeStamp}" />
                             <DataGridTextColumn Header="Action" Binding="{Binding Action}">
                                 <DataGridTextColumn.CellStyle>
@@ -346,7 +346,13 @@
                                             <DataTrigger Binding="{Binding ActionColor}" Value="yellow">
                                                 <Setter Property="Background" Value="Yellow"></Setter>
                                             </DataTrigger>
-                                        </Style.Triggers>
+                                            <DataTrigger Binding="{Binding ActionColor}" Value="blue">
+                                                <Setter Property="Background" Value="LightSkyBlue"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ActionColor}" Value="blue2">
+                                                <Setter Property="Background" Value="MediumTurquoise"></Setter>
+                                            </DataTrigger>                                            
+                                            </Style.Triggers>
                                     </Style>
                                 </DataGridTextColumn.CellStyle>
                             </DataGridTextColumn>

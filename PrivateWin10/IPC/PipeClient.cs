@@ -231,6 +231,11 @@ namespace PrivateWin10.IPC
             return RemoteExec("UpdateRule", rule, false);
         }
 
+        public bool ClearRules(ProgramList.ID id, bool bDisable)
+        {
+            return RemoteExec("ClearRules", new object[2] { id, bDisable }, false);
+        }
+
         public bool RemoveRule(FirewallRule rule)
         {
             return RemoteExec("RemoveRule", rule, false);

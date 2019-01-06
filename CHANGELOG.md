@@ -5,7 +5,31 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### ToDo's
 - add tweak restore mechanism
 - make overvioew page usefull
+	- show a list of newly added programs to firewall
+	- show recently blocked
+	- show firewall status on/off/block
+	- list of undone tweaks
+- add prozess sniper feature (auto terminate selected prozesses)
 
+
+
+## [0.1g] - 2019-01-06
+
+### Added
+- notification window has now path label clickable and opens explorer in the files directory
+- issuing cleanup now also resets teh error flag
+
+### Changed
+- disabled autoresize for Name column
+- open from tray trayicon now only react to left mouse button double click
+- notification window direction stings are nor more clear
+- allowed lan connections are now logged blue
+- allowed multicast connections are now logged turquoise
+
+### Fixed
+- notification window next/previouse buttons now peoeprly enable/disable
+- fixed crash when listing a not longer existing service
+- fixed issue when resolving special adress ranges
 
 ## [0.1f] - 2019-01-03
 
@@ -20,7 +44,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - fixed ptiv10 failed to start when firewalls ervice was disabled
 
 ### Changed
-- poer and Ip columns doesn't autoresize anymore
+- port and Ip columns doesn't autoresize anymore
 
 ## [0.1e] - 2018-12-29
 

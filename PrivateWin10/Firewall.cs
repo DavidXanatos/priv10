@@ -235,25 +235,18 @@ namespace PrivateWin10
             return id;
         }
 
-        private void DisableUserRules(Program prog)
-        {
-            foreach (FirewallRule rule in prog.Rules.Values.ToList())
-            {
-                if (rule.Name.IndexOf(FirewallRule.RulePrefix) != 0) // Note: all internal rules start with priv10 - 
-                {
-                    rule.Enabled = false;
-                    UpdateRule(rule, true);
-                }
-            }
-        }
-
-        private void ClearPrivRules(Program prog)
+        public void ClearRules(Program prog, bool bDisable)
         {
             foreach (FirewallRule rule in prog.Rules.Values.ToList())
             {
                 if (rule.Name.IndexOf(FirewallRule.RulePrefix) == 0) // Note: all imternal rules start with priv10 - 
                 {
                     RemoveRule(rule, true);
+                }
+                else if (bDisable)
+                {
+                    rule.Enabled = false;
+                    UpdateRule(rule, true);
                 }
             }
         }
@@ -431,11 +424,7 @@ namespace PrivateWin10
             if (prog.config.NetAccess == prog.config.CurAccess)
                 return;
 
-
-            if (prog.config.NetAccess != Program.Config.AccessLevels.CustomConfig)
-                DisableUserRules(prog);
-
-            ClearPrivRules(prog);
+            ClearRules(prog, prog.config.NetAccess != Program.Config.AccessLevels.CustomConfig);
 
             foreach (ProgramList.ID id in prog.IDs)
             {
@@ -692,7 +681,7 @@ namespace PrivateWin10
             }
             else
             {
-                ClearPrivRules(prog);
+                ClearRules(prog, false);
             }
             return ret;
         }

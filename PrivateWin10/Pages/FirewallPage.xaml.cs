@@ -1082,6 +1082,9 @@ namespace PrivateWin10.Pages
             if (MessageBox.Show(Translate.fmt("msg_clean_progs"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
+            foreach (ProgramControl item in mPrograms.Values)
+                item.SetError(false);
+
             int Count = App.itf.CleanUpPrograms();
 
             MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.mName, MessageBoxButton.OK, MessageBoxImage.Information);
@@ -1353,7 +1356,13 @@ namespace PrivateWin10.Pages
                 if(Entry.Type == PrivateWin10.Program.LogEntry.Types.RuleError) return "yellow";
                 switch (Entry.Action)
                 {
-                    case Firewall.Actions.Allow: return "green";
+                    case Firewall.Actions.Allow:
+                        if(NetFunc.IsMultiCast(Entry.RemoteAddress))
+                            return "blue2";
+                        else if (Firewall.MatchAddress(Entry.RemoteAddress, "LocalSubnet"))
+                            return "blue";
+                        else
+                            return "green";
                     case Firewall.Actions.Block: return "red";
                     default: return "";
                 }

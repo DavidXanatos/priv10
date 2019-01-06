@@ -191,6 +191,10 @@ namespace PrivateWin10.IPC
                 {
                     call.args = App.engine.UpdateRule((FirewallRule)call.args);
                 }
+                else if (call.func == "ClearRules")
+                {
+                    call.args = App.engine.ClearRules(GetArg<ProgramList.ID>(call.args, 0), GetArg<bool>(call.args, 1));
+                }
                 else if (call.func == "RemoveRule")
                 {
                     call.args = App.engine.RemoveRule((FirewallRule)call.args);

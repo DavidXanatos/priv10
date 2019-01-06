@@ -62,6 +62,9 @@ namespace PrivateWin10.IPC
         bool UpdateRule(FirewallRule rule);
 
         [OperationContract]
+        bool ClearRules(ProgramList.ID id, bool bDisable);
+
+        [OperationContract]
         bool RemoveRule(FirewallRule rule);
 
         [OperationContract]

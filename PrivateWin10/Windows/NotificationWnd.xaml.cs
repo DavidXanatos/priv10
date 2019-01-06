@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -102,6 +104,8 @@ namespace PrivateWin10.Windows
         private void UpdateIndex()
         {
             lblIndex.Text = string.Format("{0}/{1}", curIndex + 1, mEventList.Count);
+            btnPrev.IsEnabled = curIndex + 1 > 1;
+            btnNext.IsEnabled = curIndex + 1 < mEventList.Count;
         }
 
         private void LoadCurrent(bool bUpdate = false)
@@ -281,6 +285,8 @@ namespace PrivateWin10.Windows
             }
             else
             {
+                App.itf.ClearRules(id, true);
+
                 switch (NetAccess)
                 {
                     case Program.Config.AccessLevels.FullAccess:
@@ -331,7 +337,7 @@ namespace PrivateWin10.Windows
                 Entry = entry;
             }
 
-            public string Protocol { get { return NetFunc.Protocol2Str(Entry.Protocol) + (Entry.Direction == Firewall.Directions.Inbound ? " <<<" : " >>>"); } }
+            public string Protocol { get { return Translate.fmt(Entry.Direction == Firewall.Directions.Inbound ? "str_in" : "str_out", NetFunc.Protocol2Str(Entry.Protocol)); } }
 
             public string Address { get { if (Entry.RemoteAddress == null || Entry.RemoteAddress.Length == 0) return ""; return Entry.RemoteAddress + ":" + Entry.RemotePort.ToString(); } }
 
@@ -356,5 +362,11 @@ namespace PrivateWin10.Windows
             #endregion
         }
 
+        private void LblPath_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            string path = System.IO.Path.GetDirectoryName(lblPath.Text);
+            if (!string.IsNullOrEmpty(path))
+                Process.Start("Explorer.exe", "/select, " + path);
+        }
     }
 }

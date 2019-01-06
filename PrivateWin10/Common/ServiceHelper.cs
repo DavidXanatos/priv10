@@ -594,6 +594,6 @@ public static class ServiceHelper
             ServiceCacheLock.ExitWriteLock();
         }
 
-        return info.DisplayName;
+        return info == null ? "[unknown service]" : info.DisplayName;
     }
 }

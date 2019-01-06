@@ -212,7 +212,8 @@ namespace PrivateWin10
             mStrings.Add("mnu_exit", "E&xit");
             mStrings.Add("mnu_block", "&Block Internet");
             mStrings.Add("msg_dupliate_session", "An other instance is already running.");
-
+            mStrings.Add("str_in", "{0} In");
+            mStrings.Add("str_out", "{0} Out");
 
 
             //mStrings.Add("", "");

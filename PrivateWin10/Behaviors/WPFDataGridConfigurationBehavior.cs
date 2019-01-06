@@ -82,7 +82,7 @@ namespace Behaviors
 
         #region "private Properties"
 
-        private string _ContextMenuChoices = "Alphabetcal Menu,Show All Columns,Freeze Columns,Row Numbers,Filter Columns By,All {0} Columns";
+        private string _ContextMenuChoices = "Alphabetical Menu,Show All Columns,Freeze Columns,Row Numbers,Filter Columns By,All {0} Columns";
         private string _ViewingColsFormat = "(viewing {0} of {1} columns)";
 
         private DataGrid dataGrid;

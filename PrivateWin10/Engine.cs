@@ -228,6 +228,17 @@ namespace PrivateWin10
             }));
         }
 
+        public bool ClearRules(ProgramList.ID id, bool bDisable)
+        {
+            return mDispatcher.Invoke(new Func<bool>(() => {
+                Program prog = programs.GetProgram(id);
+                if (prog == null)
+                    return false;
+                firewall.ClearRules(prog, bDisable);
+                return true;
+            }));
+        }
+
         public bool RemoveRule(FirewallRule rule)
         {
             return mDispatcher.Invoke(new Func<bool>(() => {

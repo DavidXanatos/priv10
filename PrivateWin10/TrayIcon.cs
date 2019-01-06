@@ -93,7 +93,9 @@ namespace PrivateWin10
 
         private void notifyIcon1_DoubleClick(object Sender, EventArgs e)
         {
-            //MessageBox.Show("Double clicked");
+            if ((e as MouseEventArgs).Button != MouseButtons.Left)
+                return;
+
             TrayEventArgs args = new TrayEventArgs();
             args.Action = Actions.ToggleWindow;
             Action(this, args);
