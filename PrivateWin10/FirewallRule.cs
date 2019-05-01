@@ -131,6 +131,7 @@ namespace PrivateWin10
                     type = ProgramList.Types.Global;
 
                 rule.mID = new ProgramList.ID(type, path, name);
+                rule.mID.MakeDisplayName();
 
                 // https://docs.microsoft.com/en-us/windows/desktop/api/netfw/nn-netfw-inetfwrule
 
@@ -384,6 +385,7 @@ namespace PrivateWin10
             rule.Action = Firewall.Actions.Allow;
             rule.Direction = direction;
             rule.Enabled = true;
+            //rule.RemoteAddresses = NetFunc.GetSpecialNet("LocalSubnet");
             rule.RemoteAddresses = "LocalSubnet";
             rule.Expiration = expiration;
             return rule;

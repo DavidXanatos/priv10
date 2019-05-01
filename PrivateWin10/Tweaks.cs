@@ -323,7 +323,7 @@ namespace PrivateWin10
                 {
                     if (rule.AccessControlType != AccessControlType.Deny)
                         continue;
-                    if (!rule.IdentityReference.Value.Equals(FileOps.SID_Worls))
+                    if (!rule.IdentityReference.Value.Equals(FileOps.SID_World))
                         continue;
                     if ((rule.FileSystemRights & FileSystemRights.ExecuteFile) != 0)
                         return true;
@@ -352,7 +352,7 @@ namespace PrivateWin10
                         ac.RemoveAccessRule(rule);
                 }
                 else
-                    ac.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(FileOps.SID_Worls), FileSystemRights.ExecuteFile, AccessControlType.Deny));
+                    ac.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(FileOps.SID_World), FileSystemRights.ExecuteFile, AccessControlType.Deny));
                 File.SetAccessControl(path, ac);
                 return true;
             }

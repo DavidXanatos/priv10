@@ -10,8 +10,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 	- show firewall status on/off/block
 	- list of undone tweaks
 - add prozess sniper feature (auto terminate selected prozesses)
+- when cleaning up also remove obsolete rules
 
+## [0.1h] - 2019-05-01
 
+### Added
+- Compatybility with windows 8.1 and server 2012
+- first seen date for programs
+
+### Fixed
+- diagtrackrunner.exe and AeLookupSvc tweak are not longer offered to win10 users as on win 10 thay are not present
+- crash when adding new category
 
 ## [0.1g] - 2019-01-06
 

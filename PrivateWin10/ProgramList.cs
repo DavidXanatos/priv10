@@ -42,9 +42,6 @@ namespace PrivateWin10
                     Path = "";
                 if (Name == null)
                     Name = "";
-
-                if (App.engine != null)
-                    MakeDisplayName();
             }
 
             public ID()
@@ -56,18 +53,16 @@ namespace PrivateWin10
                 Type = type;
                 Path = path ?? "";
                 Name = name ?? "";
-
-                MakeDisplayName();
             }
 
-            private void MakeDisplayName()
+            public void MakeDisplayName()
             {
                 switch (Type)
                 {
                     case ProgramList.Types.System: DescrStr = Translate.fmt("name_system"); break;
                     case ProgramList.Types.Service: DescrStr = ServiceHelper.GetServiceName(Name); break;
                     case ProgramList.Types.Program: DescrStr = MiscFunc.GetExeName(Path); break;
-                    case ProgramList.Types.App: DescrStr = App.engine != null ? App.engine.appMgr.GetAppName(Name) : ""; break;
+                    case ProgramList.Types.App: DescrStr = App.engine.appMgr.GetAppName(Name); break;
                     default:
                     case ProgramList.Types.Global: DescrStr = Translate.fmt("name_global"); break;
                 }
@@ -129,7 +124,6 @@ namespace PrivateWin10
                     Type = (Types)Enum.Parse(typeof(Types), idNode.SelectSingleNode("Type").InnerText);
                     Name = idNode.SelectSingleNode("Name").InnerText;
                     Path = idNode.SelectSingleNode("Path").InnerText;
-                    MakeDisplayName();
                     return true;
                 }
                 catch{}
@@ -269,6 +263,8 @@ namespace PrivateWin10
             Program prog = null;
             if (!byID.TryGetValue(id, out prog) && canAdd)
             {
+                id.MakeDisplayName();
+
                 prog = new Program(id);
                 Progs.Add(prog.guid, prog);
                 byID.Add(id, prog);

@@ -35,6 +35,7 @@ namespace PrivateWin10
         static public WinVer Win6           { get { return new WinVer() { minVer = ver6 }; } }
         static public WinVer Win6to7        { get { return new WinVer() { minVer = ver6, maxVer = ver7 }; } }
         static public WinVer Win7           { get { return new WinVer() { minVer = ver7 }; } }
+        static public WinVer Win7to81       { get { return new WinVer() { minVer = ver7, maxVer = ver81 }; } }
         static public WinVer Win8           { get { return new WinVer() { minVer = ver8 }; } }
         static public WinVer Win81          { get { return new WinVer() { minVer = ver81 }; } }
         static public WinVer Win81only      { get { return new WinVer() { minVer = ver81, maxVer = ver81 }; } }

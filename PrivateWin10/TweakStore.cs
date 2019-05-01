@@ -42,9 +42,15 @@ namespace PrivateWin10
                 Name = "DoNotShowFeedbackNotifications",
                 Value = 1
             });
-            telemetry.Add(new Tweak("Disable Telemetry Service", TweakType.DisableService, WinVer.Win7) // Microsoft forced telemetry on windows 7 in a cumulative update
+            telemetry.Add(new Tweak("Disable Telemetry Service (DiagTrack-Listener)", TweakType.DisableService, WinVer.Win7) // Microsoft forced telemetry on windows 7 in a cumulative update
             {
                 Name = "DiagTrack"
+            });
+            telemetry.Add(new Tweak("Disable AutoLogger-Diagtrack-Listener", TweakType.SetRegistry, WinVer.Win10)
+            {
+                Path = @"SYSTEM\CurrentControlSet\Control\WMI\Autologger\AutoLogger-Diagtrack-Listener",
+                Name = "Start",
+                Value = 0
             });
             telemetry.Add(new Tweak("Disable Push Service", TweakType.DisableService, WinVer.Win10)
             {
@@ -70,7 +76,7 @@ namespace PrivateWin10
                 Path = @"\Microsoft\Windows\Application Experience",
                 Name = "*"
             });
-            appExp.Add(new Tweak("Disable Application Expirience Service", TweakType.DisableService, WinVer.Win7)
+            appExp.Add(new Tweak("Disable Application Expirience Service", TweakType.DisableService, WinVer.Win7to81)
             {
                 Name = "AeLookupSvc"
             });
@@ -94,7 +100,7 @@ namespace PrivateWin10
             {
                 Path = @"%SystemRoot%\System32\CompatTelRunner.exe"
             });
-            appExp.Add(new Tweak("Disable DiagTrackRunner.exe", TweakType.BlockFile, WinVer.Win7)
+            appExp.Add(new Tweak("Disable DiagTrackRunner.exe", TweakType.BlockFile, WinVer.Win7to81)
             {
                 Path = @"%SystemRoot%\CompatTel\diagtrackrunner.exe"
             });
@@ -1199,6 +1205,18 @@ namespace PrivateWin10
                 Name = "HidePeopleBar",
                 Value = 1
             });
+
+            // HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}_NvTelemetry
+            //"C:\Windows\SysWOW64\RunDll32.EXE" "C:\Program Files\NVIDIA Corporation\Installer2\InstallerCore\NVI2.DLL",UninstallPackage NvTelemetry
+
+            // HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall\OneDriveSetup.exe
+            //taskkill /f /im OneDrive.exe
+            //%SystemRoot%\System32\OneDriveSetup.exe /uninstall
+            //%SystemRoot%\SysWOW64\OneDriveSetup.exe /uninstall
+            //"C:\Users\Philipp\AppData\Local\Microsoft\OneDrive\19.002.0107.0005\OneDriveSetup.exe" /uninstall 
+
+            //[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Features]
+            //"TamperProtection" = dword:00000000
 
             return true;
         }

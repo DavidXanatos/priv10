@@ -232,6 +232,7 @@ namespace PrivateWin10
                 }
             }
             ProgramList.ID id = new ProgramList.ID(type, path, name);
+            id.MakeDisplayName();
             return id;
         }
 
@@ -673,7 +674,8 @@ namespace PrivateWin10
         public bool BlockInternet(bool bBlock)
         {
             bool ret = true;
-            Program prog = App.engine.programs.GetProgram(new ProgramList.ID(ProgramList.Types.Global), true);
+            ProgramList.ID id = new ProgramList.ID(ProgramList.Types.Global);
+            Program prog = App.engine.programs.GetProgram(id, true);
             if (bBlock)
             {
                 ret &= UpdateRule(FirewallRule.MakeBlockRule(prog.GetMainID(), Directions.Inbound), true);

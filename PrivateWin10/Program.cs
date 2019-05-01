@@ -205,7 +205,10 @@ namespace PrivateWin10
                 {
                     ProgramList.ID id = new ProgramList.ID();
                     if (id.Load(node))
+                    {
+                        id.MakeDisplayName();
                         IDs.Add(id);
+                    }
                 }
                 else if (node.Name == "Name")
                     config.Name = node.InnerText;

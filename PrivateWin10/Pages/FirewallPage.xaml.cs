@@ -347,7 +347,9 @@ namespace PrivateWin10.Pages
             }
 
             //Note: windows firewall doesn't block localhost acces so we ignore it
-            if (args.entry.Type == Program.LogEntry.Types.RuleError && !NetFunc.IsLocalHost(args.entry.RemoteAddress))
+            if (args.entry.Type == Program.LogEntry.Types.RuleError 
+              && args.entry.Action == Firewall.Actions.Allow 
+              && !NetFunc.IsLocalHost(args.entry.RemoteAddress))
                 item.SetError(true);
 
             if (chkNoLocal.IsChecked != true || (!NetFunc.IsLocalHost(args.entry.RemoteAddress) && !NetFunc.IsMultiCast(args.entry.RemoteAddress)))
@@ -526,7 +528,7 @@ namespace PrivateWin10.Pages
             }
 
             bool bPath = false;
-            if (Filter.Substring(0, 1) == "~")
+            if (Filter.Length > 0 && Filter.Substring(0, 1) == "~")
             {
                 bPath = true;
                 Filter = Filter.Substring(1);

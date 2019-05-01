@@ -96,13 +96,25 @@ public class AppManager
     }
 
 
-    // undocumented API: https://stackoverflow.com/questions/47521346/api-to-get-appcontainername-from-appcontainersid
-    [DllImport("api-ms-win-appmodel-identity-l1-2-0", CharSet = CharSet.Unicode, SetLastError = true)]
-    static extern int AppContainerLookupMoniker(IntPtr Sid, [In, Out, MarshalAs(UnmanagedType.LPWStr)] ref string packageFamilyName);
+    internal static class AppModel
+    {
+        // undocumented API: https://stackoverflow.com/questions/47521346/api-to-get-appcontainername-from-appcontainersid
+        [DllImport("api-ms-win-appmodel-identity-l1-2-0", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern int AppContainerLookupMoniker(IntPtr Sid, [In, Out, MarshalAs(UnmanagedType.LPWStr)] ref string packageFamilyName);
 
-    [DllImport("api-ms-win-appmodel-identity-l1-2-0", CharSet = CharSet.Unicode, SetLastError = true)]
-    static extern int AppContainerDeriveSidFromMoniker([In, MarshalAs(UnmanagedType.LPWStr)] string packageFamilyName, ref IntPtr pSID);
+        [DllImport("api-ms-win-appmodel-identity-l1-2-0", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern int AppContainerDeriveSidFromMoniker([In, MarshalAs(UnmanagedType.LPWStr)] string packageFamilyName, ref IntPtr pSID);
+    }
 
+    internal static class AppModel8
+    {
+        // todo this is for windows 8.1 but does it work on 8 ?
+        [DllImport("api-ms-win-appmodel-identity-l1-1-0", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern int AppContainerLookupMoniker(IntPtr Sid, [In, Out, MarshalAs(UnmanagedType.LPWStr)] ref string packageFamilyName);
+
+        [DllImport("api-ms-win-appmodel-identity-l1-1-0", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern int AppContainerDeriveSidFromMoniker([In, MarshalAs(UnmanagedType.LPWStr)] string packageFamilyName, ref IntPtr pSID);
+    }
 
     [DllImport("advapi32", CharSet = CharSet.Unicode)]
     static extern bool ConvertStringSidToSid([In, MarshalAs(UnmanagedType.LPWStr)] string pStringSid, ref IntPtr pSID);
@@ -112,31 +124,35 @@ public class AppManager
 
     public static string SidToPackageID(string sid)
     {
-        IntPtr pSid = new IntPtr();
-        ConvertStringSidToSid(sid, ref pSid);
-
-        //string test = "";
-        //ConvertSidToStringSid(pSid, ref test);
-
         string packageID = "";
-        int ret = AppContainerLookupMoniker(pSid, ref packageID);
+        if (!UwpFunc.IsWindows7OrLower)
+        {
+            IntPtr pSid = new IntPtr();
+            ConvertStringSidToSid(sid, ref pSid);
 
-        Marshal.FreeHGlobal(pSid);
+            //string test = "";
+            //ConvertSidToStringSid(pSid, ref test);
 
+            int ret = UwpFunc.IsWindows8 ? AppModel8.AppContainerLookupMoniker(pSid, ref packageID) : AppModel.AppContainerLookupMoniker(pSid, ref packageID);
+
+            Marshal.FreeHGlobal(pSid);
+        }
         return packageID;
     }
 
     public static string PackageIDToSid(string packageID)
     {
-        IntPtr pSid = new IntPtr();
-
-        int ret = AppContainerDeriveSidFromMoniker(packageID, ref pSid);
-
         string strSID = "";
-        ConvertSidToStringSid(pSid, ref strSID);
+        if (!UwpFunc.IsWindows7OrLower)
+        {
+            IntPtr pSid = new IntPtr();
 
-        Marshal.FreeHGlobal(pSid);
+            int ret = UwpFunc.IsWindows8 ? AppModel8.AppContainerDeriveSidFromMoniker(packageID, ref pSid) : AppModel.AppContainerDeriveSidFromMoniker(packageID, ref pSid);
 
+            ConvertSidToStringSid(pSid, ref strSID);
+
+            Marshal.FreeHGlobal(pSid);
+        }
         return strSID;
     }
 

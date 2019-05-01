@@ -58,7 +58,7 @@ public class WpfFunc
         for (int i = 0; i < box.Items.Count; i++)
         {
             ContentControl item = (box.Items[i] as ContentControl);
-            if (item.Tag.ToString().Equals(tag))
+            if (item.Tag != null && item.Tag.ToString().Equals(tag))
                 return item;
         }
         return null;

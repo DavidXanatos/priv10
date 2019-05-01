@@ -21,7 +21,7 @@ namespace PrivateWin10.IPC
             public PipeListener(string pipeName)
             {
                 PipeSecurity pipeSa = new PipeSecurity();
-                pipeSa.SetAccessRule(new PipeAccessRule(new SecurityIdentifier(FileOps.SID_Worls), PipeAccessRights.FullControl, AccessControlType.Allow));
+                pipeSa.SetAccessRule(new PipeAccessRule(new SecurityIdentifier(FileOps.SID_World), PipeAccessRights.FullControl, AccessControlType.Allow));
                 int buffLen = 2*1024*1024; // 2MB buffer should be plany ;)
                 pipeStream = new NamedPipeServerStream(pipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous, buffLen, buffLen, pipeSa);
                 pipeStream.BeginWaitForConnection(new AsyncCallback(PipeConnected), null);

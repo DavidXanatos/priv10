@@ -133,7 +133,7 @@ namespace PrivateWin10.Windows
             {
                 //case ProgramList.Types.Program: lblSubName.Text = ""; break;
                 case ProgramList.Types.Service: lblSubName.Text = id.Name; break;
-                case ProgramList.Types.App: lblSubName.Text = App.engine.appMgr.GetAppName(id.Name); break;
+                case ProgramList.Types.App: lblSubName.Text = AppManager.SidToPackageID(id.Name); break;
                 default: lblSubName.Text = ""; break;
             }
             lblPath.Text = id.Path;

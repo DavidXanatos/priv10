@@ -40,7 +40,8 @@ namespace PrivateWin10
             this.menuBlock.Index = 0;
             this.menuBlock.Text = Translate.fmt("mnu_block");
 
-            Program prog = App.itf.GetProgram(new ProgramList.ID(ProgramList.Types.Global), true);
+            ProgramList.ID id = new ProgramList.ID(ProgramList.Types.Global);
+            Program prog = App.itf.GetProgram(id, true);
 
             this.menuBlock.Checked = (prog.config.CurAccess == Program.Config.AccessLevels.BlockAccess);
 

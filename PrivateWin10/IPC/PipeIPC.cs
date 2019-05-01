@@ -20,11 +20,11 @@ namespace PrivateWin10.IPC
 
     public class PipeIPC<T> where T : PipeStream
     {
-#if DEBUG
-        public static string Name = "priv10dbg";
-#else
+//#if DEBUG
+//        public static string Name = "priv10dbg";
+//#else
         public static string Name = "priv10";
-#endif
+//#endif
 
         protected T pipeStream = null;
         public event EventHandler<byte[]> DataReceived;

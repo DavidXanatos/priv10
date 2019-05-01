@@ -86,7 +86,7 @@ public class AdminFunc
                         return false;
 
                     FileSecurity ac = File.GetAccessControl(exePath);
-                    ac.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(FileOps.SID_Worls), FileSystemRights.ReadAndExecute, AccessControlType.Allow));
+                    ac.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(FileOps.SID_World), FileSystemRights.ReadAndExecute, AccessControlType.Allow));
                     File.SetAccessControl(exePath, ac);
                 }
             }

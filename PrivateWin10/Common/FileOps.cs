@@ -140,7 +140,7 @@ class FileOps
     }
 
     public static string SID_null = "S-1-0-0"; //	Null SID
-    public static string SID_Worls = "S-1-1-0"; //	World
+    public static string SID_World = "S-1-1-0"; //	World
     public static string SID_Local = "S-1-2-0"; //	Local
     public static string SID_Console = "S-1-2-1"; //	Console Logon
     public static string SID_OwnerID = "S-1-3-0"; //	Creator Owner ID

@@ -478,7 +478,7 @@ public class NetFunc
             IpRanges.Add("192.168.0.0-192.168.255.255");
 
             // IPv6
-            IpRanges.Add("::1");
+            IpRanges.Add("::1"); // Note: if this is present windows firewall does not accept this range
             IpRanges.Add("fc00::-fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
             IpRanges.Add("fe80::-febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
         }
