@@ -53,35 +53,9 @@ public class TextHelpers
     {
         if (str == null)
             return false;
-        return CompareWildcardImpl(str.ToLower(), "*" + find.ToLower() + "*");
-    }
-
-    private static bool CompareWildcardImpl(IEnumerable<char> input, string mask)
-    {
-        for (int i = 0; i < mask.Length; i++)
-        {
-            switch (mask[i])
-            {
-                case '?':
-                    if (!input.Any())
-                        return false;
-
-                    input = input.Skip(1);
-                    break;
-                case '*':
-                    while (input.Any() && !CompareWildcardImpl(input, mask.Substring(i + 1)))
-                        input = input.Skip(1);
-                    break;
-                default:
-                    if (!input.Any() || input.First() != mask[i])
-                        return false;
-
-                    input = input.Skip(1);
-                    break;
-            }
-        }
-
-        return !input.Any();
+        //var like = "^" + Regex.Escape(find).Replace("_", ".").Replace("%", ".*") + "$";
+        var like = Regex.Escape(find).Replace("_", ".").Replace("%", ".*");
+        return Regex.IsMatch(str, like, RegexOptions.IgnoreCase);
     }
 
     public static List<string> TokenizeStr(string input)
@@ -95,6 +69,12 @@ public class TextHelpers
                 output.Add(str);
         }
         return output;
+    }
+
+    public static List<string> SplitStr(string str, string sep, bool bKeepEmpty = false)
+    {
+        String[] spearator = { sep };
+        return str.Split(spearator, bKeepEmpty ? StringSplitOptions.None : StringSplitOptions.RemoveEmptyEntries).ToList();
     }
 }
 

@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -107,13 +106,13 @@ namespace PrivateWin10
             //if (!MiscFunc.IsRunningAsUwp())
             this.Title = string.Format("{0} v{1} by David Xanatos", App.mName, App.mVersion);
             if (!App.lic.CommercialUse)
-                this.Title += " - for Private non Commercial Use";
+                this.Title += " - Freeware for Private NOT Commercial Use";
 
             WpfFunc.LoadWnd(this, "Main");
 
             mPages.Add("Overview", new OverviewPage());
             mPages.Add("Privacy", new PrivacyPage());
-            if(App.client.IsConnected())
+            if (App.client.IsConnected())
                 mPages.Add("Firewall", new FirewallPage());
             else
                 mPages.Add("Firewall", null);
@@ -133,25 +132,35 @@ namespace PrivateWin10
             Brush brushOff = (TryFindResource("SidePanel.off") as Brush);
             foreach (string name in mPages.Keys)
             {
-                /*TabItem item = new TabItem();
+                TabItem item = new TabItem();
+                this.SidePanel.Items.Add(item);
+
                 item.KeyDown += SidePanel_Click;
                 item.MouseLeftButtonUp += SidePanel_Click;
                 item.Name = "PanelItem_" + name;
                 item.Style = (TryFindResource("SidePanelItem") as Style);
 
                 StackPanel panel = new StackPanel();
+                item.Header = panel;
 
                 Image image = new Image();
                 image.Width = 32;
                 image.Height = 32;
+                image.SnapsToDevicePixels = true;
                 image.Name = "PanelItem_" + name + "_Image";
-
                 panel.Children.Add(image);
-                item.Content = panel;
-                this.SidePanel.Items.Add(item);*/
+
+                Path pin = new Path();
+                pin.Width = 4;
+                pin.Height = 24;
+                pin.Margin = new Thickness(-43, -32, 0, 0);
+                pin.Fill = TryFindResource("SidePanel.Pin") as SolidColorBrush;
+                pin.IsHitTestVisible = false;
+                pin.Name = "PanelItem_" + name + "_Pin";
+                pin.Data = new RectangleGeometry(new Rect(new Point(0, 0), new Point(4, 24)));
+                panel.Children.Add(pin);
 
                 Geometry geometry = (TryFindResource("Icon_" + name) as Geometry);
-                Image image = (FindName("PanelItem_" + name + "_Image") as Image);
                 image.Tag = new Tuple<DrawingImage, DrawingImage>(new DrawingImage(new GeometryDrawing(brushOn, null, geometry)), new DrawingImage(new GeometryDrawing(brushOff, null, geometry)));
             }
 
@@ -159,13 +168,13 @@ namespace PrivateWin10
 
         }
 
-    private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             WpfFunc.StoreWnd(this, "Main");
 
             foreach (IUserPage page in mPages.Values)
             {
-                if(page != null)
+                if (page != null)
                     page.OnClose();
             }
 
@@ -213,23 +222,27 @@ namespace PrivateWin10
             {
                 bool isThis = item.Name == "PanelItem_" + name;
 
-                (FindName(item.Name + "_Pin") as Path).Visibility = isThis ? Visibility.Visible : Visibility.Hidden;
+                //(FindName(item.Name + "_Pin") as Path).Visibility = isThis ? Visibility.Visible : Visibility.Hidden;
+                ((item.Header as StackPanel).Children[1] as Path).Visibility = isThis ? Visibility.Visible : Visibility.Hidden;
 
-                Image image = (FindName(item.Name + "_Image") as Image);
+                //Image image = (FindName(item.Name + "_Image") as Image);
+                Image image = ((item.Header as StackPanel).Children[0] as Image);
                 image.Source = isThis ? (image.Tag as Tuple<DrawingImage, DrawingImage>).Item1 : (image.Tag as Tuple<DrawingImage, DrawingImage>).Item2;
             }
         }
 
-        long lastReminder = 0;
+        //long lastReminder = 0;
 
         private void Window_Activated(object sender, EventArgs e)
         {
-            if (App.lic.LicenseStatus == QLicense.LicenseStatus.VALID)
+            // todo: 
+            /*if (App.lic.LicenseStatus == QLicense.LicenseStatus.VALID)
                 return;
 
-            long curTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            UInt64 curTime = MiscFunc.GetUTCTime();
 
-            if (lastReminder == 0) {
+            if (lastReminder == 0)
+            {
                 long InstallAge = curTime - App.GetInstallDate();
                 if (InstallAge < 5 * 24 * 3600) // 5 days old or younger
                     lastReminder = curTime + 2 * 3600; // first reminder after 3 hours
@@ -245,14 +258,14 @@ namespace PrivateWin10
                 reminder.Owner = this;
                 if (reminder.ShowDialog() == true) // user promissed to support
                     lastReminder = curTime + 5 * 3600; // for a total of 6h no reminding
-            }
+            }*/
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             //UpdateSysMenu(); // Install system menu
 
-            if (App.GetConfigInt("Startup", "ShowSetup", 1) == 1 && !(App.IsAutoStart() || App.svc.IsInstalled()))
+            if (AdminFunc.IsAdministrator() && App.GetConfigInt("Startup", "ShowSetup", 1) == 1 && !App.svc.IsInstalled())
             {
                 SetupWnd wnd = new SetupWnd();
                 wnd.Owner = this;

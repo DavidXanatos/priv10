@@ -43,14 +43,12 @@
                         <Label x:Name="lblSupport" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Support the Author:" FontSize="16"/>
                         <Label MouseDown="lblLink_MouseDown" x:Name="lblSupportLink" Grid.Column="0" Margin="-3,0,0,0" VerticalAlignment="Top" Content="https://www.patreon.com/DavidXanatos" Cursor="Hand" FontSize="16" Style="{StaticResource Link}"/>
                     </StackPanel>
-                    <StackPanel Margin="0,20,0,0" VerticalAlignment="Top" Orientation="Horizontal">
-                        <Label Name="lblLicense" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="License for:" FontSize="16"/>
-                        <Label Name="lblLicenseFor" Grid.Column="0" Margin="-3,0,0,0" VerticalAlignment="Top" Content="non commertial use" Cursor="Hand" FontSize="16"/>
-                    </StackPanel>
-                    <StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal">
-                        <Label Name="lblUser" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Some User" FontSize="16"/>
-                        <Label Name="lblSupporting" Grid.Column="0" Margin="-3,0,0,0" VerticalAlignment="Top" Content="is supporting Private WinTen" Cursor="Hand" FontSize="16"/>
-                    </StackPanel>
+                    <Label Name="lblLicenseState" Margin="0,20,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="License: ..." FontSize="16"/>
+                    <Label Name="lblLicenseUser" Margin="0,0,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="" FontSize="16"/>
+                    <!--StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal">
+                        <Label Name="lblUser" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="" FontSize="16"/>
+                        <Label Name="lblSupporting" Grid.Column="0" Margin="-3,0,0,0" VerticalAlignment="Top" Content="" FontSize="16"/>
+                    </-->
                 </StackPanel>
                 <StackPanel Grid.Row="1" Margin="0,0,0,32" VerticalAlignment="Bottom" Orientation="Horizontal">
                     <Label x:Name="lblWeb" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Source Code:" FontSize="16"/>

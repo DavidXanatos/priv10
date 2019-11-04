@@ -35,30 +35,36 @@ namespace PrivateWin10.Windows
             this.btnApply.Content = Translate.fmt("lbl_apply");
             this.consGrid.Columns[0].Header = Translate.fmt("lbl_protocol");
             this.consGrid.Columns[1].Header = Translate.fmt("lbl_ip_port");
-            this.consGrid.Columns[2].Header = Translate.fmt("lbl_time_stamp");
+            this.consGrid.Columns[2].Header = Translate.fmt("lbl_remote_host");
+            this.consGrid.Columns[3].Header = Translate.fmt("lbl_time_stamp");
+            this.consGrid.Columns[4].Header = Translate.fmt("lbl_pid");
 
             this.Topmost = true;
 
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_none"), Tag = Program.Config.AccessLevels.Unconfigured });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_silence"), Tag = Program.Config.AccessLevels.StopNotify });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_allow"), Tag = Program.Config.AccessLevels.FullAccess });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_edit"), Tag = Program.Config.AccessLevels.CustomConfig });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_lan"), Tag = Program.Config.AccessLevels.LocalOnly });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_block"), Tag = Program.Config.AccessLevels.BlockAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_none"), Tag = ProgramSet.Config.AccessLevels.Unconfigured });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_silence"), Tag = ProgramSet.Config.AccessLevels.StopNotify });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_allow"), Tag = ProgramSet.Config.AccessLevels.FullAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_edit"), Tag = ProgramSet.Config.AccessLevels.CustomConfig });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_lan"), Tag = ProgramSet.Config.AccessLevels.LocalOnly });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_block"), Tag = ProgramSet.Config.AccessLevels.BlockAccess });
             foreach (ComboBoxItem item in cmbAccess.Items)
-                item.Background = ProgramControl.GetAccessColor((Program.Config.AccessLevels)item.Tag);
+                item.Background = ProgramControl.GetAccessColor((ProgramSet.Config.AccessLevels)item.Tag);
 
-            cmbRemember.Items.Add(new ComboBoxItem() { Content = Translate.fmt("lbl_permanent"), Tag = 0 });
 #if DEBUG
             cmbRemember.Items.Add(new ComboBoxItem() { Content = Translate.fmt("lbl_temp", "1 min"), Tag = 60 });
 #endif
             cmbRemember.Items.Add(new ComboBoxItem() { Content = Translate.fmt("lbl_temp", "5 min"), Tag = 5 * 60 });
             cmbRemember.Items.Add(new ComboBoxItem() { Content = Translate.fmt("lbl_temp", "15 min"), Tag = 15 * 60 });
             cmbRemember.Items.Add(new ComboBoxItem() { Content = Translate.fmt("lbl_temp", "1 h"), Tag = 60 * 60 });
+            cmbRemember.SelectedIndex = cmbRemember.Items.Count-1; // default is 1h
             cmbRemember.Items.Add(new ComboBoxItem() { Content = Translate.fmt("lbl_temp", "24 h"), Tag = 24 * 60 * 60 });
-            cmbRemember.SelectedIndex = 0;
+            cmbRemember.Items.Add(new ComboBoxItem() { Content = Translate.fmt("lbl_permanent"), Tag = 0 });
 
-            WpfFunc.LoadWnd(this, "Notify");
+            if (!WpfFunc.LoadWnd(this, "Notify"))
+            {
+                this.Left = SystemParameters.WorkArea.Width - this.Width - 4.0;
+                this.Top = SystemParameters.WorkArea.Height - this.Height - 4.0;
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -67,22 +73,42 @@ namespace PrivateWin10.Windows
         }
 
         int curIndex = -1;
-        private SortedDictionary<ProgramList.ID, Tuple<Program, List<Program.LogEntry>>> mEvents = new SortedDictionary<ProgramList.ID, Tuple<Program, List<Program.LogEntry>>>();
-        private List<ProgramList.ID> mEventList = new List<ProgramList.ID>();
+        private SortedDictionary<ProgramID, Tuple<Program, List<FirewallManager.NotifyArgs>>> mEvents = new SortedDictionary<ProgramID, Tuple<Program, List<FirewallManager.NotifyArgs>>>();
+        private List<ProgramID> mEventList = new List<ProgramID>();
 
-        public void Add(Program prog, Program.LogEntry entry)
+        public void Add(ProgramSet progs, FirewallManager.NotifyArgs args)
         {
-            ProgramList.ID id = entry.mID;
+            ProgramID id = args.entry.ProgID;
+            Program prog = null;
+            if (!progs.Programs.TryGetValue(id, out prog))
+                return;
 
-            Tuple<Program, List<Program.LogEntry>> list;
+            Tuple<Program, List<FirewallManager.NotifyArgs>> list;
             if (!mEvents.TryGetValue(id, out list))
             {
-                list = new Tuple<Program, List<Program.LogEntry>>(prog, new List<Program.LogEntry>());
+                if (args.update)
+                    return;
+
+                list = new Tuple<Program, List<FirewallManager.NotifyArgs>>(prog, new List<FirewallManager.NotifyArgs>());
                 mEvents.Add(id, list);
                 mEventList.Add(id);
             }
 
-            list.Item2.Add(entry);
+            if (args.update)
+            {
+                foreach (var oldEntry in list.Item2)
+                {
+                    if (oldEntry.entry.guid.Equals(args.entry.guid))
+                    {
+                        oldEntry.entry.Update(args.entry);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                list.Item2.Add(args);
+            }
 
             int oldIndex = curIndex;
 
@@ -112,7 +138,7 @@ namespace PrivateWin10.Windows
         {
             if (!bUpdate)
             {
-                Program.Config.AccessLevels NetAccess = Program.Config.AccessLevels.Unconfigured;
+                ProgramSet.Config.AccessLevels NetAccess = ProgramSet.Config.AccessLevels.Unconfigured;
 
                 cmbAccess.Background = ProgramControl.GetAccessColor(NetAccess);
                 WpfFunc.CmbSelect(cmbAccess, NetAccess.ToString());
@@ -120,44 +146,56 @@ namespace PrivateWin10.Windows
 
             btnApply.IsEnabled = false;
 
-            ProgramList.ID id = mEventList.ElementAt(curIndex);
-            Tuple<Program, List<Program.LogEntry>> list = mEvents[id];
+            ProgramID id = mEventList.ElementAt(curIndex);
+            Tuple<Program, List<FirewallManager.NotifyArgs>> list = mEvents[id];
 
-            int PID = list.Item2.Count > 0 ? list.Item2.First().PID : 0;
+            //int PID = list.Item2.Count > 0 ? list.Item2.First().FwEvent.ProcessId : 0;
+            string FilePath = list.Item2.Count > 0 ? list.Item2.First().entry.FwEvent.ProcessFileName : "";
 
-            imgIcon.Source = ImgFunc.GetIcon(list.Item1.GetIcon(), imgIcon.Width);
+            imgIcon.Source = ImgFunc.GetIcon(FilePath, imgIcon.Width); // todo: use .progSet.GetIcon instead?
             //lblName.Text = id.GetDisplayName(false);
-            grpBox.Header = id.GetDisplayName(false);
-            lblPID.Text = string.Format("{0} ({1})", System.IO.Path.GetFileName(id.Path), PID);
-            switch (id.Type)
-            {
-                //case ProgramList.Types.Program: lblSubName.Text = ""; break;
-                case ProgramList.Types.Service: lblSubName.Text = id.Name; break;
-                case ProgramList.Types.App: lblSubName.Text = AppManager.SidToPackageID(id.Name); break;
-                default: lblSubName.Text = ""; break;
-            }
-            lblPath.Text = id.Path;
+            grpBox.Header = list.Item1.Description;
+            //lblPID.Text = string.Format("{0} ({1})", System.IO.Path.GetFileName(id.Path), PID);
+            lblPID.Text = System.IO.Path.GetFileName(id.Path);
 
-            /*lstEvents.Items.Clear();
-            foreach (Program.LogEntry entry in list.Item2)
-            {
-                string info = "";
-                info += NetFunc.Protocol2SStr(entry.Protocol) + "://";
-
-                switch (entry.Protocol)
-                {
-                    case (int)FirewallRule.KnownProtocols.TCP:
-                    case (int)FirewallRule.KnownProtocols.UDP:
-                        info += entry.RemoteAddress + ":" + entry.RemotePort;
-                        break;
-                }
-
-                lstEvents.Items.Add(new ListBoxItem() { Content = info});
-            }*/
+            List<string> services = new List<string>();
 
             consGrid.Items.Clear();
-            foreach (Program.LogEntry entry in list.Item2)
-                consGrid.Items.Insert(0, new ConEntry(entry));
+            foreach (FirewallManager.NotifyArgs args in list.Item2)
+            {
+                consGrid.Items.Insert(0, new ConEntry(args.entry));
+
+                if (args.services != null)
+                {
+                    foreach (var service in args.services)
+                    {
+                        if (!services.Contains(service))
+                            services.Add(service);
+                    }
+                }
+            }
+
+            if (services.Count > 0)
+            {
+                cmbService.Visibility = Visibility.Visible;
+                cmbService.Items.Clear();
+                foreach (var service in services)
+                    cmbService.Items.Add(service);
+                cmbService.SelectedIndex = -1;
+                cmbService.Text = Translate.fmt("msg_pick_svc");
+            }
+            else
+            {
+                cmbService.Visibility = Visibility.Collapsed;
+                switch (id.Type)
+                {
+                    //case ProgramList.Types.Program: lblSubName.Text = ""; break;
+                    case ProgramID.Types.Service: lblSubName.Text = id.GetServiceId(); break;
+                    case ProgramID.Types.App: lblSubName.Text = id.GetPackageName(); break;
+                    default: lblSubName.Text = ""; break;
+                }
+            }
+            lblPath.Text = id.Path;
         }
 
         private void btnPrev_Click(object sender, RoutedEventArgs e)
@@ -178,7 +216,7 @@ namespace PrivateWin10.Windows
 
         private void PopEntry()
         {
-            ProgramList.ID id = mEventList.ElementAt(curIndex);
+            ProgramID id = mEventList.ElementAt(curIndex);
 
             mEventList.RemoveAt(curIndex);
             mEvents.Remove(id);
@@ -203,24 +241,29 @@ namespace PrivateWin10.Windows
 
         private void cmbAccess_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Program.Config.AccessLevels NetAccess = (Program.Config.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
+            if (cmbService.Visibility == Visibility.Visible && cmbService.SelectedIndex == -1)
+            {
+                btnApply.IsEnabled = false;
+                return;
+            }
+
+            ProgramSet.Config.AccessLevels NetAccess = (ProgramSet.Config.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
             cmbAccess.Background = ProgramControl.GetAccessColor(NetAccess);
-            btnApply.IsEnabled = NetAccess != Program.Config.AccessLevels.Unconfigured;
+            btnApply.IsEnabled = NetAccess != ProgramSet.Config.AccessLevels.Unconfigured;
         }
 
-        private bool MakeCustom(ProgramList.ID id, long expiration, ConEntry entry = null)
+        private bool MakeCustom(Program prog, UInt64 expiration, ConEntry entry = null)
         {
-            FirewallRule rule = new FirewallRule() { guid = Guid.Empty, Profile = (int)Firewall.Profiles.All, Interface = (int)Firewall.Interfaces.All, Enabled = true };
-            rule.mID = id;
-            rule.Name = Translate.fmt("custom_rule", id.GetDisplayName());
-            rule.Grouping = FirewallRule.RuleGroup;
-            rule.Expiration = expiration;
+            FirewallRule rule = new FirewallRule() { guid = null, Profile = (int)FirewallRule.Profiles.All, Interface = (int)FirewallRule.Interfaces.All, Enabled = true };
+            rule.ProgID = prog.ID;
+            rule.Name = FirewallManager.MakeRuleName(FirewallManager.CustomName, expiration != 0, prog.Description);
+            rule.Grouping = FirewallManager.RuleGroup;
 
             if (entry != null)
             {
-                rule.Direction = entry.Entry.Direction;
-                rule.Protocol = entry.Entry.Protocol;
-                switch (entry.Entry.Protocol)
+                rule.Direction = entry.Entry.FwEvent.Direction;
+                rule.Protocol = (int)entry.Entry.FwEvent.Protocol;
+                switch (entry.Entry.FwEvent.Protocol)
                 {
                     /*case (int)FirewallRule.KnownProtocols.ICMP:
                     case (int)FirewallRule.KnownProtocols.ICMPv6:
@@ -229,22 +272,22 @@ namespace PrivateWin10.Windows
                     case (int)FirewallRule.KnownProtocols.TCP:
                     case (int)FirewallRule.KnownProtocols.UDP:
                         rule.LocalPorts = "*";
-                        rule.RemotePorts = entry.Entry.RemotePort.ToString();
+                        rule.RemotePorts = entry.Entry.FwEvent.RemotePort.ToString();
                         break;
                 }
                 rule.LocalAddresses = "*";
-                rule.RemoteAddresses = entry.Entry.RemoteAddress.ToString();
+                rule.RemoteAddresses = entry.Entry.FwEvent.RemoteAddress.ToString();
             }
             else
             {
-                rule.Direction = Firewall.Directions.Bidirectiona;
+                rule.Direction = FirewallRule.Directions.Bidirectiona;
             }
 
-            RuleWindow ruleWnd = new RuleWindow(new List<ProgramList.ID>() { id }, rule);
+            RuleWindow ruleWnd = new RuleWindow(new List<Program>() { prog }, rule);
             if (ruleWnd.ShowDialog() != true)
                 return false;
 
-            if (!App.itf.UpdateRule(rule))
+            if (!App.client.UpdateRule(rule, expiration))
             {
                 MessageBox.Show(Translate.fmt("msg_rule_failed"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
@@ -253,64 +296,46 @@ namespace PrivateWin10.Windows
             return true;
         }
 
-        private long GetExpiration()
+        private UInt64 GetExpiration()
         {
             ComboBoxItem remember = (cmbRemember.SelectedItem as ComboBoxItem);
             if (remember != null && (int)remember.Tag != 0)
-                return DateTimeOffset.UtcNow.ToUnixTimeSeconds() + (int)remember.Tag;
+                return MiscFunc.GetUTCTime() + (UInt64)(int)remember.Tag;
             return 0;
         }
 
         private void btnApply_Click(object sender, RoutedEventArgs e)
         {
-            ProgramList.ID id = mEventList.ElementAt(curIndex);
-            long expiration = GetExpiration();
+            ProgramID id = mEventList.ElementAt(curIndex);
+            Tuple<Program, List<FirewallManager.NotifyArgs>> list = mEvents[id];
 
-            Program.Config.AccessLevels NetAccess = (Program.Config.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
+            UInt64 expiration = GetExpiration();
 
-            if (NetAccess == Program.Config.AccessLevels.CustomConfig)
+            ProgramSet.Config.AccessLevels NetAccess = (ProgramSet.Config.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
+
+            if (NetAccess == ProgramSet.Config.AccessLevels.CustomConfig)
             {
-                if (!MakeCustom(id, expiration))
+                if (!MakeCustom(list.Item1, expiration))
                     return;
-            }
-            else if (NetAccess == Program.Config.AccessLevels.StopNotify)
-            {
-                Program prog = App.itf.GetProgram(id);
-
-                if (expiration != 0)
-                    prog.config.SilenceUntill = expiration;
-                else
-                    prog.config.Notify = false;
-                App.itf.UpdateProgram(prog.guid, prog.config);
             }
             else
             {
-                App.itf.ClearRules(id, true);
+                ProgramSet prog = App.client.GetProgram(id);
 
-                switch (NetAccess)
+                if (NetAccess == ProgramSet.Config.AccessLevels.StopNotify)
                 {
-                    case Program.Config.AccessLevels.FullAccess:
+                    if (expiration != 0)
+                        prog.config.SilenceUntill = expiration;
+                    else
+                        prog.config.Notify = false;
 
-                        // add and enable allow all rule
-                        App.itf.UpdateRule(FirewallRule.MakeAllowRule(id, Firewall.Directions.Bidirectiona, expiration));
-                        break;
-                    case Program.Config.AccessLevels.LocalOnly:
+                    App.client.UpdateProgram(prog.guid, prog.config);
+                }
+                else
+                {
+                    prog.config.NetAccess = NetAccess;
 
-                        // create block rule only of we operate in blacklist mode
-                        //if (App.itf.GetFilteringMode() == Firewall.FilteringModes.BlackList)
-                        //{
-                            //add and enable block rules for the internet
-                            App.itf.UpdateRule(FirewallRule.MakeBlockInetRule(id, Firewall.Directions.Bidirectiona, expiration));
-                        //}
-
-                        //add and enable allow rules for the lan
-                        App.itf.UpdateRule(FirewallRule.MakeAllowLanRule(id, Firewall.Directions.Bidirectiona, expiration));
-                        break;
-                    case Program.Config.AccessLevels.BlockAccess:
-
-                        // add and enable broad block rules
-                        App.itf.UpdateRule(FirewallRule.MakeBlockRule(id, Firewall.Directions.Bidirectiona, expiration));
-                        break;
+                    App.client.UpdateProgram(prog.guid, prog.config, expiration);
                 }
             }
             PopEntry();
@@ -322,9 +347,11 @@ namespace PrivateWin10.Windows
             if (entry == null)
                 return;
 
-            ProgramList.ID id = mEventList.ElementAt(curIndex);
-            long expiration = GetExpiration();
-            if (MakeCustom(id, expiration, entry))
+            ProgramID id = mEventList.ElementAt(curIndex);
+            Tuple<Program, List<FirewallManager.NotifyArgs>> list = mEvents[id];
+
+            UInt64 expiration = GetExpiration();
+            if (MakeCustom(list.Item1, expiration, entry))
                 PopEntry();
         }
 
@@ -337,11 +364,15 @@ namespace PrivateWin10.Windows
                 Entry = entry;
             }
 
-            public string Protocol { get { return Translate.fmt(Entry.Direction == Firewall.Directions.Inbound ? "str_in" : "str_out", NetFunc.Protocol2Str(Entry.Protocol)); } }
+            public string Protocol { get { return Translate.fmt(Entry.FwEvent.Direction == FirewallRule.Directions.Inbound ? "str_in" : "str_out", NetFunc.Protocol2Str(Entry.FwEvent.Protocol)); } }
 
-            public string Address { get { if (Entry.RemoteAddress == null || Entry.RemoteAddress.Length == 0) return ""; return Entry.RemoteAddress + ":" + Entry.RemotePort.ToString(); } }
+            public string Address { get { if (Entry.FwEvent.RemoteAddress == null) return ""; return Entry.FwEvent.RemoteAddress.ToString() + ":" + Entry.FwEvent.RemotePort.ToString(); } }
 
-            public string TimeStamp { get { return Entry.TimeStamp.ToString("HH:mm:ss"); } }
+            public string RemoteHost { get { return Entry.RemoteHostName; } }
+
+            public string TimeStamp { get { return Entry.FwEvent.TimeStamp.ToString("HH:mm:ss"); } }
+
+            public string ProcessID { get { return Entry.FwEvent.ProcessId.ToString(); } }
 
             #region INotifyPropertyChanged Members
 
@@ -364,7 +395,7 @@ namespace PrivateWin10.Windows
 
         private void LblPath_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            string path = System.IO.Path.GetDirectoryName(lblPath.Text);
+            string path = lblPath.Text;
             if (!string.IsNullOrEmpty(path))
                 Process.Start("Explorer.exe", "/select, " + path);
         }

@@ -32,37 +32,45 @@ namespace PrivateWin10.Pages
             lblTitle.Content = App.mName;
             lblVerNum.Content = App.mVersion;
             //lblHWID.Content = App.lic.GetUID();
-            lblLicenseFor.Content = "Private non Commercial Use";
+
+            lblLicenseState.Content = "License Type: Freeware for private, non commercial use.";
+            lblLicenseUser.Content = "";
             if (App.lic.LicenseStatus == LicenseStatus.UNDEFINED)
             {
-                lblUser.Content = TextHelpers.Split2(System.Security.Principal.WindowsIdentity.GetCurrent().Name, "\\").Item2;
-                lblSupporting.Content = "why are you not supporting Private WinTen? 😢";
+                //lblUser.Content = TextHelpers.Split2(System.Security.Principal.WindowsIdentity.GetCurrent().Name, "\\").Item2;
+                //lblSupporting.Content = "why are you not supporting Private WinTen? 😢";
             }
             else if (App.lic.LicenseStatus == LicenseStatus.VALID)
             {
                 if (App.lic.CommercialUse)
                 {
-                    lblLicenseFor.Content = "Commercial Use";
-                    lblUser.Content = "Licensed To:";
-                    lblSupporting.Content = App.lic.LicenseName;
+                    lblLicenseState.Content = "License Type: Business for commercial use.";
+                    lblLicenseUser.Content = "Licensed To: " + App.lic.LicenseName;
+
+                    //lblUser.Content = "Licensed To:";
+                    //lblSupporting.Content = App.lic.LicenseName;
                 }
                 else
                 {
-                    lblUser.Content = App.lic.LicenseName;
-                    lblSupporting.Content = "is supporting Private WinTen, great! 😀";
+                    lblLicenseState.Content = "License Type: Personal for private use.";
+                    lblLicenseUser.Content = "Licensed To: " + App.lic.LicenseName;
+
+                    //lblUser.Content = App.lic.LicenseName;
+                    //lblSupporting.Content = "is supporting Private WinTen, great! 😀";
                 }
             }
             else
             {
-                lblLicense.Content = "License INVALID:";
                 if(App.lic.WasVoided())
-                    lblLicenseFor.Content = "This licence has been Voided!";
+                    lblLicenseState.Content = "License INVALID: This license has been Voided!";
                 else if (App.lic.HasExpired())
-                    lblLicenseFor.Content = "This licence has Expired!";
+                    lblLicenseState.Content = "License INVALID: This license has Expired!";
                 else
-                    lblLicenseFor.Content = "The license file is broken!";
-                lblUser.Content = "Licensee Name:";
-                lblSupporting.Content = App.lic.LicenseName;
+                    lblLicenseState.Content = "License INVALID: The license file is broken!";
+                lblLicenseUser.Content = "Licensee Name: " + App.lic.LicenseName;
+
+                //lblUser.Content = "Licensee Name:";
+                //lblSupporting.Content = App.lic.LicenseName;
             }
         }
 

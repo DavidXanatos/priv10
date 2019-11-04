@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Ribbon;
 using PrivateWin10;
 
 public class WpfFunc
@@ -76,28 +78,75 @@ public class WpfFunc
 
     }
 
+    static public RibbonGalleryItem CmbPick(RibbonGalleryCategory cat, string tag)
+    {
+        if (tag == null)
+            return null;
+        for (int i = 0; i < cat.Items.Count; i++)
+        {
+            RibbonGalleryItem item = (cat.Items[i] as RibbonGalleryItem);
+            if (item.Tag != null && item.Tag.ToString().Equals(tag))
+                return item;
+        }
+        return null;
+    }
+
+    static public bool CmbSelect(RibbonGallery gal, string tag)
+    {
+        ContentControl item = CmbPick(gal.Items[0] as RibbonGalleryCategory, tag);
+        if (item != null)
+        {
+            gal.SelectedItem = item;
+            return true;
+        }
+        return false;
+    }
+
+    static public void CmbAdd(RibbonGallery gal, string text, object tag)
+    {
+        (gal.Items[0] as RibbonGalleryCategory).Items.Add(new RibbonGalleryItem { Content = text, Tag = tag });
+    }
+
     public static void StoreWnd(Window wnd, string name)
     {
         App.SetConfig("GUI", name + "WndPos", wnd.Left + ":" + wnd.Top);
         App.SetConfig("GUI", name + "WndSize", wnd.Width + ":" + wnd.Height);
     }
 
-    public static void LoadWnd(Window wnd, string name)
+    public static bool LoadWnd(Window wnd, string name)
     {
+        Rectangle rect = new Rectangle();
+
         string wndPos = App.GetConfig("GUI", name + "WndPos", null);
-        if (wndPos != null)
-        {
-            var LT = TextHelpers.Split2(wndPos, ":");
-            wnd.Left = MiscFunc.parseInt(LT.Item1);
-            wnd.Top = MiscFunc.parseInt(LT.Item2);
-        }
+        if (wndPos == null || wndPos.Length == 0)
+            return false;
+
+        var LT = TextHelpers.Split2(wndPos, ":");
+        rect.X = MiscFunc.parseInt(LT.Item1);
+        rect.Y = MiscFunc.parseInt(LT.Item2);
+
         string wndSize = App.GetConfig("GUI", name + "WndSize", null);
-        if (wndSize != null)
+        if (wndSize != null || wndSize.Length == 0)
         {
             var WH = TextHelpers.Split2(wndSize, ":");
-            wnd.Width = MiscFunc.parseInt(WH.Item1);
-            wnd.Height = MiscFunc.parseInt(WH.Item2);
+            rect.Width = MiscFunc.parseInt(WH.Item1);
+            rect.Height = MiscFunc.parseInt(WH.Item2);
         }
+        else
+        {
+            rect.Width = (int)wnd.Width;
+            rect.Height = (int)wnd.Height;
+        }
+
+        if (!MiscFunc.IsOnScreen(rect))
+            return false;
+
+        wnd.Left = rect.Left;
+        wnd.Top = rect.Top;
+        wnd.Width = rect.Width;
+        wnd.Height = rect.Height;
+
+        return true;
     }
 
     public static List<string> SplitAndValidate(string Values, ref bool? duplicate)
@@ -120,4 +169,27 @@ public class WpfFunc
         return ValueList;
     }
 
+    public static T FindChild<T>(DependencyObject parentObj) where T : DependencyObject
+    {
+        if (parentObj == null)
+            return null;
+
+        try
+        {
+            if (parentObj is T)
+                return parentObj as T;
+
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parentObj); i++)
+            {
+                T childObj = FindChild<T>(System.Windows.Media.VisualTreeHelper.GetChild(parentObj, i));
+                if (childObj != null)
+                    return childObj;
+            }
+        }
+        catch (Exception err)
+        {
+            AppLog.Exception(err);
+        }
+        return null;
+    }
 }

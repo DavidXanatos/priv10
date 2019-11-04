@@ -66,7 +66,7 @@
                                   IsEditable="True" 
                                   IsReadOnly="True" 
                                   Height="25"
-                                  VerticalAlignment="Top" Text=""  >
+                                  VerticalAlignment="Top" Text="" DropDownClosed="cmbApp_DropDownClosed" >
                         <ComboBox.GroupStyle>
                             <GroupStyle>
                                 <GroupStyle.HeaderTemplate>

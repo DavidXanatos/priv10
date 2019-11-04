@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PrivateWin10.Windows"
         xmlns:controls="clr-namespace:PrivateWin10.Controls"
-        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" x:Class="PrivateWin10.Windows.RuleWindow"
+        x:Class="PrivateWin10.Windows.RuleWindow"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:RuleWindowViewModel}"
         Title="RuleWindow" MinHeight="600" MinWidth="410" Height="600" Width="800" Closing="Window_Closing">

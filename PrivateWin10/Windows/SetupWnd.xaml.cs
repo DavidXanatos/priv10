@@ -61,13 +61,13 @@ namespace PrivateWin10.Windows
             {
                 App.SetConfig("Firewall", "Enabled", 1);
 
-                Firewall.FilteringModes Mode = Firewall.FilteringModes.WhiteList;
+                FirewallManager.FilteringModes Mode = FirewallManager.FilteringModes.WhiteList;
                 App.SetConfig("Firewall", "Mode", Mode.ToString());
-                App.itf.SetFilteringMode(Mode);
+                App.client.SetFilteringMode(Mode);
 
-                Firewall.Auditing audit = Firewall.Auditing.All;
+                FirewallMonitor.Auditing audit = FirewallMonitor.Auditing.All;
                 App.SetConfig("Firewall", "AuditPol", audit.ToString());
-                App.itf.SetAuditPol(audit);
+                App.client.SetAuditPolicy(audit);
 
                 App.SetConfig("Firewall", "NotifyBlocked", chkNotifyFW.IsChecked == true ? 1 : 0);
             }

@@ -21,40 +21,41 @@ namespace PrivateWin10
     public partial class TweakControl : UserControl
     {
         public event RoutedEventHandler Click;
-        public event RoutedEventHandler ReqSU;
+        public event RoutedEventHandler Toggle;
+        //public event RoutedEventHandler ReqSU;
 
-        Tweak myTweak;
+        TweakManager.Tweak Tweak;
 
-        public TweakControl(Tweak tweak)
+        public TweakControl(TweakManager.Tweak tweak)
         {
-            myTweak = tweak;
-            myTweak.StatusChanged += OnStatusChanged;
+            Tweak = tweak;
+            //myTweak.StatusChanged += OnStatusChanged;
 
             InitializeComponent();
 
-            OnStatusChanged(null, null);
+            //OnStatusChanged(null, null);
 
             string infoStr = "";
 
             switch (tweak.Type)
             {
-                case TweakType.SetRegistry:
-                case TweakType.SetGPO:
+                case TweakManager.TweakType.SetRegistry:
+                case TweakManager.TweakType.SetGPO:
                     infoStr += tweak.Path + "\r\n";
-                    infoStr += tweak.Name + " = " + tweak.Value + "\r\n";
+                    infoStr += tweak.Key + " = " + tweak.Value + "\r\n";
                     break;
-                case TweakType.DisableTask:
-                    infoStr += "Disable Scheduled Task: " + tweak.Path + "\\" + tweak.Name + "\r\n";
+                case TweakManager.TweakType.DisableTask:
+                    infoStr += "Disable Scheduled Task: " + tweak.Path + "\\" + tweak.Key + "\r\n";
                     break;
-                case TweakType.DisableService:
-                    infoStr += "Disable Service: " + tweak.Name + "\r\n";
+                case TweakManager.TweakType.DisableService:
+                    infoStr += "Disable Service: " + tweak.Key + "\r\n";
                     break;
-                case TweakType.BlockFile:
+                case TweakManager.TweakType.BlockFile:
                     infoStr += "Dissable Access to: " + tweak.Path + "\r\n";
                     break;
-                case TweakType.UseFirewall:
-                    infoStr += "Set Firewal roule" + "\r\n";
-                    break;
+                //case TweakType.UseFirewall:
+                //    infoStr += "Set Firewal roule" + "\r\n";
+                //    break;
                 default:
                     infoStr = "Unknown Tweak Type";
                     break;
@@ -85,7 +86,9 @@ namespace PrivateWin10
 
         private void toggle_Click(object sender, RoutedEventArgs e)
         {
-            if (!myTweak.usrLevel && !AdminFunc.IsAdministrator())
+            Toggle?.Invoke(this, e);
+
+            /*if (!myTweak.usrLevel && !AdminFunc.IsAdministrator())
             {
                 ReqSU?.Invoke(this, e);
                 OnStatusChanged(null, null);
@@ -96,12 +99,20 @@ namespace PrivateWin10
                 myTweak.Apply((System.Windows.Forms.Control.ModifierKeys & System.Windows.Forms.Keys.Control) == 0);
             else
                 myTweak.Undo((System.Windows.Forms.Control.ModifierKeys & System.Windows.Forms.Keys.Control) == 0);
+            */
         }
 
-        void OnStatusChanged(object sender, EventArgs arg)
+        public bool? IsChecked { get { return toggle.IsChecked; } }
+
+        public void Update()
         {
-            toggle.IsChecked = myTweak.Test();
+            // toggle.IsChecked = Tweak.Test();
+            toggle.IsChecked = Tweak.Status;
         }
-        
+
+        /*void OnStatusChanged(object sender, EventArgs arg)
+        {
+            Update();
+        }*/
     }
 }

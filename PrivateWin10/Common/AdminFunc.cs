@@ -86,7 +86,7 @@ public class AdminFunc
                         return false;
 
                     FileSecurity ac = File.GetAccessControl(exePath);
-                    ac.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(FileOps.SID_World), FileSystemRights.ReadAndExecute, AccessControlType.Allow));
+                    ac.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.ReadAndExecute, AccessControlType.Allow));
                     File.SetAccessControl(exePath, ac);
                 }
             }
@@ -95,7 +95,7 @@ public class AdminFunc
         }
         catch (Exception err)
         {
-            AppLog.Line("Enable SkipUAC Error {0}", err.ToString());
+            AppLog.Exception(err);
             return false;
         }
         return true;
@@ -112,10 +112,10 @@ public class AdminFunc
             IRegisteredTask task = folder.GetTask(taskName);
 
             silent = false;
-            AppLog.Line("Trying to SkipUAC ...");
+            AppLog.Debug("Trying to SkipUAC ...");
 
             IExecAction action = (IExecAction)task.Definition.Actions[1];
-            if (action.Path.Equals(System.Reflection.Assembly.GetExecutingAssembly().Location, StringComparison.CurrentCultureIgnoreCase))
+            if (action.Path.Equals(System.Reflection.Assembly.GetExecutingAssembly().Location, StringComparison.OrdinalIgnoreCase))
             {
                 string arguments = args == null ? "" : ("\"" + string.Join("\" \"", args) + "\"");
 
@@ -138,7 +138,7 @@ public class AdminFunc
         catch (Exception err)
         {
             if (!silent)
-                AppLog.Line("SkipUAC Error {0}", err.ToString());
+                AppLog.Exception(err);
         }
         return false;
     }

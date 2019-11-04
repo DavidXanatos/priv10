@@ -27,7 +27,7 @@
         <Grid Margin="210,0,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="235" MaxWidth="300" />
+                <ColumnDefinition Width="*" MinWidth="250" MaxWidth="400" />
                 <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="*" MinWidth="100" />
             </Grid.ColumnDefinitions>

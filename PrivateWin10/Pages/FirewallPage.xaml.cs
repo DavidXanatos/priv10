@@ -1,6 +1,4 @@
-﻿using PrivateWin10.Controls;
-using PrivateWin10.ViewModels;
-using PrivateWin10.Windows;
+﻿using PrivateWin10.Windows;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Ribbon;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -24,7 +23,7 @@ using System.Windows.Threading;
 namespace PrivateWin10.Pages
 {
     /// <summary>
-    /// Interaction logic for Firewall.xaml
+    /// Interaction logic for FirewallManager.xaml
     /// </summary>
     public partial class FirewallPage : UserControl, IUserPage
     {
@@ -36,28 +35,59 @@ namespace PrivateWin10.Pages
             Name,
             NameRev,
             LastActivity,
+            DataRate,
+            SocketCount,
             ModuleCount
         }
         Sorts mSortBy = Sorts.Name;
-
-        string mCatFilter = "!Global";
-
-        string mProgFilter = "";
         bool mSortProgs = false;
 
-        bool mHideDisabled = false;
-        string mRuleFilter = "";
-        //string mIDFilter = "";
-        string mConFilter = "";
-        int mConLimit = 1000;
-
-        enum ConTypes
+        class FilterPreset
         {
-            All = 0,
-            Blocked,
-            Allowed
+            public enum Recent: int
+            {
+                Not = 0,
+                Blocked = 1,
+                Allowed = 2,
+                Active = 3
+            }
+            public Recent Recently = Recent.Not;
+
+            public enum Socket
+            {
+                Not = 0,
+                Any,
+                Web,
+                TCP,
+                Client,
+                Server,
+                UDP,
+                //Raw,
+                None
+            }
+            public Socket Sockets = Socket.Not;
+
+            public enum Rule
+            {
+                Not = 0,
+                Any,
+                Active,
+                Disabled,
+                None
+            }
+            public Rule Rules = Rule.Not;
+
+            public List<string> Types = new List<string>();
+
+            public List<string> Categories = new List<string>();
+
+            public string Filter = "";
         }
-        ConTypes mConTypes = ConTypes.All;
+
+        Dictionary<string, FilterPreset> AllFilters = new Dictionary<string, FilterPreset>();
+
+        FilterPreset CurFilter = new FilterPreset();
+
 
         private CategoryModel CatModel;
 
@@ -67,69 +97,70 @@ namespace PrivateWin10.Pages
         {
             InitializeComponent();
 
-            this.btnAdd.Content = Translate.fmt("btn_add_prog");
-            this.btnMerge.Content = Translate.fmt("btn_merge_progs");
-            this.btnRemove.Content = Translate.fmt("btn_del_progs");
-            this.btnCleanup.Content = Translate.fmt("btn_cleanup_list");
-            this.chkNoLocal.Content = Translate.fmt("chk_ignore_local");
+            ruleList.firewallPage = this;
+            consList.firewallPage = this;
+            sockList.firewallPage = this;
+            dnsList.firewallPage = this;
 
-            this.lblSort.Content = Translate.fmt("lbl_sort");
-            this.lblType.Content = Translate.fmt("lbl_type");
-            this.lblFilter.Content = Translate.fmt("lbl_filter");
 
-            this.btnReload.Content = Translate.fmt("btn_reload");
-            this.chkAll.Content = Translate.fmt("chk_all");
+            this.rbbFilter.Header = Translate.fmt("lbl_view_filter");
 
-            this.grpRules.Header = Translate.fmt("grp_firewall");
-            this.grpLog.Header = Translate.fmt("gtp_con_log");
-            this.grpRuleTools.Header = Translate.fmt("grp_tools");
-            this.grpLogTools.Header = Translate.fmt("grp_tools");
-            this.grpRuleView.Header = Translate.fmt("grp_view");
-            this.grpLogView.Header = Translate.fmt("grp_view");
+            this.rbbPresets.Header = Translate.fmt("filter_presets");
 
-            this.btnCreateRule.Content = Translate.fmt("btn_mk_rule");
-            this.btnEnableRule.Content = Translate.fmt("btn_enable_rule");
-            this.btnDisableRule.Content = Translate.fmt("btn_disable_rule");
-            this.btnRemoveRule.Content = Translate.fmt("btn_remove_rule");
-            this.btnBlockRule.Content = Translate.fmt("btn_block_rule");
-            this.btnAllowRule.Content = Translate.fmt("btn_allow_rule");
-            this.btnEditRule.Content = Translate.fmt("btn_edit_rule");
-            this.btnCloneRule.Content = Translate.fmt("btn_clone_rule");
+            this.rbbActivity.Header = Translate.fmt("filter_activity");
 
-            this.chkNoDisabled.Content = Translate.fmt("chk_hide_disabled");
-            this.lblFilterRules.Content = Translate.fmt("lbl_filter_rules");
+            this.lblRecent.Label = Translate.fmt("filter_recent");
+            WpfFunc.CmbAdd(cmbRecent, Translate.fmt("filter_recent_not"), FilterPreset.Recent.Not);
+            WpfFunc.CmbAdd(cmbRecent, Translate.fmt("filter_recent_active"), FilterPreset.Recent.Active);
+            WpfFunc.CmbAdd(cmbRecent, Translate.fmt("filter_recent_blocked"), FilterPreset.Recent.Blocked);
+            WpfFunc.CmbAdd(cmbRecent, Translate.fmt("filter_recent_allowed"), FilterPreset.Recent.Allowed);
 
-            this.btnMkRule.Content = Translate.fmt("btn_mk_rule");
-            this.btnClearLog.Content = Translate.fmt("btn_clear_log");
-            this.lblShowCons.Content = Translate.fmt("lbl_show_cons");
-            this.lblFilterCons.Content = Translate.fmt("lbl_filter_cons");
+            this.lblSockets.Label = Translate.fmt("filter_sockets");
+            WpfFunc.CmbAdd(cmbSockets, Translate.fmt("filter_sockets_not"), FilterPreset.Socket.Not);
+            WpfFunc.CmbAdd(cmbSockets, Translate.fmt("filter_sockets_any"), FilterPreset.Socket.Any);
+            WpfFunc.CmbAdd(cmbSockets, Translate.fmt("filter_sockets_web"), FilterPreset.Socket.Web);
+            WpfFunc.CmbAdd(cmbSockets, Translate.fmt("filter_sockets_tcp"), FilterPreset.Socket.TCP);
+            WpfFunc.CmbAdd(cmbSockets, Translate.fmt("filter_sockets_client"), FilterPreset.Socket.Client);
+            WpfFunc.CmbAdd(cmbSockets, Translate.fmt("filter_sockets_server"), FilterPreset.Socket.Server);
+            WpfFunc.CmbAdd(cmbSockets, Translate.fmt("filter_sockets_udp"), FilterPreset.Socket.UDP);
+            //WpfFunc.CmbAdd(cmbSockets, Translate.fmt("filter_sockets_raw"), FilterPreset.Socket.Raw);
+            WpfFunc.CmbAdd(cmbSockets, Translate.fmt("filter_sockets_none"), FilterPreset.Socket.None);
 
-            this.ruleGrid.Columns[1].Header = Translate.fmt("lbl_name");
-            this.ruleGrid.Columns[2].Header = Translate.fmt("lbl_group");
-            this.ruleGrid.Columns[3].Header = Translate.fmt("lbl_enabled");
-            this.ruleGrid.Columns[4].Header = Translate.fmt("lbl_profiles");
-            this.ruleGrid.Columns[5].Header = Translate.fmt("lbl_action");
-            this.ruleGrid.Columns[6].Header = Translate.fmt("lbl_direction");
-            this.ruleGrid.Columns[7].Header = Translate.fmt("lbl_protocol");
-            this.ruleGrid.Columns[8].Header = Translate.fmt("lbl_remote_ip");
-            this.ruleGrid.Columns[9].Header = Translate.fmt("lbl_local_ip");
-            this.ruleGrid.Columns[10].Header = Translate.fmt("lbl_remote_port");
-            this.ruleGrid.Columns[11].Header = Translate.fmt("lbl_local_port");
-            this.ruleGrid.Columns[12].Header = Translate.fmt("lbl_icmp");
-            this.ruleGrid.Columns[13].Header = Translate.fmt("lbl_interfaces");
-            this.ruleGrid.Columns[14].Header = Translate.fmt("lbl_edge");
-            this.ruleGrid.Columns[15].Header = Translate.fmt("lbl_program");
+            this.lblRules.Label = Translate.fmt("filter_rules");
+            WpfFunc.CmbAdd(cmbRules, Translate.fmt("filter_rules_not"), FilterPreset.Rule.Not);
+            WpfFunc.CmbAdd(cmbRules, Translate.fmt("filter_rules_any"), FilterPreset.Rule.Any);
+            WpfFunc.CmbAdd(cmbRules, Translate.fmt("filter_rules_enabled"), FilterPreset.Rule.Active);
+            WpfFunc.CmbAdd(cmbRules, Translate.fmt("filter_rules_disabled"), FilterPreset.Rule.Disabled);
+            WpfFunc.CmbAdd(cmbRules, Translate.fmt("filter_rules_none"), FilterPreset.Rule.None);
 
-            this.consGrid.Columns[1].Header = Translate.fmt("lbl_name");
-            this.consGrid.Columns[2].Header = Translate.fmt("lbl_time_stamp");
-            this.consGrid.Columns[3].Header = Translate.fmt("lbl_action");
-            this.consGrid.Columns[4].Header = Translate.fmt("lbl_direction");
-            this.consGrid.Columns[5].Header = Translate.fmt("lbl_protocol");
-            this.consGrid.Columns[6].Header = Translate.fmt("lbl_remote_ip");
-            this.consGrid.Columns[7].Header = Translate.fmt("lbl_remote_port");
-            this.consGrid.Columns[8].Header = Translate.fmt("lbl_local_ip");
-            this.consGrid.Columns[9].Header = Translate.fmt("lbl_local_port");
-            this.consGrid.Columns[10].Header = Translate.fmt("lbl_program");
+
+            this.rbbFilters.Header = Translate.fmt("filter_program");
+            this.lblTypes.Text = Translate.fmt("filter_types");
+            this.chkProgs.Label = Translate.fmt("filter_programs");
+            this.chkApps.Label = Translate.fmt("filter_apps");
+            this.chkSys.Label = Translate.fmt("filter_system");
+
+            this.rbbCaegories.Header = Translate.fmt("filter_category");
+
+
+
+            this.rbbView.Header = Translate.fmt("lbl_view_options");
+            //this.rbbOptions.Header = Translate.fmt("lbl_view_options");
+
+            this.rbbRules.Header = Translate.fmt("lbl_rules_and");
+            this.btnReload.Label = Translate.fmt("btn_reload");
+            this.chkAll.Label = Translate.fmt("chk_all");
+
+            this.rbbProgs.Header = Translate.fmt("lbl_programs");
+            this.btnAdd.Label = Translate.fmt("btn_add_prog");
+            this.btnMerge.Label = Translate.fmt("btn_merge_progs");
+            this.btnRemove.Label = Translate.fmt("btn_del_progs");
+            this.btnCleanup.Label = Translate.fmt("btn_cleanup_list");
+
+            this.rbbSort.Header = Translate.fmt("lbl_sort_and");
+            this.lblSort.Label = Translate.fmt("lbl_sort");
+            this.chkNoLocal.Label = Translate.fmt("chk_ignore_local");
+            this.chkNoLan.Label = Translate.fmt("chk_ignore_lan");
 
 
 
@@ -138,73 +169,58 @@ namespace PrivateWin10.Pages
                 progsCol.Width = new GridLength(progColHeight, GridUnitType.Pixel);
 
             double rulesRowHeight = MiscFunc.parseDouble(App.GetConfig("GUI", "FirewallRulesHeight", "0.0"));
-            if (progColHeight > 0.0)
+            if (rulesRowHeight > 0.0)
                 rulesRow.Height = new GridLength(rulesRowHeight, GridUnitType.Pixel);
-
-            ruleCols.DisplayIndexes = App.GetConfig("GUI", "ruleGrid_DisplayIndexes", "0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15");
-            ruleCols.VisibleColumns = App.GetConfig("GUI", "ruleGrid_VisibleColumns", "Program;Local Ports;Remote Ports;Remote Address;Protocol;Direction;Action;Location;Enabled;Name;Profiles;Interfaces;-0");
-            consCols.DisplayIndexes = App.GetConfig("GUI", "consGrid_DisplayIndexes", "0;1;2;3;4;5;6;7;8;9;10");
-            consCols.VisibleColumns = App.GetConfig("GUI", "consGrid_VisibleColumns", "Program;Local Ports;Local Address;Remote Ports;Remote Address;Protocol;Direction;Action;Time Stamp;Name;;-0");
 
             SuspendChange++;
 
-            cmbSoft.Items.Add(new ContentControl { Content = Translate.fmt("sort_no"), Tag = Sorts.Unsorted });
-            cmbSoft.Items.Add(new ContentControl { Content = Translate.fmt("sort_name"), Tag = Sorts.Name });
-            cmbSoft.Items.Add(new ContentControl { Content = Translate.fmt("sort_rname"), Tag = Sorts.NameRev });
-            cmbSoft.Items.Add(new ContentControl { Content = Translate.fmt("sort_act"), Tag = Sorts.LastActivity });
-            cmbSoft.Items.Add(new ContentControl { Content = Translate.fmt("sort_count"), Tag = Sorts.ModuleCount });
-            WpfFunc.CmbSelect(cmbSoft, ((Sorts)App.GetConfigInt("GUI", "SortList", 0)).ToString());
 
-            mProgFilter = App.GetConfig("GUI", "ProgFilter", "");
-            txtFilter.Text = mProgFilter;
+            WpfFunc.CmbAdd(cmbSort, Translate.fmt("sort_no"), Sorts.Unsorted);
+            WpfFunc.CmbAdd(cmbSort, Translate.fmt("sort_name"), Sorts.Name);
+            WpfFunc.CmbAdd(cmbSort, Translate.fmt("sort_rname"), Sorts.NameRev);
+            WpfFunc.CmbAdd(cmbSort, Translate.fmt("sort_act"), Sorts.LastActivity);
+            WpfFunc.CmbAdd(cmbSort, Translate.fmt("sort_rate"), Sorts.DataRate);
+            WpfFunc.CmbAdd(cmbSort, Translate.fmt("sort_socks"), Sorts.SocketCount);
+            WpfFunc.CmbAdd(cmbSort, Translate.fmt("sort_count"), Sorts.ModuleCount);
+            WpfFunc.CmbSelect(cmbSort, ((Sorts)App.GetConfigInt("GUI", "SortList", 0)).ToString());
 
-            mRuleFilter = App.GetConfig("GUI", "RuleFilter", "");
-            txtRuleFilter.Text = mRuleFilter;
+            this.chkNoLocal.IsChecked = App.GetConfigInt("GUI", "ActNoLocal", 0) == 1;
+            this.chkNoLan.IsChecked = App.GetConfigInt("GUI", "ActNoLan", 0) == 1;
 
-            //mIDFilter = App.GetConfig("GUI", "IDFilter", "");
-            //txtIDFilter.Text = mIDFilter;
-
-            mConFilter = App.GetConfig("GUI", "ConFilter", "");
-            txtConFilter.Text = mConFilter;
-
-            try
-            {
-                mConTypes = (ConTypes)App.GetConfigInt("GUI", "ConTypes", 0);
-                cmbConTypes.SelectedIndex = (int)mConTypes;
-            }
-            catch { }
-
-            //mConLimit = App.engine.programs.MaxLogLength * 10; // todo
-            mConLimit = App.GetConfigInt("GUI", "LogLimit", 1000);
 
             CatModel = new CategoryModel();
 
-            Filters = new ObservableCollection<CatEntry>();
-
-            ListCollectionView lcv = new ListCollectionView(Filters);
-            lcv.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
-            cmbFilter.ItemsSource = lcv;
-
-            mCatFilter = App.GetConfig("GUI", "CategoryFilter", mCatFilter);
             LoadCategorys();
 
             CatModel.Categorys.CollectionChanged += Categorys_CollectionChanged;
 
+            if(UwpFunc.IsWindows7OrLower)
+                chkApps.IsEnabled = false;
+
+            var Filter = LoadPreset();
+            ApplyPreset(Filter);
+
+            foreach (var section in App.IniEnumSections())
+            {
+                if (section.IndexOf("Preset_") != 0)
+                    continue;
+                string Name = section.Substring(7);
+                WpfFunc.CmbAdd(cmdPreset, Name, Name);
+            }
+
             SuspendChange--;
 
-            mTimer.Tick += new EventHandler(OnTimer_Tick);
+            mTimer.Tick += new EventHandler(OnTimerTick);
             mTimer.Interval = new TimeSpan(0, 0, 0, 0, 250); // 4 times a second
             mTimer.Start();
-            OnTimer_Tick(null, null);
+            OnTimerTick(null, null);
 
-            App.cb.ActivityNotification += OnActivity;
-            App.cb.ChangeNotification += OnChange;
+            App.client.ActivityNotification += OnActivity;
+            App.client.ChangeNotification += OnChange;
 
             this.processScroll.PreviewKeyDown += process_KeyEventHandler;
 
             CheckPrograms();
-            CheckRules();
-            CheckLogLines();
         }
 
         bool IsHidden = true;
@@ -215,6 +231,12 @@ namespace PrivateWin10.Pages
 
             FullUpdate = false;
             UpdatesProgs.Clear();
+
+            var pol = App.client.GetAuditPolicy();
+            logTab.IsEnabled = pol != FirewallMonitor.Auditing.Off;
+            consList.IsEnabled = logTab.IsEnabled;
+            //consList.chkAllowed.IsEnabled = (pol & FirewallMonitor.Auditing.Allowed) != 0;
+            //consList.chkBlocked.IsEnabled = (pol & FirewallMonitor.Auditing.Blocked) != 0;
 
             UpdateProgramList();
         }
@@ -229,10 +251,10 @@ namespace PrivateWin10.Pages
             App.SetConfig("GUI", "FirewallProgsWidth", ((int)progsCol.ActualWidth).ToString());
             App.SetConfig("GUI", "FirewallRulesHeight", ((int)rulesRow.ActualHeight).ToString());
 
-            App.SetConfig("GUI", "ruleGrid_DisplayIndexes", ruleCols.DisplayIndexes);
-            App.SetConfig("GUI", "ruleGrid_VisibleColumns", ruleCols.VisibleColumns);
-            App.SetConfig("GUI", "consGrid_DisplayIndexes", consCols.DisplayIndexes);
-            App.SetConfig("GUI", "consGrid_VisibleColumns", consCols.VisibleColumns);
+            ruleList.OnClose();
+            consList.OnClose();
+            sockList.OnClose();
+            dnsList.OnClose();
 
             if (notificationWnd != null)
                 notificationWnd.Close();
@@ -243,96 +265,69 @@ namespace PrivateWin10.Pages
             LoadCategorys();
         }
 
-        public class Category : ContentControl
+        private void AddCatItem(string cat, object tag)
         {
-            public string Group { get; set; }
-        }
-
-        public class CatEntry : ContentControl
-        {
-            public bool? IsSelected { get; set; }
-            public Visibility IsCheckVisible { get { return IsCheckable ? Visibility.Visible : Visibility.Collapsed; } }
-            public bool IsCheckable { get; set; }
-            public string Group { get; set; }
-        }
-
-        public ObservableCollection<CatEntry> Filters;
-
-        private void AddCatItem(string text, string group, object tag)
-        {
-            Filters.Add(new CatEntry
+            var chk = new CheckBox()
             {
-                IsCheckable = true,
-                IsSelected = false,
-                Content = text,
-                Tag = tag,
-                Group = group
-            });
+                IsChecked = false,
+                IsThreeState = true,
+                //MaxWidth = 110,
+                Content = cat,
+                Tag = tag
+            };
+            chk.Unchecked += new RoutedEventHandler(OnFilter_Changed);
+            chk.Checked += new RoutedEventHandler(OnFilter_Changed);
+            chk.Indeterminate += new RoutedEventHandler(OnFilter_Changed);
+
+            this.catFilter.Items.Add(chk);
         }
 
         private void LoadCategorys()
         {
             SuspendChange++;
 
-            Filters.Clear();
-
-            AddCatItem(Translate.fmt("filter_all"), Translate.fmt("cat_gen"), "!All");
-            AddCatItem(Translate.fmt("filter_programs"), Translate.fmt("cat_gen"), "!Programs");
-            AddCatItem(Translate.fmt("filter_system"), Translate.fmt("cat_gen"), "!System");
-            if (UwpFunc.IsWindows7OrLower == false)
-                AddCatItem(Translate.fmt("filter_apps"), Translate.fmt("cat_gen"), "!Apps");
-
+            this.catFilter.Items.Clear();
             foreach (CategoryModel.Category cat in CatModel.Categorys)
             {
                 if (cat.SpecialCat == CategoryModel.Category.Special.No)
-                    AddCatItem(cat.Content.ToString(), Translate.fmt("cat_cats"), cat.Content.ToString());
+                    AddCatItem(cat.Content.ToString(), cat.Content.ToString());
             }
-
-            AddCatItem(Translate.fmt("filter_uncat"), Translate.fmt("cat_other"), "!Uncategorized");
-
-            if (mCatFilter.Length > 0)
-            {
-                if (mCatFilter.Substring(0, 1) == "!")
-                    WpfFunc.CmbSelect(cmbFilter, mCatFilter);
-                else if (mCatFilter.Substring(0, 1) == ".")
-                    cmbFilter.Text = mCatFilter.Substring(1);
-                else
-                {
-                    if (mCatFilter.Contains(","))
-                    {
-                        HashSet<string> cats = new HashSet<string>(mCatFilter.Split(','));
-                        foreach (CatEntry ctrl in cmbFilter.Items)
-                        {
-                            if (cats.Contains(ctrl.Tag.ToString()))
-                                ctrl.IsSelected = true;
-                            else if (cats.Contains("-" + ctrl.Tag.ToString()))
-                                ctrl.IsSelected = null;
-                            else
-                                ctrl.IsSelected = false;
-                        }
-                    }
-                    else
-                        cmbFilter.Text = mCatFilter;
-                }
-            }
-
+            AddCatItem(Translate.fmt("cat_uncat"), "");
+            
             SuspendChange--;
         }
 
-        void OnActivity(object sender, Firewall.NotifyArgs args)
+        public ProgramSet GetProgSet(Guid guid, ProgramID progID, out ProgramControl item)
+        {
+            ProgramSet prog = null;
+            if (mPrograms.TryGetValue(guid, out item))
+                prog = item.Program;
+            else if (progID != null)
+                prog = App.client.GetProgram(progID);
+            else
+            {
+                List<ProgramSet> progs = App.client.GetPrograms(new List<Guid>() { guid });
+                if (progs.Count() != 0)
+                    prog = progs[0];
+            }
+            return prog;
+        }
+
+        void OnActivity(object sender, FirewallManager.NotifyArgs args)
         {
             ProgramControl item = null;
-            Program prog;
-            if (mPrograms.TryGetValue(args.guid, out item))
-                prog = item.Program;
-            else
-                prog = App.itf.GetProgram(args.entry.mID);
+            ProgramSet prog = GetProgSet(args.guid, args.progID, out item);
+            if (prog == null)
+                return;
 
-            if (args.entry.Type == Program.LogEntry.Types.UnRuled && args.entry.Action == Firewall.Actions.Block)
+            Program program = null;
+            prog.Programs.TryGetValue(args.progID, out program);
+
+            if (args.entry.State == Program.LogEntry.States.UnRuled && args.entry.FwEvent.Action == FirewallRule.Actions.Block)
             {
                 bool? Notify = prog.config.GetNotify();
-                if(Notify == true || (App.GetConfigInt("Firewall", "NotifyBlocked", 1) != 0 && Notify != false))
-                    ShowNotification(prog, args.entry);
+                if (Notify == true || (App.GetConfigInt("Firewall", "NotifyBlocked", 1) != 0 && Notify != false))
+                    ShowNotification(prog, args);
             }
 
             if (IsHidden)
@@ -340,36 +335,57 @@ namespace PrivateWin10.Pages
 
             if (item == null)
             {
-                if (DoFilter(mProgFilter, prog.config.Name, prog.IDs))
+                if (DoFilter(CurFilter, prog))
                     return;
 
                 item = AddProgramItem(prog);
+
+                args.update = false;
             }
 
-            //Note: windows firewall doesn't block localhost acces so we ignore it
-            if (args.entry.Type == Program.LogEntry.Types.RuleError 
-              && args.entry.Action == Firewall.Actions.Allow 
-              && !NetFunc.IsLocalHost(args.entry.RemoteAddress))
-                item.SetError(true);
-
-            if (chkNoLocal.IsChecked != true || (!NetFunc.IsLocalHost(args.entry.RemoteAddress) && !NetFunc.IsMultiCast(args.entry.RemoteAddress)))
+            if (!args.update) // ignore update events
             {
-                item.Program.lastActivity = DateTime.Now;
-                switch (args.entry.Action)
+                //Note: windows firewall doesn't block localhost acces so we ignore it
+                if (args.entry.State == Program.LogEntry.States.RuleError
+                  && args.entry.FwEvent.Action == FirewallRule.Actions.Allow
+                  && !NetFunc.IsLocalHost(args.entry.FwEvent.RemoteAddress))
+                    item.SetError(true);
+
+                if (program != null)
                 {
-                    case Firewall.Actions.Allow: item.Program.allowedConnections++; break;
-                    case Firewall.Actions.Block: item.Program.blockedConnections++; break;
+                    switch (args.entry.FwEvent.Action)
+                    {
+                        case FirewallRule.Actions.Allow: program.countAllowed++; break;
+                        case FirewallRule.Actions.Block: program.countBlocked++; break; 
+                    }
                 }
-                if (mSortBy == Sorts.LastActivity)
-                    mSortProgs = true;
+
+                if ((chkNoLocal.IsChecked != true || (!NetFunc.IsLocalHost(args.entry.FwEvent.RemoteAddress) && !NetFunc.IsMultiCast(args.entry.FwEvent.RemoteAddress)))
+                 && (chkNoLan.IsChecked != true || !FirewallRule.MatchAddress(args.entry.FwEvent.RemoteAddress, "LocalSubnet")))
+                {
+                    switch (args.entry.FwEvent.Action)
+                    {
+                        case FirewallRule.Actions.Allow: item.Flash(Colors.LightGreen); break;
+                        case FirewallRule.Actions.Block: item.Flash(Colors.LightPink); break;
+                    }
+
+                    if (program != null)
+                    {
+                        switch (args.entry.FwEvent.Action)
+                        {
+                            case FirewallRule.Actions.Allow:
+                                program.lastAllowed = DateTime.Now; 
+                                break;
+                            case FirewallRule.Actions.Block:
+                                program.lastBlocked = DateTime.Now;
+                                break;
+                        }
+                        if (mSortBy == Sorts.LastActivity)
+                            mSortProgs = true;
+                    }
+                }
 
                 item.DoUpdate();
-
-                switch (args.entry.Action)
-                {
-                    case Firewall.Actions.Allow: item.Flash(Colors.LightGreen); break;
-                    case Firewall.Actions.Block: item.Flash(Colors.LightPink); break;
-                }
             }
 
             // from here on only col log update:
@@ -377,28 +393,16 @@ namespace PrivateWin10.Pages
             if (!mCurPrograms.Contains(item) && chkAll.IsChecked != true)
                 return;
 
-            if (DoFilter(mConFilter, args.entry.mID.GetDisplayName(), new HashSet<ProgramList.ID>() { args.entry.mID }))
-                return;
-
-            switch (mConTypes)
-            {
-                case ConTypes.Allowed: if (args.entry.Action != Firewall.Actions.Allow) return; break;
-                case ConTypes.Blocked: if (args.entry.Action != Firewall.Actions.Block) return; break;
-            }
-
-            consGrid.Items.Insert(0, new LogItem(args.entry));
-
-            while (consGrid.Items.Count > mConLimit)
-                consGrid.Items.RemoveAt(mConLimit);
+            consList.AddEntry(prog, program, args);
 
             //if (mSortBy == Sorts.LastActivity)
             //    OnChange(sender, new ProgramList.ChangeArgs() { guid = args.guid });
         }
 
+        
         private NotificationWnd notificationWnd = null;
 
-
-        private void ShowNotification(Program prog, Program.LogEntry entry)
+        private void ShowNotification(ProgramSet prog, FirewallManager.NotifyArgs args)
         {
             if (notificationWnd == null)
             {
@@ -406,7 +410,7 @@ namespace PrivateWin10.Pages
                 notificationWnd.Closing += NotificationClosing;
                 notificationWnd.Show();
             }
-            notificationWnd.Add(prog, entry);
+            notificationWnd.Add(prog, args);
         }
 
         void NotificationClosing(object sender, CancelEventArgs e)
@@ -417,7 +421,7 @@ namespace PrivateWin10.Pages
         HashSet<Guid> UpdatesProgs = new HashSet<Guid>();
         bool FullUpdate = false;
 
-        void OnChange(object sender, ProgramList.ChangeArgs args)
+        void OnChange(object sender, ProgramList.ListEvent args)
         {
             if (args.guid == Guid.Empty)
                 FullUpdate = true;
@@ -425,21 +429,25 @@ namespace PrivateWin10.Pages
                 UpdatesProgs.Add(args.guid);
         }
 
-        private void OnTimer_Tick(object sender, EventArgs e)
+        private void OnTimerTick(object sender, EventArgs e)
         {
             if (IsHidden)
                 return;
+            if (App.mMainWnd.WindowState == WindowState.Minimized)
+                return;
+            if (App.mMainWnd.Visibility != Visibility.Visible)
+                return;
 
-            if (FullUpdate)
+            if (FullUpdate && CurFilter.Sockets != FilterPreset.Socket.Not)
             {
                 FullUpdate = false;
                 UpdateProgramList();
             }
             else if (UpdatesProgs.Count > 0)
             {
-                List<Program> progs = App.itf.GetPrograms(UpdatesProgs.ToList());
+                List<ProgramSet> progs = App.client.GetPrograms(UpdatesProgs.ToList());
 
-                foreach (Program prog in progs)
+                foreach (ProgramSet prog in progs)
                 {
                     ProgramControl item;
                     if (!mPrograms.TryGetValue(prog.guid, out item))
@@ -451,7 +459,7 @@ namespace PrivateWin10.Pages
                     if (mCurPrograms.Contains(item))
                     {
                         UpdateIDs();
-                        UpdateRules();
+                        ruleList.UpdateRules();
                     }
                 }
             }
@@ -463,6 +471,12 @@ namespace PrivateWin10.Pages
             }
 
             UpdatesProgs.Clear();
+
+            if (mCurPrograms.Count > 0 || chkAll.IsChecked == true)
+            {
+                sockList.UpdateSockets();
+                dnsList.UpdateDnsLog(); // todo: update this liek the connection log i.e. incrementally
+            }
         }
 
         SortedDictionary<Guid, ProgramControl> mPrograms = new SortedDictionary<Guid, ProgramControl>();
@@ -473,7 +487,9 @@ namespace PrivateWin10.Pages
 
             Dictionary<Guid, ProgramControl> OldProcesses = new Dictionary<Guid, ProgramControl>(mPrograms);
 
-            foreach (Program prog in App.itf.GetPrograms())
+            List<ProgramSet> progs = App.client.GetPrograms();
+
+            foreach (ProgramSet prog in progs)
             {
                 ProgramControl item;
                 if (mPrograms.TryGetValue(prog.guid, out item))
@@ -497,12 +513,12 @@ namespace PrivateWin10.Pages
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
 
-            Console.WriteLine("UpdateProgramList took: " + elapsedMs + "ms");
+            AppLog.Debug("UpdateProgramList took: " + elapsedMs + "ms");
 
             SortAndFitlerProgList();
         }
 
-        ProgramControl AddProgramItem(Program prog)
+        ProgramControl AddProgramItem(ProgramSet prog)
         {
             ProgramControl item = new ProgramControl(prog, CatModel);
             mPrograms.Add(prog.guid, item);
@@ -518,7 +534,7 @@ namespace PrivateWin10.Pages
             return item;
         }
 
-        bool DoTest(string Filter, string Name, HashSet<ProgramList.ID> IDs)
+        static public bool DoTest(string Filter, string Name, List<ProgramID> IDs)
         {
             bool bNot = false;
             if (Filter.Substring(0, 1) == "-")
@@ -538,18 +554,29 @@ namespace PrivateWin10.Pages
                 return false;
             if (bPath)
             {
-                foreach (ProgramList.ID _id in IDs)
+                foreach (ProgramID _id in IDs)
                 {
-                    if (TextHelpers.CompareWildcard(_id.Path,Filter) != bNot)
+                    if (_id.Path.Length > 0 && TextHelpers.CompareWildcard(_id.Path, Filter) != bNot)
                         return false;
-                    if (TextHelpers.CompareWildcard(_id.Name,Filter) != bNot)
-                        return false;
+
+                    if (_id.Type == ProgramID.Types.Service)
+                    {
+                        if (TextHelpers.CompareWildcard(_id.GetServiceId(), Filter) != bNot)
+                            return false;
+                        if (TextHelpers.CompareWildcard(_id.GetServiceName(), Filter) != bNot)
+                            return false;
+                    }
+                    else if (_id.Type == ProgramID.Types.App)
+                    {
+                        if (TextHelpers.CompareWildcard(_id.GetPackageName(), Filter) != bNot)
+                            return false;
+                    }
                 }
             }
             return true;
         }
 
-        bool DoFilter(string Filter, string Name, HashSet<ProgramList.ID> IDs)
+        static public bool DoFilter(string Filter, string Name, List<ProgramID> IDs)
         {
             if (Filter.Length == 0)
                 return false;
@@ -572,8 +599,10 @@ namespace PrivateWin10.Pages
                 {
                     case Sorts.Name: return l.Program.config.Name.CompareTo(r.Program.config.Name);
                     case Sorts.NameRev: return r.Program.config.Name.CompareTo(l.Program.config.Name);
-                    case Sorts.LastActivity: return r.Program.lastActivity.CompareTo(l.Program.lastActivity);
-                    case Sorts.ModuleCount: return r.Program.IDs.Count.CompareTo(l.Program.IDs.Count);
+                    case Sorts.LastActivity: return r.Program.GetLastActivity().CompareTo(l.Program.GetLastActivity());
+                    case Sorts.DataRate: return r.Program.GetDataRate().CompareTo(l.Program.GetDataRate());
+                    case Sorts.SocketCount: return r.Program.GetSocketCount().CompareTo(l.Program.GetSocketCount());
+                    case Sorts.ModuleCount: return r.Program.Programs.Count.CompareTo(l.Program.Programs.Count);
                 }
                 return 0;
             }
@@ -592,88 +621,129 @@ namespace PrivateWin10.Pages
                     row.Height = GridLength.Auto; //new GridLength(item.Height + 2);
                 Grid.SetRow(item, i);
 
-
-                Func<Program, bool> filterFx = (Program prog) =>
-                {
-                    if (mCatFilter.Length > 0)
-                    {
-                        int Accepted = 0;
-                        foreach (string Filter in mCatFilter.Split(','))
-                        {
-                            switch (ExecTest(Filter, prog))
-                            {
-                                case 0: break;
-                                case 1: Accepted++; break;
-                                case -1: return false;
-                            }
-                        }
-                        if (Accepted == 0)
-                            return false;
-                    }
-
-                    if (DoFilter(mProgFilter, prog.config.Name, prog.IDs))
-                        return false;
-
-                    return true;
-                };
-
-                item.Visibility = filterFx(item.Program) ? Visibility.Visible : Visibility.Collapsed;
-
+                item.Visibility = DoFilter(CurFilter, item.Program) ? Visibility.Collapsed : Visibility.Visible;
             }
 
             while (OrderList.Count < this.processGrid.RowDefinitions.Count)
                 this.processGrid.RowDefinitions.RemoveAt(OrderList.Count);
         }
 
-        private int ExecTest(string Filter, Program prog)
+        public static bool MultiFilter(List<string> filters, Func<string, bool> filterFx)
         {
-            ProgramList.ID id = prog.GetMainID();
+            if (filters.Count == 0)
+                return false; // empty list jut  pass
 
-            bool bNot = false;
-            if (Filter.Substring(0, 1) == "-")
+            int Count = 0;
+            foreach (string _filter in filters)
             {
-                bNot = true;
-                Filter = Filter.Substring(1);
+                string filter = _filter;
+
+                bool bNot = false;
+                if (filter.Length > 0 && filter.Substring(0, 1) == "-")
+                {
+                    bNot = true;
+                    filter = filter.Substring(1);
+                }
+                else
+                    Count++;
+
+                if (filterFx(filter))
+                    return !bNot ? false : true;
             }
 
-            if (Filter.Substring(0, 1) == "!")
-            {
-                if (Filter == "!Uncategorized")
-                {
-                    if (prog.config.Category == null || prog.config.Category.Length == 0)
-                        return bNot ? -1 : 1;
-                }
-                else if (Filter == "!Programs")
-                {
-                    if(id.Type == ProgramList.Types.Program)
-                        return bNot ? -1 : 1;
-                }
-                else if (Filter == "!System")
-                {
-                    if(id.Type == ProgramList.Types.System || id.Type == ProgramList.Types.Global || id.Type == ProgramList.Types.Service)
-                        return bNot ? -1 : 1;
-                }
-                else if (Filter == "!Apps")
-                {
-                    if (id.Type == ProgramList.Types.App)
-                        return bNot ? -1 : 1;
-                }
-                else //if (Filter == "!All")
-                    return 1;
+            return Count > 0; // no match fail
+        }
 
-            }
-            else if (mCatFilter.Substring(0, 1) == ".")
+        private bool DoFilter(FilterPreset Filter, ProgramSet prog)
+        {
+            //Activity
+            if (Filter.Recently != FilterPreset.Recent.Not)
             {
-                Filter = Filter.Substring(1);
-                if (TextHelpers.CompareWildcard(prog.config.Category,Filter))
-                    return bNot ? -1 : 1;
+                DateTime lastActivity = prog.GetLastActivity((Filter.Recently & FilterPreset.Recent.Allowed) != 0, (Filter.Recently & FilterPreset.Recent.Blocked) != 0);
+                if (lastActivity < DateTime.Now.AddMinutes(-App.GetConfigInt("GUI", "RecentTreshold", 15)))
+                    return true;
             }
-            else
+
+            //Sockets
+            switch (Filter.Sockets)
             {
-                if (prog.config.Category != null && Filter.Equals(prog.config.Category, StringComparison.OrdinalIgnoreCase))
-                    return bNot ? -1 : 1;
+                case FilterPreset.Socket.Any:
+                    if (prog.SocketsTcp == 0 && prog.SocketsUdp == 0)
+                        return true;
+                    break;
+                case FilterPreset.Socket.TCP:
+                    if (prog.SocketsTcp == 0)
+                        return true;
+                    break;
+                case FilterPreset.Socket.Client:
+                    if (prog.SocketsTcp - prog.SocketsSrv == 0)
+                        return true;
+                    break;
+                case FilterPreset.Socket.Server:
+                    if (prog.SocketsSrv == 0)
+                        return true;
+                    break;
+                case FilterPreset.Socket.UDP:
+                    if (prog.SocketsUdp == 0)
+                        return true;
+                    break;
+                case FilterPreset.Socket.Web:
+                    if (prog.SocketsWeb == 0)
+                        return true;
+                    break;
+                case FilterPreset.Socket.None:
+                    if (prog.SocketsTcp != 0 || prog.SocketsUdp != 0)
+                        return true;
+                    break;
             }
-            return 0;
+
+
+            //Rules
+            switch (Filter.Rules)
+            {
+                case FilterPreset.Rule.Any:
+                    if (prog.EnabledRules == 0 && prog.DisabledRules == 0)
+                        return true;
+                    break;
+                case FilterPreset.Rule.Active:
+                    if (prog.EnabledRules == 0)
+                        return true;
+                    break;
+                case FilterPreset.Rule.Disabled:
+                    if (prog.DisabledRules == 0)
+                        return true;
+                    break;
+                case FilterPreset.Rule.None:
+                    if (prog.EnabledRules != 0 || prog.DisabledRules != 0)
+                        return true;
+                    break;
+            }
+
+                //Types
+            if (MultiFilter(Filter.Types, (string Type) => {
+                if (Type == "Programs")
+                    return prog.Programs.Keys.FirstOrDefault(id => id.Type == ProgramID.Types.Program) != null;
+                else if (Type == "System")
+                    return prog.Programs.Keys.FirstOrDefault(id => (id.Type == ProgramID.Types.System || id.Type == ProgramID.Types.Global || id.Type == ProgramID.Types.Service)) != null;
+                else if (Type == "Apps")
+                    return prog.Programs.Keys.FirstOrDefault(id => id.Type == ProgramID.Types.App) != null;
+                return false;
+            }))
+                return true;
+
+            //Categories
+            if (MultiFilter(Filter.Categories, (string Category) => {
+                return Category.Length == 0 // Uncategorized
+                ? (prog.config.Category == null || prog.config.Category.Length == 0)
+                : (prog.config.Category != null && Category.Equals(prog.config.Category, StringComparison.OrdinalIgnoreCase));
+            }))
+                return true;
+
+            //Filter
+            if (DoFilter(Filter.Filter, prog.config.Name, prog.Programs.Keys.ToList()))
+                return true;
+
+            return false;
         }
 
 
@@ -706,135 +776,66 @@ namespace PrivateWin10.Pages
             }
 
             UpdateIDs(true);
-            UpdateRules(true);
-            UpdateConnections(true);
+            ruleList.UpdateRules(true);
+            consList.UpdateConnections(true);
+            sockList.UpdateSockets(true);
+            dnsList.UpdateDnsLog(true);
             CheckPrograms();
         }
 
-        private List<ProgramList.ID> GetIDs()
+        public List<Guid> GetCurGuids(string filter = null)
         {
-            List<ProgramList.ID> IDs = new List<ProgramList.ID>();
+            List<Guid> guids = new List<Guid>();
+            if (chkAll.IsChecked != true)
+            {
+                foreach (ProgramControl ctrl in mCurPrograms)
+                {
+                    if (filter != null && DoFilter(filter, ctrl.Program.config.Name, ctrl.Program.Programs.Keys.ToList()))
+                        continue;
 
-            void AddIDs(HashSet<ProgramList.ID> ids)
-            {
-                foreach (ProgramList.ID ID in ids)
-                    IDs.Add(ID);
+                    guids.Add(ctrl.Program.guid);
+                }
             }
-            if (chkAll.IsChecked == true)
+            return guids;
+        }
+
+        private List<Program> GetProgs(bool ignoreAll = false)
+        {
+            List<Program> progs = new List<Program>();
+
+            void AddIDs(SortedDictionary<ProgramID, Program> programs)
             {
-                HashSet<Program> temp = new HashSet<Program>();
-                foreach (Program entry in App.itf.GetPrograms())
+                foreach (Program prog in programs.Values)
+                    progs.Add(prog);
+            }
+            if (chkAll.IsChecked == true && ignoreAll == false)
+            {
+                HashSet<ProgramSet> temp = new HashSet<ProgramSet>();
+                foreach (ProgramSet entry in App.client.GetPrograms())
                 {
                     if (temp.Add(entry))
-                        AddIDs(entry.IDs);
+                        AddIDs(entry.Programs);
                 }
             }
             else
             {
                 foreach (ProgramControl ctrl in mCurPrograms)
                 {
-                    AddIDs(ctrl.Program.IDs);
+                    AddIDs(ctrl.Program.Programs);
                 }
             }
 
-            return IDs;
+            return progs;
         }
 
         private void UpdateIDs(bool clear = false)
         {
-            /*if (clear)
-                progGrid.Items.Clear();
 
-            Dictionary<ProgramList.ID, ProgramControl.IDEntry> oldRules = new Dictionary<ProgramList.ID, ProgramControl.IDEntry>();
-            foreach (ProgramControl.IDEntry oldItem in progGrid.Items)
-                oldRules.Add(oldItem.mID, oldItem);
-
-            foreach (ProgramList.ID id in GetIDs())
-            {
-                if (DoFilter(mIDFilter, id.GetDisplayName(), new HashSet<ProgramList.ID>() { id }))
-                    continue;
-
-                if (!oldRules.Remove(id))
-                    progGrid.Items.Insert(0, new ProgramControl.IDEntry(id));
-            }
-
-            foreach (ProgramControl.IDEntry item in oldRules.Values)
-                progGrid.Items.Remove(item);*/
-        }
-
-        private void UpdateRules(bool clear = false)
-        {
-            if (clear)
-                ruleGrid.Items.Clear();
-
-            Dictionary<FirewallRule, RuleItem> oldRules = new Dictionary<FirewallRule, RuleItem>();
-            foreach (RuleItem oldItem in ruleGrid.Items)
-                oldRules.Add(oldItem.Rule, oldItem);
-
-            List<Guid> guids = new List<Guid>();
-            if (chkAll.IsChecked != true)
-            {
-                foreach (ProgramControl ctrl in mCurPrograms)
-                    guids.Add(ctrl.Program.guid);
-            }
-
-            foreach (FirewallRule rule in App.itf.GetRules(guids))
-            {
-                if (mHideDisabled && rule.Enabled == false)
-                    continue;
-
-                if (DoFilter(mRuleFilter, rule.Name, new HashSet<ProgramList.ID>() { rule.mID }))
-                    continue;
-
-                if (!oldRules.Remove(rule))
-                    ruleGrid.Items.Add(new RuleItem(rule));
-            }
-
-            foreach (RuleItem item in oldRules.Values)
-                ruleGrid.Items.Remove(item);
-
-            // update existing cels
-            ruleGrid.Items.Refresh();
-        }
-
-        private void UpdateConnections(bool clear = false)
-        {
-            if (clear)
-                consGrid.Items.Clear();
-
-            Dictionary<Guid, LogItem> oldLog = new Dictionary<Guid, LogItem>();
-            foreach (LogItem oldItem in consGrid.Items)
-                oldLog.Add(oldItem.Entry.guid, oldItem);
-
-            List<Guid> guids = new List<Guid>();
-            if (chkAll.IsChecked != true)
-            {
-                foreach (ProgramControl ctrl in mCurPrograms)
-                    guids.Add(ctrl.Program.guid);
-            }
-
-            foreach (Program.LogEntry entry in App.itf.GetConnections(guids))
-            {
-                if (DoFilter(mConFilter, entry.mID.GetDisplayName(), new HashSet<ProgramList.ID>() { entry.mID }))
-                    continue;
-
-                switch (mConTypes)
-                {
-                    case ConTypes.Allowed: if (entry.Action != Firewall.Actions.Allow) continue; break;
-                    case ConTypes.Blocked: if (entry.Action != Firewall.Actions.Block) continue; break;
-                }
-
-                if (!oldLog.Remove(entry.guid))
-                    consGrid.Items.Insert(0, new LogItem(entry));
-            }
-
-            foreach (LogItem item in oldLog.Values)
-                consGrid.Items.Remove(item);
         }
 
         void process_KeyEventHandler(object sender, KeyEventArgs e)
         {
-            if ((e.Key == Key.Up || e.Key == Key.Down) && !((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control))
+            if ((e.Key == Key.Up || e.Key == Key.Down) /*&& !((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)*/)
             {
                 ProgramControl curProcess = null;
                 if (mCurPrograms.Count > 0)
@@ -845,138 +846,70 @@ namespace PrivateWin10.Pages
                     mCurPrograms.Clear();
                 }
 
+                e.Handled = true;
+                int curRow = Grid.GetRow(curProcess);
                 if (e.Key == Key.Up)
                 {
-                    e.Handled = true;
-                    int curRow = Grid.GetRow(curProcess);
-                    if (curRow > 0)
+                    while (curRow > 0)
                     {
-                        if (curProcess != null)
-                            curProcess.SetFocus(false);
-                        curProcess = this.processGrid.Children.Cast<ProgramControl>().First((c) => Grid.GetRow(c) == curRow - 1);
-                        if (curProcess != null)
+                        curRow--;
+                        ProgramControl curProg = this.processGrid.Children.Cast<ProgramControl>().First((c) => Grid.GetRow(c) == curRow);
+                        if (curProg.Visibility == Visibility.Visible)
                         {
-                            curProcess.SetFocus(true);
-
+                            curProcess = curProg;
                             this.processScroll.ScrollToVerticalOffset(this.processScroll.VerticalOffset - (curProcess.ActualHeight + 2));
+                            break;
                         }
                     }
                 }
                 else if (e.Key == Key.Down)
                 {
-                    e.Handled = true;
-                    int curRow = Grid.GetRow(curProcess);
-                    if (curRow < this.processGrid.Children.Count - 1)
+                    while (curRow < this.processGrid.Children.Count - 1)
                     {
-                        if (curProcess != null)
-                            curProcess.SetFocus(false);
-                        curProcess = this.processGrid.Children.Cast<ProgramControl>().First((c) => Grid.GetRow(c) == curRow + 1);
-                        if (curProcess != null)
+                        curRow++;
+                        ProgramControl curProg = this.processGrid.Children.Cast<ProgramControl>().First((c) => Grid.GetRow(c) == curRow);
+                        if (curProg.Visibility == Visibility.Visible)
                         {
-                            curProcess.SetFocus(true);
-
+                            curProcess = curProg;
                             this.processScroll.ScrollToVerticalOffset(this.processScroll.VerticalOffset + (curProcess.ActualHeight + 2));
+                            break;
                         }
                     }
                 }
 
+                if (curProcess == null)
+                    return;
+
+                curProcess.SetFocus(true);
                 mCurPrograms.Add(curProcess);
 
                 UpdateIDs(true);
-                UpdateRules(true);
-                UpdateConnections(true);
+                ruleList.UpdateRules(true);
+                consList.UpdateConnections(true);
+                sockList.UpdateSockets(true);
+                dnsList.UpdateDnsLog(true);
                 CheckPrograms();
             }
         }
 
-        private void cmbSoft_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        
+        private void cmbSort_SelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        //private void cmbSort_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            mSortBy = (Sorts)((sender as ComboBox).SelectedItem as ContentControl).Tag;
+            mSortBy = (Sorts)((sender as RibbonGallery).SelectedItem as RibbonGalleryItem).Tag;
             if (SuspendChange != 0)
                 return;
             App.SetConfig("GUI", "SortList", (int)mSortBy);
             mSortProgs = true;
         }
 
-        bool cmbFilterOpen = false;
-
-        private void cmbFilter_DropDownOpened(object sender, EventArgs e)
-        {
-            cmbFilterOpen = true;
-        }
-
-        private void cmbFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (SuspendChange != 0)
-                return;
-            ContentControl ctrl = (cmbFilter.SelectedItem as CatEntry);
-            if (ctrl == null)
-                return;
-            mCatFilter = ctrl.Tag.ToString();
-            mSortProgs = true;
-            App.SetConfig("GUI", "CategoryFilter", mCatFilter);
-        }
-
-        private void cmbFilter_CheckClicked(object sender, RoutedEventArgs e)
-        {
-            if (SuspendChange != 0)
-                return;
-
-            mCatFilter = "";
-            foreach (CatEntry ctrl in cmbFilter.Items)
-            {
-                if (ctrl.IsSelected == false)
-                    continue;
-                if (mCatFilter.Length > 0)
-                    mCatFilter += ",";
-                if (ctrl.IsSelected == null)
-                    mCatFilter += "-" + ctrl.Tag.ToString();
-                else
-                    mCatFilter += ctrl.Tag.ToString();
-            }
-            mSortProgs = true;
-            App.SetConfig("GUI", "CategoryFilter", mCatFilter);
-        }
-
-        private void cmbFilter_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (SuspendChange != 0 || cmbFilterOpen || cmbFilter.SelectedItem != null)
-                return;
-            if (mCatFilter.Length > 0 && mCatFilter.Substring(0, 1) != ".")
-                cmbFilter.Text = "";
-            mCatFilter = "." + cmbFilter.Text;
-            mSortProgs = true;
-            App.SetConfig("GUI", "CategoryFilter", mCatFilter);
-        }
-
-        private void cmbFilter_DropDownClosed(object sender, EventArgs e)
-        {
-            cmbFilterOpen = false;
-
-            if (mCatFilter.Length > 0 && mCatFilter.Substring(0, 1) != "!" && mCatFilter.Substring(0, 1) != ".")
-            {
-                SuspendChange++;
-                if (mCatFilter.Contains(","))
-                    cmbFilter.Text = Translate.fmt("filer_multi");
-                else
-                    cmbFilter.Text = mCatFilter;
-                SuspendChange--;
-            }
-        }
-
         private void chkAll_Click(object sender, RoutedEventArgs e)
         {
             UpdateIDs(true);
-            UpdateRules(true);
-            UpdateConnections(true);
-        }
-
-        private void txtFilter_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            mProgFilter = txtFilter.Text;
-            mSortProgs = true;
-            FullUpdate = true;
-            App.SetConfig("GUI", "ProgFilter", mProgFilter);
+            ruleList.UpdateRules(true);
+            consList.UpdateConnections(true);
+            sockList.UpdateSockets(true);
+            dnsList.UpdateDnsLog(true);
         }
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)
@@ -988,7 +921,7 @@ namespace PrivateWin10.Pages
                 if (progWnd.ShowDialog() != true)
                     return;
 
-                if (App.itf.AddProgram(progWnd.ID, Guid.Empty))
+                if (App.client.AddProgram(progWnd.ID, Guid.Empty))
                     break;
 
                 MessageBox.Show(Translate.fmt("msg_already_exist"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -1002,7 +935,7 @@ namespace PrivateWin10.Pages
 
             foreach (ProgramControl curProgram in mCurPrograms)
             {
-                if (curProgram.Program.GetMainID().Type == ProgramList.Types.System || curProgram.Program.GetMainID().Type == ProgramList.Types.Global)
+                if (curProgram.Program.Programs.First().Key.Type == ProgramID.Types.System || curProgram.Program.Programs.First().Key.Type == ProgramID.Types.Global)
                 {
                     MessageBox.Show(Translate.fmt("msg_no_sys_merge"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     return;
@@ -1011,10 +944,10 @@ namespace PrivateWin10.Pages
 
             for (ProgramControl firstProg = mCurPrograms[0]; mCurPrograms.Count > 1; mCurPrograms.RemoveAt(1))
             {
-                Program curProgram = mCurPrograms[1].Program;
-                App.itf.MergePrograms(firstProg.Program.guid, curProgram.guid);
+                ProgramSet curProgram = mCurPrograms[1].Program;
+                App.client.MergePrograms(firstProg.Program.guid, curProgram.guid);
             }
-
+            
             //firstProg.Process.Log.Sort();
         }
 
@@ -1024,60 +957,18 @@ namespace PrivateWin10.Pages
                 return;
 
             foreach (ProgramControl curProgram in mCurPrograms)
-                App.itf.RemoveProgram(curProgram.Program.guid);
+                App.client.RemoveProgram(curProgram.Program.guid);
         }
 
-        private void btnEnableRule_Click(object sender, RoutedEventArgs e)
-        {
-            foreach (RuleItem item in ruleGrid.SelectedItems)
-            {
-                item.Rule.Enabled = true;
-                App.itf.UpdateRule(item.Rule);
-            }
-        }
-
-        private void btnDisableRule_Click(object sender, RoutedEventArgs e)
-        {
-            foreach (RuleItem item in ruleGrid.SelectedItems)
-            {
-                item.Rule.Enabled = false;
-                App.itf.UpdateRule(item.Rule);
-            }
-        }
-
-        private void btnRemoveRule_Click(object sender, RoutedEventArgs e)
-        {
-            if (MessageBox.Show(Translate.fmt("msg_remove_rules"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
-                return;
-
-            foreach (RuleItem item in ruleGrid.SelectedItems)
-                App.itf.RemoveRule(item.Rule);
-        }
+        
 
         private void btnReload_Click(object sender, RoutedEventArgs e)
         {
-            App.itf.LoadRules();
+            App.client.LoadRules();
             UpdateIDs(true);
-            UpdateRules(true);
+            ruleList.UpdateRules(true);
         }
 
-        private void btnBlockRule_Click(object sender, RoutedEventArgs e)
-        {
-            foreach (RuleItem item in ruleGrid.SelectedItems)
-            {
-                item.Rule.Action = Firewall.Actions.Block;
-                App.itf.UpdateRule(item.Rule);
-            }
-        }
-
-        private void btnAllowRule_Click(object sender, RoutedEventArgs e)
-        {
-            foreach (RuleItem item in ruleGrid.SelectedItems)
-            {
-                item.Rule.Action = Firewall.Actions.Allow;
-                App.itf.UpdateRule(item.Rule);
-            }
-        }
 
         private void btnCleanup_Click(object sender, RoutedEventArgs e)
         {
@@ -1087,156 +978,39 @@ namespace PrivateWin10.Pages
             foreach (ProgramControl item in mPrograms.Values)
                 item.SetError(false);
 
-            int Count = App.itf.CleanUpPrograms();
+            int Count = App.client.CleanUpPrograms();
 
             MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.mName, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private void btnCreateRule_Click(object sender, RoutedEventArgs e)
+        public void ShowRuleWindow(FirewallRule rule)
         {
-            if (mCurPrograms.Count == 0)
-                return;
-            FirewallRule rule = new FirewallRule() { guid = Guid.Empty, Profile = (int)Firewall.Profiles.All, Interface = (int)Firewall.Interfaces.All, Enabled = true };
-            rule.Name = Translate.fmt("custom_rule", mCurPrograms[0].Program.GetMainID().GetDisplayName());
-            rule.Grouping = FirewallRule.RuleGroup;
-            rule.Direction = Firewall.Directions.Bidirectiona;
-            if (mCurPrograms.Count == 1)
-                rule.mID = mCurPrograms[0].Program.GetMainID();
-            ShowRuleWindow(rule);
-        }
+            // if no rule was given it means create a new rule for one of the current programs
+            if (rule == null)
+            {
+                rule = new FirewallRule() { guid = null, Profile = (int)FirewallRule.Profiles.All, Interface = (int)FirewallRule.Interfaces.All, Enabled = true };
+                rule.Grouping = FirewallManager.RuleGroup;
+                rule.Direction = FirewallRule.Directions.Bidirectiona;
 
-        private void btnEditRule_Click(object sender, RoutedEventArgs e)
-        {
-            RuleItem item = (ruleGrid.SelectedItem as RuleItem);
-            if (item == null)
-                return;
+                rule.Name = Translate.fmt("custom_rule", mCurPrograms.Count != 0 ? mCurPrograms[0].Program.config.Name : "");
+                if (mCurPrograms.Count == 1)
+                    rule.ProgID = mCurPrograms[0].Program.Programs.First().Key;
+            }
 
-            ShowRuleWindow(item.Rule);
-        }
-
-        private void ruleGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            btnEditRule_Click(null, null);
-        }
-
-        private void ShowRuleWindow(FirewallRule rule)
-        {
-            List<ProgramList.ID> IDs = GetIDs();
+            List<Program> progs = GetProgs();
 
             for (; ; )
             {
-                RuleWindow ruleWnd = new RuleWindow(IDs, rule);
+                RuleWindow ruleWnd = new RuleWindow(progs, rule);
                 if (ruleWnd.ShowDialog() != true)
                     return;
 
-                if (App.itf.UpdateRule(rule)) // Note: this also adds
+                if (App.client.UpdateRule(rule)) // Note: this also adds
                     break;
 
                 MessageBox.Show(Translate.fmt("msg_rule_failed"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
         }
-
-        private void cmbConTypes_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            mConTypes = (ConTypes)cmbConTypes.SelectedIndex;
-            App.SetConfig("GUI", "ConTypes", (int)mConTypes);
-            UpdateConnections(true);
-        }
-
-        private void txtConFilter_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            mConFilter = txtConFilter.Text;
-            App.SetConfig("GUI", "ConFilter", mConFilter);
-            UpdateConnections(true);
-        }
-
-        private void txtRuleFilter_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            mRuleFilter = txtRuleFilter.Text;
-            App.SetConfig("GUI", "RuleFilter", mRuleFilter);
-            UpdateRules(true);
-        }
-
-        /*private void txtIDFilter_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            mIDFilter = txtIDFilter.Text;
-            App.SetConfig("GUI", "IDFilter", mRuleFilter);
-            UpdateIDs(true);
-        }*/
-
-        private void btnClearLog_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBoxResult res = MessageBox.Show(Translate.fmt("msg_clear_log"), App.mName, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-
-            if (res == MessageBoxResult.Cancel)
-                return;
-
-            if(App.itf.ClearLog(res == MessageBoxResult.Yes))
-                consGrid.Items.Clear();
-        }
-
-        private void btnCloneRule_Click(object sender, RoutedEventArgs e)
-        {
-            if (MessageBox.Show(Translate.fmt("msg_clone_rules"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
-                return;
-
-            foreach (RuleItem item in ruleGrid.SelectedItems)
-            {
-                FirewallRule rule = item.Rule.Clone();
-                rule.Name += " - Clone";
-                App.itf.UpdateRule(rule);
-            }
-        }
-
-        private void btnMkRule_Click(object sender, RoutedEventArgs e)
-        {
-            LogItem item = (consGrid.SelectedItem as LogItem);
-            if (item == null)
-                return;
-
-            FirewallRule rule = new FirewallRule() { guid = Guid.Empty, mID = item.Entry.mID, Profile = (int)Firewall.Profiles.All, Interface = (int)Firewall.Interfaces.All, Enabled = true };
-
-            rule.mID = item.Entry.mID;
-            rule.Name = Translate.fmt("custom_rule", item.Entry.mID.GetDisplayName());
-            rule.Grouping = FirewallRule.RuleGroup;
-
-            rule.Direction = item.Entry.Direction;
-            rule.Protocol = item.Entry.Protocol;
-            switch (item.Entry.Protocol)
-            {
-                /*case (int)FirewallRule.KnownProtocols.ICMP:
-                case (int)FirewallRule.KnownProtocols.ICMPv6:
-
-                    break;*/
-                case (int)FirewallRule.KnownProtocols.TCP:
-                case (int)FirewallRule.KnownProtocols.UDP:
-                    rule.RemotePorts = item.Entry.RemotePort.ToString();
-                    break;
-            }
-            rule.RemoteAddresses = item.Entry.RemoteAddress.ToString();
-
-            ShowRuleWindow(rule);
-        }
-
-        private void chkNoDisabled_Click(object sender, RoutedEventArgs e)
-        {
-            mHideDisabled = chkNoDisabled.IsChecked == true;
-            UpdateRules(true);
-        }
-
-
-        /*private void progGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            ProgramControl.IDEntry entry = (progGrid.SelectedItem as ProgramControl.IDEntry);
-            if (entry == null)
-                return;
-
-            ProgramWnd progWnd = new ProgramWnd(entry.mID);
-            if (progWnd.ShowDialog() != true)
-                return;
-
-            // no editing
-        }*/
 
         private void CheckPrograms()
         {
@@ -1244,287 +1018,235 @@ namespace PrivateWin10.Pages
             int SelectedCount = 0;
             foreach (ProgramControl ctrl in mCurPrograms)
             {
-                if (ctrl.Program.GetMainID().Type == ProgramList.Types.Global || ctrl.Program.GetMainID().Type == ProgramList.Types.System)
+                if (ctrl.Program.Programs.First().Key.Type == ProgramID.Types.Global || ctrl.Program.Programs.First().Key.Type == ProgramID.Types.System)
                     GlobalSelected = true;
                 else
                     SelectedCount++;
             }
 
-            btnCreateRule.IsEnabled = SelectedCount >= 1;
             btnMerge.IsEnabled = (SelectedCount >= 2 && !GlobalSelected);
             btnRemove.IsEnabled = (SelectedCount >= 1 && !GlobalSelected);
         }
 
-        private void CheckRules()
+        private void Ribbon_Loaded(object sender, RoutedEventArgs e)
         {
-            int SelectedCount = 0;
-            int EnabledCount = 0;
-            int DisabledCount = 0;
-            int AllowingCount = 0;
-            int BlockingCount = 0;
-
-            foreach (RuleItem item in ruleGrid.SelectedItems)
+            try // when this page does not have focus this gets called but the required child is missing
             {
-                SelectedCount++;
-                if (item.Rule.Enabled)
-                    EnabledCount++;
+                // hide quick access bar: https://stackoverflow.com/questions/6265392/wpf-ribbon-hide-quick-access-toolbar
+                Grid child = VisualTreeHelper.GetChild((DependencyObject)sender, 0) as Grid;
+                if (child != null)
+                    child.RowDefinitions[0].Height = new GridLength(0);
+
+                txtPreset.Text = Translate.fmt("lbl_last_preset");
+            }
+            catch { }
+        }
+
+        private void ChkNoLocal_Click(object sender, RoutedEventArgs e)
+        {
+            App.SetConfig("GUI", "ActNoLocal", this.chkNoLocal.IsChecked == true ? 1 : 0);
+        }
+
+        private void ChkNoLan_Click(object sender, RoutedEventArgs e)
+        {
+            App.SetConfig("GUI", "ActNoLan", this.chkNoLan.IsChecked == true ? 1 : 0);
+        }
+
+        private void BtnNoFilter_Click(object sender, RoutedEventArgs e)
+        {
+            ApplyPreset(new FilterPreset());
+            App.IniDeleteSection("DefaultPreset");
+            btnNoFilter.IsEnabled = false;
+        }
+
+        private void ApplyPreset(FilterPreset Filter)
+        {
+            CurFilter = Filter;
+
+            SuspendChange++;
+
+            //Recently
+            WpfFunc.CmbSelect(this.cmbRecent, CurFilter.Recently.ToString());
+
+            //Sockets
+            WpfFunc.CmbSelect(this.cmbSockets, CurFilter.Sockets.ToString());
+
+            //Rules
+            WpfFunc.CmbSelect(this.cmbRules, CurFilter.Rules.ToString());
+
+            //Types
+            chkProgs.IsChecked = CurFilter.Types.FirstOrDefault(cur => cur.Equals("Programs")) != null ? true : false;
+            chkApps.IsChecked = CurFilter.Types.FirstOrDefault(cur => cur.Equals("Apps")) != null ? true : false;
+            chkSys.IsChecked = CurFilter.Types.FirstOrDefault(cur => cur.Equals("System")) != null ? true : false;
+
+            //Categories
+            foreach (var item in this.catFilter.Items)
+            {
+                CheckBox box = item as CheckBox;
+                string cat = box.Tag as string;
+
+                if (CurFilter.Categories.FirstOrDefault(cur => cur.Equals(cat)) != null)
+                    box.IsChecked = true;
+                else if (CurFilter.Categories.FirstOrDefault(cur => cur.Equals("-" + cat)) != null)
+                    box.IsChecked = null;
                 else
-                    DisabledCount++;
-                if (item.Rule.Action == Firewall.Actions.Allow)
-                    AllowingCount++;
-                if (item.Rule.Action == Firewall.Actions.Block)
-                    BlockingCount++;
+                    box.IsChecked = false;
             }
 
-            btnEnableRule.IsEnabled = DisabledCount >= 1;
-            btnDisableRule.IsEnabled = EnabledCount >= 1;
-            btnRemoveRule.IsEnabled = SelectedCount >= 1;
-            btnBlockRule.IsEnabled = AllowingCount >= 1;
-            btnAllowRule.IsEnabled = BlockingCount >= 1;
-            btnEditRule.IsEnabled = SelectedCount == 1;
-            btnCloneRule.IsEnabled = SelectedCount >= 1;
+            // Filter
+            this.txtFilter.Text = CurFilter.Filter;
+
+            SuspendChange--;
+
+            mSortProgs = true;
+            //FullUpdate = true;
         }
 
-        private void CheckLogLines()
+        private void OnFilter_Changed(object sender, RoutedEventArgs e)
         {
-            btnMkRule.IsEnabled = consGrid.SelectedItems.Count == 1;
-        }
+            if (SuspendChange != 0)
+                return;
 
-        private void RuleGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            CheckRules();
-        }
+            //Recently
+            if(this.cmbRecent.SelectedItem != null)
+                CurFilter.Recently = (FilterPreset.Recent)(this.cmbRecent.SelectedItem as RibbonGalleryItem).Tag;
 
-        private void ConsGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            CheckLogLines();
-        }
-    }
+            //Sockets
+            if (this.cmbSockets.SelectedItem != null)
+                CurFilter.Sockets = (FilterPreset.Socket)(this.cmbSockets.SelectedItem as RibbonGalleryItem).Tag;
 
-    public class LogItem : INotifyPropertyChanged
-    {
-        public Program.LogEntry Entry;
+            //Rules
+            if (this.cmbRules.SelectedItem != null)
+                CurFilter.Rules = (FilterPreset.Rule)(this.cmbRules.SelectedItem as RibbonGalleryItem).Tag;
 
-        public LogItem(Program.LogEntry entry)
-        {
-            Entry = entry;
-        }
+            //Types
+            CurFilter.Types.Clear();
+            if (chkProgs.IsChecked != false)
+                CurFilter.Types.Add(/*chkProgs.IsChecked != true ? "-Programs" :*/ "Programs");
+            if (chkApps.IsChecked != false)
+                CurFilter.Types.Add(/*chkProgs.IsChecked != true ? "-Apps" :*/ "Apps");
+            if (chkSys.IsChecked != false)
+                CurFilter.Types.Add(/*chkProgs.IsChecked != true ? "-System" :*/ "System");
 
-        void DoUpdate()
-        {
-            NotifyPropertyChanged(null);
-        }
-
-        public ImageSource Icon { get { return ImgFunc.GetIcon(Entry.mID.Path, 16); } }
-
-        public string Name { get { return Entry.mID.GetDisplayName(); } }
-        public string Program { get { return Entry.mID.AsString(); } }
-        public string TimeStamp { get { return Entry.TimeStamp.ToString("HH:mm:ss dd.MM.yyyy"); } }
-        public string Action
-        {
-            get
+            //Categories
+            CurFilter.Categories.Clear();
+            foreach (var item in this.catFilter.Items)
             {
-                switch (Entry.Action)
+                CheckBox box = item as CheckBox;
+                if (box.IsChecked == false)
+                    continue;
+                string cat = box.Tag as string;
+                if (box.IsChecked != true)
+                    cat = "-" + cat;
+                CurFilter.Categories.Add(cat);
+            }
+
+            // Filter
+            CurFilter.Filter = this.txtFilter.Text;
+
+            SavePreset(CurFilter);
+
+            mSortProgs = true;
+            //FullUpdate = true;
+
+            btnNoFilter.IsEnabled = true;
+        }
+
+        private string MakePresetSection(string Name)
+        {
+            return Name != null ? "Preset_" + Name.Replace(" ", "_") : "DefaultPreset";
+        }
+
+        private void SavePreset(FilterPreset Filter, string Name = null)
+        {
+            string Section = MakePresetSection(Name);
+
+            App.SetConfig(Section, "Recent", CurFilter.Recently.ToString());
+            App.SetConfig(Section, "Sockets", CurFilter.Sockets.ToString());
+            App.SetConfig(Section, "Rules", CurFilter.Rules.ToString());
+            App.SetConfig(Section, "Types", string.Join(",", CurFilter.Types));
+            App.SetConfig(Section, "Categories", string.Join(",", CurFilter.Categories));
+            App.SetConfig(Section, "Filter", CurFilter.Filter);
+        }
+
+        private FilterPreset LoadPreset(string Name = null)
+        {
+            string Section = MakePresetSection(Name);
+
+            FilterPreset Filter = new FilterPreset();
+            Enum.TryParse(App.GetConfig(Section, "Recent"), out Filter.Recently);
+            Enum.TryParse(App.GetConfig(Section, "Sockets"), out Filter.Sockets);
+            Enum.TryParse(App.GetConfig(Section, "Rules"), out Filter.Rules);
+            Filter.Types = TextHelpers.SplitStr(App.GetConfig(Section, "Types"), ",");
+            Filter.Categories = TextHelpers.SplitStr(App.GetConfig(Section, "Categories"), ",");
+            Filter.Filter = App.GetConfig(Section, "Filter");
+            return Filter;
+        }
+
+
+        private void CmdPreset_SelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (SuspendChange != 0)
+                return;
+
+            var item = this.cmdPreset.SelectedItem;
+            if (item == null)
+                return;
+            var Filter = LoadPreset((item as RibbonGalleryItem).Tag.ToString());
+            ApplyPreset(Filter);
+        }
+
+        private void BtnAddPreset_Click(object sender, RoutedEventArgs e)
+        {
+            if (txtPreset.Text.Length == 0)
+                txtPreset.Text = "Preset_" + (cmdPresets.Items.Count + 1).ToString();
+
+            string Name = txtPreset.Text;
+
+            bool bFound = false;
+            foreach (var item in cmdPresets.Items)
+            {
+                if ((item as RibbonGalleryItem).Content.Equals(Name))
                 {
-                    case Firewall.Actions.Allow: return Translate.fmt("str_allow");
-                    case Firewall.Actions.Block: return Translate.fmt("str_block");
-                    default: return Translate.fmt("str_undefined");
+                    bFound = true;
+                    break;
                 }
             }
-        }
 
-        public string Direction
-        {
-            get
+            if (!bFound)
             {
-                switch (Entry.Direction)
-                {
-                    case Firewall.Directions.Inbound: return Translate.fmt("str_inbound");
-                    case Firewall.Directions.Outboun: return Translate.fmt("str_outbound");
-                    default: return Translate.fmt("str_undefined");
-                }
+                var item = new RibbonGalleryItem { Content = Name, Tag = Name };
+
+                cmdPresets.Items.Add(item);
+
+                SuspendChange++;
+                cmdPreset.SelectedItem = item;
+                SuspendChange--;
             }
-        }
-        public string Protocol { get { return (Entry.Protocol == (int)NetFunc.KnownProtocols.Any) ? Translate.fmt("pro_any") : NetFunc.Protocol2Str(Entry.Protocol); } }
-        public string DestAddress { get { return Entry.RemoteAddress; } }
-        public string DestPorts { get { return Entry.RemotePort.ToString(); } }
-        public string SrcAddress { get { return Entry.LocalAddress; } }
-        public string SrcPorts { get { return Entry.LocalPort.ToString(); } }
 
-        public string ActionColor
+            SavePreset(CurFilter, Name);
+        }
+
+        private void BtnDelPreset_Click(object sender, RoutedEventArgs e)
         {
-            get
-            {
-                if(Entry.Type == PrivateWin10.Program.LogEntry.Types.RuleError) return "yellow";
-                switch (Entry.Action)
-                {
-                    case Firewall.Actions.Allow:
-                        if(NetFunc.IsMultiCast(Entry.RemoteAddress))
-                            return "blue2";
-                        else if (Firewall.MatchAddress(Entry.RemoteAddress, "LocalSubnet"))
-                            return "blue";
-                        else
-                            return "green";
-                    case Firewall.Actions.Block: return "red";
-                    default: return "";
-                }
-            }
+            var item = this.cmdPreset.SelectedItem;
+            if (item == null)
+                return;
+            string Section = MakePresetSection((item as RibbonGalleryItem).Tag.ToString());
+            App.IniDeleteSection(Section);
+            cmdPresets.Items.Remove(item);
         }
 
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        #endregion
-
-        #region Private Helpers
-
-        private void NotifyPropertyChanged(string propertyName)
+        private void TxtPreset_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            var text = txtPreset.Text;
+            Task.Delay(10).ContinueWith(t => txtPreset.Dispatcher.Invoke(() => txtPreset.Text = text));
         }
 
-        #endregion
-    }
-
-    public class RuleItem : INotifyPropertyChanged
-    {
-        public FirewallRule Rule;
-
-        public RuleItem(FirewallRule rule)
+        private void TxtPreset_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            Rule = rule;
+            if (e.Key == Key.Enter)
+                TxtPreset_LostFocus(null, null);
         }
-
-        void DoUpdate()
-        {
-            NotifyPropertyChanged(null);
-        }
-
-        public ImageSource Icon { get { return ImgFunc.GetIcon(Rule.mID.Path, 16); } }
-
-        public string Name { get { return Rule.Name; } }
-        public string Program { get { return Rule.mID.AsString(); } }
-        public string Grouping
-        {
-            get
-            {
-                if (Rule.Grouping != null && Rule.Grouping.Substring(0, 1) == "@")
-                    return MiscFunc.GetResourceStr(Rule.Grouping);
-                return Rule.Grouping;
-            }
-        }
-        public string Enabled { get { return Translate.fmt(Rule.Enabled ? "str_enabled" : "str_disabled"); } }
-
-        public string DisabledColor { get { return Rule.Enabled ? "" : "gray"; } }
-
-        public string Profiles
-        {
-            get
-            {
-                if (Rule.Profile == (int)Firewall.Profiles.All)
-                    return Translate.fmt("str_all");
-                else
-                {
-                    List<string> profiles = new List<string>();
-                    if ((Rule.Profile & (int)Firewall.Profiles.Private) != 0)
-                        profiles.Add(Translate.fmt("str_private"));
-                    if ((Rule.Profile & (int)Firewall.Profiles.Domain) != 0)
-                        profiles.Add(Translate.fmt("str_domain"));
-                    if ((Rule.Profile & (int)Firewall.Profiles.Public) != 0)
-                        profiles.Add(Translate.fmt("str_public"));
-                    return string.Join(",", profiles.ToArray().Reverse());
-                }
-            }
-        }
-        public string Action
-        {
-            get
-            {
-                switch (Rule.Action)
-                {
-                    case Firewall.Actions.Allow: return Translate.fmt("str_allow");
-                    case Firewall.Actions.Block: return Translate.fmt("str_block");
-                    default: return Translate.fmt("str_undefined");
-                }
-            }
-        }
-
-        public string ActionColor
-        {
-            get
-            {
-                switch (Rule.Action)
-                {
-                    case Firewall.Actions.Allow: return "green";
-                    case Firewall.Actions.Block: return "red";
-                    default: return "";
-                }
-            }
-        }
-
-        public string Direction
-        {
-            get
-            {
-                switch (Rule.Direction)
-                {
-                    case Firewall.Directions.Inbound: return Translate.fmt("str_inbound");
-                    case Firewall.Directions.Outboun: return Translate.fmt("str_outbound");
-                    default: return Translate.fmt("str_undefined");
-                }
-            }
-        }
-        public string Protocol { get { return (Rule.Protocol == (int)NetFunc.KnownProtocols.Any) ? Translate.fmt("pro_any") : NetFunc.Protocol2Str(Rule.Protocol); } }
-        public string DestAddress { get { return Rule.RemoteAddresses; } }
-        public string DestPorts { get { return Rule.RemotePorts; } }
-        public string SrcAddress { get { return Rule.LocalAddresses; } }
-        public string SrcPorts { get { return Rule.LocalPorts; } }
-
-        public string ICMPOptions { get { return Rule.IcmpTypesAndCodes; } }
-
-        public string Interfaces
-        {
-            get
-            {
-                if (Rule.Interface == (int)Firewall.Interfaces.All)
-                    return Translate.fmt("str_all");
-                else
-                {
-                    List<string> interfaces = new List<string>();
-                    if ((Rule.Profile & (int)Firewall.Interfaces.Lan) != 0)
-                        interfaces.Add(Translate.fmt("str_lan"));
-                    if ((Rule.Profile & (int)Firewall.Interfaces.RemoteAccess) != 0)
-                        interfaces.Add(Translate.fmt("str_ras"));
-                    if ((Rule.Profile & (int)Firewall.Interfaces.Wireless) != 0)
-                        interfaces.Add(Translate.fmt("str_wifi"));
-                    return string.Join(",", interfaces.ToArray().Reverse());
-                }
-            }
-        }
-
-        public string EdgeTraversal { get { return Rule.EdgeTraversal.ToString(); } }
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        #endregion
-
-        #region Private Helpers
-
-        private void NotifyPropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        #endregion
     }
 }

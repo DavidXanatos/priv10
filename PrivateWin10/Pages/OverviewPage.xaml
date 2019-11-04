@@ -4,10 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PrivateWin10.Pages"
+             xmlns:controls="clr-namespace:PrivateWin10.Controls"
              mc:Ignorable="d" 
              MinHeight="400" MinWidth="400">
     
     <FrameworkElement.Resources>
+        <controls:DateConverter x:Key="dateConverter"/>
+        
         <DrawingImage x:Key="Icon_Start">
             <DrawingImage.Drawing>
                 <DrawingGroup>
@@ -34,43 +37,86 @@
     </FrameworkElement.Resources>
 
     <Grid Margin="48,0,0,0">
-        <!--ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,0,0" VerticalScrollBarVisibility="Auto"-->
-        <WrapPanel Grid.Row="0" Orientation="Vertical">
-            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
-                <Grid Margin="0,5,0,5">
-                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Start}" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <TextBlock Name="lblStartup"  HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Operation Status" VerticalAlignment="Top" FontWeight="Bold"/>
-                    <StackPanel Orientation="Vertical" Margin="50,45,0,0">
-                        <StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal">
-                            <Label Name="lblRunning" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Running as:" FontSize="16"/>
+        <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Name="logRow" Height="*" MinHeight="100" MaxHeight="200" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" MinHeight="100"/>
+            </Grid.RowDefinitions>
+
+            <!--ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,0,0" VerticalScrollBarVisibility="Auto"-->
+            <WrapPanel Grid.Row="1" Orientation="Horizontal">
+                <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
+                    <Grid Margin="0,5,0,5">
+                        <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Start}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                        <TextBlock Name="lblStartup"  HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Operation Status" VerticalAlignment="Top" FontWeight="Bold"/>
+                        <StackPanel Orientation="Vertical" Margin="50,45,0,0">
+                            <StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal">
+                                <Label Name="lblRunning" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Running as:" FontSize="16"/>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
+                    </Grid>
                 </Grid>
-            </Grid>
 
-            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
-                <Grid Margin="0,5,0,5">
-                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Firewall}" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <TextBlock Name="lblFirewall" HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Windows Firewall" VerticalAlignment="Top" FontWeight="Bold"/>
-                    <StackPanel Orientation="Vertical" Margin="50,45,0,0">
-                        <StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal">
-                            <Label Name="lblFirewallStatus" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Firewall status:" FontSize="16"/>
-                            <Label Name="lblFirewallInfo" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="" FontSize="16"/>
+                <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
+                    <Grid Margin="0,5,0,5">
+                        <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Firewall}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                        <TextBlock Name="lblFirewall" HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Windows Firewall" VerticalAlignment="Top" FontWeight="Bold"/>
+                        <StackPanel Orientation="Vertical" Margin="50,45,0,0">
+                            <StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal">
+                                <Label Name="lblFirewallStatus" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Firewall status:" FontSize="16"/>
+                                <Label Name="lblFirewallInfo" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="" FontSize="16"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal">
+                                <Label Name="lblRuleGuardStatus" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Rule Guard:" FontSize="16"/>
+                                <Label Name="lblRuleGuardInfo" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="" FontSize="16"/>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
+                    </Grid>
                 </Grid>
-            </Grid>
 
-            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
-                <Grid Margin="0,5,0,5">
-                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Privacy}" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <TextBlock Name="lblPrivacy" HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Privacy Option" VerticalAlignment="Top" FontWeight="Bold"/>
-                    <StackPanel Orientation="Vertical" Margin="0,45,0,0">
-
-
-                    </StackPanel>
+                <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
+                    <Grid Margin="0,5,0,5">
+                        <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Privacy}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                        <TextBlock Name="lblPrivacy" HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Privacy Option" VerticalAlignment="Top" FontWeight="Bold"/>
+                        <StackPanel Orientation="Vertical" Margin="0,45,0,0">
+                            <StackPanel Margin="0,0,0,0" VerticalAlignment="Top" Orientation="Horizontal">
+                                <Label Name="lblTweakGuardStatus" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Tweak Guard:" FontSize="16"/>
+                                <Label Name="lblTweakGuardInfo" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="" FontSize="16"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
-            </Grid>
-        </WrapPanel>
+            </WrapPanel>
+
+            <GridSplitter ResizeDirection="Rows" Grid.Row="2"  Width="Auto" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
+            <GroupBox Grid.Row="3" Name="grpLog" Header="Privacy Log">
+                <DataGrid Name="logGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="LogGrid_SelectionChanged">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Level">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Grid.Column="0" Margin="2,0,2,0" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Icon}" />
+                                        <TextBlock Grid.Column="1" Height="16" HorizontalAlignment="Left" Margin="2,0,2,0" VerticalAlignment="Center" Text="{Binding Level}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Time Stamp" Binding="{Binding TimeStamp, Converter={StaticResource dateConverter}}" />
+                        <DataGridTextColumn Header="Category" Binding="{Binding Category}" />
+                        <DataGridTextColumn Header="Event" Binding="{Binding Event}" />
+                        <DataGridTextColumn Header="Message" Binding="{Binding Message}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
+        </Grid>
+
     </Grid>
 </UserControl>

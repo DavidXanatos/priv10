@@ -74,7 +74,7 @@ public class IconExtractor
     /// </summary>
     public int Count
     {
-        get { return iconData.Length; }
+        get { return iconData == null ? 0 : iconData.Length; }
     }
 
     /// <summary>
@@ -142,14 +142,14 @@ public class IconExtractor
     private void Initialize(string fileName)
     {
         if (fileName == null)
-            throw new ArgumentNullException("fileName");
+            return;
 
         IntPtr hModule = IntPtr.Zero;
         try
         {
             hModule = LoadLibraryEx(fileName, IntPtr.Zero, LOAD_LIBRARY_AS_DATAFILE);
             if (hModule == IntPtr.Zero)
-                throw new Win32Exception();
+                return;
 
             FileName = GetFileName(hModule);
 

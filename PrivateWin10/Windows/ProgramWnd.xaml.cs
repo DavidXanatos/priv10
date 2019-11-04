@@ -1,6 +1,4 @@
-﻿using PrivateWin10.Controls;
-using PrivateWin10.ViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -15,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using PrivateWin10.Controls;
 
 namespace PrivateWin10.Windows
 {
@@ -23,7 +22,7 @@ namespace PrivateWin10.Windows
     /// </summary>
     public partial class ProgramWnd : Window
     {
-        public ProgramList.ID ID;
+        public ProgramID ID;
 
         public ObservableCollection<PathEntry> Paths;
 
@@ -34,7 +33,7 @@ namespace PrivateWin10.Windows
 
         int SuspendChange = 0;
 
-        public ProgramWnd(ProgramList.ID id)
+        public ProgramWnd(ProgramID id)
         {
             InitializeComponent();
 
@@ -93,40 +92,40 @@ namespace PrivateWin10.Windows
             if (ID == null)
             {
                 radProgram.IsChecked = true;
-                ID = new ProgramList.ID(ProgramList.Types.Program);
+                ID = ProgramID.NewID(ProgramID.Types.Program);
             }
             else
             {
                 switch (ID.Type)
                 {
-                    case ProgramList.Types.Program:
+                    case ProgramID.Types.Program:
                         radProgram.IsChecked = true;
                         break;
-                    case ProgramList.Types.Service:
+                    case ProgramID.Types.Service:
                         radService.IsChecked = true;
                         foreach (ServiceModel.Service service in cmbService.Items)
                         {
-                            if (MiscFunc.StrCmp(service.Value,ID.Name))
+                            if (MiscFunc.StrCmp(service.Value,ID.GetServiceId()))
                             {
                                 cmbService.SelectedItem = service;
                                 break;
                             }
                         }
                         if (cmbService.SelectedItem == null)
-                            cmbService.Text = ID.Name;
+                            cmbService.Text = ID.GetServiceId();
                         break;
-                    case ProgramList.Types.App:
+                    case ProgramID.Types.App:
                         radApp.IsChecked = true;
-                        foreach (AppModel.App app in cmbApp.Items)
+                        foreach (AppModel.AppPkg app in cmbApp.Items)
                         {
-                            if (MiscFunc.StrCmp(app.Value, ID.Name))
+                            if (MiscFunc.StrCmp(app.Value, ID.GetPackageSID()))
                             {
                                 cmbService.SelectedItem = app;
                                 break;
                             }
                         }
                         if (cmbApp.SelectedItem == null)
-                            cmbApp.Text = AppManager.SidToPackageID(ID.Name);
+                            cmbApp.Text = ID.GetPackageName();
                         break;
                 }
             }
@@ -142,31 +141,24 @@ namespace PrivateWin10.Windows
 
         private void btnOK_Click(object sender, RoutedEventArgs e)
         {
+            ContentControl path = (cmbPath.SelectedItem as ContentControl);
+            string pathStr = path != null ? (path.Tag as string) : cmbPath.Text;
             if (radProgram.IsChecked == true)
             {
-                ID.Type = ProgramList.Types.Program;
-                ContentControl path = (cmbPath.SelectedItem as ContentControl);
-                ID.Path = path != null ? (path.Tag as string) : cmbPath.Text;
-                ID.Name = "";
+                ID = ProgramID.NewProgID(pathStr);
             }
             else if (radService.IsChecked == true)
             {
-                ID.Type = ProgramList.Types.Service;
-                ContentControl path = (cmbPath.SelectedItem as ContentControl);
-                ID.Path = path != null ? (path.Tag as string) : cmbPath.Text;
-
                 ServiceModel.Service name = (cmbService.SelectedItem as ServiceModel.Service);
-                ID.Name = name != null ? name.Value : cmbService.Text;
+                ID = ProgramID.NewSvcID(name != null ? name.Value : cmbService.Text, pathStr);
             }
-            else if(radProgram.IsChecked == true)
+            else if (radProgram.IsChecked == true)
             {
-                ID.Type = ProgramList.Types.Program;
-                ContentControl path = (cmbPath.SelectedItem as ContentControl);
-                ID.Path = path != null ? (path.Tag as string) : cmbPath.Text;
-
-                AppModel.App name = (cmbApp.SelectedItem as AppModel.App);
-                ID.Name = name != null ? name.Value : cmbApp.Text;
+                AppModel.AppPkg name = (cmbApp.SelectedItem as AppModel.AppPkg);
+                ID = ProgramID.NewAppID(name != null ? name.Value : cmbApp.Text, pathStr);
             }
+            else
+                ID = ProgramID.NewID(ProgramID.Types.Global);
 
             this.DialogResult = true;
         }
@@ -221,6 +213,19 @@ namespace PrivateWin10.Windows
                     cmbPath.SelectedItem = path;
                 }
             }
+        }
+
+        private void cmbApp_DropDownClosed(object sender, EventArgs e)
+        {
+            if (SuspendChange > 0)
+                return;
+
+            AppModel.AppPkg item = (cmbApp.SelectedItem as AppModel.AppPkg);
+            if (item == null)
+                return;
+
+            if (item.Value == null && App.PkgMgr != null)
+                App.PkgMgr.UpdateAppCache();
         }
     }
 }

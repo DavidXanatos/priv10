@@ -1,5 +1,4 @@
-﻿using PrivateWin10.ViewModels;
-using PrivateWin10.Windows;
+﻿using PrivateWin10.Windows;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,7 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace PrivateWin10.Controls
+namespace PrivateWin10
 {
     /// <summary>
     /// Interaction logic for ProcessControl.xaml
@@ -26,25 +25,25 @@ namespace PrivateWin10.Controls
     {
         public event RoutedEventHandler Click;
 
-        public Program Program;
+        public ProgramSet Program;
 
         private CategoryModel CatModel;
 
         //private Brush mBorderBrush;
 
-        public static SolidColorBrush GetAccessColor(Program.Config.AccessLevels NetAccess)
+        public static SolidColorBrush GetAccessColor(ProgramSet.Config.AccessLevels NetAccess)
         {
             switch (NetAccess)
             {
-                case Program.Config.AccessLevels.FullAccess: return new SolidColorBrush(Colors.LightGreen);
-                case Program.Config.AccessLevels.CustomConfig: return new SolidColorBrush(Colors.Gold);
-                case Program.Config.AccessLevels.LocalOnly: return new SolidColorBrush(Colors.LightSkyBlue);
-                case Program.Config.AccessLevels.BlockAccess: return new SolidColorBrush(Colors.LightPink);
+                case ProgramSet.Config.AccessLevels.FullAccess: return new SolidColorBrush(Colors.LightGreen);
+                case ProgramSet.Config.AccessLevels.CustomConfig: return new SolidColorBrush(Colors.Gold);
+                case ProgramSet.Config.AccessLevels.LocalOnly: return new SolidColorBrush(Colors.LightSkyBlue);
+                case ProgramSet.Config.AccessLevels.BlockAccess: return new SolidColorBrush(Colors.LightPink);
                 default: return new SolidColorBrush(Colors.White);
             }
         }
 
-        public ProgramControl(Program prog, CategoryModel Categories)
+        public ProgramControl(ProgramSet prog, CategoryModel Categories)
         {
             InitializeComponent();
 
@@ -67,13 +66,13 @@ namespace PrivateWin10.Controls
             //mBorderBrush = name.BorderBrush;
             //name.BorderBrush = Brushes.Transparent;
 
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_none"), Tag = Program.Config.AccessLevels.Unconfigured });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_allow"), Tag = Program.Config.AccessLevels.FullAccess });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_edit"), Tag = Program.Config.AccessLevels.CustomConfig });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_lan"), Tag = Program.Config.AccessLevels.LocalOnly });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_block"), Tag = Program.Config.AccessLevels.BlockAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_none"), Tag = ProgramSet.Config.AccessLevels.Unconfigured });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_allow"), Tag = ProgramSet.Config.AccessLevels.FullAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_edit"), Tag = ProgramSet.Config.AccessLevels.CustomConfig });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_lan"), Tag = ProgramSet.Config.AccessLevels.LocalOnly });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_block"), Tag = ProgramSet.Config.AccessLevels.BlockAccess });
             foreach (ComboBoxItem item in cmbAccess.Items)
-                item.Background = GetAccessColor((Program.Config.AccessLevels)item.Tag);
+                item.Background = GetAccessColor((ProgramSet.Config.AccessLevels)item.Tag);
 
             SuspendChange--;
 
@@ -81,15 +80,15 @@ namespace PrivateWin10.Controls
 
             DoUpdate();
 
-            ProgramList.ID id = prog.IDs.First();
-            if (id.Type == ProgramList.Types.Global || id.Type == ProgramList.Types.System)
+            ProgramID id = prog.Programs.First().Key;
+            if (id.Type == ProgramID.Types.Global || id.Type == ProgramID.Types.System)
             {
                 btnIDs.IsEnabled = false;
                 //btnCustimize.Visibility = Visibility.Hidden;
                 cmbAccess.Visibility = Visibility.Hidden;
                 //category.Visibility = Visibility.Hidden;
             }
-            if (id.Type == ProgramList.Types.Global)
+            if (id.Type == ProgramID.Types.Global)
             {
                 chkNotify.Visibility = Visibility.Hidden;
             }
@@ -111,22 +110,48 @@ namespace PrivateWin10.Controls
         {
             SuspendChange++;
 
-            icon.Source = ImgFunc.GetIcon(Program.GetIcon(), icon.Width);
+            ImgFunc.GetIconAsync(Program.GetIcon(), icon.Width, (ImageSource src) => {
+                if (Application.Current != null)
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        icon.Source = src;
+                    }));
+                }
+                return 0;
+            });
+
             //name.Content = process.Name;
             name.Text = Program.config.Name;
 
-            info.Content = Translate.fmt("lbl_info", Program.blockedConnections, Program.allowedConnections);
+            int blockedConnections = 0;
+            int allowedConnections = 0;
+            int socketCount = 0;
+            UInt64 uploadRate = 0;
+            UInt64 downloadRate = 0;
+            foreach (Program prog in Program.Programs.Values)
+            {
+                blockedConnections += prog.countAllowed;
+                allowedConnections += prog.countBlocked;
+
+                socketCount += prog.SocketCount;
+
+                uploadRate += prog.UploadRate;
+                downloadRate += prog.DownloadRate;
+            }
+            info.Content = Translate.fmt("lbl_prog_info", blockedConnections, allowedConnections, socketCount, 
+                FileOps.FormatSize((decimal)uploadRate), FileOps.FormatSize((decimal)downloadRate)); 
 
             WpfFunc.CmbSelect(category, Program.config.Category == null ? "" : Program.config.Category);
 
-            if (Program.config.NetAccess == Program.Config.AccessLevels.Unconfigured)
+            if (Program.config.NetAccess == ProgramSet.Config.AccessLevels.Unconfigured)
             {
                 cmbAccess.Background = GetAccessColor(Program.config.CurAccess);
                 WpfFunc.CmbSelect(cmbAccess, Program.config.CurAccess.ToString());
             }
             else
             {
-                if (Program.config.NetAccess != Program.Config.AccessLevels.Unconfigured && Program.config.NetAccess != Program.config.CurAccess)
+                if (Program.config.NetAccess != ProgramSet.Config.AccessLevels.Unconfigured && Program.config.NetAccess != Program.config.CurAccess)
                     cmbAccess.Background /*grid.Background*/ = FindResource("Stripes") as DrawingBrush;
                 else
                     cmbAccess.Background = GetAccessColor(Program.config.NetAccess);
@@ -138,10 +163,10 @@ namespace PrivateWin10.Controls
 
             progGrid.Items.Clear();
 
-            foreach (ProgramList.ID id in Program.IDs)
-                progGrid.Items.Insert(0, new IDEntry(id));
+            foreach (Program prog in Program.Programs.Values)
+                progGrid.Items.Insert(0, new ProgEntry(prog));
 
-            btnSplit.IsEnabled = Program.IDs.Count > 1;
+            btnSplit.IsEnabled = Program.Programs.Count > 1;
             SuspendChange--;
         }
 
@@ -224,7 +249,7 @@ namespace PrivateWin10.Controls
                 Value = (cat.Content as String);
 
             Program.config.Category = Value;
-            App.itf.UpdateProgram(Program.guid, Program.config);
+            App.client.UpdateProgram(Program.guid, Program.config);
         }
 
         private void name_LostFocus(object sender, RoutedEventArgs e)
@@ -238,7 +263,7 @@ namespace PrivateWin10.Controls
                 name.IsReadOnly = true;
 
                 Program.config.Name = name.Text;
-                App.itf.UpdateProgram(Program.guid, Program.config);
+                App.client.UpdateProgram(Program.guid, Program.config);
             }
         }
 
@@ -260,7 +285,7 @@ namespace PrivateWin10.Controls
                 if (e.Key == Key.Enter)
                 {
                     Program.config.Name = name.Text;
-                    App.itf.UpdateProgram(Program.guid, Program.config);
+                    App.client.UpdateProgram(Program.guid, Program.config); 
                 }
             }
         }
@@ -288,27 +313,32 @@ namespace PrivateWin10.Controls
                 picker.IconIndex = MiscFunc.parseInt(pathIndex.Item2);
                 if (picker.ShowDialog() != System.Windows.Forms.DialogResult.OK)
                     return;
+
                 IconExtractor extractor = new IconExtractor(picker.FileName);
+                if (extractor.Count == 0)
+                    return;
+
                 Program.config.Icon = picker.FileName + "|" + picker.IconIndex;
-                App.itf.UpdateProgram(Program.guid, Program.config);
+                App.client.UpdateProgram(Program.guid, Program.config);
                 icon.Source = ImgFunc.GetIcon(Program.GetIcon(), icon.Width);
             }
         }
 
 
-        public class IDEntry : INotifyPropertyChanged
+        public class ProgEntry : INotifyPropertyChanged
         {
-            public ProgramList.ID mID;
+            public Program Prog;
 
-            public IDEntry(ProgramList.ID id)
+            public ProgEntry(Program prog)
             {
-                mID = id;
+                Prog = prog;
             }
 
-            public ImageSource Icon { get { return ImgFunc.GetIcon(mID.Path, 16); } }
+            public ImageSource Icon { get { return ImgFunc.GetIcon(Prog.ID.Path, 16); } }
 
-            public string Name { get { return mID.GetDisplayName(); } }
-            public string Program { get { return mID.AsString(); } }
+            public string Name { get { return Prog.Description; } }
+
+            public string Program { get { return Prog.ID.FormatString(); } } 
 
             #region INotifyPropertyChanged Members
 
@@ -340,7 +370,7 @@ namespace PrivateWin10.Controls
             if (progWnd.ShowDialog() != true)
                 return;
 
-            if (!App.itf.AddProgram(progWnd.ID, Program.guid))
+            if (!App.client.AddProgram(progWnd.ID, Program.guid))
                 MessageBox.Show(Translate.fmt("msg_already_exist"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
 
@@ -352,10 +382,10 @@ namespace PrivateWin10.Controls
                 return;
             }
 
-            IDEntry[] Temp = new IDEntry[progGrid.SelectedItems.Count];
+            ProgEntry[] Temp = new ProgEntry[progGrid.SelectedItems.Count];
             progGrid.SelectedItems.CopyTo(Temp, 0);
-            foreach (IDEntry item in Temp)
-                App.itf.SplitPrograms(Program.guid, item.mID);
+            foreach (ProgEntry item in Temp)
+                App.client.SplitPrograms(Program.guid, item.Prog.ID);
         }
 
         private void btnRemove_Click(object sender, RoutedEventArgs e)
@@ -363,19 +393,19 @@ namespace PrivateWin10.Controls
             if (MessageBox.Show(Translate.fmt("msg_remove_progs"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
-            IDEntry[] Temp = new IDEntry[progGrid.SelectedItems.Count];
+            ProgEntry[] Temp = new ProgEntry[progGrid.SelectedItems.Count];
             progGrid.SelectedItems.CopyTo(Temp, 0);
-            foreach (IDEntry item in Temp)
-                App.itf.RemoveProgram(Program.guid, item.mID);
+            foreach (ProgEntry item in Temp)
+                App.client.RemoveProgram(Program.guid, item.Prog.ID);
         }
 
         private void progGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            IDEntry entry = (progGrid.SelectedItem as IDEntry);
+            ProgEntry entry = (progGrid.SelectedItem as ProgEntry);
             if (entry == null)
                 return;
 
-            ProgramWnd progWnd = new ProgramWnd(entry.mID);
+            ProgramWnd progWnd = new ProgramWnd(entry.Prog.ID);
             if (progWnd.ShowDialog() != true)
                 return;
 
@@ -388,7 +418,7 @@ namespace PrivateWin10.Controls
                 return;
 
             Program.config.SetNotify(chkNotify.IsChecked);
-            App.itf.UpdateProgram(Program.guid, Program.config);
+            App.client.UpdateProgram(Program.guid, Program.config); 
         }
 
         private void cmbAccess_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -396,8 +426,8 @@ namespace PrivateWin10.Controls
             if (SuspendChange > 0)
                 return;
 
-            Program.config.NetAccess = (Program.Config.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
-            App.itf.UpdateProgram(Program.guid, Program.config);
+            Program.config.NetAccess = (ProgramSet.Config.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
+            App.client.UpdateProgram(Program.guid, Program.config);
         }
 
         /*private void btnCustimize_Click(object sender, RoutedEventArgs e)

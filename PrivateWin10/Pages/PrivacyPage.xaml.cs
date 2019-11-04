@@ -21,8 +21,11 @@ namespace PrivateWin10.Pages
     /// </summary>
     public partial class PrivacyPage : UserControl, IUserPage
     {
-        private Dictionary<string, TweakControl> myTweaks = new Dictionary<string, TweakControl>();
-        private Dictionary<string, TweakGroup> myGroups = new Dictionary<string, TweakGroup>();
+        //private Dictionary<Guid, TweakManager.Tweak> TweakList = null;
+
+        //private Dictionary<string, ToggleButton> Categories = new Dictionary<string, ToggleButton>();
+        private Dictionary<string, TweakGroup> Groups = new Dictionary<string, TweakGroup>();
+        private Dictionary<string, TweakControl> Tweaks = new Dictionary<string, TweakControl>();
 
         public bool showAll = false; // todo
 
@@ -33,11 +36,16 @@ namespace PrivateWin10.Pages
 
         public void OnShow()
         {
-            for (int i = 0; i < App.tweaks.Categorys.Count; ++i)
+            //App.tweaks.TestTweaks(); // that takes over half a second
+
+            // initialize tweak list on first show
+            if (this.catGrid.Children.Count > 0)
+                return;
+
+            foreach (TweakStore.Category cat in App.tweaks.Categorys.Values)
             {
-                Category cat = App.tweaks.Categorys[i];
                 ToggleButton item = new ToggleButton();
-                item.Content = cat.Label;
+                item.Content = cat.Name;
                 item.Tag = cat;
                 item.VerticalAlignment = VerticalAlignment.Top;
                 item.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -56,49 +64,73 @@ namespace PrivateWin10.Pages
                 RowDefinition row = new RowDefinition();
                 row.Height = new GridLength(item.Height + 2);
                 this.catGrid.RowDefinitions.Add(row);
-                Grid.SetRow(item, i);
+                Grid.SetRow(item, this.catGrid.Children.Count - 1);
                 //Grid.SetColumn(item, 1);
             }
+
+            /*if (TweakList != null)
+                return;
+
+            TweakList = App.tweaks.GetTweaks();
+
+            this.catGrid.Children.Clear();
+            this.catGrid.RowDefinitions.Clear();
+
+            int i = 0;
+            foreach (TweakManager.Tweak tweak in TweakList.Values)
+            {
+                ToggleButton item;
+                if (!Categories.TryGetValue(tweak.Category, out item))
+                {
+                    item = new ToggleButton();
+                    item.Content = tweak.Category;
+                    item.Tag = new TweakStore.Category(tweak.Category);
+                    item.VerticalAlignment = VerticalAlignment.Top;
+                    item.HorizontalAlignment = HorizontalAlignment.Stretch;
+                    item.Height = 32;
+                    item.Background = new SolidColorBrush(Color.FromArgb(255, 235, 235, 235));
+                    item.FontWeight = FontWeights.Bold;
+                    item.Margin = new Thickness(1, 1, 1, 1);
+                    item.Click += new RoutedEventHandler(category_Click);
+                    item.MouseDoubleClick += new MouseButtonEventHandler(category_dblClick);
+                    item.Style = (Style)FindResource(ToolBar.ToggleButtonStyleKey);
+
+                    Categories.Add(tweak.Category, item);
+
+                    this.catGrid.Children.Add(item);
+                    RowDefinition row = new RowDefinition();
+                    row.Height = new GridLength(item.Height + 2);
+                    this.catGrid.RowDefinitions.Add(row);
+                    Grid.SetRow(item, i++);
+                    //Grid.SetColumn(item, 1);
+                }
+
+                TweakStore.Category cat = item.Tag as TweakStore.Category;
+                cat.Add(tweak);
+            }
+
+            foreach (ToggleButton item in Categories.Values)
+            {
+                TweakStore.Category cat = item.Tag as TweakStore.Category;
+
+                if (!showAll && !cat.IsAvailable())
+                    item.IsEnabled = false;
+            }*/
 
             category_Click(this.catGrid.Children[0], null);
         }
 
         public void OnHide()
         {
-            this.catGrid.Children.Clear();
-            this.catGrid.RowDefinitions.Clear();
         }
 
         public void OnClose()
         {
         }
 
-        void category_dblClick(object sender, RoutedEventArgs e)
-        {
-            Category cat = (Category)(sender as ToggleButton).Tag;
-            if (MessageBox.Show(string.Format("Apply all {0} tweaks?", cat.Label), "Private Win10", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
-                return;
-
-            for (int i = 0; i < cat.Groups.Count; ++i)
-            {
-                Group group = cat.Groups[i];
-                if (!group.IsAvailable())
-                    continue;
-
-                foreach (Tweak tweak in group.Tweaks)
-                {
-                    if (!tweak.IsAvailable())
-                        continue;
-
-                    if (tweak.Sellected == null ? !tweak.Optional : (bool)tweak.Sellected)
-                        tweak.Apply();
-                }
-            }
-        }
-
         void category_Click(object sender, RoutedEventArgs e)
         {
-            Category cat = (Category)(sender as ToggleButton).Tag;
+            TweakStore.Category cat = (TweakStore.Category)(sender as ToggleButton).Tag;
 
             foreach (ToggleButton curBtn in this.catGrid.Children)
             {
@@ -112,28 +144,32 @@ namespace PrivateWin10.Pages
             this.tweakGrid.Children.Clear();
             this.tweakGrid.RowDefinitions.Clear();
 
-            for (int i = 0; i < cat.Groups.Count; ++i)
+            foreach (TweakStore.Group group in cat.Groups.Values)
             {
-                Group group = cat.Groups[i];
                 if (!showAll && !group.IsAvailable())
                     continue;
+
                 TweakGroup item;
-                if (!myGroups.TryGetValue(group.Label, out item))
+                if (!Groups.TryGetValue(group.Name, out item))
                 {
                     item = new TweakGroup(group);
-                    myGroups.Add(group.Label, item);
+                    Groups.Add(group.Name, item);
                     //item.MouseDown += new MouseButtonEventHandler(group_Click);
                     item.Click += new RoutedEventHandler(group_Click);
-                    item.ReqSU += new RoutedEventHandler(req_su);
-                }
-                item.label.Content = group.Label;
-                item.Tag = group;
-                item.VerticalAlignment = VerticalAlignment.Top;
-                item.HorizontalAlignment = HorizontalAlignment.Stretch;
-                item.Margin = new Thickness(1, 1, 1, 1);
+                    item.Toggle += new RoutedEventHandler(group_Toggle);
+                    //item.ReqSU += new RoutedEventHandler(req_su);
 
-                if (!group.IsAvailable())
-                    item.toggle.IsEnabled = false;
+                    item.label.Content = group.Name;
+                    item.Tag = group;
+                    item.VerticalAlignment = VerticalAlignment.Top;
+                    item.HorizontalAlignment = HorizontalAlignment.Stretch;
+                    item.Margin = new Thickness(1, 1, 1, 1);
+
+                    if (!group.IsAvailable())
+                        item.toggle.IsEnabled = false;
+                }
+
+                item.Update(); // note: this tests all tweaks in the groupe
 
                 this.groupGrid.Children.Add(item);
                 RowDefinition row = new RowDefinition();
@@ -146,7 +182,7 @@ namespace PrivateWin10.Pages
 
         void group_Click(object sender, RoutedEventArgs e)
         {
-            Group group = (Group)(sender as TweakGroup).Tag;
+            TweakStore.Group group = (TweakStore.Group)(sender as TweakGroup).Tag;
 
             foreach (TweakGroup curBtn in this.groupGrid.Children)
                 curBtn.SetFocus(curBtn == sender);
@@ -154,28 +190,31 @@ namespace PrivateWin10.Pages
             this.tweakGrid.Children.Clear();
             this.tweakGrid.RowDefinitions.Clear();
 
-            for (int i = 0; i < group.Tweaks.Count; ++i)
+            foreach (TweakManager.Tweak tweak in group.Tweaks.Values)
             {
-                Tweak tweak = group.Tweaks[i];
                 if (!showAll && !tweak.IsAvailable())
                     continue;
                 TweakControl item;
-                if (!myTweaks.TryGetValue(group.Label + "|" + tweak.Label, out item))
+                if (!Tweaks.TryGetValue(group.Name + "|" + tweak.Name, out item))
                 {
                     item = new TweakControl(tweak);
-                    myTweaks.Add(group.Label + "|" + tweak.Label, item);
+                    Tweaks.Add(group.Name + "|" + tweak.Name, item);
                     //item.MouseDown += new MouseButtonEventHandler(tweak_Click);
                     item.Click += new RoutedEventHandler(tweak_Click);
-                    item.ReqSU += new RoutedEventHandler(req_su);
-                }
-                item.label.Content = tweak.Label;
-                item.Tag = tweak;
-                item.VerticalAlignment = VerticalAlignment.Top;
-                item.HorizontalAlignment = HorizontalAlignment.Stretch;
-                item.Margin = new Thickness(1, 1, 1, 1);
+                    item.Toggle += new RoutedEventHandler(tweak_Toggle);
+                    //item.ReqSU += new RoutedEventHandler(req_su);
 
-                if (!tweak.IsAvailable())
-                    item.toggle.IsEnabled = false;
+                    item.label.Content = tweak.Name;
+                    item.Tag = tweak;
+                    item.VerticalAlignment = VerticalAlignment.Top;
+                    item.HorizontalAlignment = HorizontalAlignment.Stretch;
+                    item.Margin = new Thickness(1, 1, 1, 1);
+
+                    if (!tweak.IsAvailable())
+                        item.toggle.IsEnabled = false;
+                }
+
+                item.Update();
 
                 this.tweakGrid.Children.Add(item);
                 RowDefinition row = new RowDefinition();
@@ -188,18 +227,123 @@ namespace PrivateWin10.Pages
 
         void tweak_Click(object sender, RoutedEventArgs e)
         {
-            Tweak tweak = (Tweak)(sender as TweakControl).Tag;
+            TweakManager.Tweak tweak = (TweakManager.Tweak)(sender as TweakControl).Tag;
 
             foreach (TweakControl curBtn in this.tweakGrid.Children)
                 curBtn.SetFocus(curBtn == sender);
-
-            // todo:
         }
 
-        void req_su(object sender, RoutedEventArgs e)
+        void group_Toggle(object sender, RoutedEventArgs e)
         {
+            TweakGroup item = sender as TweakGroup;
+            TweakStore.Group group = item.Tag as TweakStore.Group;
+
+            if (TestAdmin())
+            {
+                if (item.oldValue == null)
+                {
+                    int active_count = 0;
+                    List<TweakManager.Tweak> to_be_fixed = new List<TweakManager.Tweak>();
+                    foreach (TweakManager.Tweak tweak in group.Tweaks.Values)
+                    {
+                        if (tweak.Status == true)
+                            active_count++;
+                        else if (tweak.State != TweakManager.Tweak.States.Unsellected)
+                            to_be_fixed.Add(tweak);
+                    }
+
+                    if (active_count == 0)
+                        ToggleGroup(group, TweakManager.Tweak.States.Unsellected);
+                    else // fix tweaks
+                    {
+                        foreach (TweakManager.Tweak tweak in to_be_fixed)
+                            tweak.Apply(null);
+                    }
+                }
+                else
+                    ToggleGroup(group, (bool)item.IsChecked ? TweakManager.Tweak.States.SelGroupe : TweakManager.Tweak.States.Unsellected);
+            }
+
+            UpdateView();
+        }
+
+        void tweak_Toggle(object sender, RoutedEventArgs e)
+        {
+            TweakControl item = sender as TweakControl;
+            TweakManager.Tweak tweak = item.Tag as TweakManager.Tweak;
+
+            if (tweak.usrLevel == false || TestAdmin())
+            {
+                ToggleTweak(tweak, (bool)item.IsChecked ? TweakManager.Tweak.States.Sellected : TweakManager.Tweak.States.Unsellected);
+            }
+
+            UpdateView();
+        }
+
+        void category_dblClick(object sender, RoutedEventArgs e)
+        {
+            TweakStore.Category cat = (TweakStore.Category)(sender as ToggleButton).Tag;
+            if (MessageBox.Show(string.Format("Apply all {0} tweaks?", cat.Name), "Private Win10", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                return;
+
+            if (!TestAdmin())
+                return;
+
+            foreach (TweakStore.Group group in cat.Groups.Values)
+            {
+                ToggleGroup(group, TweakManager.Tweak.States.SelGroupe, true); 
+            }
+
+            UpdateView();
+        }
+
+        void ToggleGroup(TweakStore.Group group, TweakManager.Tweak.States value, bool bOnlyRecommended = false)
+        {
+            foreach (TweakManager.Tweak tweak in group.Tweaks.Values)
+            {
+                if(bOnlyRecommended && tweak.Hint != TweakManager.Tweak.Hints.Recommended)
+                    continue;
+                if (value != TweakManager.Tweak.States.Unsellected && tweak.Hint == TweakManager.Tweak.Hints.Optional) // skip optional tweaks, thay are usually eider dangerouse or redundant
+                    continue;
+
+                ToggleTweak(tweak, value);
+            }
+        }
+
+        void ToggleTweak(TweakManager.Tweak tweak, TweakManager.Tweak.States value)
+        {
+            if (value == TweakManager.Tweak.States.Unsellected)
+                tweak.Undo();
+            else
+                tweak.Apply(value != TweakManager.Tweak.States.Sellected);
+        }
+
+        /*void req_su(object sender, RoutedEventArgs e)
+        {
+            TestAdmin();
+        }*/
+
+        bool TestAdmin()
+        {
+            if (TweakManager.HasAdministrator())
+                return true;
+
             if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.mName), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 App.Restart(true);
+            return false;
+        }
+
+        void UpdateView()
+        {
+            foreach (var item in this.groupGrid.Children)
+            {
+                (item as TweakGroup).Update();
+            }
+
+            foreach (var item in this.tweakGrid.Children)
+            {
+                (item as TweakControl).Update();
+            }
         }
     }
 }

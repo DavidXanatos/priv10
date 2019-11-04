@@ -1,6 +1,4 @@
 ﻿using Microsoft.Win32;
-using PrivateWin10.IPC;
-using PrivateWin10.Windows;
 using QLicense;
 using System;
 using System.Collections.Generic;
@@ -9,12 +7,10 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.ServiceModel;
-using System.ServiceModel.Description;
 using System.ServiceProcess;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -26,49 +22,102 @@ namespace PrivateWin10
     /// </summary>
     public partial class App : Application
     {
-        public static bool mConsole = false;
+        public static bool HasConsole = false;
         public static string[] args = null;
         public static string exePath = "";
         public static string mVersion = "0.0";
         public static string mName = "Private WinTen";
+        public static string mAppName = "PrivateWin10";
         public static string mSvcName = "priv10";
         public static string appPath = "";
+        public static string dataPath = "";
+        public static bool isPortable = false;
         public static int mSession = 0;
+
+        public static AppLog Log = null;
 
         public static Service svc = null;
         public static Engine engine = null;
-        public static Tweaks tweaks = null;
+        public static TweakManager tweaks = null;
+
+        public static AppManager PkgMgr = null; // Windows 8 & 10 App Manager
 
         public static TrayIcon mTray = null;
-
         public static MainWindow mMainWnd = null;
 
+        public static Priv10Client client = null;
+        public static Priv10Host host = null;
 
-        public static IPCInterface itf;
-        public static IPCCallback cb;
-        public static PipeClient client;
-        public static PipeHost host;
+        enum StartModes
+        {
+            Normal = 0,
+            Service,
+            Engine,
+            Worker
+        }
+
+        public enum EventIDs : long
+        {
+            Undefined = 0x0000,
+
+            // generic
+            Exception,
+            AppError,
+            AppWarning,
+            AppInfo,
+
+            TweakBegin = 0x0100,
+            TweakChanged,
+            TweakFixed,
+            TweakError,
+            TweakEnd = 0x01FF,
+
+            FirewallBegin = 0x0200,
+            RuleChanged,
+            RuleDeleted,
+            RuleAdded,
+            //FirewallNewProg
+            FirewallEnd = 0x02FF,
+        }
+
+        public enum EventFlags : short
+        {
+            DebugMessages = 0x0A00,
+            DebugEvents = 0x0B00,
+            AppLogEntries = 0x0C00,
+            InfoLogEntries = 0x0D00,
+            Notifications = 0x0E00, // Show a Notification
+            PopUpMessages = 0x0F00, // Show a PopUp Message
+        }
 
         [STAThread]
         public static void Main(string[] args)
         {
             App.args = args;
 
-            mConsole = WinConsole.Initialize(TestArg("-console") || TestArg("-console-debug"));
+            HasConsole = WinConsole.Initialize(TestArg("-console"));
 
-            if (TestArg("-help") || TestArg("/?"))
-            {
-                ShowHelp();
-                return;
-            }
-            else if (TestArg("-dbg_wait"))
+            if (TestArg("-dbg_wait"))
                 MessageBox.Show("Waiting for debugger. (press ok when attached)");
 
-            Thread.CurrentThread.Name = "Main";
+            Log = new AppLog(mAppName);
+            AppLog.ExceptionLogID = (long)EventIDs.Exception;
+            AppLog.ExceptionCategory = (short)EventFlags.DebugEvents;
 
-            Console.WriteLine("Starting...");
+            StartModes startMode = StartModes.Normal;
+            if (TestArg("-svc"))
+                startMode = StartModes.Service;
+            else if (TestArg("-engine"))
+                startMode = StartModes.Engine;
+            else // Normal (GUI) mode
+            {
+                Log.EnableLogging();
+                Log.LoadLog();
+            }
 
-            AppLog Log = new AppLog();
+            App.LogInfo("PrivateWin10 Process Started, Mode {0}.", startMode.ToString());
+
+            //Thread.CurrentThread.Name = "Main";
 
             exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(exePath);
@@ -76,59 +125,90 @@ namespace PrivateWin10
             if (fvi.FileBuildPart != 0)
                 mVersion += (char)('a' + (fvi.FileBuildPart - 1));
             appPath = Path.GetDirectoryName(exePath);
+
+            dataPath = appPath;
+            if (File.Exists(GetINIPath())) // if an ini exists in the app path, its considdered to be a portable run
+            {
+                isPortable = true;
+
+                AppLog.Debug("Portable Mode");
+            }
+            else
+            {
+                string progData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                if (progData == null)
+                    progData = @"C:\ProgramData";
+
+                dataPath = progData + "\\" + mAppName;
+                if (!Directory.Exists(dataPath))
+                {
+                    Directory.CreateDirectory(dataPath);
+                    FileOps.SetAnyDirSec(dataPath);
+                }
+
+                AppLog.Debug("Config Directory: {0}", progData);
+            }
+
             mSession = Process.GetCurrentProcess().SessionId;
 
             Translate.Load();
 
             svc = new Service(mSvcName);
 
-            if (TestArg("-engine"))
+            if (!UwpFunc.IsWindows7OrLower)
             {
-                engine = new Engine();
-
-                engine.Run();
-                return;
+                Console.WriteLine("Initializing app manager...");
+                PkgMgr = new AppManager();
             }
-            else if (TestArg("-svc"))
+
+            switch (startMode)
             {
-                if (TestArg("-install"))
-                {
-                    Console.WriteLine("Installing service...");
-                    svc.Install(TestArg("-start"));
-                    Console.WriteLine("... done");
-                }
-                else if (TestArg("-remove"))
-                {
-                    Console.WriteLine("Removing service...");
-                    svc.Uninstall();
-                    Console.WriteLine("... done");
-                }
-                else
+                case StartModes.Engine:
                 {
                     engine = new Engine();
-
-                    ServiceBase.Run(svc);
+                    engine.Run();
+                    return;
                 }
-                return;
+                case StartModes.Service:
+                {
+                    if (TestArg("-install"))
+                    {
+                        AppLog.Debug("Installing service...");
+                        svc.Install(TestArg("-start"));
+                        AppLog.Debug("... done");
+                    }
+                    else if (TestArg("-remove"))
+                    {
+                        AppLog.Debug("Removing service...");
+                        svc.Uninstall();
+                        AppLog.Debug("... done");
+                    }
+                    else
+                    {
+                        engine = new Engine();
+
+                        ServiceBase.Run(svc);
+                    }
+                    return;
+                }
             }
 
-            tweaks = new Tweaks();
+            client = new Priv10Client(mSvcName);
 
-            client = new PipeClient();
-
+            // Encure wie have the required privilegs
             //if (!AdminFunc.IsDebugging())
             {
-                Console.WriteLine("Trying to connect to Engine...");
+                AppLog.Debug("Trying to connect to Engine...");
                 int conRes = client.Connect(1000);
                 if (conRes == 0)
                 {
                     if (!AdminFunc.IsAdministrator())
                     {
-                        Console.WriteLine("Trying to obtain Administrative proivilegs...");
+                        AppLog.Debug("Trying to obtain Administrative proivilegs...");
                         if (AdminFunc.SkipUacRun(mName, App.args))
                             return;
 
-                        Console.WriteLine("Trying to start with 'runas'...");
+                        AppLog.Debug("Trying to start with 'runas'...");
                         // Restart program and run as admin
                         var exeName = Process.GetCurrentProcess().MainModule.FileName;
                         string arguments = "\"" + string.Join("\" \"", args) + "\"";
@@ -142,24 +222,24 @@ namespace PrivateWin10
                         }
                         catch
                         {
-                            MessageBox.Show(Translate.fmt("msg_admin_rights", mName), mName);
-                            return; // no point in cintinuing without admin rights or an already running engine
+                            //MessageBox.Show(Translate.fmt("msg_admin_rights", mName), mName);
+                            //return; // no point in cintinuing without admin rights or an already running engine
                         }
                     }
                     else if (svc.IsInstalled())
                     {
-                        Console.WriteLine("Trying to start service...");
+                        AppLog.Debug("Trying to start service...");
                         if (svc.Startup())
                         {
-                            Console.WriteLine("Trying to connect to service...");
+                            AppLog.Debug("Trying to connect to service...");
 
                             if (client.Connect() != 0)
-                                Console.WriteLine("Connected to service...");
+                                AppLog.Debug("Connected to service...");
                             else
-                                Console.WriteLine("Failed to connect to service...");
+                                AppLog.Debug("Failed to connect to service...");
                         }
                         else
-                            Console.WriteLine("Failed to start service...");
+                            AppLog.Debug("Failed to start service...");
                     }
                 }
                 else if (conRes == -1)
@@ -169,56 +249,23 @@ namespace PrivateWin10
                 }
             }
 
+            //
+
+            tweaks = new TweakManager();
+
             // if we couldn't connect to the engine start it and connect
             if (!client.IsConnected() && AdminFunc.IsAdministrator())
             {
-                Console.WriteLine("Starting Engine Thread...");
+                AppLog.Debug("Starting Engine Thread...");
 
                 engine = new Engine();
 
                 engine.Start();
 
-                Console.WriteLine("... engine started.");
+                AppLog.Debug("... engine started.");
 
                 client.Connect();
             }
-
-            // ToDo: use a more direct communication when running in one process
-
-            itf = client;
-            cb = client;
-
-            /*if (TestArg("-console-debug"))
-            {
-                Console.WriteLine("Private WinTen reporting for duty, sir!");
-                Console.WriteLine("");
-
-                for (bool running = true; running;)
-                {
-                    String Line = Console.ReadLine();
-                    if (Line.Length == 0)
-                        continue;
-
-                    String Command = TextHelpers.GetLeft(ref Line).ToLower();
-
-                    if (Command == "quit" || Command == "exit")
-                        running = false;
-
-                    if (Command == "test")
-                    {
-                    }
-                    else
-                    {
-                        Console.WriteLine("Unknown Command, sir!");
-                        continue;
-                    }
-                    Console.WriteLine("Yes, sir!");
-                }
-
-                return;
-            }*/
-
-            Console.WriteLine("Preparing GUI...");
 
             var app = new App();
             app.InitializeComponent();
@@ -239,7 +286,9 @@ namespace PrivateWin10
 
             client.Close();
 
-            if(engine != null)
+            tweaks.StoreTweaks();
+
+            if (engine != null)
                 engine.Stop();
         }
 
@@ -262,6 +311,37 @@ namespace PrivateWin10
                     }
             }
         }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Misc Helpers
+
+        static public bool TestArg(string name)
+        {
+            for (int i = 0; i < App.args.Length; i++)
+            {
+                if (App.args[i].Equals(name, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
+        }
+
+        static public string GetArg(string name)
+        {
+            for (int i = 0; i < App.args.Length; i++)
+            {
+                if (App.args[i].Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    string temp = App.args[i + 1];
+                    if (temp.Length > 0 && temp[0] != '-')
+                        return temp;
+                    return "";
+                }
+            }
+            return null;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Config
 
 
         static public string GetConfig(string Section, string Key, string Default = "")
@@ -289,32 +369,7 @@ namespace PrivateWin10
             IniWriteValue(Section, Key, Value);
         }
 
-        static public bool TestArg(string name)
-        {
-            for (int i = 0; i < App.args.Length; i++)
-            {
-                if (App.args[i].Equals(name, StringComparison.CurrentCultureIgnoreCase))
-                    return true;
-            }
-            return false;
-        }
-
-        static public string GetArg(string name)
-        {
-            for (int i = 0; i < App.args.Length; i++)
-            {
-                if (App.args[i].Equals(name, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    string temp = App.args[i + 1];
-                    if (temp.Length > 0 && temp[0] != '-')
-                        return temp;
-                    return "";
-                }
-            }
-            return null;
-        }
-
-        private static string GetINIPath() { return appPath + @"\Config.ini"; }
+        private static string GetINIPath() { return dataPath + "\\" + mAppName + ".ini"; }
 
         [DllImport("kernel32")]
         private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
@@ -323,42 +378,39 @@ namespace PrivateWin10
             WritePrivateProfileString(Section, Key, Value, INIPath != null ? INIPath : GetINIPath());
         }
 
+        public static void IniDeleteSection(string Section, string INIPath = null)
+        {
+            WritePrivateProfileString(Section, null, null, INIPath != null ? INIPath : GetINIPath());
+        }
+
         [DllImport("kernel32")]
         private static extern int GetPrivateProfileString(string section, string key, string def, [In, Out] char[] retVal, int size, string filePath);
         public static string IniReadValue(string Section, string Key, string Default = "", string INIPath = null)
         {
             char[] chars = new char[8193];
             int size = GetPrivateProfileString(Section, Key, Default, chars, 8193, INIPath != null ? INIPath : GetINIPath());
+            /*int size = GetPrivateProfileString(Section, Key, "\xff", chars, 8193, INIPath != null ? INIPath : GetINIPath());
+            if (size == 1 && chars[0] == '\xff')
+            {
+                WritePrivateProfileString(Section, Key, Default, INIPath != null ? INIPath : GetINIPath());
+                return Default;
+            }*/
             return new String(chars, 0, size);
         }
 
-        public static string[] IniEnumSections(string INIPath = null)
+        public static List<string> IniEnumSections(string INIPath = null)
         {
             char[] chars = new char[8193];
             int size = GetPrivateProfileString(null, null, null, chars, 8193, INIPath != null ? INIPath : GetINIPath());
-            return new String(chars, 0, size).Split('\0');
+            return TextHelpers.SplitStr(new String(chars, 0, size), "\0");
         }
 
-        private static void ShowHelp()
-        {
-            string Message = "Available command line options\r\n";
-            string[] Help = {
-                                    "-console\t\tshow console (for debugging)",
-                                    "-help\t\tShow this help message" };
-            if (!mConsole)
-                MessageBox.Show(Message + string.Join("\r\n", Help));
-            else
-            {
-                Console.WriteLine(Message);
-                for (int j = 0; j < Help.Length; j++)
-                    Console.WriteLine(" " + Help[j]);
-            }
-        }
-
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Start & Restart
 
         public static void AutoStart(bool enable)
         {
-            var subKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+            var subKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
             if (enable)
             {
                 string value = "\"" + System.Reflection.Assembly.GetExecutingAssembly().Location + "\"" + " -autorun";
@@ -370,14 +422,8 @@ namespace PrivateWin10
 
         public static bool IsAutoStart()
         {
-            var subKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", false);
+            var subKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
             return (subKey != null && subKey.GetValue("PrivateWin10") != null);
-        }
-
-        public static long GetInstallDate()
-        {
-            FileInfo info = new FileInfo(exePath);
-            return Math.Max(((DateTimeOffset)info.CreationTime).ToUnixTimeSeconds(), ((DateTimeOffset)info.LastWriteTime).ToUnixTimeSeconds());
         }
 
         public static void Restart(bool RunAs = false, bool bService = false)
@@ -392,7 +438,7 @@ namespace PrivateWin10
             string arguments = "\"" + string.Join("\" \"", args) + "\"";
             ProcessStartInfo startInfo = new ProcessStartInfo(exeName, arguments);
             startInfo.UseShellExecute = true;
-            if(RunAs)
+            if (RunAs)
                 startInfo.Verb = "runas";
             try
             {
@@ -402,9 +448,53 @@ namespace PrivateWin10
             catch
             {
                 //MessageBox.Show(Translate.fmt("msg_admin_req", mName), mName);
-                AppLog.Line("Failed to restart Application");
+                App.LogWarning("Failed to restart Application");
             }
         }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Event Logging
+
+        static public void LogCriticalError(string message, params object[] args)
+        {
+#if DEBUG
+            Debugger.Break();
+#endif
+            LogError("Critical Error: " + message, args);
+        }
+
+        static public void LogError(string message, params object[] args)
+        {
+            AppLog.Add(EventLogEntryType.Error, (long)EventIDs.AppError, (short)EventFlags.AppLogEntries, string.Format(message, args));
+        }
+
+        static public void LogError(App.EventIDs eventID, Dictionary<string, string> Params, App.EventFlags flags, string message, params object[] args)
+        {
+            AppLog.Add(EventLogEntryType.Error, (long)eventID, (short)flags, string.Format(message, args), Params);
+        }
+
+        static public void LogWarning(string message, params object[] args)
+        {
+            AppLog.Add(EventLogEntryType.Warning, (long)EventIDs.AppWarning, (short)EventFlags.AppLogEntries, string.Format(message, args));
+        }
+
+        static public void LogWarning(App.EventIDs eventID, Dictionary<string, string> Params, App.EventFlags flags, string message, params object[] args)
+        {
+            AppLog.Add(EventLogEntryType.Warning, (long)eventID, (short)flags, string.Format(message, args), Params);
+        }
+
+        static public void LogInfo(string message, params object[] args)
+        {
+            AppLog.Add(EventLogEntryType.Information, (long)EventIDs.AppInfo, (short)EventFlags.AppLogEntries, string.Format(message, args));
+        }
+
+        static public void LogInfo(App.EventIDs eventID, Dictionary<string, string> Params, App.EventFlags flags, string message, params object[] args)
+        {
+            AppLog.Add(EventLogEntryType.Information, (long)eventID, (short)flags, string.Format(message, args), Params);
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Licensing
 
         public static MyLicense lic = null;
 
@@ -420,7 +510,7 @@ namespace PrivateWin10
                 lic = (MyLicense)LicenseHandler.ParseLicenseFromBASE64String(typeof(MyLicense), File.ReadAllText("license.lic"), certPubicKeyData, out status, out msg);
             else
                 msg = "Your copy of this application is not activated";
-            if(lic == null)
+            if (lic == null)
                 lic = new MyLicense(); // we always want this object
             lic.LicenseStatus = status;
             if (status != LicenseStatus.VALID && msg.Length == 0)

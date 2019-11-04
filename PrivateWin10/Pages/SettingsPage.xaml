@@ -23,6 +23,15 @@
                 </DrawingGroup>
             </DrawingImage.Drawing>
         </DrawingImage>
+
+
+        <DrawingImage x:Key="Icon_Privacy">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Privacy}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>        
     </FrameworkElement.Resources>
 
     <Grid Margin="48,0,0,0">
@@ -43,6 +52,17 @@
 
             <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
                 <Grid Margin="0,5,0,5">
+                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Privacy}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <TextBlock Name="lblProvacy"  HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Tweak Guard" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <StackPanel Orientation="Vertical" Margin="0,45,0,0">
+                        <CheckBox Name="chkTweakCheck"  Content="Monitor Tweaks for changes" HorizontalAlignment="Left" Margin="20,5,0,0" VerticalAlignment="Top" Click="ChkTweakCheck_Click"/>
+                        <CheckBox Name="chkTweakFix"  Content="Re Apply Tweaks that got un done" HorizontalAlignment="Left" Margin="35,5,0,0" VerticalAlignment="Top" Click="ChkTweakFix_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+
+            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
+                <Grid Margin="0,5,0,5">
                     <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Firewall}" VerticalAlignment="Top" HorizontalAlignment="Left" />
                     <TextBlock Name="lblFirewall" HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Windows Firewall Option" VerticalAlignment="Top" FontWeight="Bold"/>
                     <StackPanel Orientation="Vertical" Margin="0,45,0,0">
@@ -50,10 +70,16 @@
                         <CheckBox Name="chkUseFW"  Content="Manage Windows Firewall" HorizontalAlignment="Left" Margin="20,5,0,0" VerticalAlignment="Top" Click="ChkUseFW_Click"/>
                         <CheckBox Name="chkNotifyFW"  Content="Show blocked connection atemps" HorizontalAlignment="Left" Margin="35,5,0,0" VerticalAlignment="Top" Click="chkNotifyFW_Click"/>
 
+                        <CheckBox Name="chkGuardFW"  Content="Guard Firewall Rules" HorizontalAlignment="Left" Margin="35,5,0,0" VerticalAlignment="Top" Click="ChkGuardFW_Click"/>
+                            <!--CheckBox Name="chkFixRules"  Content="Undo 3rd party rule changes" HorizontalAlignment="Left" Margin="50,5,0,0" VerticalAlignment="Top" Click="ChkFixRules_Click"/-->
+                            <RadioButton Name="radAlert" GroupName="FwGuard" Margin="50,5,0,0" VerticalAlignment="Top"  Content="Notify about rule changes" Checked="radGuard_Checked"/>
+                            <RadioButton Name="radDisable" GroupName="FwGuard" Margin="50,5,0,0" VerticalAlignment="Top" Content="Disable not autorized rules" Checked="radGuard_Checked"/>
+                            <RadioButton Name="radFix" GroupName="FwGuard" Margin="50,5,0,0" VerticalAlignment="Top" Content="Undo un autorized rule changed" Checked="radGuard_Checked"/>
+                        
                         <Label Name="lblMode" Margin="20,5,0,0" Content="Filtering Mode"/>
-                        <RadioButton Name="radWhitelist" Margin="35,5,0,0" VerticalAlignment="Top"  Content="White-List Mode (recommended)" Checked="radMode_Checked"/>
-                        <RadioButton Name="radBlacklist" Margin="35,5,0,0" VerticalAlignment="Top" Content="Black-List Mode (default)" Checked="radMode_Checked"/>
-                        <RadioButton Name="radDisabled" Margin="35,5,0,0" VerticalAlignment="Top" Content="Disable Windows Firewall" Checked="radMode_Checked"/>
+                        <RadioButton Name="radWhitelist" GroupName="FwMode" Margin="35,5,0,0" VerticalAlignment="Top"  Content="White-List Mode (recommended)" Checked="radMode_Checked"/>
+                        <RadioButton Name="radBlacklist" GroupName="FwMode" Margin="35,5,0,0" VerticalAlignment="Top" Content="Black-List Mode (default)" Checked="radMode_Checked"/>
+                        <RadioButton Name="radDisabled" GroupName="FwMode" Margin="35,5,0,0" VerticalAlignment="Top" Content="Disable Windows Firewall" Checked="radMode_Checked"/>
 
                         <Label Name="lblAudit" Margin="20,5,0,0" VerticalAlignment="Top" Content="Audit Policy (Should be set to All)"/>
                         <ComboBox Name="cmbAudit" HorizontalAlignment="Left" Margin="60,0,0,0" VerticalAlignment="Top" Width="150" SelectionChanged="cmbAudit_SelectionChanged">

@@ -41,14 +41,9 @@ namespace PrivateWin10
             mStrings.Add("sort_name", "Name");
             mStrings.Add("sort_rname", "Name (rev.)");
             mStrings.Add("sort_act", "Last Activity");
+            mStrings.Add("sort_rate", "Data Rate");
+            mStrings.Add("sort_socks", "Socket Count");
             mStrings.Add("sort_count", "Module Count");
-            mStrings.Add("filter_all", "All");
-            mStrings.Add("filter_programs", "Programs");
-            mStrings.Add("filter_services", "Services");
-            mStrings.Add("filter_system", "System");
-            mStrings.Add("filter_apps", "Apps");
-            mStrings.Add("filter_uncat", "Uncategorized");
-            mStrings.Add("filer_multi", "Multiple Categories");
             mStrings.Add("str_enabled", "Enabled");
             mStrings.Add("str_disabled", "Disabled");
             mStrings.Add("str_undefined", "undefined");
@@ -61,6 +56,20 @@ namespace PrivateWin10
             mStrings.Add("str_inbound", "Inbound");
             mStrings.Add("str_outbound", "Outbound");
             mStrings.Add("str_inandout", "Bidirectional");
+            mStrings.Add("str_open", "open");
+            mStrings.Add("str_closed", "closed");
+            mStrings.Add("str_listen", "listen");
+            mStrings.Add("str_syn_sent", "syn sent");
+            mStrings.Add("str_syn_received", "syn received");
+            mStrings.Add("str_established", "established");
+            mStrings.Add("str_fin_wait_1", "fin wait 1");
+            mStrings.Add("str_fin_wait_2", "fin wait 2");
+            mStrings.Add("str_close_wait", "close wait");
+            mStrings.Add("str_closing", "closing");
+            mStrings.Add("str_last_ack", "last ack");
+            mStrings.Add("str_time_wait", "time wait");
+            mStrings.Add("str_delete_tcb", "delete tcb");
+            mStrings.Add("str_blocked", "blocked");
             mStrings.Add("msg_no_sys_merge", "System or Global entries can not be merged with other entries!");
             mStrings.Add("msg_remove_progs", "Are you sure you want to remove the selected programs? All associated firewal rules will be removed aswell.");
             mStrings.Add("msg_remove_rules", "Are you sure you want to remove the selected rules?");
@@ -98,7 +107,7 @@ namespace PrivateWin10
             mStrings.Add("acl_edit", "Custom Config");
             mStrings.Add("acl_lan", "Lan Only");
             mStrings.Add("acl_block", "Block Access");
-            mStrings.Add("lbl_info", "Blocked: {0}; Allowed: {1}");
+            mStrings.Add("lbl_prog_info", "Blocked: {0}; Allowed: {1}; Open: {2}\r\nUpload: {3}/s; Download: {4}/s");
             mStrings.Add("lbl_permanent", "Permanent Rule (forever)");
             mStrings.Add("lbl_temp", "Temporary Rule {0}");
             mStrings.Add("msg_clone_rules", "Duplicate selected rules?");
@@ -125,6 +134,7 @@ namespace PrivateWin10
             mStrings.Add("lbl_remove", "Remove");
             mStrings.Add("lbl_name", "Name");
             mStrings.Add("lbl_group", "Group");
+            mStrings.Add("lbl_index", "Index");
             mStrings.Add("lbl_progam", "Program");
             mStrings.Add("wnd_notify", "Connection Notification Window");
             mStrings.Add("lbl_prev", "Previouse");
@@ -135,8 +145,12 @@ namespace PrivateWin10
             mStrings.Add("lbl_direction", "Direction");
             mStrings.Add("lbl_protocol", "Protocol");
             mStrings.Add("lbl_ip_port", "Address:Port");
-            mStrings.Add("lbl_time_stamp", "TimeStamp");
+            mStrings.Add("lbl_remote_host", "Remote Host");
+            mStrings.Add("lbl_time_stamp", "Time Stamp");
+            mStrings.Add("lbl_pid", "PID");
             mStrings.Add("wnd_program", "Program parameters");
+            mStrings.Add("lbl_upload", "Upload");
+            mStrings.Add("lbl_download", "Download");
             mStrings.Add("lbl_program", "Program");
             mStrings.Add("lbl_exe", "Executable");
             mStrings.Add("lbl_svc", "Only Services");
@@ -145,6 +159,7 @@ namespace PrivateWin10
             mStrings.Add("lbl_rule", "Firewall rule identity");
             mStrings.Add("grp_action", "Action & Scope");
             mStrings.Add("lbl_action", "Action");
+            mStrings.Add("lbl_state", "State");
             mStrings.Add("lbl_itf_all", "All Interfaces Types");
             mStrings.Add("lbl_itf_select", "Specific Types:");
             mStrings.Add("lbl_itf_lan", "LAN");
@@ -163,7 +178,10 @@ namespace PrivateWin10
             mStrings.Add("btn_del_progs", "Remove Program(s)");
             mStrings.Add("btn_cleanup_list", "Cleanup List");
             mStrings.Add("chk_ignore_local", "Ignore localHost");
-            mStrings.Add("lbl_sort", "Sort:");
+            mStrings.Add("chk_ignore_lan", "Ignore LAN");
+            mStrings.Add("chk_hide_local", "Hide localHost");
+            mStrings.Add("chk_hide_lan", "Hide LAN Entries");
+            mStrings.Add("lbl_sort", "Sort By:");
             mStrings.Add("lbl_type", "Type:");
             mStrings.Add("lbl_filter", "Filter:");
             mStrings.Add("btn_reload", "Reload Rules");
@@ -197,9 +215,16 @@ namespace PrivateWin10
             mStrings.Add("chk_autorun", "Autostart at logon");
             mStrings.Add("chk_instal_svc", "Install Service (priv10)");
             mStrings.Add("chk_no_uac", "Bypass UAC prompt");
+            mStrings.Add("chk_tweak_check", "Monitor Tweaks for changes");
+            mStrings.Add("chk_tweak_fix", "Re Apply Tweaks that got un done");
             mStrings.Add("lbl_firewall_options", "Windows Firewall Option");
             mStrings.Add("chk_manage_fw", "Manage Windows Firewall");
             mStrings.Add("chk_show_notify", "Show blocked connection atemps");
+            mStrings.Add("chk_fw_guard", "Guard Firewall Rules");
+            mStrings.Add("chk_fw_guard_alert", "Notify about rule changes");
+            mStrings.Add("chk_fw_guard_disable", "Disable not autorized rules");
+            mStrings.Add("chk_fw_guard_fix", "Undo un autorized rule changed");
+            mStrings.Add("chk_fix_rules", "Undo 3rd party rule changes");
             mStrings.Add("lbl_filter_mode", "Filtering Mode");
             mStrings.Add("chk_fw_whitelist", "White-List Mode (recommended)");
             mStrings.Add("chk_fw_blacklist", "Black-List Mode (default)");
@@ -214,6 +239,79 @@ namespace PrivateWin10
             mStrings.Add("msg_dupliate_session", "An other instance is already running.");
             mStrings.Add("str_in", "{0} In");
             mStrings.Add("str_out", "{0} Out");
+            mStrings.Add("app_reload", "[Update App List]");
+            mStrings.Add("msg_pick_svc", "[Select Service]");
+            mStrings.Add("lbl_host_name", "Host Name");
+            mStrings.Add("lbl_last_seen", "Last Seen");
+            mStrings.Add("lbl_seen_count", "Seen Count");
+            mStrings.Add("txt_unknown", "Unknown");
+            mStrings.Add("tweak_reg", "Registry Tweak");
+            mStrings.Add("tweak_gpo", "GPO Tweak");
+            mStrings.Add("tweak_svc", "Disable Service");
+            mStrings.Add("tweak_task", "Disable Task");
+            mStrings.Add("tweak_file", "Block File");
+            mStrings.Add("tweak_fw", "Use Firewall");
+            mStrings.Add("tweak_undone", ", un done: {0} (!)");
+            mStrings.Add("lbl_programs", "Programs");
+            mStrings.Add("lbl_view_options", "View Options");
+            mStrings.Add("lbl_sort_and", "Sort & Higlight");
+            mStrings.Add("lbl_rules_and", "Rules and Details");
+            mStrings.Add("lbl_view_filter", "View Filter");
+            mStrings.Add("cat_uncat", "[Uncategorized]");
+            mStrings.Add("filter_presets", "Filter Presets");
+            mStrings.Add("filter_program", "Program Filter");
+            mStrings.Add("filter_activity", "Activity Filter");
+            mStrings.Add("filter_category", "Category Filter");
+            mStrings.Add("filter_all", "All");
+            mStrings.Add("filter_programs", "Programs");
+            mStrings.Add("filter_services", "Services");
+            mStrings.Add("filter_system", "System");
+            mStrings.Add("filter_apps", "Apps");
+            mStrings.Add("filter_uncat", "Uncategorized");
+            mStrings.Add("filer_multi", "Multiple Categories");
+            mStrings.Add("filter_types", "Types:");
+            mStrings.Add("filter_recent", "Activity:");
+            mStrings.Add("filter_recent_not", "[No Filter]");
+            mStrings.Add("filter_recent_active", "Recent");
+            mStrings.Add("filter_recent_blocked", "Blocked");
+            mStrings.Add("filter_recent_allowed", "Allowed");
+            mStrings.Add("filter_sockets", "Sockets:");
+            mStrings.Add("filter_sockets_not", "[No Filter]");
+            mStrings.Add("filter_sockets_any", "Any");
+            mStrings.Add("filter_sockets_web", "HTTP 80,443");
+            mStrings.Add("filter_sockets_tcp", "TCP Sockets");
+            mStrings.Add("filter_sockets_client", "TCP Client");
+            mStrings.Add("filter_sockets_server", "TCP Server");
+            mStrings.Add("filter_sockets_udp", "UDP Sockets");
+            mStrings.Add("filter_sockets_raw", "Raw Sockets");
+            mStrings.Add("filter_sockets_none", "Without");
+            mStrings.Add("filter_rules", "Rules:");
+            mStrings.Add("filter_rules_not", "[No Filter]");
+            mStrings.Add("filter_rules_any", "with Any");
+            mStrings.Add("filter_rules_enabled", "with Active");
+            mStrings.Add("filter_rules_disabled", "with Disabled");
+            mStrings.Add("filter_rules_none", "Without");
+            mStrings.Add("lbl_last_preset", "Last Preset");
+            mStrings.Add("msg_tweak_un_done", "Tweak {0} from {1} is not applyed!");
+            mStrings.Add("msg_tweak_stuck", "Failed to re Apply Tweak {0} from {1}.");
+            mStrings.Add("msg_tweak_fixed", "Successfully reApplyed Tweak {0} from {1}.");
+            mStrings.Add("msg_rule_event", "Firewall rule \"{0}\" for \"{1}\" was {2}.");
+            mStrings.Add("msg_rule_disabled", ", the rule has been disabled");
+            mStrings.Add("msg_rule_restored", ", the original rule was restored");
+            mStrings.Add("msg_rule_added", "Added");
+            mStrings.Add("msg_rule_changed", "Changed");
+            mStrings.Add("msg_rule_removed", "Removed");
+            mStrings.Add("msg_rules_approved", "All currently valid Firewall Rules have been approved.");
+            mStrings.Add("lbl_log_level", "Level");
+            mStrings.Add("lbl_log_type", "Category");
+            mStrings.Add("lbl_log_event", "Event");
+            mStrings.Add("lbl_message", "Message");
+            mStrings.Add("log_error", "Error");
+            mStrings.Add("log_warning", "Warning");
+            mStrings.Add("log_info", "Information");
+            mStrings.Add("log_firewall", "Firewall");
+            mStrings.Add("log_tweaks", "Tweaks");
+            mStrings.Add("log_other", "Other");
 
 
             //mStrings.Add("", "");
@@ -230,14 +328,18 @@ namespace PrivateWin10
 
             if (lang != "en")
             {
-                foreach (string key in mStrings.Keys.ToList())
+                var Langs = App.IniEnumSections(langINI);
+                if (Langs.Contains(lang))
                 {
-                    string str = App.IniReadValue(lang, key, "", langINI);
-                    if (str.Length == 0)
-                        continue;
+                    foreach (string key in mStrings.Keys.ToList())
+                    {
+                        string str = App.IniReadValue(lang, key, "", langINI);
+                        if (str.Length == 0)
+                            continue;
 
-                    mStrings.Remove(key);
-                    mStrings.Add(key, str);
+                        mStrings.Remove(key);
+                        mStrings.Add(key, str);
+                    }
                 }
             }
         }

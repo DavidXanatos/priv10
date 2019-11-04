@@ -43,7 +43,7 @@ namespace PrivateWin10.Controls
             set
             {
                 lstAddr.Items.Clear();
-                if (value == null || value == "*")
+                if (FirewallRule.IsEmptyOrStar(value))
                 {
                     radAny.IsChecked = true;
                     gridCustom.IsEnabled = false;
@@ -203,6 +203,7 @@ namespace PrivateWin10.Controls
             return true;
         }
     }
+
     public class AddressViewModel : WpfFunc.ViewModelHelper, IDataErrorInfo
     {
         public string this[string propName]

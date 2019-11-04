@@ -1,0 +1,128 @@
+﻿<UserControl x:Class="PrivateWin10.Controls.FirewallRuleList"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PrivateWin10.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="150"/>
+        </Grid.ColumnDefinitions>
+        <GroupBox Name="grpRules" Header="Firewall Rules">
+            <DataGrid Name="rulesGrid" AutoGenerateColumns="False" IsReadOnly="true" MouseDoubleClick="ruleGrid_MouseDoubleClick" GridLinesVisibility="All" SelectionChanged="RuleGrid_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Ico">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Margin="2,0,2,0" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Icon}" />
+                                    <!--TextBlock Grid.Column="1" Height="16" HorizontalAlignment="Left" Margin="2,0,2,0" VerticalAlignment="Center" Text="{Binding Name}" /-->
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}">
+                        <!--DataGridTextColumn.CellStyle>
+                            <Style TargetType="{x:Type DataGridCell}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding NameColor}" Value="warn">
+                                        <Setter Property="Background" Value="Yellow"></Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </-->
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Grouping" Binding="{Binding Grouping}" />
+                    <DataGridTextColumn Header="Index" Binding="{Binding Index}" />
+                    <DataGridTextColumn Header="Enabled" Binding="{Binding Enabled}" />
+                    <DataGridTextColumn Header="Profiles" Binding="{Binding Profiles}" />
+                    <DataGridTextColumn Header="Action" Binding="{Binding Action}">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="{x:Type DataGridCell}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ActionColor}" Value="red">
+                                        <Setter Property="Background" Value="LightPink"></Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ActionColor}" Value="green">
+                                        <Setter Property="Background" Value="LightGreen"></Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" />
+                    <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" />
+                    <DataGridTextColumn Width="150" Header="Remote Address" Binding="{Binding DestAddress}" />
+                    <DataGridTextColumn Width="150" Header="Local Address" Binding="{Binding SrcAddress}" />
+                    <DataGridTextColumn Width="150" Header="Remote Ports" Binding="{Binding DestPorts}" />
+                    <DataGridTextColumn Width="150" Header="Local Ports" Binding="{Binding SrcPorts}" />
+                    <DataGridTextColumn Header="ICMP Options" Binding="{Binding ICMPOptions}" />
+                    <DataGridTextColumn Header="Interfaces" Binding="{Binding Interfaces}" />
+                    <DataGridTextColumn Header="Edge Traversal" Binding="{Binding EdgeTraversal}" />
+                    <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
+                </DataGrid.Columns>
+                <DataGrid.RowStyle>
+                    <Style TargetType="{x:Type DataGridRow}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DisabledColor}" Value="gray">
+                                <Setter Property="Foreground" Value="DarkGray"></Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NameColor}" Value="warn">
+                                <Setter Property="Background" Value="Yellow"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+            </DataGrid>
+        </GroupBox>
+        <ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Expander Name="grpRuleTools" Grid.Row="0" IsExpanded="True" Header="Tools" Margin="2,0,2,2">
+                    <StackPanel>
+                        <Button Name="btnCreateRule" Margin="2,2,2,2" Content="Create Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnCreateRule_Click"/>
+                        <Button Name="btnEnableRule" Margin="2,2,2,2" Content="Enable Rules" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnEnableRule_Click"/>
+                        <Button Name="btnDisableRule" Margin="2,2,2,2" Content="Disable Rules" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnDisableRule_Click"/>
+                        <Button Name="btnRemoveRule" Margin="2,2,2,2" Content="Remove Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnRemoveRule_Click"/>
+                        <Button Name="btnBlockRule" Margin="2,2,2,2" Content="Set Blocking" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnBlockRule_Click"/>
+                        <Button Name="btnAllowRule" Margin="2,2,2,2" Content="Set Allowing" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnAllowRule_Click"/>
+                        <Button Name="btnEditRule" Margin="2,2,2,2" Content="Edit Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnEditRule_Click"/>
+                        <Button Name="btnCloneRule" Margin="2,2,2,2" Content="Clone Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnCloneRule_Click"/>
+                    </StackPanel>
+                </Expander>
+                <Expander Name="grpRuleView" Grid.Row="1" IsExpanded="True" Header="View Options" Margin="2,2,2,0">
+                    <StackPanel>
+                        <CheckBox Content="Hide Disabled" Name="chkNoDisabled" Click="chkNoDisabled_Click"/>
+                        <Label Name="lblFilterRules" Margin="2,2,2,2" Content="Filter Rules" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
+                        <TextBox Margin="2,2,2,2" Name="txtRuleFilter" HorizontalAlignment="Stretch" Height="24" VerticalAlignment="Top" TextWrapping="Wrap" Text="" TextChanged="txtRuleFilter_TextChanged" >
+                            <!--TextBox.Style>
+                                            <Style BasedOn="{StaticResource MetroTextBox}" TargetType="{x:Type TextBox}">
+                                                <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
+                                                <Style.Triggers>
+                                                    <Trigger Property="Controls:TextBoxHelper.HasText" Value="False">
+                                                        <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="False" />
+                                                        <Setter Property="Controls:TextBoxHelper.Watermark" Value="Enter Filter..." />
+                                                    </Trigger>
+                                                    <Trigger Property="Controls:TextBoxHelper.HasText" Value="True">
+                                                        <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </-->
+                        </TextBox>
+                    </StackPanel>
+                </Expander>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

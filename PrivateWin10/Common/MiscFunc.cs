@@ -9,14 +9,15 @@ using System.Management;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using System.ServiceProcess;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+
 
 internal struct LASTINPUTINFO
 {
@@ -26,6 +27,25 @@ internal struct LASTINPUTINFO
 
 static class MiscFunc
 {
+    public static UInt64 GetUTCTime()
+    {
+        return (UInt64)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0)).TotalSeconds;
+    }
+
+    public static TValue GetOrCreate<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
+    where TValue : new()
+    {
+        TValue val;
+
+        if (!dict.TryGetValue(key, out val))
+        {
+            val = new TValue();
+            dict.Add(key, val);
+        }
+
+        return val;
+    }
+
     public static bool Exec(string cmd, string args, bool hidden = true)
     {
         try
@@ -46,17 +66,22 @@ static class MiscFunc
         }
         catch (Exception err)
         {
-            AppLog.Line("Error in {0}: {1}", MiscFunc.GetCurrentMethod(), err.Message);
+            AppLog.Exception(err);
         }
         return false;
     }
 
-    internal static void ActiveSleep(int ms)
+    public static UInt64 GetCurTick()
+    {
+        return (UInt64)DateTime.Now.Ticks / 10000; // ticks in ms
+    }
+
+    /*internal static void ActiveSleep(int ms)
     {
         DateTime until = DateTime.Now.Add(new TimeSpan(0, 0, 0, 0, ms));
         while (until >= DateTime.Now)
             System.Windows.Forms.Application.DoEvents();
-    }
+    }*/
 
     [DllImport("User32.dll")]
     private static extern bool GetLastInputInfo(ref LASTINPUTINFO plii);
@@ -77,47 +102,32 @@ static class MiscFunc
 
     public static int parseInt(string str, int def = 0)
     {
-        try
-        {
-            if (str.Length == 0)
-                return def;
-            return int.Parse(str);
-        }
-        catch
-        {
-            return def;
-        }
+        int ret;
+        if (int.TryParse(str, out ret))
+            return ret;
+        return def;
     }
 
     public static double parseDouble(string str, double def = 0)
     {
-        try
-        {
-            if (str.Length == 0)
-                return def;
-            return double.Parse(str);
-        }
-        catch
-        {
-            return def;
-        }
+        double ret;
+        if (double.TryParse(str, out ret))
+            return ret;
+        return def;
     }
 
     public static bool? parseBool(string str, bool? def = false)
     {
-        try
-        {
-            if (str.Length == 0)
-                return def;
-            return bool.Parse(str);
-        }
-        catch
-        {
+        if (str.Length == 0)
             return def;
-        }
+
+        bool ret;
+        if (bool.TryParse(str, out ret))
+            return ret;
+        return def;
     }
 
-    public static string mNtOsKrnlPath = Environment.ExpandEnvironmentVariables(@"%SystemRoot%\System32\ntoskrnl.exe");
+    public static string NtOsKrnlPath = Environment.ExpandEnvironmentVariables(@"%SystemRoot%\System32\ntoskrnl.exe");
 
     public static string parsePath(string path)
     {
@@ -134,7 +144,7 @@ static class MiscFunc
         }
         catch (Exception err)
         {
-            AppLog.Line("Error in {0}: {1}", MiscFunc.GetCurrentMethod(), err.Message);
+            AppLog.Exception(err);
         }
         return "";
     }
@@ -183,7 +193,7 @@ static class MiscFunc
         return ret;
     }
 
-    public static string GetExeName(string appPath)
+    public static string GetExeDescription(string appPath)
     {
         string descr = null;
         if (File.Exists(appPath))
@@ -262,5 +272,18 @@ static class MiscFunc
         {
             return "Unknown";
         }
+    }
+
+    static public bool IsOnScreen(Rectangle formRectangle)
+    {
+        Screen[] screens = Screen.AllScreens;
+        foreach (Screen screen in screens)
+        {
+            if (screen.WorkingArea.Contains(formRectangle))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

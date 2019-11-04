@@ -1,5 +1,4 @@
-﻿using PrivateWin10.ViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -25,7 +24,7 @@ namespace PrivateWin10.Windows
 
         private readonly RuleWindowViewModel viewModel;
 
-        public RuleWindow(List<ProgramList.ID> ids, FirewallRule rule)
+        public RuleWindow(List<Program> progs, FirewallRule rule)
         {
             InitializeComponent();
 
@@ -72,7 +71,7 @@ namespace PrivateWin10.Windows
             this.btnCancel.Content = Translate.fmt("lbl_cancel");
 
             Rule = rule;
-            bool bNew = Rule.guid == Guid.Empty;
+            bool bNew = Rule.guid == null;
 
             viewModel = new RuleWindowViewModel();
             DataContext = viewModel;
@@ -85,20 +84,20 @@ namespace PrivateWin10.Windows
                 cmbGroup.Text = Rule.Grouping;
             txtInfo.Text = Rule.Description;
 
-            foreach (ProgramList.ID id in ids)
+            foreach (Program prog in progs)
             {
-                ContentControl program = new ContentControl() { Content = id.GetDisplayName(), Tag = id };
+                ContentControl program = new ContentControl() { Content = prog.Description, Tag = prog.ID };
                 cmbProgram.Items.Add(program);
-                if (Rule.mID != null && id.CompareTo(Rule.mID) == 0)
+                if (Rule.ProgID != null && prog.ID.CompareTo(Rule.ProgID) == 0)
                     cmbProgram.SelectedItem = program;
             }
 
-            cmbAction.Items.Add(new ContentControl() { Content = Translate.fmt("str_allow"), Tag = Firewall.Actions.Allow });
-            cmbAction.Items.Add(new ContentControl() { Content = Translate.fmt("str_block"), Tag = Firewall.Actions.Block });
+            cmbAction.Items.Add(new ContentControl() { Content = Translate.fmt("str_allow"), Tag = FirewallRule.Actions.Allow });
+            cmbAction.Items.Add(new ContentControl() { Content = Translate.fmt("str_block"), Tag = FirewallRule.Actions.Block });
             //WpfFunc.CmbSelect(cmbAction, Rule.Action.ToString());
             viewModel.RuleAction = WpfFunc.CmbPick(cmbAction, Rule.Action.ToString());
 
-            if (Rule.Profile == (int)Firewall.Profiles.All)
+            if (Rule.Profile == (int)FirewallRule.Profiles.All)
             {
                 radProfileAll.IsChecked = true;
                 chkPrivate.IsChecked = true;
@@ -108,12 +107,12 @@ namespace PrivateWin10.Windows
             else
             {
                 radProfileCustom.IsChecked = true;
-                chkPrivate.IsChecked = ((Rule.Profile & (int)Firewall.Profiles.Private) != 0);
-                chkDomain.IsChecked = ((Rule.Profile & (int)Firewall.Profiles.Domain) != 0);
-                chkPublic.IsChecked = ((Rule.Profile & (int)Firewall.Profiles.Public) != 0);
+                chkPrivate.IsChecked = ((Rule.Profile & (int)FirewallRule.Profiles.Private) != 0);
+                chkDomain.IsChecked = ((Rule.Profile & (int)FirewallRule.Profiles.Domain) != 0);
+                chkPublic.IsChecked = ((Rule.Profile & (int)FirewallRule.Profiles.Public) != 0);
             }
 
-            if (Rule.Interface == (int)Firewall.Interfaces.All)
+            if (Rule.Interface == (int)FirewallRule.Interfaces.All)
             {
                 radNicAll.IsChecked = true;
                 chkLAN.IsChecked = true;
@@ -123,21 +122,21 @@ namespace PrivateWin10.Windows
             else
             {
                 radNicCustom.IsChecked = true;
-                chkLAN.IsChecked = ((Rule.Interface & (int)Firewall.Interfaces.Lan) != 0);
-                chkVPN.IsChecked = ((Rule.Interface & (int)Firewall.Interfaces.RemoteAccess) != 0);
-                chkWiFi.IsChecked = ((Rule.Interface & (int)Firewall.Interfaces.Wireless) != 0);
+                chkLAN.IsChecked = ((Rule.Interface & (int)FirewallRule.Interfaces.Lan) != 0);
+                chkVPN.IsChecked = ((Rule.Interface & (int)FirewallRule.Interfaces.RemoteAccess) != 0);
+                chkWiFi.IsChecked = ((Rule.Interface & (int)FirewallRule.Interfaces.Wireless) != 0);
             }
 
             if (bNew)
-                cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_inandout"), Tag = Firewall.Directions.Bidirectiona });
-            cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_outbound"), Tag = Firewall.Directions.Outboun });
-            cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_inbound"), Tag = Firewall.Directions.Inbound });
+                cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_inandout"), Tag = FirewallRule.Directions.Bidirectiona });
+            cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_outbound"), Tag = FirewallRule.Directions.Outboun });
+            cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_inbound"), Tag = FirewallRule.Directions.Inbound });
             WpfFunc.CmbSelect(cmbDirection, Rule.Direction.ToString());
 
             cmbProtocol.Items.Add(new ContentControl() { Content = Translate.fmt("pro_any"), Tag = (int)NetFunc.KnownProtocols.Any });
             for (int i = (int)NetFunc.KnownProtocols.Min; i <= (int)NetFunc.KnownProtocols.Max; i++)
             {
-                string name = NetFunc.Protocol2Str(i);
+                string name = NetFunc.Protocol2Str((UInt32)i);
                 if (name != null)
                     cmbProtocol.Items.Add(new ContentControl() { Content = i.ToString() + " - " + name, Tag = i });
             }
@@ -166,20 +165,20 @@ namespace PrivateWin10.Windows
             if (program == null)
                 return;
 
-            ProgramList.ID id = (program.Tag as ProgramList.ID);
+            ProgramID id = (program.Tag as ProgramID);
 
             txtPath.Text = id.Path;
             switch (id.Type)
             {
-                case ProgramList.Types.Service:
-                    txtService.Text = ServiceHelper.GetServiceName(id.Name) + " (" + id.Name + ")";
+                case ProgramID.Types.Service:
+                    txtService.Text = id.GetServiceName() + " (" + id.GetServiceId() + ")";
                     break;
-                case ProgramList.Types.App:
-                    txtApp.Text = AppManager.SidToPackageID(id.Name);
+                case ProgramID.Types.App:
+                    txtApp.Text = id.GetPackageName();
                     break;
             }
-            txtService.IsEnabled = id.Type == ProgramList.Types.Service;
-            txtApp.IsEnabled = id.Type == ProgramList.Types.App;
+            txtService.IsEnabled = id.Type == ProgramID.Types.Service;
+            txtApp.IsEnabled = id.Type == ProgramID.Types.App;
         }
 
         private void profile_Checked(object sender, RoutedEventArgs e)
@@ -236,8 +235,8 @@ namespace PrivateWin10.Windows
                 foreach (int type in types.Keys)
                     cmbICMP.Items.Add(new ContentControl() { Content = type.ToString() + ":* (" + types[type] + ")", Tag = type.ToString() + ":*" });
                 cmbICMP.Items.Add(new ContentControl() { Content = "3:4 (Type 3, Code 4)", Tag = "3:4" }); // why does windows firewall has this explicitly
-                if (!WpfFunc.CmbSelect(cmbICMP, Rule.IcmpTypesAndCodes) && Rule.IcmpTypesAndCodes != null)
-                    cmbICMP.Text = Rule.IcmpTypesAndCodes;
+                if (!WpfFunc.CmbSelect(cmbICMP, Rule.GetIcmpTypesAndCodes()) && Rule.IcmpTypesAndCodes != null)
+                    cmbICMP.Text = Rule.GetIcmpTypesAndCodes();
             }
             else
                 tabParams.SelectedItem = tabNone;
@@ -267,38 +266,39 @@ namespace PrivateWin10.Windows
                 cmbRemotePorts.Items.Add(new ContentControl() { Content = Translate.fmt("port_any"), Tag = "*" });
                 cmbLocalPorts.Items.Add(new ContentControl() { Content = Translate.fmt("port_any"), Tag = "*" });
 
-                if (Rule.Direction == Firewall.Directions.Outboun)
+                if (Rule.Direction == FirewallRule.Directions.Outboun)
                 {
                     if (curProtocol == (int)FirewallRule.KnownProtocols.TCP)
                     {
-                        cmbRemotePorts.Items.Add(new ContentControl() { Content = "IPHTTPS", Tag = "IPHTTPS" });
+                        cmbRemotePorts.Items.Add(new ContentControl() { Content = FirewallRule.PortKeywordIpTlsOut, Tag = FirewallRule.PortKeywordIpTlsOut });
                     }
                 }
-                else if (Rule.Direction == Firewall.Directions.Inbound)
+                else if (Rule.Direction == FirewallRule.Directions.Inbound)
                 {
                     if (curProtocol == (int)FirewallRule.KnownProtocols.TCP)
                     {
-                        cmbLocalPorts.Items.Add(new ContentControl() { Content = "IPHTTPS", Tag = "IPHTTPS" });
-                        cmbLocalPorts.Items.Add(new ContentControl() { Content = "RPC-EPMap", Tag = "RPC-EPMap" });
-                        cmbLocalPorts.Items.Add(new ContentControl() { Content = "RPC", Tag = "RPC" });
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = FirewallRule.PortKeywordIpTlsIn, Tag = FirewallRule.PortKeywordIpTlsIn });
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = FirewallRule.PortKeywordRpcEp, Tag = FirewallRule.PortKeywordRpcEp });
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = FirewallRule.PortKeywordRpc, Tag = FirewallRule.PortKeywordRpc });
                     }
                     else if (curProtocol == (int)FirewallRule.KnownProtocols.UDP)
                     {
-                        cmbLocalPorts.Items.Add(new ContentControl() { Content = "Teredo", Tag = "Teredo" });
-                        cmbLocalPorts.Items.Add(new ContentControl() { Content = "Ply2Disc", Tag = "Ply2Disc" });
-                        cmbLocalPorts.Items.Add(new ContentControl() { Content = "mDNS", Tag = "mDNS" });
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = FirewallRule.PortKeywordTeredo, Tag = FirewallRule.PortKeywordTeredo });
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = FirewallRule.PortKeywordPly2Disc, Tag = FirewallRule.PortKeywordPly2Disc });
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = FirewallRule.PortKeywordMDns, Tag = FirewallRule.PortKeywordMDns });
+                        cmbLocalPorts.Items.Add(new ContentControl() { Content = FirewallRule.PortKeywordDhcp, Tag = FirewallRule.PortKeywordDhcp });
                     }
                 }
 
                 //if (!WpfFunc.CmbSelect(cmbRemotePorts, Rule.RemotePorts) && Rule.RemotePorts != null)
                 //    cmbRemotePorts.Text = Rule.RemotePorts;
-                viewModel.RemotePort = WpfFunc.CmbPick(cmbRemotePorts, Rule.RemotePorts == null ? "*" : Rule.RemotePorts);
+                viewModel.RemotePort = WpfFunc.CmbPick(cmbRemotePorts, FirewallRule.IsEmptyOrStar(Rule.RemotePorts) ? "*" : Rule.RemotePorts);
                 if (viewModel.RemotePort == null)
                     viewModel.RemotePortTxt = Rule.RemotePorts;
 
                 //if (!WpfFunc.CmbSelect(cmbLocalPorts, Rule.LocalPorts) && Rule.LocalPorts != null)
                 //    cmbLocalPorts.Text = Rule.LocalPorts;
-                viewModel.LocalPort = WpfFunc.CmbPick(cmbLocalPorts, Rule.LocalPorts == null ? "*" : Rule.LocalPorts);
+                viewModel.LocalPort = WpfFunc.CmbPick(cmbLocalPorts, FirewallRule.IsEmptyOrStar(Rule.LocalPorts) ? "*" : Rule.LocalPorts);
                 if (viewModel.LocalPort == null)
                     viewModel.LocalPortTxt = Rule.LocalPorts;
             }
@@ -346,50 +346,50 @@ namespace PrivateWin10.Windows
             Rule.Grouping = cmbGroup.Text;
             Rule.Description = txtInfo.Text;
 
-            Rule.mID = ((cmbProgram.SelectedItem as ContentControl).Tag as ProgramList.ID);
+            Rule.ProgID = ((cmbProgram.SelectedItem as ContentControl).Tag as ProgramID);
 
-            Rule.Action = (Firewall.Actions)(cmbAction.SelectedItem as ContentControl).Tag;
+            Rule.Action = (FirewallRule.Actions)(cmbAction.SelectedItem as ContentControl).Tag;
 
             if (radProfileAll.IsChecked == true || (chkPrivate.IsChecked == true && chkDomain.IsChecked == true && chkPublic.IsChecked == true))
-                Rule.Profile = (int)Firewall.Profiles.All;
+                Rule.Profile = (int)FirewallRule.Profiles.All;
             else
             {
-                Rule.Profile = (int)Firewall.Profiles.Undefined;
+                Rule.Profile = (int)FirewallRule.Profiles.Undefined;
                 if (chkPrivate.IsChecked == true)
-                    Rule.Profile |= (int)Firewall.Profiles.Private;
+                    Rule.Profile |= (int)FirewallRule.Profiles.Private;
                 if (chkDomain.IsChecked == true)
-                    Rule.Profile |= (int)Firewall.Profiles.Domain;
+                    Rule.Profile |= (int)FirewallRule.Profiles.Domain;
                 if (chkPublic.IsChecked == true)
-                    Rule.Profile |= (int)Firewall.Profiles.Public;
+                    Rule.Profile |= (int)FirewallRule.Profiles.Public;
             }
 
             if (radProfileAll.IsChecked == true || (chkPrivate.IsChecked == true && chkDomain.IsChecked == true && chkPublic.IsChecked == true))
-                Rule.Profile = (int)Firewall.Profiles.All;
+                Rule.Profile = (int)FirewallRule.Profiles.All;
             else
             {
-                Rule.Profile = (int)Firewall.Profiles.Undefined;
+                Rule.Profile = (int)FirewallRule.Profiles.Undefined;
                 if (chkPrivate.IsChecked == true)
-                    Rule.Profile |= (int)Firewall.Profiles.Private;
+                    Rule.Profile |= (int)FirewallRule.Profiles.Private;
                 if (chkDomain.IsChecked == true)
-                    Rule.Profile |= (int)Firewall.Profiles.Domain;
+                    Rule.Profile |= (int)FirewallRule.Profiles.Domain;
                 if (chkPublic.IsChecked == true)
-                    Rule.Profile |= (int)Firewall.Profiles.Public;
+                    Rule.Profile |= (int)FirewallRule.Profiles.Public;
             }
 
             if (radProfileAll.IsChecked == true || (chkLAN.IsChecked == true && chkVPN.IsChecked == true && chkWiFi.IsChecked == true))
-                Rule.Interface = (int)Firewall.Interfaces.All;
+                Rule.Interface = (int)FirewallRule.Interfaces.All;
             else
             {
-                Rule.Interface = (int)Firewall.Interfaces.None;
+                Rule.Interface = 0;
                 if (chkLAN.IsChecked == true)
-                    Rule.Interface |= (int)Firewall.Interfaces.Lan;
+                    Rule.Interface |= (int)FirewallRule.Interfaces.Lan;
                 if (chkVPN.IsChecked == true)
-                    Rule.Interface |= (int)Firewall.Interfaces.RemoteAccess;
+                    Rule.Interface |= (int)FirewallRule.Interfaces.RemoteAccess;
                 if (chkWiFi.IsChecked == true)
-                    Rule.Interface |= (int)Firewall.Interfaces.Wireless;
+                    Rule.Interface |= (int)FirewallRule.Interfaces.Wireless;
             }
 
-            Rule.Direction = (Firewall.Directions)(cmbDirection.SelectedItem as ContentControl).Tag;
+            Rule.Direction = (FirewallRule.Directions)(cmbDirection.SelectedItem as ContentControl).Tag;
 
             Rule.Protocol = curProtocol.Value;
             if (Rule.Protocol == (int)FirewallRule.KnownProtocols.TCP || Rule.Protocol == (int)FirewallRule.KnownProtocols.UDP)
@@ -407,9 +407,9 @@ namespace PrivateWin10.Windows
             else if (Rule.Protocol == (int)FirewallRule.KnownProtocols.ICMP || Rule.Protocol == (int)FirewallRule.KnownProtocols.ICMPv6)
             {
                 if (cmbICMP.SelectedItem != null)
-                    Rule.IcmpTypesAndCodes = (string)((cmbICMP.SelectedItem as ContentControl).Tag);
+                    Rule.SetIcmpTypesAndCodes((cmbICMP.SelectedItem as ContentControl).Tag as string);
                 else
-                    Rule.IcmpTypesAndCodes = cmbICMP.Text.Replace(" ", ""); // white spaces are not valid
+                    Rule.SetIcmpTypesAndCodes(cmbICMP.Text);
             }
 
             Rule.RemoteAddresses = addrDest.Address;

@@ -32,9 +32,19 @@ namespace PrivateWin10.Pages
             this.chkService.Content = Translate.fmt("chk_instal_svc");
             this.chkNoUAC.Content = Translate.fmt("chk_no_uac");
 
+            this.chkTweakCheck.Content = Translate.fmt("chk_tweak_check");
+            this.chkTweakFix.Content = Translate.fmt("chk_tweak_fix");
+
             this.lblFirewall.Text = Translate.fmt("lbl_firewall_options");
             this.chkUseFW.Content = Translate.fmt("chk_manage_fw");
             this.chkNotifyFW.Content = Translate.fmt("chk_show_notify");
+
+            this.chkGuardFW.Content = Translate.fmt("chk_fw_guard");
+            //this.chkFixRules.Content = Translate.fmt("chk_fix_rules");
+            this.radAlert.Content = Translate.fmt("chk_fw_guard_alert");
+            this.radDisable.Content = Translate.fmt("chk_fw_guard_disable");
+            this.radFix.Content = Translate.fmt("chk_fw_guard_fix");
+
             this.lblMode.Content = Translate.fmt("lbl_filter_mode");
             this.radWhitelist.Content = Translate.fmt("chk_fw_whitelist");
             this.radBlacklist.Content = Translate.fmt("chk_fw_blacklist");
@@ -71,23 +81,29 @@ namespace PrivateWin10.Pages
             chkService.IsChecked = App.svc.IsInstalled();
             chkNoUAC.IsChecked = AdminFunc.IsSkipUac(App.mName);
 
+            chkTweakCheck.IsChecked = App.GetConfigInt("TweakGuard", "AutoCheck", 1) != 0;
+            chkTweakFix.IsEnabled = chkTweakCheck.IsChecked == true;
+            chkTweakFix.IsChecked = App.GetConfigInt("TweakGuard", "AutoFix", 0) != 0;
+
             chkUseFW.IsChecked = App.GetConfigInt("Firewall", "Enabled", 0) != 0;
 
             if (App.client.IsConnected())
             {
-                var mode = App.itf.GetFilteringMode();
+                var mode = App.client.GetFilteringMode();
 
-                radWhitelist.IsChecked = mode == Firewall.FilteringModes.WhiteList;
-                radBlacklist.IsChecked = mode == Firewall.FilteringModes.BlackList;
-                radDisabled.IsChecked = mode == Firewall.FilteringModes.NoFiltering;
+                radWhitelist.IsChecked = mode == FirewallManager.FilteringModes.WhiteList;
+                radBlacklist.IsChecked = mode == FirewallManager.FilteringModes.BlackList;
+                radDisabled.IsChecked = mode == FirewallManager.FilteringModes.NoFiltering;
 
-                var pol = App.itf.GetAuditPol();
+                var pol = App.client.GetAuditPolicy();
                 switch (pol)
                 {
-                    case Firewall.Auditing.All: cmbAudit.SelectedItem = lblAuditAll; break;
-                    case Firewall.Auditing.Blocked: cmbAudit.SelectedItem = lblAuditBlock; break;
-                    default: cmbAudit.SelectedItem = lblAuditAll; break;
+                    case FirewallMonitor.Auditing.All: cmbAudit.SelectedItem = lblAuditAll; break;
+                    case FirewallMonitor.Auditing.Blocked: cmbAudit.SelectedItem = lblAuditBlock; break;
+                    default: cmbAudit.SelectedItem = lblAuditNone; break;
                 }
+
+                chkGuardFW.IsChecked = App.client.IsFirewallGuard();
             }
             else
             {
@@ -97,7 +113,18 @@ namespace PrivateWin10.Pages
                 radBlacklist.IsEnabled = false;
                 radDisabled.IsEnabled = false;
                 cmbAudit.IsEnabled = false;
+
+                chkGuardFW.IsEnabled = false;
             }
+
+            var fix_mode = App.GetConfigInt("Firewall", "GuardMode", 0);
+
+            radFix.IsChecked = fix_mode == (int)FirewallGuard.Mode.Fix;
+            radDisable.IsChecked = fix_mode == (int)FirewallGuard.Mode.Disable;
+            radAlert.IsChecked = fix_mode == (int)FirewallGuard.Mode.Alert;
+
+            radFix.IsEnabled = radDisable.IsEnabled = radAlert.IsEnabled = chkGuardFW.IsChecked != false;
+
 
             chkNotifyFW.IsEnabled = chkUseFW.IsChecked == true;
             chkNotifyFW.IsChecked = App.GetConfigInt("Firewall", "NotifyBlocked", 1) != 0;
@@ -175,32 +202,31 @@ namespace PrivateWin10.Pages
         {
             if (bHold) return;
 
-            Firewall.FilteringModes Mode;
+            FirewallManager.FilteringModes Mode;
             if (radWhitelist.IsChecked == true)
-                Mode = Firewall.FilteringModes.WhiteList;
+                Mode = FirewallManager.FilteringModes.WhiteList;
             else if (radBlacklist.IsChecked == true)
-                Mode = Firewall.FilteringModes.BlackList;
+                Mode = FirewallManager.FilteringModes.BlackList;
             else //if (radDisabled.IsChecked == true)
-                Mode = Firewall.FilteringModes.NoFiltering;
+                Mode = FirewallManager.FilteringModes.NoFiltering;
 
             App.SetConfig("Firewall", "Mode", Mode.ToString());
-            App.itf.SetFilteringMode(Mode);
+            App.client.SetFilteringMode(Mode);
         }
 
         private void cmbAudit_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (bHold) return;
 
-            Firewall.Auditing audit;
+            FirewallMonitor.Auditing audit;
             if (cmbAudit.SelectedItem == lblAuditAll)
-                audit = Firewall.Auditing.All;
+                audit = FirewallMonitor.Auditing.All;
             else if (cmbAudit.SelectedItem == lblAuditBlock)
-                audit = Firewall.Auditing.Blocked;
+                audit = FirewallMonitor.Auditing.Blocked;
             else //if (cmbAudit.SelectedItem == lblAuditNone)
-                audit = Firewall.Auditing.Off;
+                audit = FirewallMonitor.Auditing.Off;
 
-            App.SetConfig("Firewall", "AuditPol", audit.ToString());
-            App.itf.SetAuditPol(audit);
+            App.client.SetAuditPolicy(audit);
         }
 
         private void ChkUseFW_Click(object sender, RoutedEventArgs e)
@@ -228,6 +254,50 @@ namespace PrivateWin10.Pages
             if (bHold) return;
 
             App.SetConfig("Firewall", "NotifyBlocked", chkNotifyFW.IsChecked == true ? 1 : 0);
+        }
+
+        private void ChkTweakCheck_Click(object sender, RoutedEventArgs e)
+        {
+            if (bHold) return;
+
+            App.SetConfig("TweakGuard", "AutoCheck", chkTweakCheck.IsChecked == true ? 1 : 0);
+            chkTweakFix.IsEnabled = chkTweakCheck.IsChecked == true;
+        }
+
+        private void ChkTweakFix_Click(object sender, RoutedEventArgs e)
+        {
+            if (bHold) return;
+
+            App.SetConfig("TweakGuard", "AutoFix", chkTweakFix.IsChecked == true ? 1 : 0);
+        }
+
+        private void ChkGuardFW_Click(object sender, RoutedEventArgs e)
+        {
+            if (bHold) return;
+
+            radFix.IsEnabled = radDisable.IsEnabled = radAlert.IsEnabled = chkGuardFW.IsChecked != false;
+
+            setFirewallGuard();
+        }
+
+        private void radGuard_Checked(object sender, RoutedEventArgs e)
+        {
+            if (bHold) return;
+
+            setFirewallGuard();
+        }
+
+        private void setFirewallGuard()
+        {
+            FirewallGuard.Mode Mode;
+            if (radFix.IsChecked == true)
+                Mode = FirewallGuard.Mode.Fix;
+            else if (radDisable.IsChecked == true)
+                Mode = FirewallGuard.Mode.Disable;
+            else //if (radAlert.IsChecked == true)
+                Mode = FirewallGuard.Mode.Alert;
+
+            App.client.SetFirewallGuard(chkGuardFW.IsChecked != false, Mode);
         }
     }
 }

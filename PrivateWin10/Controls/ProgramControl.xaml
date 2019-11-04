@@ -4,9 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:controls="clr-namespace:PrivateWin10.Controls" 
-             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
-             xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.AeroLite" 
-             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" x:Class="PrivateWin10.Controls.ProgramControl">
+             x:Class="PrivateWin10.ProgramControl">
 
     <UserControl.Resources>
 
@@ -99,7 +97,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Label Grid.Column="0" x:Name="info" Content="" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center"/>
+                <Label Grid.Column="0" x:Name="info" Content="" HorizontalAlignment="Left" Margin="0,0,0,0" Height="48" VerticalAlignment="Center"/>
 
                 <WrapPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,0" HorizontalAlignment="Right" Background="Transparent" VerticalAlignment="Center">
                     <CheckBox x:Name="chkNotify" Content="Notify" Margin="2,0,2,0" VerticalAlignment="Center" IsThreeState="True" Click="chkNotify_Click"/>

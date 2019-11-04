@@ -40,10 +40,13 @@ namespace PrivateWin10
             this.menuBlock.Index = 0;
             this.menuBlock.Text = Translate.fmt("mnu_block");
 
-            ProgramList.ID id = new ProgramList.ID(ProgramList.Types.Global);
-            Program prog = App.itf.GetProgram(id, true);
+            ProgramID id = ProgramID.NewID(ProgramID.Types.Global);
+            ProgramSet prog = App.client.GetProgram(id, true);
 
-            this.menuBlock.Checked = (prog.config.CurAccess == Program.Config.AccessLevels.BlockAccess);
+            if (prog == null)
+                this.menuBlock.Enabled = false;
+            else
+                this.menuBlock.Checked = (prog.config.CurAccess == ProgramSet.Config.AccessLevels.BlockAccess);
 
             this.menuBlock.Click += new System.EventHandler(this.menuBlock_Click);
 
@@ -87,6 +90,11 @@ namespace PrivateWin10
             notifyIcon.Dispose();
         }
 
+        public void Notify(string Message, ToolTipIcon Icon = ToolTipIcon.Info)
+        {
+            notifyIcon.ShowBalloonTip(5000, App.mName, Message, Icon);
+        }
+
         private void notifyIcon1_Click(object Sender, EventArgs e)
         {
             //MessageBox.Show("clicked");
@@ -106,7 +114,7 @@ namespace PrivateWin10
         {
             this.menuBlock.Checked = !this.menuBlock.Checked;
 
-            App.itf.BlockInternet(this.menuBlock.Checked);
+            App.client.BlockInternet(this.menuBlock.Checked);
         }
 
         private void menuExit_Click(object Sender, EventArgs e)

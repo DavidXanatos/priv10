@@ -2,15 +2,61 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-### ToDo's
-- add tweak restore mechanism
-- make overvioew page usefull
-	- show a list of newly added programs to firewall
-	- show recently blocked
-	- show firewall status on/off/block
-	- list of undone tweaks
-- add prozess sniper feature (auto terminate selected prozesses)
-- when cleaning up also remove obsolete rules
+
+## [0.50a] - 2019-11-03
+
+### Added
+- added own event log, displayed in the overview page
+- added network manager listing all open sockets and currently connected networks
+- added ETW tracking to obtain datarate information for sockets
+- added dns inspector, dns query monitoring with fallback to reverse dns queries
+-- showing domain names to the remote adresses
+-- logging all domains every program tryed to connect to
+- added tweaks to disable office 2016/2019 telemetry
+- added Ribbon Toolbar to the Firewall view
+-- improved program list filtering a lot
+-- added more list view customization options
+-- much better category filtering
+-- etc...
+- added Tweak Guard to automatically re apply tweaks that windows undid
+-- tweaks and their states are saved to tweaks.xml
+-- tweak changes are logged on the priv10 event log
+- added Firewall Rule Guard
+-- firewall rule changes are identifyed on start as well as monitored on live during runtime
+-- Optin to automatically disable changed/added rules or to flat out always out undo all changes not done by priv10
+-- All 3rd party changes to firewall rules logged in the priv10 event log + notfication
+- added option to reload app list from apps dropdown
+- added propper modern app resource string display
+
+
+### Changed
+- completly reworked the backend (engine and service) code
+- refactored IPC code
+- dropped many unnececery dependencies
+- Now by default using "C:\ProgramData\PrivateWin10" instead of the application directory to store data
+-- If a PrivateWin10.ini is present in the applicaton directory the tool starts in portable mode instead
+- reworked firewall manager and firewall rules
+- reworked firewall event monitoring to make it more robust to future changes in windows
+- Changed from the old and out dated COM Interface to a use Native windows firewall API's instead
+-- Now supporting new windows 10 features
+- reworked datagrid  header handling
+
+- and much more that I forgot to write down...
+
+### fixed
+- program list browsing with arow keys when filter is engaged
+- reworked AppManager class to properly work
+-- improved sid to app resolution performance
+-- properly resolving apppackage id of running modern apps by current process ID
+- not uniqie service resolution is now handled properly.
+- sorting by timestamp now works properly
+- fixed issues with file and registry tweaks not being un don properly
+- fixed issues with not applicable tweaks being sometimes shown where it could have been avoided
+
+- and many more which I forgot to write down...
+
+
+
 
 ## [0.1h] - 2019-05-01
 

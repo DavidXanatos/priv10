@@ -3,17 +3,147 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ribbon="clr-namespace:System.Windows.Controls.Ribbon;assembly=System.Windows.Controls.Ribbon"
+             xmlns:primitives="clr-namespace:System.Windows.Controls.Ribbon.Primitives;assembly=System.Windows.Controls.Ribbon"
              xmlns:controls="clr-namespace:PrivateWin10.Controls"
-             xmlns:local="clr-namespace:PrivateWin10.Pages"
-             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" 
-             xmlns:Behaviors="clr-namespace:Behaviors"
              mc:Ignorable="d"
-             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
              MinHeight="400" MinWidth="800">
-
-    
     <Grid Margin="48,0,0,0">
-        <Grid Margin="0,0,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="100*"/>
+        </Grid.RowDefinitions>
+
+        <!--ToolBar Grid.Row="0">
+
+        </-->
+
+        <ribbon:Ribbon Grid.Row="0" Loaded="Ribbon_Loaded" Name="rbbBar">
+            <Ribbon.QuickAccessToolBar>
+                <RibbonQuickAccessToolBar />
+            </Ribbon.QuickAccessToolBar>
+
+            <Ribbon.ApplicationMenu>
+                <RibbonApplicationMenu Visibility="Collapsed"/>
+            </Ribbon.ApplicationMenu>
+
+            <RibbonTab Name="rbbFilter" Header="View Filter">
+                <RibbonGroup Header="Filter Presets" Name="rbbPresets">
+                    <RibbonButton Name="btnNoFilter" Label="Clear Filters" LargeImageSource="{StaticResource Icon_NoFilter}" Click="BtnNoFilter_Click"/>
+                    <RibbonComboBox Name="txtPreset" SmallImageSource="{StaticResource Icon_Filter}" SelectionBoxWidth="100" IsEditable="True" LostFocus="TxtPreset_LostFocus" PreviewKeyDown="TxtPreset_PreviewKeyDown">
+                        <RibbonGallery Name="cmdPreset" SelectedValuePath="Content" MaxColumnCount="1" SelectionChanged="CmdPreset_SelectionChanged">
+                            <RibbonGalleryCategory Name="cmdPresets">
+                                
+                            </RibbonGalleryCategory>
+                        </RibbonGallery>
+                    </RibbonComboBox>
+                    <RibbonButton Name="btnDelPreset"  Label="Remove Filter Preset" SmallImageSource="{StaticResource Icon_DelFilter}" Click="BtnDelPreset_Click"/>
+                    <RibbonButton Name="btnAddPreset"  Label="Save Filter Preset" SmallImageSource="{StaticResource Icon_AddFilter}" Click="BtnAddPreset_Click"/>
+                </RibbonGroup>
+
+                <RibbonGroup Header="Activity Filter" Name="rbbActivity">
+                    <RibbonGroup.Resources>
+                        <Style TargetType="{x:Type RibbonTwoLineText}">
+                            <Setter Property="HorizontalAlignment" Value="Left" />
+                            <Setter Property="Width" Value="60" />
+                        </Style>
+                    </RibbonGroup.Resources>
+
+                    <RibbonComboBox Name="lblRecent" Label="Activity:">
+                        <RibbonGallery Name="cmbRecent" SelectedValuePath="Content" MaxColumnCount="1" SelectionChanged="OnFilter_Changed">
+                            <RibbonGalleryCategory>
+
+                            </RibbonGalleryCategory>
+                        </RibbonGallery>
+                    </RibbonComboBox>
+
+                    <RibbonComboBox Name="lblSockets" Label="Sockets:">
+                        <RibbonGallery Name="cmbSockets" SelectedValuePath="Content" MaxColumnCount="1" SelectionChanged="OnFilter_Changed">
+                            <RibbonGalleryCategory>
+
+                            </RibbonGalleryCategory>
+                        </RibbonGallery>
+                    </RibbonComboBox>
+
+                    <RibbonComboBox Name="lblRules" Label="Rules:">
+                        <RibbonGallery Name="cmbRules" SelectedValuePath="Content" MaxColumnCount="1" SelectionChanged="OnFilter_Changed">
+                            <RibbonGalleryCategory>
+
+                            </RibbonGalleryCategory>
+                        </RibbonGallery>
+                    </RibbonComboBox>
+
+                </RibbonGroup>
+                
+                <RibbonGroup Header="Program Filter" Name="rbbFilters">
+                    <RibbonCheckBox Visibility="Hidden" />
+                    <WrapPanel Orientation="Horizontal">
+                        <TextBlock Name="lblTypes" Text="Types:" Margin="0,0,10,0"></TextBlock>
+                        <RibbonCheckBox Name="chkProgs" Label="Programs" IsThreeState="false" Checked="OnFilter_Changed" Indeterminate="OnFilter_Changed" Unchecked="OnFilter_Changed"/>
+                        <RibbonCheckBox Name="chkApps" Label="Apps" IsThreeState="false" Checked="OnFilter_Changed" Indeterminate="OnFilter_Changed" Unchecked="OnFilter_Changed"/>
+                        <RibbonCheckBox Name="chkSys" Label="System" IsThreeState="false" Checked="OnFilter_Changed" Indeterminate="OnFilter_Changed" Unchecked="OnFilter_Changed"/>
+                    </WrapPanel>
+                    <RibbonTextBox Name="txtFilter" Margin="0,0,0,0" SmallImageSource="{StaticResource Icon_Search}" Text="" TextBoxWidth="250" TextChanged="OnFilter_Changed"></RibbonTextBox>
+                </RibbonGroup>
+
+                <RibbonGroup Header="Category Filter" Name="rbbCaegories">
+                    <primitives:RibbonMenuItemsPanel Margin="0,-0,0,-0">
+                        <RibbonGallery Width="400">
+                            <RibbonGalleryCategory Name="catFilter">
+
+                            </RibbonGalleryCategory>
+                        </RibbonGallery>
+                    </primitives:RibbonMenuItemsPanel>
+                </RibbonGroup>
+            </RibbonTab>
+            
+            <RibbonTab Name="rbbView" Header="View Options">
+                <RibbonGroup Header="Sort &amp; Higlight" Name="rbbSort">
+                    <RibbonComboBox Name="lblSort" Label="Sort By:">
+                        <RibbonGallery Name="cmbSort" SelectedValuePath="Content" MaxColumnCount="1" SelectedValue="" SelectionChanged="cmbSort_SelectionChanged">
+                            <RibbonGalleryCategory>
+                            </RibbonGalleryCategory>
+                        </RibbonGallery>
+                    </RibbonComboBox>
+                    <RibbonCheckBox Name="chkNoLocal" Label="Ignore localHost" Click="ChkNoLocal_Click"/>
+                    <RibbonCheckBox Name="chkNoLan" Label="Ignore LAN" Click="ChkNoLan_Click"/>
+                </RibbonGroup>
+                
+                <!--RibbonGroup Header="View Options" Name="rbbOptions">
+                    <WrapPanel Orientation="Horizontal">
+                        <RibbonSplitButton Label="15m">
+                            <ribbon:RibbonGallery MaxColumnCount="1">
+                                <ribbon:RibbonGalleryCategory>
+                                    <ribbon:RibbonGalleryItem Content="Green" Foreground="Green" />
+                                    <ribbon:RibbonGalleryItem Content="Blue" Foreground="Blue" />
+                                    <ribbon:RibbonGalleryItem Content="Orange" Foreground="Orange" />
+                                </ribbon:RibbonGalleryCategory>
+                            </ribbon:RibbonGallery>
+                        </RibbonSplitButton>
+                    </WrapPanel>
+                </-->
+                
+                <RibbonGroup Header="Rules and Details" Name="rbbRules">
+                    <RibbonCheckBox Name="chkAll" Label="Show All" Click="chkAll_Click"/>
+                    <RibbonButton Name="btnReload" Label="Reload Rules" SmallImageSource="{StaticResource Icon_Refresh}" Click="btnReload_Click"/>
+                </RibbonGroup>
+            </RibbonTab>
+
+            <RibbonTab Header="Programs" Name="rbbProgs">
+                <RibbonGroup Header="Program Set">
+                    <RibbonButton Name="btnAdd" Label="Add" SmallImageSource="{StaticResource Icon_Plus}" Click="btnAdd_Click"/>
+                    <RibbonButton Name="btnMerge" Label="Merge" SmallImageSource="{StaticResource Icon_Merge}" Click="btnMerge_Click"/>
+                    <RibbonButton Name="btnRemove" Label="Remove" SmallImageSource="{StaticResource Icon_Remove}" Click="btnRemove_Click"/>
+                </RibbonGroup>
+                <RibbonGroup Header="CleauUp">
+                    <RibbonButton Name="btnCleanup" Label="Programs" SmallImageSource="{StaticResource Icon_CleanUp}" Click="btnCleanup_Click"/>
+                </RibbonGroup>
+            </RibbonTab>
+
+        </ribbon:Ribbon>
+
+        <Grid Grid.Row="1" Margin="0,0,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Name="progsCol" Width="50*" MinWidth="500" MaxWidth="800"/>
@@ -28,23 +158,23 @@
                     <RowDefinition Height="100*"/>
                 </Grid.RowDefinitions>
 
-                <WrapPanel Grid.Row="0" Orientation="Horizontal">
+                <!--WrapPanel Grid.Row="0" Orientation="Horizontal">
                     <Button Name="btnAdd" Margin="2,2" Content="Add Program" Click="btnAdd_Click"/>
                     <Button Name="btnMerge" Margin="2,2" Content="Merge Programs" Click="btnMerge_Click"/>
                     <Button Name="btnRemove" Margin="2,2" Content="Remove Program(s)" Click="btnRemove_Click"/>
                     <Button Name="btnCleanup" Margin="2,2" Content="Cleanup List" Click="btnCleanup_Click"/>
                     <CheckBox Name="chkNoLocal" Content="Ignore localHost" VerticalAlignment="Center" IsChecked="True"/>
-                </WrapPanel>
-                
-                <WrapPanel Grid.Row="1" Orientation="Horizontal">
+                </-->
+
+                <!--WrapPanel Grid.Row="1" Orientation="Horizontal">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Label Name="lblSort" Content="Sort:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
-                        <ComboBox Name="cmbSoft" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center" MinWidth ="100" Width="Auto"  Grid.Column="1" 
-                                  SelectionChanged="cmbSoft_SelectionChanged"/>
+                        <ComboBox Name="cmbSort" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center" MinWidth ="100" Width="Auto"  Grid.Column="1" 
+                                  SelectionChanged="cmbSort_SelectionChanged"/>
                     </Grid>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -65,11 +195,11 @@
                                     </GroupStyle.HeaderTemplate>
                                 </GroupStyle>
                             </ComboBox.GroupStyle>
-                            <!--ComboBox.ItemTemplate>
+                            <!-ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Content}"/>
                                 </DataTemplate>
-                            </-->
+                            </->
                             <ComboBox.ItemTemplate>
                                 <DataTemplate DataType="ComboBox">
                                     <StackPanel Orientation="Horizontal">
@@ -88,7 +218,7 @@
                         </Grid.ColumnDefinitions>
                         <Label Name="lblFilter" Content="Filter" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
                         <TextBox Name="txtFilter" HorizontalAlignment="Left" Height="23" Margin="0,2,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" MinWidth ="150" Width="Auto" Grid.Column="1" TextChanged="txtFilter_TextChanged">
-                            <TextBox.Style>
+                            <!-TextBox.Style>
                                 <Style BasedOn="{StaticResource MetroTextBox}" TargetType="{x:Type TextBox}">
                                     <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
                                     <Style.Triggers>
@@ -101,17 +231,18 @@
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
-                            </TextBox.Style>
+                            </->
                         </TextBox>
                     </Grid>
 
-                </WrapPanel>
+                </-->
 
                 <ScrollViewer Name="processScroll" Grid.Row="2" Margin="0,0,0,0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="LightGray">
                     <Grid Margin="0,2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Name="processGrid">
 
                     </Grid>
                 </ScrollViewer>
+                <!--controls:ProgramList x:Name="programList" Grid.Row="2" Margin="0,0,0,0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" /-->
             </Grid>
 
 
@@ -132,12 +263,12 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0">
+                    <!--Grid Grid.Column="0">
                         <WrapPanel Orientation="Horizontal">
                             <Button Name="btnReload" Margin="2,2" Content="Reload Rules" Click="btnReload_Click"/>
                             <CheckBox Name="chkAll" Content="Show All" Grid.Row="1" VerticalAlignment="Top" Margin="3,3,0,0" Click="chkAll_Click"/>
                         </WrapPanel>
-                    </Grid>
+                    </-->
 
                     <!--Grid Grid.Column="1">
                         <Grid Grid.Row="1" VerticalAlignment="Stretch"  Margin="10,10,0,10">
@@ -193,223 +324,22 @@
                         </Grid>
                     </-->
                 </Grid>
-                
 
-                <Grid Grid.Row="1" VerticalAlignment="Stretch">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="150"/>
-                    </Grid.ColumnDefinitions>
-                    <GroupBox Name="grpRules" Header="Firewall Rules">
-                    <DataGrid Name="ruleGrid" AutoGenerateColumns="False" IsReadOnly="true" MouseDoubleClick="ruleGrid_MouseDoubleClick" GridLinesVisibility="All" SelectionChanged="RuleGrid_SelectionChanged">
-                        <i:Interaction.Behaviors>
-                            <Behaviors:WPFDataGridConfigurationBehavior x:Name="ruleCols"/>
-                        </i:Interaction.Behaviors>
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Ico">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Image Grid.Column="0" Margin="2,0,2,0" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Icon}" />
-                                            <!--TextBlock Grid.Column="1" Height="16" HorizontalAlignment="Left" Margin="2,0,2,0" VerticalAlignment="Center" Text="{Binding Name}" /-->
-                                        </Grid>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}"/>
-                            <DataGridTextColumn Header="Grouping" Binding="{Binding Grouping}" />
-                            <DataGridTextColumn Header="Enabled" Binding="{Binding Enabled}" />
-                            <DataGridTextColumn Header="Profiles" Binding="{Binding Profiles}" />
-                            <DataGridTextColumn Header="Action" Binding="{Binding Action}">
-                                <DataGridTextColumn.CellStyle>
-                                    <Style BasedOn="{StaticResource MetroDataGridCell}" TargetType="{x:Type DataGridCell}">
-                                        <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ActionColor}" Value="red">
-                                            <Setter Property="Background" Value="LightPink"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ActionColor}" Value="green">
-                                            <Setter Property="Background" Value="LightGreen"></Setter>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                                </DataGridTextColumn.CellStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" />
-                            <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" />
-                            <DataGridTextColumn Width="150" Header="Remote Address" Binding="{Binding DestAddress}" />
-                            <DataGridTextColumn Width="150" Header="Local Address" Binding="{Binding SrcAddress}" />
-                            <DataGridTextColumn Width="150" Header="Remote Ports" Binding="{Binding DestPorts}" />
-                            <DataGridTextColumn Width="150" Header="Local Ports" Binding="{Binding SrcPorts}" />
-                            <DataGridTextColumn Header="ICMP Options" Binding="{Binding ICMPOptions}" />
-                            <DataGridTextColumn Header="Interfaces" Binding="{Binding Interfaces}" />
-                            <DataGridTextColumn Header="Edge Traversal" Binding="{Binding EdgeTraversal}" />
-                            <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
-                        </DataGrid.Columns>
-                        <DataGrid.RowStyle>
-                            <Style BasedOn="{StaticResource MetroDataGridRow}" TargetType="{x:Type DataGridRow}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DisabledColor}" Value="gray">
-                                        <Setter Property="Foreground" Value="DarkGray"></Setter>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.RowStyle>
-                    </DataGrid>
-                    </GroupBox>
-                    <ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Expander Name="grpRuleTools" Grid.Row="0" IsExpanded="True" Header="Tools" Margin="2,0,2,2">
-                                <StackPanel>
-                                    <Button Name="btnCreateRule" Margin="2,2,2,2" Content="Create Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnCreateRule_Click"/>
-                                    <Button Name="btnEnableRule" Margin="2,2,2,2" Content="Enable Rules" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnEnableRule_Click"/>
-                                    <Button Name="btnDisableRule" Margin="2,2,2,2" Content="Disable Rules" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnDisableRule_Click"/>
-                                    <Button Name="btnRemoveRule" Margin="2,2,2,2" Content="Remove Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnRemoveRule_Click"/>
-                                    <Button Name="btnBlockRule" Margin="2,2,2,2" Content="Set Blocking" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnBlockRule_Click"/>
-                                    <Button Name="btnAllowRule" Margin="2,2,2,2" Content="Set Allowing" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnAllowRule_Click"/>
-                                    <Button Name="btnEditRule" Margin="2,2,2,2" Content="Edit Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnEditRule_Click"/>
-                                    <Button Name="btnCloneRule" Margin="2,2,2,2" Content="Clone Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnCloneRule_Click"/>
-                                </StackPanel>
-                            </Expander>
-                            <Expander Name="grpRuleView" Grid.Row="1" IsExpanded="True" Header="View Options" Margin="2,2,2,0">
-                                <StackPanel>
-                                    <CheckBox Content="Hide Disabled" Name="chkNoDisabled" Click="chkNoDisabled_Click"/>
-                                    <Label Name="lblFilterRules" Margin="2,2,2,2" Content="Filter Rules" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
-                                    <TextBox Margin="2,2,2,2" Name="txtRuleFilter" HorizontalAlignment="Stretch" Height="24" VerticalAlignment="Top" TextWrapping="Wrap" Text="" TextChanged="txtRuleFilter_TextChanged" >
-                                        <TextBox.Style>
-                                            <Style BasedOn="{StaticResource MetroTextBox}" TargetType="{x:Type TextBox}">
-                                                <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
-                                                <Style.Triggers>
-                                                    <Trigger Property="Controls:TextBoxHelper.HasText" Value="False">
-                                                        <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="False" />
-                                                        <Setter Property="Controls:TextBoxHelper.Watermark" Value="Enter Filter..." />
-                                                    </Trigger>
-                                                    <Trigger Property="Controls:TextBoxHelper.HasText" Value="True">
-                                                        <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBox.Style>
-                                    </TextBox>
-                                </StackPanel>
-                            </Expander>
-                        </Grid>
-                    </ScrollViewer>
-                </Grid>
+                <controls:FirewallRuleList x:Name="ruleList" Grid.Row="1" VerticalAlignment="Stretch"/>
 
                 <GridSplitter ResizeDirection="Rows" Grid.Row="2"  Width="Auto" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 
-                <Grid Grid.Row="3"  VerticalAlignment="Stretch">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="150"/>
-                    </Grid.ColumnDefinitions>
-                    <GroupBox Name="grpLog" Header="Connection Log">
-                    <DataGrid Name="consGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="ConsGrid_SelectionChanged">
-                        <i:Interaction.Behaviors>
-                            <Behaviors:WPFDataGridConfigurationBehavior x:Name="consCols"/>
-                        </i:Interaction.Behaviors>
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Ico">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Image Grid.Column="0" Margin="2,0,2,0" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Icon}" />
-                                            <!--TextBlock Grid.Column="1" Height="16" HorizontalAlignment="Left" Margin="2,0,2,0" VerticalAlignment="Center" Text="{Binding Name}" /-->
-                                        </Grid>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}" />
-                            <DataGridTextColumn Header="Time Stamp" Binding="{Binding TimeStamp}" />
-                            <DataGridTextColumn Header="Action" Binding="{Binding Action}">
-                                <DataGridTextColumn.CellStyle>
-                                    <Style BasedOn="{StaticResource MetroDataGridCell}" TargetType="{x:Type DataGridCell}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ActionColor}" Value="red">
-                                                <Setter Property="Background" Value="LightPink"></Setter>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding ActionColor}" Value="green">
-                                                <Setter Property="Background" Value="LightGreen"></Setter>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding ActionColor}" Value="yellow">
-                                                <Setter Property="Background" Value="Yellow"></Setter>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding ActionColor}" Value="blue">
-                                                <Setter Property="Background" Value="LightSkyBlue"></Setter>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding ActionColor}" Value="blue2">
-                                                <Setter Property="Background" Value="MediumTurquoise"></Setter>
-                                            </DataTrigger>                                            
-                                            </Style.Triggers>
-                                    </Style>
-                                </DataGridTextColumn.CellStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" />
-                            <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" />
-                            <DataGridTextColumn Width="150" Header="Remote Address" Binding="{Binding DestAddress}" />
-                            <DataGridTextColumn Width="150" Header="Remote Ports" Binding="{Binding DestPorts}" />
-                            <DataGridTextColumn Width="150" Header="Local Address" Binding="{Binding SrcAddress}" />
-                            <DataGridTextColumn Width="150" Header="Local Ports" Binding="{Binding SrcPorts}" />
-                            <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    </GroupBox>
-                    <ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Expander Name="grpLogTools" Grid.Row="0" IsExpanded="True" Header="Tools" Margin="2,0,2,2">
-                                <StackPanel>
-                                    <!--Button Name="btnMkllow" Margin="2,2,2,2" Content="Create Allow Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkAllow_Click"/>
-                                    <Button Name="btnMkBlock" Margin="2,2,2,2" Content="Create Block Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkBlock_Click"/-->
-                                    <Button Name="btnMkRule" Margin="2,2,2,2" Content="Create Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkRule_Click"/>
-                                    <Button Name="btnClearLog" Margin="2,2,2,2" Content="Clear Log" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnClearLog_Click"/>
-                                </StackPanel>
-                            </Expander>
-                            <Expander Name="grpLogView" Grid.Row="1" IsExpanded="True" Header="View Options" Margin="2,2,2,0">
-                                <StackPanel>
-                                    <Label Name="lblShowCons" Margin="2,2,2,2" Content="Show Connections" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
-                                    <ComboBox Margin="2,2,2,2" Name="cmbConTypes" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Stretch" Text="" SelectionChanged="cmbConTypes_SelectionChanged">
-                                        <ComboBoxItem Content="All"/>
-                                        <ComboBoxItem Content="Blocked"/>
-                                        <ComboBoxItem Content="Allowed"/>
-                                    </ComboBox>
-                                    <Label Name="lblFilterCons" Margin="2,2,2,2" Content="Fitler Connections" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
-                                    <TextBox Margin="2,2,2,2" Name="txtConFilter" HorizontalAlignment="Stretch" Height="24" VerticalAlignment="Top" TextWrapping="Wrap" Text="" TextChanged="txtConFilter_TextChanged" >
-                                        <TextBox.Style>
-                                            <Style BasedOn="{StaticResource MetroTextBox}" TargetType="{x:Type TextBox}">
-                                                <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
-                                                <Style.Triggers>
-                                                    <Trigger Property="Controls:TextBoxHelper.HasText" Value="False">
-                                                        <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="False" />
-                                                        <Setter Property="Controls:TextBoxHelper.Watermark" Value="Enter Filter..." />
-                                                    </Trigger>
-                                                    <Trigger Property="Controls:TextBoxHelper.HasText" Value="True">
-                                                        <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBox.Style>
-                                    </TextBox>
-                                </StackPanel>
-                            </Expander>
-                        </Grid>
-                    </ScrollViewer>
-                </Grid>
+                <TabControl Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <TabItem Header="Open Sockets">
+                        <controls:NetworkSocketList x:Name="sockList" VerticalAlignment="Stretch"/>
+                    </TabItem>
+                    <TabItem Name="logTab" Header="Connection Log">
+                        <controls:FirewallLogList x:Name="consList" VerticalAlignment="Stretch"/>
+                    </TabItem>
+                    <TabItem Header="Dns Log">
+                        <controls:DnsLogList x:Name="dnsList" VerticalAlignment="Stretch"/>
+                    </TabItem>
+                </TabControl>
             </Grid>
             <!--/-->
 
