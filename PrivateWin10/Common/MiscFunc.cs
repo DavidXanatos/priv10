@@ -129,6 +129,8 @@ static class MiscFunc
 
     public static string NtOsKrnlPath = Environment.ExpandEnvironmentVariables(@"%SystemRoot%\System32\ntoskrnl.exe");
 
+    public static string Shell32Path = Environment.ExpandEnvironmentVariables(@"%SystemRoot%\System32\shell32.dll");
+
     public static string parsePath(string path)
     {
         try
@@ -153,7 +155,7 @@ static class MiscFunc
     public static extern UInt64 GetTickCount64();
 
     [DllImport("kernel32.dll")]
-    private static extern uint QueryDosDevice(string lpDeviceName, StringBuilder lpTargetPath, int ucchMax);
+    public static extern uint QueryDosDevice(string lpDeviceName, [In, Out] char[] lpTargetPath, int ucchMax);
 
     private static Dictionary<string, Tuple<string, UInt64>> DriveLetterCache = new Dictionary<string, Tuple<string, UInt64>>();
     private static ReaderWriterLockSlim DriveLetterCacheLock = new ReaderWriterLockSlim();
@@ -174,12 +176,11 @@ static class MiscFunc
         DriveLetterCacheLock.ExitReadLock();
 
         string ret = "?:";
-        StringBuilder lpTargetPath = new StringBuilder(260+1);
+        char[] lpTargetPath = new char[260 + 1];
         for (char ltr = 'A'; ltr <= 'Z'; ltr++)
         {
-            lpTargetPath.Clear();
-            QueryDosDevice(ltr + ":", lpTargetPath, lpTargetPath.MaxCapacity - 1);
-            if (longPath.Equals(lpTargetPath.ToString(), StringComparison.OrdinalIgnoreCase))
+            uint size = QueryDosDevice(ltr + ":", lpTargetPath, 260);
+            if (size > 0  && longPath.Equals(new String(lpTargetPath, 0, (int)size-2), StringComparison.OrdinalIgnoreCase))
             {
                 ret = ltr + ":";
                 break;

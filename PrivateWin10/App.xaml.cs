@@ -151,6 +151,10 @@ namespace PrivateWin10
 
             mSession = Process.GetCurrentProcess().SessionId;
 
+            AppDomain currentDomain = AppDomain.CurrentDomain;
+            currentDomain.AssemblyResolve += new ResolveEventHandler(currentDomain_AssemblyResolve);
+
+
             Translate.Load();
 
             svc = new Service(mSvcName);
@@ -290,6 +294,40 @@ namespace PrivateWin10
 
             if (engine != null)
                 engine.Stop();
+        }
+
+        static private Assembly currentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            //This handler is called only when the common language runtime tries to bind to the assembly and fails.
+
+            string strTempAssmbPath = "";
+
+            //Retrieve the list of referenced assemblies in an array of AssemblyName.
+            Assembly objExecutingAssemblies = Assembly.GetExecutingAssembly();
+            AssemblyName[] arrReferencedAssmbNames = objExecutingAssemblies.GetReferencedAssemblies();
+
+            //Loop through the array of referenced assembly names.
+            foreach (AssemblyName strAssmbName in arrReferencedAssmbNames)
+            {
+                //Check for the assembly names that have raised the "AssemblyResolve" event.
+                if (strAssmbName.FullName.Substring(0, strAssmbName.FullName.IndexOf(",")) == args.Name.Substring(0, args.Name.IndexOf(",")))
+                {
+                    //Build the path of the assembly from where it has to be loaded.
+                    //The following line is probably the only line of code in this method you may need to modify:
+                    if(System.Environment.Is64BitProcess)
+                        strTempAssmbPath = appPath + @"\x64\";
+                    else
+                        strTempAssmbPath = appPath + @"\x86\";
+                    strTempAssmbPath += args.Name.Substring(0, args.Name.IndexOf(",")) + ".dll";
+                    break;
+                }
+            }
+
+            //Load the assembly from the specified path.
+            Assembly MyAssembly = Assembly.LoadFrom(strTempAssmbPath);
+
+            //Return the loaded assembly.
+            return MyAssembly;
         }
 
         static void TrayAction(object sender, TrayIcon.TrayEventArgs args)

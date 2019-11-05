@@ -72,7 +72,7 @@ static public class AuditPolicy
     /// <param name="ppAuditPolicy">A pointer to a single buffer that contains both an array of pointers to AUDIT_POLICY_INFORMATION structures and the structures themselves. </param>
     /// <returns>https://msdn.microsoft.com/en-us/library/windows/desktop/aa375702(v=vs.85).aspx</returns>
     [DllImport("advapi32.dll", SetLastError = true)]
-    private static extern bool AuditQuerySystemPolicy(Guid pSubCategoryGuids, uint PolicyCount, out IntPtr ppAuditPolicy);
+    private static extern bool AuditQuerySystemPolicy(ref Guid pSubCategoryGuids, uint PolicyCount, out IntPtr ppAuditPolicy);
 
     /// <summary>
     /// The AuditSetSystemPolicy function sets system audit policy for one or more audit-policy subcategories.
@@ -214,7 +214,7 @@ static public class AuditPolicy
     {
         List<string> identifiers = new List<string>();
         IntPtr buffer;
-        bool success = AuditQuerySystemPolicy(subCategoryGuid, 1, out buffer);
+        bool success = AuditQuerySystemPolicy(ref subCategoryGuid, 1, out buffer);
         if (!success) { throw new Win32Exception(Marshal.GetLastWin32Error()); }
         AUDIT_POLICY_INFORMATION policyInformation = (AUDIT_POLICY_INFORMATION)Marshal.PtrToStructure(buffer, typeof(AUDIT_POLICY_INFORMATION));
         AuditFree(buffer);

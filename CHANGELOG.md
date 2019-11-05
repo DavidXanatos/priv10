@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.50b] - 2019-11-05
+
+### Added
+- compatybility with old 32 bit platforms
+
+### Fixed
+- when rule guard is not enabled all rules were marked as changed
+
+
 
 ## [0.50a] - 2019-11-03
 

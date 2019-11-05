@@ -13,26 +13,19 @@ using System.Threading.Tasks;
 
 namespace PrivateWin10
 {
-    public class NetworkMonitor: IDisposable
+    public class NetworkMonitorEtw : IDisposable
     {
-        MultiValueDictionary<UInt64, NetworkSocket> SocketList = new MultiValueDictionary<UInt64, NetworkSocket>();
-
-        UInt64 LastUpdate = 0;
-
         Microsoft.O365.Security.ETW.KernelTrace kernelTrace;
         Microsoft.O365.Security.ETW.Kernel.NetworkTcpipProvider networkProvider;
-        Thread kernelThread;
+        Thread kernelThread = null;
 
-
-        public NetworkMonitor()
+        public NetworkMonitorEtw(Microsoft.O365.Security.ETW.IEventRecordDelegate OnNetworkEvent)
         {
-            LastUpdate = MiscFunc.GetTickCount64();
-
             kernelTrace = new Microsoft.O365.Security.ETW.KernelTrace("priv10_KernelLogger");
             networkProvider = new Microsoft.O365.Security.ETW.Kernel.NetworkTcpipProvider();
             networkProvider.OnEvent += OnNetworkEvent;
             kernelTrace.Enable(networkProvider);
-            
+
             kernelThread = new Thread(() => { kernelTrace.Start(); });
             kernelThread.Start();
         }
@@ -41,6 +34,41 @@ namespace PrivateWin10
         {
             kernelTrace.Stop();
             kernelThread.Join();
+        }
+    }
+
+    public class NetworkMonitor: IDisposable
+    {
+        MultiValueDictionary<UInt64, NetworkSocket> SocketList = new MultiValueDictionary<UInt64, NetworkSocket>();
+
+        UInt64 LastUpdate = 0;
+
+        NetworkMonitorEtw Etw = null;
+
+        public NetworkMonitor()
+        {
+            LastUpdate = MiscFunc.GetTickCount64();
+
+            try
+            {
+                InitEtw();
+                //AppLog.Debug("Successfully initialized NetworkMonitorETW");
+            }
+            catch
+            {
+                AppLog.Debug("Failed to initialized NetworkMonitorETW");
+            }
+        }
+
+        private void InitEtw()
+        {
+            Etw = new NetworkMonitorEtw(OnNetworkEvent);
+        }
+
+        public void Dispose()
+        {
+            if (Etw != null)
+                Etw.Dispose();
         }
 
         public enum EtwNetEventType

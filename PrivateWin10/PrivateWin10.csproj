@@ -356,6 +356,7 @@
     <ProjectReference Include="..\ETW\O365.Security.Native.ETW\O365.Security.Native.ETW.vcxproj">
       <Project>{ed4e6027-541f-440a-a5ee-15dbb7b89423}</Project>
       <Name>Microsoft.O365.Security.Native.ETW</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\LocalPolicy\LocalPolicy.csproj">
       <Project>{52bd99e0-0865-4f2c-9a65-0d2f9d1a8982}</Project>

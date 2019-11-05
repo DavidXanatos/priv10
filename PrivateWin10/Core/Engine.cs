@@ -609,6 +609,7 @@ namespace PrivateWin10
                     FirewallRuleEx ruleEx = new FirewallRuleEx();
                     ruleEx.guid = rule.guid;
                     ruleEx.Assign(rule);
+                    ruleEx.SetApplied();
 
                     if (rule.Name.IndexOf(FirewallManager.TempRulePrefix) == 0) // Note: all temporary rules start with priv10temp - 
                         ruleEx.Expiration = MiscFunc.GetUTCTime(); // expire now

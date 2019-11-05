@@ -22,27 +22,39 @@ public static class ImgFunc
     {
         ImageSource image = null;
         IconCacheLock.EnterReadLock();
-        IconCache.TryGetValue(path, out image);
+        bool bFound = IconCache.TryGetValue(path, out image);
         IconCacheLock.ExitReadLock();
-        if(image != null)
+        if(bFound)
             return image;
 
-        var pathIndex = TextHelpers.Split2(path, "|");
+        try
+        {
+            var pathIndex = TextHelpers.Split2(path, "|");
 
-        IconExtractor extractor = new IconExtractor(pathIndex.Item1);
-        int index = MiscFunc.parseInt(pathIndex.Item2);
-        if(index < extractor.Count)
-            image = ToImageSource(extractor.GetIcon(index, new System.Drawing.Size((int)size, (int)size)));
+            IconExtractor extractor = new IconExtractor(pathIndex.Item1);
+            int index = MiscFunc.parseInt(pathIndex.Item2);
+            if (index < extractor.Count)
+                image = ToImageSource(extractor.GetIcon(index, new System.Drawing.Size((int)size, (int)size)));
 
-        if (image == null)
-            image = ToImageSource(Icon.ExtractAssociatedIcon(MiscFunc.NtOsKrnlPath));
+            if (image == null)
+            {
+                if(File.Exists(MiscFunc.NtOsKrnlPath)) // if running in WOW64 this does not exist
+                    image = ToImageSource(Icon.ExtractAssociatedIcon(MiscFunc.NtOsKrnlPath));
+                else // fall back to an other icon
+                    image = ToImageSource(Icon.ExtractAssociatedIcon(MiscFunc.Shell32Path));
+            }
+
+            image.Freeze();
+        }
+        catch(Exception err)
+        {
+            AppLog.Exception(err);
+        }
 
         IconCacheLock.EnterWriteLock();
-        image.Freeze();
         if (!IconCache.ContainsKey(path))
             IconCache.Add(path, image);
         IconCacheLock.ExitWriteLock();
-
         return image;
     }
 

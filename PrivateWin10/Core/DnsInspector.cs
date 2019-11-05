@@ -8,12 +8,33 @@ using System.Threading.Tasks;
 
 namespace PrivateWin10
 {
-    public class DnsInspector
+    public class DnsInspectorEtw: IDisposable
     {
         Microsoft.O365.Security.ETW.UserTrace userTrace;
         Microsoft.O365.Security.ETW.Provider dnsCaptureProvider;
         Thread userThread;
 
+        public DnsInspectorEtw(Microsoft.O365.Security.ETW.IEventRecordDelegate OnDnsQueryEvent)
+        {
+            userTrace = new Microsoft.O365.Security.ETW.UserTrace("priv10_UserLogger");
+            dnsCaptureProvider = new Microsoft.O365.Security.ETW.Provider(Guid.Parse("{55404E71-4DB9-4DEB-A5F5-8F86E46DDE56}"));
+            dnsCaptureProvider.Any = Microsoft.O365.Security.ETW.Provider.AllBitsSet;
+            dnsCaptureProvider.OnEvent += OnDnsQueryEvent;
+            userTrace.Enable(dnsCaptureProvider);
+
+            userThread = new Thread(() => { userTrace.Start(); });
+            userThread.Start();
+        }
+
+        public void Dispose()
+        {
+            userTrace.Stop();
+            userThread.Join();
+        }
+    }
+
+    public class DnsInspector
+    {
         class DnsCacheEntry
         {
             public DnsCacheEntry()
@@ -37,22 +58,30 @@ namespace PrivateWin10
 
         public event EventHandler<DnsEvent> DnsQueryEvent;
 
+        DnsInspectorEtw Etw = null;
+
         public DnsInspector()
         {
-            userTrace = new Microsoft.O365.Security.ETW.UserTrace("priv10_UserLogger");
-            dnsCaptureProvider = new Microsoft.O365.Security.ETW.Provider(Guid.Parse("{55404E71-4DB9-4DEB-A5F5-8F86E46DDE56}"));
-            dnsCaptureProvider.Any = Microsoft.O365.Security.ETW.Provider.AllBitsSet;
-            dnsCaptureProvider.OnEvent += OnDnsQueryEvent;
-            userTrace.Enable(dnsCaptureProvider);
+            try
+            {
+                InitEtw();
+                //AppLog.Debug("Successfully initialized DnsInspectorETW");
+            }
+            catch
+            {
+                AppLog.Debug("Failed to initialized DnsInspectorETW");
+            }
+        }
 
-            userThread = new Thread(() => { userTrace.Start(); });
-            userThread.Start();
+        private void InitEtw()
+        {
+            Etw = new DnsInspectorEtw(OnDnsQueryEvent);
         }
 
         public void Dispose()
         {
-            userTrace.Stop();
-            userThread.Join();
+            if (Etw != null)
+                Etw.Dispose();
         }
 
 
