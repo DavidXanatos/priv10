@@ -143,17 +143,12 @@ namespace PrivateWin10.Controls
                 this.name = name != null ? name : "[unknown progream]";
             }
 
-            void DoUpdate()
-            {
-                NotifyPropertyChanged(null);
-            }
-
             public ImageSource Icon { get { return ImgFunc.GetIcon(entry.ProgID.Path, 16); } }
 
             public string Name { get { return name; } }
             public string HostName { get { return entry.HostName; } }
             public string LastSeen { get { return entry.LastSeen.ToString("HH:mm:ss dd.MM.yyyy"); } }
-            public string SeenCount { get { return entry.SeenCounter.ToString(); } }
+            public int SeenCount { get { return entry.SeenCounter; } }
             public string Program { get { return entry.ProgID.FormatString(); } }
             
             void UpdateValue<T>(ref T value, T new_value, string Name)
@@ -180,10 +175,7 @@ namespace PrivateWin10.Controls
 
             private void NotifyPropertyChanged(string propertyName)
             {
-                if (PropertyChanged != null)
-                {
-                    PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-                }
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
 
             #endregion

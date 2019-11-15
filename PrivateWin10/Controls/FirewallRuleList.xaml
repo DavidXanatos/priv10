@@ -7,12 +7,73 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="150"/>
-        </Grid.ColumnDefinitions>
-        <GroupBox Name="grpRules" Header="Firewall Rules">
-            <DataGrid Name="rulesGrid" AutoGenerateColumns="False" IsReadOnly="true" MouseDoubleClick="ruleGrid_MouseDoubleClick" GridLinesVisibility="All" SelectionChanged="RuleGrid_SelectionChanged">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="100*"/>
+        </Grid.RowDefinitions>
+
+        <ToolBar Grid.Row="0">
+            <!--Button Name="btnReload">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="{StaticResource Icon_Refresh}"/>
+                    <TextBlock Margin="3,0,0,0">Reload</TextBlock>
+                </StackPanel>
+            </>
+            <Button Name="btnCleanUp">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="{StaticResource Icon_CleanUp}"/>
+                    <TextBlock Margin="3,0,0,0">Clean Up</TextBlock>
+                </StackPanel>
+            </Button>
+            <Separator /-->
+            <Grid Margin="2,2">
+                <ComboBox Name="cmbDirection" Text="" MinWidth="80" Background="White" SelectionChanged="CmbDirection_SelectionChanged">
+                    <ComboBoxItem Name="cmbBooth" Content="All Rules"/>
+                    <ComboBoxItem Name="cmbOut" Content="Outbound" Background="Yellow"/>
+                    <ComboBoxItem Name="cmbIn" Content="Inbound" Background="Orange"/>
+                </ComboBox>
+            </Grid>
+            <Grid Margin="2,2">
+                <ComboBox Name="cmbAction" Text="" MinWidth="80" Background="White" SelectionChanged="CmbAction_SelectionChanged">
+                    <ComboBoxItem Name="cmbAll" Content="All Actions" Background="White"/>
+                    <ComboBoxItem Name="cmbAllow" Content="Allow" Background="LightGreen"/>
+                    <ComboBoxItem Name="cmbBlock" Content="Block" Background="LightPink"/>
+                </ComboBox>
+            </Grid>
+            <Separator />
+            <WrapPanel>
+                <Label Name="lblFilter" Content="Filter:"/>
+                <TextBox Name="txtRuleFilter" MinWidth="150" Margin="0,2" HorizontalAlignment="Stretch" Text="" TextChanged="txtRuleFilter_TextChanged"/>
+            </WrapPanel>
+            <Separator />
+            <ToggleButton Name="chkNoDisabled" ToolTip="Hide Disabled Rules" Click="chkNoDisabled_Click">
+                <Image Width="16" Height="16">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=chkNoDisabled, Path=IsChecked}" Value="true">
+                                    <Setter Property="Source" Value="{StaticResource Icon_Disable2}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=chkNoDisabled, Path=IsChecked}" Value="false">
+                                    <Setter Property="Source" Value="{StaticResource Icon_Disable}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </ToggleButton>
+            <!--Separator />
+            <ToggleButton Name="chkChanged" ToolTip="Show only changed rules" Click="chkNoDisabled_Click">
+                <Image Source="{StaticResource Icon_Warning}"></Image>
+            </ToggleButton-->
+        </ToolBar>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <!--ColumnDefinition Width="150"/-->
+            </Grid.ColumnDefinitions>
+            <DataGrid Name="rulesGrid" AutoGenerateColumns="False" IsReadOnly="true" MouseDoubleClick="ruleGrid_MouseDoubleClick" GridLinesVisibility="All" SelectionChanged="RuleGrid_SelectionChanged" ContextMenuOpening="RulesGrid_ContextMenuOpening">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Ico">
                         <DataGridTemplateColumn.CellTemplate>
@@ -74,15 +135,20 @@
                             <DataTrigger Binding="{Binding DisabledColor}" Value="gray">
                                 <Setter Property="Foreground" Value="DarkGray"></Setter>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding NameColor}" Value="warn">
+                            <DataTrigger Binding="{Binding NameColor}" Value="changed">
                                 <Setter Property="Background" Value="Yellow"></Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NameColor}" Value="added">
+                                <Setter Property="Background" Value="Orange"></Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding NameColor}" Value="removed">
+                                <Setter Property="Background" Value="LightPink"></Setter>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </DataGrid.RowStyle>
             </DataGrid>
-        </GroupBox>
-        <ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
+            <!--ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
@@ -102,27 +168,13 @@
                 </Expander>
                 <Expander Name="grpRuleView" Grid.Row="1" IsExpanded="True" Header="View Options" Margin="2,2,2,0">
                     <StackPanel>
-                        <CheckBox Content="Hide Disabled" Name="chkNoDisabled" Click="chkNoDisabled_Click"/>
+                        <CheckBox Content="Hide Disabled" Name="chkNoDisabled_" Click="chkNoDisabled_Click"/>
                         <Label Name="lblFilterRules" Margin="2,2,2,2" Content="Filter Rules" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
-                        <TextBox Margin="2,2,2,2" Name="txtRuleFilter" HorizontalAlignment="Stretch" Height="24" VerticalAlignment="Top" TextWrapping="Wrap" Text="" TextChanged="txtRuleFilter_TextChanged" >
-                            <!--TextBox.Style>
-                                            <Style BasedOn="{StaticResource MetroTextBox}" TargetType="{x:Type TextBox}">
-                                                <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
-                                                <Style.Triggers>
-                                                    <Trigger Property="Controls:TextBoxHelper.HasText" Value="False">
-                                                        <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="False" />
-                                                        <Setter Property="Controls:TextBoxHelper.Watermark" Value="Enter Filter..." />
-                                                    </Trigger>
-                                                    <Trigger Property="Controls:TextBoxHelper.HasText" Value="True">
-                                                        <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </-->
-                        </TextBox>
+                        <TextBox Margin="2,2,2,2" Name="txtRuleFilter_" HorizontalAlignment="Stretch" Height="24" VerticalAlignment="Top" TextWrapping="Wrap" Text="" TextChanged="txtRuleFilter_TextChanged" />
                     </StackPanel>
                 </Expander>
             </Grid>
-        </ScrollViewer>
+        </-->
+        </Grid>
     </Grid>
 </UserControl>

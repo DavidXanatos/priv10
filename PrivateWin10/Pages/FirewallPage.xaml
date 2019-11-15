@@ -15,11 +15,7 @@
             <RowDefinition Height="100*"/>
         </Grid.RowDefinitions>
 
-        <!--ToolBar Grid.Row="0">
-
-        </-->
-
-        <ribbon:Ribbon Grid.Row="0" Loaded="Ribbon_Loaded" Name="rbbBar">
+        <ribbon:Ribbon Grid.Row="0" Loaded="Ribbon_Loaded" Name="rbbBar" SelectedIndex="0">
             <Ribbon.QuickAccessToolBar>
                 <RibbonQuickAccessToolBar />
             </Ribbon.QuickAccessToolBar>
@@ -28,13 +24,42 @@
                 <RibbonApplicationMenu Visibility="Collapsed"/>
             </Ribbon.ApplicationMenu>
 
+            <Ribbon.HelpPaneContent>
+                <RibbonCheckBox Name="chkAll" Label="Show All" Margin="0,2,0,0" Click="chkAll_Click"/>
+            </Ribbon.HelpPaneContent>
+
             <RibbonTab Name="rbbFilter" Header="View Filter">
+                <!--RibbonGroup Header="Sort &amp; Higlight" Name="rbbSort">
+                    <RibbonComboBox Name="lblSort" Label="Sort By:">
+                        <RibbonGallery Name="cmbSort" SelectedValuePath="Content" MaxColumnCount="1" SelectedValue="" SelectionChanged="cmbSort_SelectionChanged">
+                            <RibbonGalleryCategory>
+                            </RibbonGalleryCategory>
+                        </RibbonGallery>
+                    </RibbonComboBox>
+                    <RibbonCheckBox Name="chkNoLocal" Label="Ignore localHost" Click="ChkNoLocal_Click"/>
+                    <RibbonCheckBox Name="chkNoLan" Label="Ignore LAN" Click="ChkNoLan_Click"/>
+                </-->
+
+                <!--RibbonGroup Header="View Options" Name="rbbOptions">
+                    <WrapPanel Orientation="Horizontal">
+                        <RibbonSplitButton Label="15m">
+                            <ribbon:RibbonGallery MaxColumnCount="1">
+                                <ribbon:RibbonGalleryCategory>
+                                    <ribbon:RibbonGalleryItem Content="Green" Foreground="Green" />
+                                    <ribbon:RibbonGalleryItem Content="Blue" Foreground="Blue" />
+                                    <ribbon:RibbonGalleryItem Content="Orange" Foreground="Orange" />
+                                </ribbon:RibbonGalleryCategory>
+                            </ribbon:RibbonGallery>
+                        </RibbonSplitButton>
+                    </WrapPanel>
+                </-->
+                
                 <RibbonGroup Header="Filter Presets" Name="rbbPresets">
                     <RibbonButton Name="btnNoFilter" Label="Clear Filters" LargeImageSource="{StaticResource Icon_NoFilter}" Click="BtnNoFilter_Click"/>
                     <RibbonComboBox Name="txtPreset" SmallImageSource="{StaticResource Icon_Filter}" SelectionBoxWidth="100" IsEditable="True" LostFocus="TxtPreset_LostFocus" PreviewKeyDown="TxtPreset_PreviewKeyDown">
                         <RibbonGallery Name="cmdPreset" SelectedValuePath="Content" MaxColumnCount="1" SelectionChanged="CmdPreset_SelectionChanged">
                             <RibbonGalleryCategory Name="cmdPresets">
-                                
+
                             </RibbonGalleryCategory>
                         </RibbonGallery>
                     </RibbonComboBox>
@@ -46,7 +71,7 @@
                     <RibbonGroup.Resources>
                         <Style TargetType="{x:Type RibbonTwoLineText}">
                             <Setter Property="HorizontalAlignment" Value="Left" />
-                            <Setter Property="Width" Value="60" />
+                            <Setter Property="MinWidth" Value="45" />
                         </Style>
                     </RibbonGroup.Resources>
 
@@ -75,19 +100,25 @@
                     </RibbonComboBox>
 
                 </RibbonGroup>
-                
+
                 <RibbonGroup Header="Program Filter" Name="rbbFilters">
-                    <RibbonCheckBox Visibility="Hidden" />
+                    <RibbonComboBox Name="lblAccess" Label="Granted Access:" SelectionBoxWidth="135">
+                        <RibbonGallery Name="cmbAccess" SelectedValuePath="Content" MaxColumnCount="1" SelectionChanged="OnFilter_Changed">
+                            <RibbonGalleryCategory>
+
+                            </RibbonGalleryCategory>
+                        </RibbonGallery>
+                    </RibbonComboBox>
                     <WrapPanel Orientation="Horizontal">
-                        <TextBlock Name="lblTypes" Text="Types:" Margin="0,0,10,0"></TextBlock>
+                        <TextBlock Name="lblTypes" Text="Types:" Margin="5,0,10,0"></TextBlock>
                         <RibbonCheckBox Name="chkProgs" Label="Programs" IsThreeState="false" Checked="OnFilter_Changed" Indeterminate="OnFilter_Changed" Unchecked="OnFilter_Changed"/>
                         <RibbonCheckBox Name="chkApps" Label="Apps" IsThreeState="false" Checked="OnFilter_Changed" Indeterminate="OnFilter_Changed" Unchecked="OnFilter_Changed"/>
                         <RibbonCheckBox Name="chkSys" Label="System" IsThreeState="false" Checked="OnFilter_Changed" Indeterminate="OnFilter_Changed" Unchecked="OnFilter_Changed"/>
                     </WrapPanel>
-                    <RibbonTextBox Name="txtFilter" Margin="0,0,0,0" SmallImageSource="{StaticResource Icon_Search}" Text="" TextBoxWidth="250" TextChanged="OnFilter_Changed"></RibbonTextBox>
+                    <RibbonTextBox Name="txtFilter" Margin="0,0,0,0" SmallImageSource="{StaticResource Icon_Search}" Text="" TextBoxWidth="220" TextChanged="OnFilter_Changed"></RibbonTextBox>
                 </RibbonGroup>
 
-                <RibbonGroup Header="Category Filter" Name="rbbCaegories">
+                <RibbonGroup Header="Category Filter" Name="rbbCaegories" LargeImageSource="{StaticResource Icon_Filter2}">
                     <primitives:RibbonMenuItemsPanel Margin="0,-0,0,-0">
                         <RibbonGallery Width="400">
                             <RibbonGalleryCategory Name="catFilter">
@@ -97,47 +128,41 @@
                     </primitives:RibbonMenuItemsPanel>
                 </RibbonGroup>
             </RibbonTab>
-            
-            <RibbonTab Name="rbbView" Header="View Options">
-                <RibbonGroup Header="Sort &amp; Higlight" Name="rbbSort">
-                    <RibbonComboBox Name="lblSort" Label="Sort By:">
-                        <RibbonGallery Name="cmbSort" SelectedValuePath="Content" MaxColumnCount="1" SelectedValue="" SelectionChanged="cmbSort_SelectionChanged">
-                            <RibbonGalleryCategory>
-                            </RibbonGalleryCategory>
-                        </RibbonGallery>
-                    </RibbonComboBox>
-                    <RibbonCheckBox Name="chkNoLocal" Label="Ignore localHost" Click="ChkNoLocal_Click"/>
-                    <RibbonCheckBox Name="chkNoLan" Label="Ignore LAN" Click="ChkNoLan_Click"/>
-                </RibbonGroup>
-                
-                <!--RibbonGroup Header="View Options" Name="rbbOptions">
-                    <WrapPanel Orientation="Horizontal">
-                        <RibbonSplitButton Label="15m">
-                            <ribbon:RibbonGallery MaxColumnCount="1">
-                                <ribbon:RibbonGalleryCategory>
-                                    <ribbon:RibbonGalleryItem Content="Green" Foreground="Green" />
-                                    <ribbon:RibbonGalleryItem Content="Blue" Foreground="Blue" />
-                                    <ribbon:RibbonGalleryItem Content="Orange" Foreground="Orange" />
-                                </ribbon:RibbonGalleryCategory>
-                            </ribbon:RibbonGallery>
-                        </RibbonSplitButton>
-                    </WrapPanel>
-                </-->
-                
-                <RibbonGroup Header="Rules and Details" Name="rbbRules">
-                    <RibbonCheckBox Name="chkAll" Label="Show All" Click="chkAll_Click"/>
-                    <RibbonButton Name="btnReload" Label="Reload Rules" SmallImageSource="{StaticResource Icon_Refresh}" Click="btnReload_Click"/>
-                </RibbonGroup>
-            </RibbonTab>
 
             <RibbonTab Header="Programs" Name="rbbProgs">
                 <RibbonGroup Header="Program Set">
-                    <RibbonButton Name="btnAdd" Label="Add" SmallImageSource="{StaticResource Icon_Plus}" Click="btnAdd_Click"/>
+                    <RibbonButton Name="btnAdd" Label="Add" LargeImageSource="{StaticResource Icon_Plus}" Click="btnAdd_Click"/>
                     <RibbonButton Name="btnMerge" Label="Merge" SmallImageSource="{StaticResource Icon_Merge}" Click="btnMerge_Click"/>
                     <RibbonButton Name="btnRemove" Label="Remove" SmallImageSource="{StaticResource Icon_Remove}" Click="btnRemove_Click"/>
-                </RibbonGroup>
-                <RibbonGroup Header="CleauUp">
                     <RibbonButton Name="btnCleanup" Label="Programs" SmallImageSource="{StaticResource Icon_CleanUp}" Click="btnCleanup_Click"/>
+                </RibbonGroup>
+            </RibbonTab>
+
+            <RibbonTab Header="Rules" Name="rbbRules">
+                <RibbonGroup Header="Rules" Name="rbbRule">
+                    <RibbonButton Name="btnCreateRule" Label="Create Rule" LargeImageSource="{StaticResource Icon_Plus}"/>
+                    <RibbonButton Name="btnReload" Label="Reload Rules" SmallImageSource="{StaticResource Icon_Refresh}"/>
+                    <RibbonButton Name="btnCleanUp" Label="Clean up Rules" SmallImageSource="{StaticResource Icon_CleanUp}"/>
+                </RibbonGroup>
+                <RibbonGroup Header="Sellected Rules" Name="rbbRuleEdit">
+                    <RibbonButton Name="btnEditRule" Label="Edit Rule" LargeImageSource="{StaticResource Icon_EditL}"/>
+                    <RibbonButton Name="btnEnableRule" Label="Enable Rules" SmallImageSource="{StaticResource Icon_Enable}"/>
+                    <RibbonButton Name="btnDisableRule" Label="Disable Rules" SmallImageSource="{StaticResource Icon_Disable}"/>
+                    <RibbonButton Name="btnRemoveRule" Label="Remove Rules" SmallImageSource="{StaticResource Icon_Remove}"/>
+                    <RibbonButton Name="btnBlockRule" Label="Set Blocking" SmallImageSource="{StaticResource Icon_Deny}"/>
+                    <RibbonButton Name="btnAllowRule" Label="Set Allowing" SmallImageSource="{StaticResource Icon_Check}"/>
+                    <RibbonButton Name="btnCloneRule" Label="Duplicate Rule" SmallImageSource="{StaticResource Icon_Clone}"/>
+                </RibbonGroup>
+                <RibbonGroup Header="Rule Guard" Name="rbbRuleGuard">
+                    <RibbonSplitButton Name="btnApprove" Label="Approve Current" SmallImageSource="{StaticResource Icon_Approve}" >
+                        <RibbonMenuItem Header="Approve All"/>
+                    </RibbonSplitButton>
+                    <RibbonSplitButton Name="btnRestore" Label="Restore Original" SmallImageSource="{StaticResource Icon_Undo}" >
+                        <RibbonMenuItem Header="Restore All"/>
+                    </RibbonSplitButton>
+                    <RibbonSplitButton Name="btnApply" Label="Redo Changes" SmallImageSource="{StaticResource Icon_Redo}" >
+                        <RibbonMenuItem Header="Restore All"/>
+                    </RibbonSplitButton>
                 </RibbonGroup>
             </RibbonTab>
 
@@ -146,9 +171,9 @@
         <Grid Grid.Row="1" Margin="0,0,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Name="progsCol" Width="50*" MinWidth="500" MaxWidth="800"/>
+                <ColumnDefinition Name="progsCol" Width="50*" MinWidth="300" MaxWidth="1000"/>
                 <ColumnDefinition Width="5" />
-                <ColumnDefinition Width="50*" MinWidth="100"/>
+                <ColumnDefinition Width="50*"/>
             </Grid.ColumnDefinitions>
 
             <Grid Margin="0,0,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
@@ -157,6 +182,49 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="100*"/>
                 </Grid.RowDefinitions>
+
+                <ToolBar Grid.Row="0">
+                    <Label Name="lblSort" Content="Sort:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
+                    <Grid Margin="2,2">
+                        <ComboBox Name="cmbSort" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center" Background="White" MinWidth ="100" Width="Auto" SelectionChanged="cmbSort_SelectionChanged"/>
+                    </Grid>
+                    
+                    <Separator/>
+
+                    <ToggleButton Name="chkNoLan" Click="ChkNoLan_Click" ToolTip="Ignore LocalHost">
+                        <Image Width="16" Height="16">
+                            <Image.Style>
+                                <Style TargetType="{x:Type Image}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=chkNoLan, Path=IsChecked}" Value="true">
+                                            <Setter Property="Source" Value="{StaticResource Icon_NoLan2}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ElementName=chkNoLan, Path=IsChecked}" Value="false">
+                                            <Setter Property="Source" Value="{StaticResource Icon_NoLan}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                    </ToggleButton>
+
+                    <ToggleButton Name="chkNoLocal" Click="ChkNoLocal_Click" ToolTip="Ignore LocalHost" IsChecked="true">
+                        <Image Width="16" Height="16">
+                            <Image.Style>
+                                <Style TargetType="{x:Type Image}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=chkNoLocal, Path=IsChecked}" Value="true">
+                                            <Setter Property="Source" Value="{StaticResource Icon_NoLocal2}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ElementName=chkNoLocal, Path=IsChecked}" Value="false">
+                                            <Setter Property="Source" Value="{StaticResource Icon_NoLocal}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                    </ToggleButton>
+                </ToolBar>
 
                 <!--WrapPanel Grid.Row="0" Orientation="Horizontal">
                     <Button Name="btnAdd" Margin="2,2" Content="Add Program" Click="btnAdd_Click"/>
@@ -249,7 +317,7 @@
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
 
             <!--ScrollViewer Grid.Column="2" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"-->
-            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="300">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Name="rulesRow" Height="*" MinHeight="200"/>
@@ -325,6 +393,9 @@
                     </-->
                 </Grid>
 
+                <!--GroupBox Name="grpRules" Header="Firewall Rules" Grid.Row="1">
+                    <controls:FirewallRuleList x:Name="ruleList" Margin="-2,-2" VerticalAlignment="Stretch"/>
+                </-->
                 <controls:FirewallRuleList x:Name="ruleList" Grid.Row="1" VerticalAlignment="Stretch"/>
 
                 <GridSplitter ResizeDirection="Rows" Grid.Row="2"  Width="Auto" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>

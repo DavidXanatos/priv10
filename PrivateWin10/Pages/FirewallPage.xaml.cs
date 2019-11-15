@@ -39,10 +39,10 @@ namespace PrivateWin10.Pages
             SocketCount,
             ModuleCount
         }
-        Sorts mSortBy = Sorts.Name;
-        bool mSortProgs = false;
+        Sorts SortBy = Sorts.Name;
+        bool SortProgs = false;
 
-        class FilterPreset
+        public class FilterPreset
         {
             public enum Recent: int
             {
@@ -77,6 +77,8 @@ namespace PrivateWin10.Pages
             }
             public Rule Rules = Rule.Not;
 
+            public ProgramSet.Config.AccessLevels Access = ProgramSet.Config.AccessLevels.AnyValue;
+
             public List<string> Types = new List<string>();
 
             public List<string> Categories = new List<string>();
@@ -88,7 +90,6 @@ namespace PrivateWin10.Pages
 
         FilterPreset CurFilter = new FilterPreset();
 
-
         private CategoryModel CatModel;
 
         int SuspendChange = 0;
@@ -97,7 +98,7 @@ namespace PrivateWin10.Pages
         {
             InitializeComponent();
 
-            ruleList.firewallPage = this;
+            ruleList.SetPage(this);
             consList.firewallPage = this;
             sockList.firewallPage = this;
             dnsList.firewallPage = this;
@@ -133,6 +134,16 @@ namespace PrivateWin10.Pages
             WpfFunc.CmbAdd(cmbRules, Translate.fmt("filter_rules_disabled"), FilterPreset.Rule.Disabled);
             WpfFunc.CmbAdd(cmbRules, Translate.fmt("filter_rules_none"), FilterPreset.Rule.None);
 
+            this.lblAccess.Label = Translate.fmt("filter_access");
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_any"), ProgramSet.Config.AccessLevels.AnyValue);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_none"), ProgramSet.Config.AccessLevels.Unconfigured);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_allow"), ProgramSet.Config.AccessLevels.FullAccess);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_edit"), ProgramSet.Config.AccessLevels.CustomConfig);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_lan"), ProgramSet.Config.AccessLevels.LocalOnly);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_block"), ProgramSet.Config.AccessLevels.BlockAccess);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_warn"), ProgramSet.Config.AccessLevels.WarningState);
+            foreach (RibbonGalleryItem item in (cmbAccess.Items[0] as RibbonGalleryCategory).Items)
+                item.Background = ProgramControl.GetAccessColor((ProgramSet.Config.AccessLevels)item.Tag);
 
             this.rbbFilters.Header = Translate.fmt("filter_program");
             this.lblTypes.Text = Translate.fmt("filter_types");
@@ -144,11 +155,11 @@ namespace PrivateWin10.Pages
 
 
 
-            this.rbbView.Header = Translate.fmt("lbl_view_options");
+            //this.rbbView.Header = Translate.fmt("lbl_view_options");
             //this.rbbOptions.Header = Translate.fmt("lbl_view_options");
 
-            this.rbbRules.Header = Translate.fmt("lbl_rules_and");
-            this.btnReload.Label = Translate.fmt("btn_reload");
+            //this.rbbRules.Header = Translate.fmt("lbl_rules_and");
+            //this.btnReload.Label = Translate.fmt("btn_reload");
             this.chkAll.Label = Translate.fmt("chk_all");
 
             this.rbbProgs.Header = Translate.fmt("lbl_programs");
@@ -157,12 +168,12 @@ namespace PrivateWin10.Pages
             this.btnRemove.Label = Translate.fmt("btn_del_progs");
             this.btnCleanup.Label = Translate.fmt("btn_cleanup_list");
 
-            this.rbbSort.Header = Translate.fmt("lbl_sort_and");
-            this.lblSort.Label = Translate.fmt("lbl_sort");
-            this.chkNoLocal.Label = Translate.fmt("chk_ignore_local");
-            this.chkNoLan.Label = Translate.fmt("chk_ignore_lan");
+            //this.rbbSort.Header = Translate.fmt("lbl_sort_and");
+            this.lblSort.Content = Translate.fmt("lbl_sort");
+            //this.chkNoLocal.Content = Translate.fmt("chk_ignore_local");
+            //this.chkNoLan.Content = Translate.fmt("chk_ignore_lan");
 
-
+            //this.rbbRules // todo: xxx
 
             double progColHeight = MiscFunc.parseDouble(App.GetConfig("GUI", "FirewallProgsWidth", "0.0"));
             if (progColHeight > 0.0)
@@ -313,7 +324,7 @@ namespace PrivateWin10.Pages
             return prog;
         }
 
-        void OnActivity(object sender, FirewallManager.NotifyArgs args)
+        void OnActivity(object sender, Engine.FwEventArgs args)
         {
             ProgramControl item = null;
             ProgramSet prog = GetProgSet(args.guid, args.progID, out item);
@@ -346,10 +357,10 @@ namespace PrivateWin10.Pages
             if (!args.update) // ignore update events
             {
                 //Note: windows firewall doesn't block localhost acces so we ignore it
-                if (args.entry.State == Program.LogEntry.States.RuleError
+                /*if (args.entry.State == Program.LogEntry.States.RuleError
                   && args.entry.FwEvent.Action == FirewallRule.Actions.Allow
                   && !NetFunc.IsLocalHost(args.entry.FwEvent.RemoteAddress))
-                    item.SetError(true);
+                    item.SetError(true);*/
 
                 if (program != null)
                 {
@@ -380,8 +391,8 @@ namespace PrivateWin10.Pages
                                 program.lastBlocked = DateTime.Now;
                                 break;
                         }
-                        if (mSortBy == Sorts.LastActivity)
-                            mSortProgs = true;
+                        if (SortBy == Sorts.LastActivity)
+                            SortProgs = true;
                     }
                 }
 
@@ -402,7 +413,7 @@ namespace PrivateWin10.Pages
         
         private NotificationWnd notificationWnd = null;
 
-        private void ShowNotification(ProgramSet prog, FirewallManager.NotifyArgs args)
+        private void ShowNotification(ProgramSet prog, Engine.FwEventArgs args)
         {
             if (notificationWnd == null)
             {
@@ -420,13 +431,16 @@ namespace PrivateWin10.Pages
 
         HashSet<Guid> UpdatesProgs = new HashSet<Guid>();
         bool FullUpdate = false;
+        bool RuleUpdate = false;
 
-        void OnChange(object sender, ProgramList.ListEvent args)
+        void OnChange(object sender, Engine.ChangeArgs args)
         {
             if (args.guid == Guid.Empty)
                 FullUpdate = true;
-            else
+            else if (args.type == Engine.ChangeArgs.Types.ProgSet)
                 UpdatesProgs.Add(args.guid);
+            else
+                RuleUpdate = true;
         }
 
         private void OnTimerTick(object sender, EventArgs e)
@@ -438,7 +452,7 @@ namespace PrivateWin10.Pages
             if (App.mMainWnd.Visibility != Visibility.Visible)
                 return;
 
-            if (FullUpdate && CurFilter.Sockets != FilterPreset.Socket.Not)
+            if (FullUpdate)
             {
                 FullUpdate = false;
                 UpdateProgramList();
@@ -455,18 +469,18 @@ namespace PrivateWin10.Pages
 
                     item.Program = prog;
                     item.DoUpdate();
-                    item.SetError(false);
-                    if (mCurPrograms.Contains(item))
-                    {
-                        UpdateIDs();
-                        ruleList.UpdateRules();
-                    }
                 }
             }
 
-            if (UpdatesProgs.Count > 0 || mSortProgs)
+            if (RuleUpdate)
             {
-                mSortProgs = false;
+                RuleUpdate = false;
+                ruleList.UpdateRules();
+            }
+
+            if (UpdatesProgs.Count > 0 || SortProgs)
+            {
+                SortProgs = false;
                 SortAndFitlerProgList();
             }
 
@@ -595,7 +609,7 @@ namespace PrivateWin10.Pages
 
             int DoSort(ProgramControl l, ProgramControl r)
             {
-                switch (mSortBy)
+                switch (SortBy)
                 {
                     case Sorts.Name: return l.Program.config.Name.CompareTo(r.Program.config.Name);
                     case Sorts.NameRev: return r.Program.config.Name.CompareTo(l.Program.config.Name);
@@ -607,7 +621,7 @@ namespace PrivateWin10.Pages
                 return 0;
             }
 
-            if (mSortBy != Sorts.Unsorted)
+            if (SortBy != Sorts.Unsorted)
                 OrderList.Sort(DoSort);
 
             for (int i = 0; i < OrderList.Count; i++)
@@ -719,7 +733,19 @@ namespace PrivateWin10.Pages
                     break;
             }
 
-                //Types
+            //Access
+            if (Filter.Access != ProgramSet.Config.AccessLevels.AnyValue)
+            {
+                if (Filter.Access == ProgramSet.Config.AccessLevels.WarningState)
+                {
+                    if ((prog.config.NetAccess == ProgramSet.Config.AccessLevels.Unconfigured || prog.config.CurAccess == prog.config.NetAccess) && prog.ChgedRules == 0)
+                        return true;
+                }
+                else if (Filter.Access != prog.config.CurAccess)
+                    return true;
+            }
+
+            //Types
             if (MultiFilter(Filter.Types, (string Type) => {
                 if (Type == "Programs")
                     return prog.Programs.Keys.FirstOrDefault(id => id.Type == ProgramID.Types.Program) != null;
@@ -775,7 +801,6 @@ namespace PrivateWin10.Pages
                 curProcess.SetFocus(true);
             }
 
-            UpdateIDs(true);
             ruleList.UpdateRules(true);
             consList.UpdateConnections(true);
             sockList.UpdateSockets(true);
@@ -827,12 +852,7 @@ namespace PrivateWin10.Pages
 
             return progs;
         }
-
-        private void UpdateIDs(bool clear = false)
-        {
-
-        }
-
+        
         void process_KeyEventHandler(object sender, KeyEventArgs e)
         {
             if ((e.Key == Key.Up || e.Key == Key.Down) /*&& !((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)*/)
@@ -883,7 +903,6 @@ namespace PrivateWin10.Pages
                 curProcess.SetFocus(true);
                 mCurPrograms.Add(curProcess);
 
-                UpdateIDs(true);
                 ruleList.UpdateRules(true);
                 consList.UpdateConnections(true);
                 sockList.UpdateSockets(true);
@@ -893,19 +912,19 @@ namespace PrivateWin10.Pages
         }
 
         
-        private void cmbSort_SelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        //private void cmbSort_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //private void cmbSort_SelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void cmbSort_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            mSortBy = (Sorts)((sender as RibbonGallery).SelectedItem as RibbonGalleryItem).Tag;
+            //mSortBy = (Sorts)((sender as RibbonGallery).SelectedItem as RibbonGalleryItem).Tag;
+            SortBy = (Sorts)((sender as ComboBox).SelectedItem as ContentControl).Tag;
             if (SuspendChange != 0)
                 return;
-            App.SetConfig("GUI", "SortList", (int)mSortBy);
-            mSortProgs = true;
+            App.SetConfig("GUI", "SortList", (int)SortBy);
+            SortProgs = true;
         }
 
         private void chkAll_Click(object sender, RoutedEventArgs e)
         {
-            UpdateIDs(true);
             ruleList.UpdateRules(true);
             consList.UpdateConnections(true);
             sockList.UpdateSockets(true);
@@ -916,16 +935,13 @@ namespace PrivateWin10.Pages
         {
             ProgramWnd progWnd = new ProgramWnd(null);
 
-            for (; ; )
-            {
-                if (progWnd.ShowDialog() != true)
-                    return;
+            if (progWnd.ShowDialog() != true)
+                return;
 
-                if (App.client.AddProgram(progWnd.ID, Guid.Empty))
-                    break;
+            if (App.client.AddProgram(progWnd.ID, Guid.Empty))
+                return;
 
-                MessageBox.Show(Translate.fmt("msg_already_exist"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            }
+            MessageBox.Show(Translate.fmt("msg_already_exist"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
 
         private void btnMerge_Click(object sender, RoutedEventArgs e)
@@ -960,23 +976,13 @@ namespace PrivateWin10.Pages
                 App.client.RemoveProgram(curProgram.Program.guid);
         }
 
-        
-
-        private void btnReload_Click(object sender, RoutedEventArgs e)
-        {
-            App.client.LoadRules();
-            UpdateIDs(true);
-            ruleList.UpdateRules(true);
-        }
-
-
         private void btnCleanup_Click(object sender, RoutedEventArgs e)
         {
             if (MessageBox.Show(Translate.fmt("msg_clean_progs"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
-            foreach (ProgramControl item in mPrograms.Values)
-                item.SetError(false);
+            //foreach (ProgramControl item in mPrograms.Values)
+            //    item.SetError(false);
 
             int Count = App.client.CleanUpPrograms();
 
@@ -1074,6 +1080,9 @@ namespace PrivateWin10.Pages
             //Rules
             WpfFunc.CmbSelect(this.cmbRules, CurFilter.Rules.ToString());
 
+            //Access
+            WpfFunc.CmbSelect(this.cmbAccess, CurFilter.Access.ToString());
+
             //Types
             chkProgs.IsChecked = CurFilter.Types.FirstOrDefault(cur => cur.Equals("Programs")) != null ? true : false;
             chkApps.IsChecked = CurFilter.Types.FirstOrDefault(cur => cur.Equals("Apps")) != null ? true : false;
@@ -1098,7 +1107,7 @@ namespace PrivateWin10.Pages
 
             SuspendChange--;
 
-            mSortProgs = true;
+            SortProgs = true;
             //FullUpdate = true;
         }
 
@@ -1118,6 +1127,13 @@ namespace PrivateWin10.Pages
             //Rules
             if (this.cmbRules.SelectedItem != null)
                 CurFilter.Rules = (FilterPreset.Rule)(this.cmbRules.SelectedItem as RibbonGalleryItem).Tag;
+
+            //Access
+            if (this.cmbAccess.SelectedItem != null)
+            {
+                this.lblAccess.Background = (this.cmbAccess.SelectedItem as RibbonGalleryItem).Background;
+                CurFilter.Access = (ProgramSet.Config.AccessLevels)(this.cmbAccess.SelectedItem as RibbonGalleryItem).Tag;
+            }
 
             //Types
             CurFilter.Types.Clear();
@@ -1146,7 +1162,7 @@ namespace PrivateWin10.Pages
 
             SavePreset(CurFilter);
 
-            mSortProgs = true;
+            SortProgs = true;
             //FullUpdate = true;
 
             btnNoFilter.IsEnabled = true;
@@ -1164,6 +1180,7 @@ namespace PrivateWin10.Pages
             App.SetConfig(Section, "Recent", CurFilter.Recently.ToString());
             App.SetConfig(Section, "Sockets", CurFilter.Sockets.ToString());
             App.SetConfig(Section, "Rules", CurFilter.Rules.ToString());
+            App.SetConfig(Section, "Access", CurFilter.Access.ToString());
             App.SetConfig(Section, "Types", string.Join(",", CurFilter.Types));
             App.SetConfig(Section, "Categories", string.Join(",", CurFilter.Categories));
             App.SetConfig(Section, "Filter", CurFilter.Filter);
@@ -1177,6 +1194,7 @@ namespace PrivateWin10.Pages
             Enum.TryParse(App.GetConfig(Section, "Recent"), out Filter.Recently);
             Enum.TryParse(App.GetConfig(Section, "Sockets"), out Filter.Sockets);
             Enum.TryParse(App.GetConfig(Section, "Rules"), out Filter.Rules);
+            Enum.TryParse(App.GetConfig(Section, "Access"), out Filter.Access);
             Filter.Types = TextHelpers.SplitStr(App.GetConfig(Section, "Types"), ",");
             Filter.Categories = TextHelpers.SplitStr(App.GetConfig(Section, "Categories"), ",");
             Filter.Filter = App.GetConfig(Section, "Filter");

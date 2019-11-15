@@ -356,15 +356,18 @@ namespace PrivateWin10
                 rule.Index = RuleCounter++;
 
                 Rules.Add(rule.guid, FwRule);
+                App.LogInfo("Added rule: {0}", FwRule.Rule.Name);
             }
+            else
+                App.LogInfo("Updated rule: {0}", FwRule.Rule.Name);
 
             return uRet == ERROR_SUCCESS;
         }
 
-        public bool RemoveRule(FirewallRule rule)
+        public bool RemoveRule(string guid)
         {
             NetFwRule FwRule;
-            if (!Rules.TryGetValue(rule.guid, out FwRule))
+            if (!Rules.TryGetValue(guid, out FwRule))
                 return true; // tne rule is already gone
 
             uint uRet = FWDeleteFirewallRule(policyHandle, FwRule.Rule.guid); // FwRule.Entry.wszRuleId
@@ -372,7 +375,8 @@ namespace PrivateWin10
                 App.LogError("Failed to Remove rule, error-code: " + uRet.ToString());
             else
             {
-                Rules.Remove(rule.guid);
+                Rules.Remove(guid);
+                App.LogInfo("Removed rule: {0}", FwRule.Rule.Name);
             }
 
             return uRet == ERROR_SUCCESS;

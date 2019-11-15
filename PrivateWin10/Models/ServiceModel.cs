@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
@@ -52,6 +53,7 @@ namespace PrivateWin10
         {
             ListCollectionView lcv = new ListCollectionView(Services);
             lcv.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
+            lcv.SortDescriptions.Add(new SortDescription("Content", ListSortDirection.Ascending));
             return lcv;
         }
     }

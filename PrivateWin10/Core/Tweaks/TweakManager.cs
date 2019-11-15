@@ -37,12 +37,11 @@ namespace PrivateWin10
 
         DispatcherTimer Timer;
         UInt64 NextTweakCheck = 0;
+        UInt64 LastSaveTime = MiscFunc.GetTickCount64();
 
         public TweakManager()
         {
-            if (File.Exists(App.dataPath + @"\Tweaks.xml"))
-                LoadTweaks(Categorys);
-            else
+            if(!LoadTweaks(Categorys))
             {
                 TweakStore.InitTweaks(Categorys);
 
@@ -74,12 +73,20 @@ namespace PrivateWin10
 
         protected void OnTimerTick(object sender, EventArgs e)
         {
-            if (NextTweakCheck > MiscFunc.GetCurTick())
-                return;
-            NextTweakCheck = MiscFunc.GetCurTick() + (UInt64)App.GetConfigInt("TweakGuard", "CheckInterval", 15 * 60)*1000;
-            if (App.GetConfigInt("TweakGuard", "AutoCheck", 1) == 0)
-                return;
-            TestTweaks(false, App.GetConfigInt("TweakGuard", "AutoFix", 0) != 0);
+            if (NextTweakCheck <= MiscFunc.GetCurTick())
+            {
+                NextTweakCheck = MiscFunc.GetCurTick() + (UInt64)App.GetConfigInt("TweakGuard", "CheckInterval", 15 * 60) * 1000;
+
+                if (App.GetConfigInt("TweakGuard", "AutoCheck", 1) != 0)
+                    TestTweaks(false, App.GetConfigInt("TweakGuard", "AutoFix", 0) != 0);
+            }
+
+
+            if (MiscFunc.GetTickCount64() - LastSaveTime > 15 * 60 * 1000) // every 15 minutes
+            {
+                LastSaveTime = MiscFunc.GetTickCount64();
+                StoreTweaks();
+            }
         }
 
         /*public Dictionary<Guid, TweakManager.Tweak> GetTweaks(List<Guid> guids = null)
@@ -196,7 +203,7 @@ namespace PrivateWin10
         }
 
         // tweak storage
-        static double xmlVersion = 1;
+        static double xmlVersion = 1.1;
 
         public bool LoadTweaks(Dictionary<string, TweakStore.Category> Categorys)
         {
@@ -212,7 +219,13 @@ namespace PrivateWin10
                 double.TryParse(xDoc.DocumentElement.GetAttribute("Version"), out fileVersion);
                 if (fileVersion != xmlVersion)
                 {
-                    App.LogError("Failed to load tweaklist, unknown file version {0}, expected {1}", fileVersion, xmlVersion);
+                    if (fileVersion != 0 && fileVersion < xmlVersion)
+                    {
+                        FileOps.MoveFile(App.dataPath + @"\Tweaks.xml", App.dataPath + @"\Tweaks_old.xml", true);
+                        App.LogWarning(App.EventIDs.AppWarning, null, App.EventFlags.Notifications, Translate.fmt("msg_tweaks_updated", App.dataPath + @"\Tweaks_old.xml"));
+                    }
+                    else 
+                        App.LogError("Failed to load tweaklist, unknown file version {0}, expected {1}", fileVersion, xmlVersion);
                     return false;
                 }
 

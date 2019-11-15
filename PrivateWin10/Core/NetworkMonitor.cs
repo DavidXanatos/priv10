@@ -294,6 +294,8 @@ namespace PrivateWin10
                 {
                     Program prog = Socket.ProgID == null ? null : App.engine.ProgramList.GetProgram(Socket.ProgID, true, ProgramList.FuzzyModes.Any);
                     prog?.AddSocket(Socket);
+                    if(prog != null)
+                        Socket.Access = prog.LookupRuleAccess(Socket);
                 }
 
                 Socket.Update(SocketRow, Interval);

@@ -39,6 +39,7 @@ namespace PrivateWin10
                 case ProgramSet.Config.AccessLevels.CustomConfig: return new SolidColorBrush(Colors.Gold);
                 case ProgramSet.Config.AccessLevels.LocalOnly: return new SolidColorBrush(Colors.LightSkyBlue);
                 case ProgramSet.Config.AccessLevels.BlockAccess: return new SolidColorBrush(Colors.LightPink);
+                case ProgramSet.Config.AccessLevels.WarningState: return new SolidColorBrush(Colors.Yellow);
                 default: return new SolidColorBrush(Colors.White);
             }
         }
@@ -131,8 +132,8 @@ namespace PrivateWin10
             UInt64 downloadRate = 0;
             foreach (Program prog in Program.Programs.Values)
             {
-                blockedConnections += prog.countAllowed;
-                allowedConnections += prog.countBlocked;
+                blockedConnections += prog.countBlocked;
+                allowedConnections += prog.countAllowed;
 
                 socketCount += prog.SocketCount;
 

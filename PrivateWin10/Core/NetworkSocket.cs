@@ -27,6 +27,7 @@ namespace PrivateWin10
 
         public DateTime CreationTime = DateTime.Now;
         public int State;
+        public Tuple<int, int> Access = Tuple.Create(0, 0); // outbound, inbound
 
         public NetworkStats Stats;
 
@@ -162,7 +163,7 @@ namespace PrivateWin10
                 case (int)IPHelper.MIB_TCP_STATE.LAST_ACK: return Translate.fmt("str_last_ack");
                 case (int)IPHelper.MIB_TCP_STATE.TIME_WAIT: return Translate.fmt("str_time_wait");
                 case (int)IPHelper.MIB_TCP_STATE.DELETE_TCB: return Translate.fmt("str_delete_tcb");
-                case -1: return Translate.fmt("str_blocked");
+                case -1: return Translate.fmt("str_fw_blocked");
                 default: return Translate.fmt("str_undefined");
             }
         }

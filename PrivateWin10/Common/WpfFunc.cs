@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Ribbon;
+using System.Windows.Media;
 using PrivateWin10;
 
 public class WpfFunc
@@ -102,6 +103,13 @@ public class WpfFunc
         return false;
     }
 
+    static public ComboBoxItem CmbAdd(ComboBox box, string text, object tag)
+    {
+        var item = new ComboBoxItem() { Content = text, Tag = tag };
+        box.Items.Add(item);
+        return item;
+    }
+
     static public void CmbAdd(RibbonGallery gal, string text, object tag)
     {
         (gal.Items[0] as RibbonGalleryCategory).Items.Add(new RibbonGalleryItem { Content = text, Tag = tag });
@@ -191,5 +199,57 @@ public class WpfFunc
             AppLog.Exception(err);
         }
         return null;
+    }
+
+    public static MenuItem AddMenu(ContextMenu menu, string label, RoutedEventHandler handler, object icon = null)
+    {
+        var item = new MenuItem() { Header = label };
+        item.Click += handler;
+        if (icon != null)
+            item.Icon = new System.Windows.Controls.Image() { Source = icon as ImageSource };
+        menu.Items.Add(item);
+        return item;
+    }
+
+
+    private void DumpVisualTree(DependencyObject parent, int level)
+    {
+        string typeName = parent.GetType().Name;
+        string name = (string)(parent.GetValue(FrameworkElement.NameProperty) ?? "");
+
+        Console.WriteLine(string.Format("{0}: {1}", typeName, name));
+
+        if (parent == null) return;
+
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+            DumpVisualTree(child, level + 1);
+        }
+    }
+
+    private void DumpLogicalTree(object parent, int level)
+    {
+        string typeName = parent.GetType().Name;
+        string name = null;
+        DependencyObject doParent = parent as DependencyObject;
+        // Not everything in the logical tree is a dependency object
+        if (doParent != null)
+        {
+            name = (string)(doParent.GetValue(FrameworkElement.NameProperty) ?? "");
+        }
+        else
+        {
+            name = parent.ToString();
+        }
+
+        Console.WriteLine(string.Format("{0}: {1}", typeName, name));
+
+        if (doParent == null) return;
+
+        foreach (object child in LogicalTreeHelper.GetChildren(doParent))
+        {
+            DumpLogicalTree(child, level + 1);
+        }
     }
 }

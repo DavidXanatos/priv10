@@ -79,7 +79,11 @@ namespace PipeIPC
                 retObj = null;
                 done.Reset();
                 if(Send(ObjectToByteArray(call)))
-                    done.WaitOne();
+#if DEBUG
+                    done.WaitOne(); // give us time to debug
+#else
+                    done.WaitOne(10000);
+#endif
 
                 if (retObj == null)
                     throw new Exception("Pipe Broke!");

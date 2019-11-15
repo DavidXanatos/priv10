@@ -99,7 +99,12 @@ namespace PrivateWin10
         {
             return RemoteExec("RemoveRule", rule, false);
         }
-        
+
+        public int SetRuleApproval(Engine.ApprovalMode Mode, FirewallRule rule)
+        {
+            return RemoteExec("SetRuleApproval", new object[2] { Mode, rule }, 0);
+        }
+
         public bool BlockInternet(bool bBlock)
         {
             return RemoteExec("BlockInternet", bBlock, false);
@@ -113,6 +118,11 @@ namespace PrivateWin10
         public int CleanUpPrograms()
         {
             return RemoteExec("CleanUpPrograms", null, 0);
+        }
+
+        public int CleanUpRules()
+        {
+            return RemoteExec("CleanUpRules", null, 0);
         }
         
         public Dictionary<Guid, List<Program.LogEntry>> GetConnections(List<Guid> guids = null)
@@ -146,8 +156,14 @@ namespace PrivateWin10
         }
 
 
-        public event EventHandler<FirewallManager.NotifyArgs> ActivityNotification;
-        public event EventHandler<ProgramList.ListEvent> ChangeNotification;
+        public bool Quit()
+        {
+            return RemoteExec("Quit", null, false);
+        }
+
+
+        public event EventHandler<Engine.FwEventArgs> ActivityNotification;
+        public event EventHandler<Engine.ChangeArgs> ChangeNotification;
         
 
         public override void HandlePushNotification(string func, object args)
@@ -159,11 +175,15 @@ namespace PrivateWin10
 
                 if (func == "ActivityNotification")
                 {
-                    NotifyActivity(RemoteCall.GetArg<Guid>(args, 0), RemoteCall.GetArg<Program.LogEntry>(args, 1), RemoteCall.GetArg<ProgramID>(args, 2), RemoteCall.GetArg<List<String>>(args, 3), RemoteCall.GetArg<bool>(args, 4));
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+                        ActivityNotification?.Invoke(this, (Engine.FwEventArgs)args);
+                    }));
                 }
                 else if (func == "ChangeNotification")
                 {
-                    NotifyChange(RemoteCall.GetArg<Guid>(args, 0));
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+                        ChangeNotification?.Invoke(this, (Engine.ChangeArgs)args);
+                    }));   
                 }
                 else
                 {
@@ -175,20 +195,6 @@ namespace PrivateWin10
                 AppLog.Exception(err);
             }
         }
-
-
-        public void NotifyActivity(Guid guid, Program.LogEntry entry, ProgramID progID, List<String> services = null, bool update = false)
-        {
-            Application.Current.Dispatcher.BeginInvoke(new Action(() => {
-                ActivityNotification?.Invoke(this, new FirewallManager.NotifyArgs() { guid = guid, entry = entry, progID = progID, services = services, update = update });
-            }));
-        }
-
-        public void NotifyChange(Guid guid)
-        {
-            Application.Current.Dispatcher.BeginInvoke(new Action(() => {
-                ChangeNotification?.Invoke(this, new ProgramList.ListEvent() { guid = guid });
-            }));
-        }
+       
     }
 }

@@ -10,77 +10,57 @@
         <local:SizeConverter x:Key="sizeConverter"/>
     </UserControl.Resources>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="150"/>
-        </Grid.ColumnDefinitions>
-        <!--GroupBox Name="grpSock" Header="Connection Log"-->
-        <DataGrid Name="dnsGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="DnsGrid_SelectionChanged">
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Ico">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Image Grid.Column="0" Margin="2,0,2,0" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Icon}" />
-                                <!--TextBlock Grid.Column="1" Height="16" HorizontalAlignment="Left" Margin="2,0,2,0" VerticalAlignment="Center" Text="{Binding Name}" /-->
-                            </Grid>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}" />
-                <DataGridTextColumn Width="200" Header="Host Name" Binding="{Binding HostName}" />
-                <DataGridTextColumn Header="Last Seen" Binding="{Binding LastSeen}" />
-                <DataGridTextColumn Header="Seen Count" Binding="{Binding SeenCount}" />
-                <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
-            </DataGrid.Columns>
-        </DataGrid>
-        <!--/-->
-        <ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Expander Name="grpDnsTools" Grid.Row="0" IsExpanded="True" Header="Tools" Margin="2,0,2,2">
-                    <StackPanel>
-                        <!--Button Name="btnMkllow" Margin="2,2,2,2" Content="Create Allow Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkAllow_Click"/>
-                                            <Button Name="btnMkBlock" Margin="2,2,2,2" Content="Create Block Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkBlock_Click"/-->
-                        <!--Button Name="btnMkRule" Margin="2,2,2,2" Content="Create Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkRule_Click"/-->
-                        <!--Button Name="btnClearLog" Margin="2,2,2,2" Content="Clear Log" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnClearLog_Click"/-->
-                    </StackPanel>
-                </Expander>
-                <Expander Name="grpDnsView" Grid.Row="1" IsExpanded="True" Header="View Options" Margin="2,2,2,0">
-                    <StackPanel>
-                        <Label Name="lblShowLog" Margin="2,2,2,2" Content="Show Dns Entries" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
-                        <!--ComboBox Margin="2,2,2,2" Name="cmbConTypes" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Stretch" Text="" SelectionChanged="cmbConTypes_SelectionChanged">
-                                                <ComboBoxItem Content="All"/>
-                                                <ComboBoxItem Content="Blocked"/>
-                                                <ComboBoxItem Content="Allowed"/>
-                                            </ComboBox-->
-                        <Label Name="lblFilterDndLog" Margin="2,2,2,2" Content="Fitler Connections" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
-                        <TextBox Margin="2,2,2,2" Name="txtDnsFilter" HorizontalAlignment="Stretch" Height="24" VerticalAlignment="Top" TextWrapping="Wrap" Text="" TextChanged="txtDnsFilter_TextChanged" >
-                            <!--TextBox.Style>
-                                            <Style BasedOn="{StaticResource MetroTextBox}" TargetType="{x:Type TextBox}">
-                                                <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
-                                                <Style.Triggers>
-                                                    <Trigger Property="Controls:TextBoxHelper.HasText" Value="False">
-                                                        <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="False" />
-                                                        <Setter Property="Controls:TextBoxHelper.Watermark" Value="Enter Filter..." />
-                                                    </Trigger>
-                                                    <Trigger Property="Controls:TextBoxHelper.HasText" Value="True">
-                                                        <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </-->
-                        </TextBox>
-                    </StackPanel>
-                </Expander>
-            </Grid>
-        </ScrollViewer>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="100*"/>
+        </Grid.RowDefinitions>
+
+        <ToolBar Grid.Row="0">
+            <WrapPanel>
+                <Label Content="Filter:"/>
+                <TextBox Name="txtDnsFilter" MinWidth="150" Margin="0,2" HorizontalAlignment="Stretch" Text="" TextChanged="txtDnsFilter_TextChanged"/>
+            </WrapPanel>
+            <!--Separator />
+            <Button Name="btnClear">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="{StaticResource Icon_CleanUp}"/>
+                    <TextBlock Margin="3,0,0,0">Clear Log</TextBlock>
+                </StackPanel>
+            </Button-->
+        </ToolBar>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <!--ColumnDefinition Width="150"/-->
+            </Grid.ColumnDefinitions>
+            <!--GroupBox Name="grpSock" Header="Connection Log"-->
+            <DataGrid Name="dnsGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="DnsGrid_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Ico">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Margin="2,0,2,0" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Icon}" />
+                                    <!--TextBlock Grid.Column="1" Height="16" HorizontalAlignment="Left" Margin="2,0,2,0" VerticalAlignment="Center" Text="{Binding Name}" /-->
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}" />
+                    <DataGridTextColumn Width="200" Header="Host Name" Binding="{Binding HostName}" />
+                    <DataGridTextColumn Header="Last Seen" Binding="{Binding LastSeen}" />
+                    <DataGridTextColumn Header="Seen Count" Binding="{Binding SeenCount}" />
+                    <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <!--/-->
+            <!--ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
+        </-->
+        </Grid>
     </Grid>
 </UserControl>

@@ -2,6 +2,36 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.51] - 2019-11-10
+
+### Added
+- added tweaks to disable visual studio tlemetry
+- when closing priv10 from tray now it prompts if the user wants to stop the priv10 service
+- programs.xml and tweaks.xml is now auto saved every 15 minutes
+- added rule context menu
+- added command to restore rules detected as changed
+- added command to approve rules detected as changed
+- program list cleanup not removed not longer existing programs
+- added access filter to view options
+- added socket type filter to socket list
+- added access column to socket list
+- apps/services/groupes in dropdown are now sorted alphabetically
+
+### Changed
+- moved rule quick actions to ribbon (commands are also avialavle form context menu)
+- moved panel filter options to toolbar form sidebar
+- reworked change notifications
+- rule change notifications now display the resolved name when possible
+
+### Fixed
+- issues with some tweak definitions
+- blocked/allowed connetion display was mixed up
+- fixed minor issue with event log notificaiton
+- fixed issue when changing rule guard mode
+- fixed crash bug in notifications
+- fixed issue adding apps
+
+
 ## [0.50b] - 2019-11-05
 
 ### Added

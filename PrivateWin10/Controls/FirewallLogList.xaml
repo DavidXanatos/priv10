@@ -10,69 +10,169 @@
         <local:DateConverter x:Key="dateConverter"/>
     </UserControl.Resources>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="150"/>
-        </Grid.ColumnDefinitions>
-        <!--GroupBox Name="grpLog" Header="Connection Log"-->
-        <DataGrid Name="consGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="ConsGrid_SelectionChanged">
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Ico">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Image Grid.Column="0" Margin="2,0,2,0" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Icon}" />
-                                <!--TextBlock Grid.Column="1" Height="16" HorizontalAlignment="Left" Margin="2,0,2,0" VerticalAlignment="Center" Text="{Binding Name}" /-->
-                            </Grid>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="Time Stamp" Binding="{Binding TimeStamp, Converter={StaticResource dateConverter}}" />
-                <DataGridTextColumn Header="Action" Binding="{Binding Action}">
-                    <DataGridTextColumn.CellStyle>
-                        <Style TargetType="{x:Type DataGridCell}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="100*"/>
+        </Grid.RowDefinitions>
+
+        <ToolBar Grid.Row="0">
+            <Grid Margin="2,2">
+                <ComboBox Name="cmbConTypes" Text="" MinWidth="80" Background="White" SelectionChanged="cmbConTypes_SelectionChanged">
+                    <ComboBoxItem Name="cmbAll" Content="All Events" Background="White"/>
+                    <ComboBoxItem Name="cmbAllow" Content="Allowed" Background="LightGreen"/>
+                    <ComboBoxItem Name="cmbBlock" Content="Blocked" Background="LightPink"/>
+                </ComboBox>
+            </Grid>
+            <Separator />
+            <WrapPanel>
+                <Label Name="lblFilter" Content="Filter:"/>
+                <TextBox Name="txtConFilter" MinWidth="150" Margin="0,2" HorizontalAlignment="Stretch" Text="" TextChanged="txtConFilter_TextChanged"/>
+            </WrapPanel>
+            
+            <Separator />
+
+            <ToggleButton Name="chkNoINet" Click="LogTypeFilters_Click" ToolTip="Hide Internet (WWW) Traffic">
+                <Image Width="16" Height="16">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding ActionColor}" Value="warn">
-                                    <Setter Property="Background" Value="Yellow"></Setter>
+                                <DataTrigger Binding="{Binding ElementName=chkNoINet, Path=IsChecked}" Value="true">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoINet2}"/>
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding ActionColor}" Value="red">
-                                    <Setter Property="Background" Value="LightPink"></Setter>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ActionColor}" Value="green">
-                                    <Setter Property="Background" Value="LightGreen"></Setter>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ActionColor}" Value="blue">
-                                    <Setter Property="Background" Value="LightSkyBlue"></Setter>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ActionColor}" Value="blue2">
-                                    <Setter Property="Background" Value="MediumTurquoise"></Setter>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ActionColor}" Value="yellow">
-                                    <Setter Property="Background" Value="Orange"></Setter>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ActionColor}" Value="yellow2">
-                                    <Setter Property="Background" Value="MediumOrchid"></Setter>
+                                <DataTrigger Binding="{Binding ElementName=chkNoINet, Path=IsChecked}" Value="false">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoINet}"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </DataGridTextColumn.CellStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" />
-                <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" />
-                <DataGridTextColumn Width="150" Header="Remote Address" Binding="{Binding DestAddress}" />
-                <DataGridTextColumn Width="150" Header="Remote Ports" Binding="{Binding DestPorts}" />
-                <DataGridTextColumn Width="150" Header="Local Address" Binding="{Binding SrcAddress}" />
-                <DataGridTextColumn Width="150" Header="Local Ports" Binding="{Binding SrcPorts}" />
-                <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
-            </DataGrid.Columns>
-        </DataGrid>
-        <!--/-->
-        <ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
+                    </Image.Style>
+                </Image>
+            </ToggleButton>
+            
+            <ToggleButton Name="chkNoLAN" Click="LogTypeFilters_Click" ToolTip="Hide LAN (Ethernet/WiFi) Traffic">
+                <Image Width="16" Height="16">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=chkNoLAN, Path=IsChecked}" Value="true">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoLan2}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=chkNoLAN, Path=IsChecked}" Value="false">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoLan}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </ToggleButton>
+
+            <ToggleButton Name="chkNoMulti" Click="LogTypeFilters_Click" ToolTip="Hide Multicast Packets" IsChecked="true">
+                <Image Width="16" Height="16">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=chkNoMulti, Path=IsChecked}" Value="true">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoMulti2}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=chkNoMulti, Path=IsChecked}" Value="false">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoMulti}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </ToggleButton>
+            
+            <ToggleButton Name="chkNoLocal" Click="LogTypeFilters_Click" ToolTip="Hide Local Host Traffic" IsChecked="true">
+                <Image Width="16" Height="16">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=chkNoLocal, Path=IsChecked}" Value="true">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoLocal2}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=chkNoLocal, Path=IsChecked}" Value="false">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoLocal}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </ToggleButton>
+
+
+            <!--Separator />
+            <Button Name="btnClear">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="{StaticResource Icon_CleanUp}"/>
+                    <TextBlock Margin="3,0,0,0">Clear Log</TextBlock>
+                </StackPanel>
+            </Button-->
+        </ToolBar>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <!--ColumnDefinition Width="150"/-->
+            </Grid.ColumnDefinitions>
+            <!--GroupBox Name="grpLog" Header="Connection Log"-->
+            <DataGrid Name="logGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="ConsGrid_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Ico">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Margin="2,0,2,0" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Icon}" />
+                                    <!--TextBlock Grid.Column="1" Height="16" HorizontalAlignment="Left" Margin="2,0,2,0" VerticalAlignment="Center" Text="{Binding Name}" /-->
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}" />
+                    <DataGridTextColumn Header="Time Stamp" Binding="{Binding TimeStamp, Converter={StaticResource dateConverter}}" />
+                    <DataGridTextColumn Header="Action" Binding="{Binding Action}">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="{x:Type DataGridCell}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ActionColor}" Value="warn">
+                                        <Setter Property="Background" Value="Yellow"></Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ActionColor}" Value="red">
+                                        <Setter Property="Background" Value="LightPink"></Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ActionColor}" Value="green">
+                                        <Setter Property="Background" Value="LightGreen"></Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ActionColor}" Value="blue">
+                                        <Setter Property="Background" Value="LightSkyBlue"></Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ActionColor}" Value="blue2">
+                                        <Setter Property="Background" Value="MediumTurquoise"></Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ActionColor}" Value="yellow">
+                                        <Setter Property="Background" Value="Orange"></Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ActionColor}" Value="yellow2">
+                                        <Setter Property="Background" Value="MediumOrchid"></Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" />
+                    <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" />
+                    <DataGridTextColumn Width="150" Header="Remote Address" Binding="{Binding DestAddress}" />
+                    <DataGridTextColumn Width="150" Header="Remote Ports" Binding="{Binding DestPorts}" />
+                    <DataGridTextColumn Width="150" Header="Local Address" Binding="{Binding SrcAddress}" />
+                    <DataGridTextColumn Width="150" Header="Local Ports" Binding="{Binding SrcPorts}" />
+                    <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <!--/-->
+            <!--ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
@@ -80,8 +180,6 @@
                 </Grid.RowDefinitions>
                 <Expander Name="grpLogTools" Grid.Row="0" IsExpanded="True" Header="Tools" Margin="2,0,2,2">
                     <StackPanel>
-                        <!--Button Name="btnMkllow" Margin="2,2,2,2" Content="Create Allow Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkAllow_Click"/>
-                                    <Button Name="btnMkBlock" Margin="2,2,2,2" Content="Create Block Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkBlock_Click"/-->
                         <Button Name="btnMkRule" Margin="2,2,2,2" Content="Create Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkRule_Click"/>
                         <Button Name="btnClearLog" Margin="2,2,2,2" Content="Clear Log" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnClearLog_Click"/>
                     </StackPanel>
@@ -94,31 +192,16 @@
                             <ComboBoxItem Content="Blocked"/>
                             <ComboBoxItem Content="Allowed"/>
                         </ComboBox>
-                        <!--CheckBox Name="chkAllowed" Margin="2,2,2,2" Content="Allowed" Click="LogTypeFilters_Click"/>
-                        <CheckBox Name="chkBlocked" Margin="2,2,2,2" Content="Blocked" Click="LogTypeFilters_Click"/-->
                         <Label Name="lblShowCons2" Margin="2,2,2,2" Content="Exclude targets" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
                         <CheckBox Name="chkNoLocal" Margin="2,2,2,2" Content="Hide LocalHost" Click="LogTypeFilters_Click"/>
                         <CheckBox Name="chkNoLAN" Margin="2,2,2,2" Content="Hide LAN" Click="LogTypeFilters_Click"/>
                         <Label Name="lblFilterCons" Margin="2,2,2,2" Content="Filter Connections" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
                         <TextBox Margin="2,2,2,2" Name="txtConFilter" HorizontalAlignment="Stretch" Height="24" VerticalAlignment="Top" TextWrapping="Wrap" Text="" TextChanged="txtConFilter_TextChanged" >
-                            <!--TextBox.Style>
-                                <Style BasedOn="{StaticResource MetroTextBox}" TargetType="{x:Type TextBox}">
-                                    <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
-                                    <Style.Triggers>
-                                        <Trigger Property="Controls:TextBoxHelper.HasText" Value="False">
-                                            <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="False" />
-                                            <Setter Property="Controls:TextBoxHelper.Watermark" Value="Enter Filter..." />
-                                        </Trigger>
-                                        <Trigger Property="Controls:TextBoxHelper.HasText" Value="True">
-                                            <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </-->
                         </TextBox>
                     </StackPanel>
                 </Expander>
             </Grid>
-        </ScrollViewer>
+        </-->
+        </Grid>
     </Grid>
 </UserControl>

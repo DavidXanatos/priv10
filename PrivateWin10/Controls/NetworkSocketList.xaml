@@ -11,84 +11,131 @@
         <local:DateConverter x:Key="dateConverter"/>
     </UserControl.Resources>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="150"/>
-        </Grid.ColumnDefinitions>
-        <!--GroupBox Name="grpSock" Header="Connection Log"-->
-        <DataGrid Name="socksGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="SockGrid_SelectionChanged">
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Ico">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Image Grid.Column="0" Margin="2,0,2,0" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Icon}" />
-                                <!--TextBlock Grid.Column="1" Height="16" HorizontalAlignment="Left" Margin="2,0,2,0" VerticalAlignment="Center" Text="{Binding Name}" /-->
-                            </Grid>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="Time Stamp" Binding="{Binding TimeStamp, Converter={StaticResource dateConverter}}" />
-                <DataGridTextColumn Header="State" Binding="{Binding State}" />
-                <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" />
-                <DataGridTextColumn Width="150" Header="Remote Address" Binding="{Binding DestAddress}" />
-                <DataGridTextColumn Width="150" Header="Remote Ports" Binding="{Binding DestPorts}" />
-                <DataGridTextColumn Width="150" Header="Local Address" Binding="{Binding SrcAddress}" />
-                <DataGridTextColumn Width="150" Header="Local Ports" Binding="{Binding SrcPorts}" />
-                <DataGridTextColumn Width="150" Header="Upload" Binding="{Binding Upload, Converter={StaticResource sizeConverter}}" />
-                <DataGridTextColumn Width="150" Header="Download" Binding="{Binding Download, Converter={StaticResource sizeConverter}}" />
-                <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
-            </DataGrid.Columns>
-        </DataGrid>
-        <!--/-->
-        <ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Expander Name="grpSockTools" Grid.Row="0" IsExpanded="True" Header="Tools" Margin="2,0,2,2">
-                    <StackPanel>
-                        <!--Button Name="btnMkllow" Margin="2,2,2,2" Content="Create Allow Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkAllow_Click"/>
-                                            <Button Name="btnMkBlock" Margin="2,2,2,2" Content="Create Block Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkBlock_Click"/-->
-                        <!--Button Name="btnMkRule" Margin="2,2,2,2" Content="Create Rule" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnMkRule_Click"/-->
-                        <Button Name="btnCloseSock" Margin="2,2,2,2" Content="Close Socket" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
-                        <!--Button Name="btnClearLog" Margin="2,2,2,2" Content="Clear Log" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top" Click="btnClearLog_Click"/-->
-                    </StackPanel>
-                </Expander>
-                <Expander Name="grpSockView" Grid.Row="1" IsExpanded="True" Header="View Options" Margin="2,2,2,0">
-                    <StackPanel>
-                        <Label Name="lblShowSocks" Margin="2,2,2,2" Content="Show Sockets" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
-                        <!--ComboBox Margin="2,2,2,2" Name="cmbConTypes" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Stretch" Text="" SelectionChanged="cmbConTypes_SelectionChanged">
-                                                <ComboBoxItem Content="All"/>
-                                                <ComboBoxItem Content="Blocked"/>
-                                                <ComboBoxItem Content="Allowed"/>
-                                            </ComboBox-->
-                        <Label Name="lblFilterSocks" Margin="2,2,2,2" Content="Filter Connections" HorizontalAlignment="Stretch" Height="28" VerticalAlignment="Top"/>
-                        <TextBox Margin="2,2,2,2" Name="txtSockFilter" HorizontalAlignment="Stretch" Height="24" VerticalAlignment="Top" TextWrapping="Wrap" Text="" TextChanged="txtSockFilter_TextChanged" >
-                            <!--TextBox.Style>
-                                            <Style BasedOn="{StaticResource MetroTextBox}" TargetType="{x:Type TextBox}">
-                                                <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
-                                                <Style.Triggers>
-                                                    <Trigger Property="Controls:TextBoxHelper.HasText" Value="False">
-                                                        <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="False" />
-                                                        <Setter Property="Controls:TextBoxHelper.Watermark" Value="Enter Filter..." />
-                                                    </Trigger>
-                                                    <Trigger Property="Controls:TextBoxHelper.HasText" Value="True">
-                                                        <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </-->
-                        </TextBox>
-                    </StackPanel>
-                </Expander>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="100*"/>
+        </Grid.RowDefinitions>
+        
+        <ToolBar Grid.Row="0">
+            <Grid Margin="2,2">
+                <ComboBox Name="sockType" Text="" MinWidth="80" Background="White" SelectionChanged="sockType_SelectionChanged">
+                    
+                </ComboBox>
             </Grid>
-        </ScrollViewer>
+            <Separator/>
+            <WrapPanel>
+                <Label Name="lblFilter" Content="Filter:"/>
+                <TextBox Name="txtSockFilter" MinWidth="150" Margin="0,2" HorizontalAlignment="Stretch" Text="" TextChanged="txtSockFilter_TextChanged"/>
+            </WrapPanel>
+            <Separator/>
+            <ToggleButton Name="chkNoINet" Click="SocketTypeFilters_Click" ToolTip="Hide Internet (WWW) Traffic">
+                <Image Width="16" Height="16">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=chkNoINet, Path=IsChecked}" Value="true">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoINet2}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=chkNoINet, Path=IsChecked}" Value="false">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoINet}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </ToggleButton>
+
+            <ToggleButton Name="chkNoLAN" Click="SocketTypeFilters_Click" ToolTip="Hide LAN (Ethernet/WiFi) Traffic">
+                <Image Width="16" Height="16">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=chkNoLAN, Path=IsChecked}" Value="true">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoLan2}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=chkNoLAN, Path=IsChecked}" Value="false">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoLan}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </ToggleButton>
+
+            <!--ToggleButton Name="chkNoMulti" Click="SocketTypeFilters_Click" ToolTip="Hide Multicast Packets" IsChecked="true">
+                <Image Width="16" Height="16">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=chkNoMulti, Path=IsChecked}" Value="true">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoMulti2}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=chkNoMulti, Path=IsChecked}" Value="false">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoMulti}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </-->
+
+            <ToggleButton Name="chkNoLocal" Click="SocketTypeFilters_Click" ToolTip="Hide Local Host Traffic" IsChecked="true">
+                <Image Width="16" Height="16">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=chkNoLocal, Path=IsChecked}" Value="true">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoLocal2}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=chkNoLocal, Path=IsChecked}" Value="false">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoLocal}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </ToggleButton>
+        </ToolBar>
+        
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <!--ColumnDefinition Width="150"/-->
+            </Grid.ColumnDefinitions>
+            <!--GroupBox Name="grpSock" Header="Connection Log"-->
+            <DataGrid Name="socksGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="SockGrid_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Ico">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Margin="2,0,2,0" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Icon}" />
+                                    <!--TextBlock Grid.Column="1" Height="16" HorizontalAlignment="Left" Margin="2,0,2,0" VerticalAlignment="Center" Text="{Binding Name}" /-->
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}" />
+                    <DataGridTextColumn Header="Time Stamp" Binding="{Binding TimeStamp, Converter={StaticResource dateConverter}}" />
+                    <DataGridTextColumn Header="State" Binding="{Binding State}" />
+                    <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" />
+                    <DataGridTextColumn Width="150" Header="Remote Address" Binding="{Binding DestAddress}" />
+                    <DataGridTextColumn Width="150" Header="Remote Ports" Binding="{Binding DestPorts}" />
+                    <DataGridTextColumn Width="150" Header="Local Address" Binding="{Binding SrcAddress}" />
+                    <DataGridTextColumn Width="150" Header="Local Ports" Binding="{Binding SrcPorts}" />
+                    <DataGridTextColumn Width="150" Header="Access" Binding="{Binding Access}" />
+                    <DataGridTextColumn Width="150" Header="Upload" Binding="{Binding Upload, Converter={StaticResource sizeConverter}}" />
+                    <DataGridTextColumn Width="150" Header="Download" Binding="{Binding Download, Converter={StaticResource sizeConverter}}" />
+                    <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <!--/-->
+            <!--ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto">
+        </-->
+        </Grid>
     </Grid>
 </UserControl>

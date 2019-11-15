@@ -1,13 +1,16 @@
 ﻿using PrivateWin10.Controls;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace PrivateWin10
 {
@@ -34,20 +37,30 @@ namespace PrivateWin10
                 foreach (FirewallRule rule in ruleSet.Value)
                 {
                     if (rule.Grouping != null && rule.Grouping.Length > 0)
-                        knownGroups.Add(rule.Grouping);
+                    {
+                        string temp = rule.Grouping;
+                        if (temp.Substring(0, 2) == "@{" && App.PkgMgr != null)
+                            temp = App.PkgMgr.GetAppResourceStr(temp);
+                        else if (temp.Substring(0, 1) == "@")
+                            temp = MiscFunc.GetResourceStr(temp);
+
+                        if (temp.Substring(0, 1) == "@")
+                            continue; // dont list unresolved names
+
+                        knownGroups.Add(temp);
+                    }
                 }
             }
 
             foreach (string group in knownGroups)
-            {
-                string temp = group;
-                if (temp.Substring(0, 2) == "@{" && App.PkgMgr != null)
-                    temp = App.PkgMgr.GetAppResourceStr(temp);
-                else if (temp.Substring(0, 1) == "@")
-                    temp = MiscFunc.GetResourceStr(temp);
+                Groups.Add(new ContentControl() { Tag = group, Content = group});
+        }
 
-                Groups.Add(new ContentControl() { Tag = group, Content = temp});
-            }
+        public IEnumerable GetGroups()
+        {
+            ListCollectionView lcv = new ListCollectionView(Groups);
+            lcv.SortDescriptions.Add(new SortDescription("Content", ListSortDirection.Ascending));
+            return lcv;
         }
     }
 }

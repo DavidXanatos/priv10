@@ -227,7 +227,7 @@ namespace PrivateWin10
             {
                 Path = @"Software\Policies\Microsoft\Internet Explorer\SQM",
                 Key = "DisableCustomerImprovementProgram",
-                Value = 1,
+                Value = 0, // must be 0 according to https://getadmx.com/?Category=Windows_10_2016&Policy=Microsoft.Policies.InternetExplorer::SQM_DisableCEIP
                 Hint = Tweak.Hints.Optional
             });
             ceip.Add(new Tweak("Disable Live Messager CEIP", TweakType.SetGPO, WinVer.WinXPto7)
@@ -283,7 +283,7 @@ namespace PrivateWin10
             {
                 Path = @"SOFTWARE\Policies\Microsoft\Windows\ScriptedDiagnosticsProvider\Policy",
                 Key = "DisableQueryRemoteServer",
-                Value = 1
+                Value = 0 // must be 0 according to https://getadmx.com/?Category=Windows_10_2016&Policy=Microsoft.Policies.MSDT::MsdtSupportProvider
             });
             diag.Add(new Tweak("Turn off Online Assist", TweakType.SetGPO, WinVer.Win6to7)
             {
@@ -524,6 +524,13 @@ namespace PrivateWin10
                 Path = @"SOFTWARE\Policies\Microsoft\MRT",
                 Key = "DontReportInfectionInformation",
                 Value = 1
+            });
+            mrt.Add(new Tweak("Disable MRT-Tool", TweakType.SetGPO, WinVer.Win2k)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\MRT",
+                Key = "DontOfferThroughWUAU",
+                Value = 1,
+                Hint = Tweak.Hints.Optional
             });
 
 
@@ -915,18 +922,21 @@ namespace PrivateWin10
             officeCat.Add(officeTelemetryOSM);
             officeTelemetryOSM.Add(new Tweak("Enablelogging", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM",
                 Key = "Enablelogging",
                 Value = 0
             });
             officeTelemetryOSM.Add(new Tweak("EnableUpload", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM",
                 Key = "EnableUpload",
                 Value = 0
             });
             officeTelemetryOSM.Add(new Tweak("EnableFileObfuscation", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM",
                 Key = "EnableFileObfuscation",
                 Value = 1
@@ -936,43 +946,62 @@ namespace PrivateWin10
 
             Group officeTelemetryCommon = new Group("Disable Telemetry Common", true);
             officeCat.Add(officeTelemetryCommon);
+            officeTelemetryCommon.Add(new Tweak("sendtelemetry", TweakType.SetGPO, WinVer.Win7)
+            {
+                usrLevel = true,
+                Path = @"Software\Policies\Microsoft\Office\Common\ClientTelemetry",
+                Key = "sendtelemetry",
+                Value = 3
+            });
+            officeTelemetryCommon.Add(new Tweak("DisableTelemetry", TweakType.SetGPO, WinVer.Win7)
+            {
+                usrLevel = true,
+                Path = @"Software\Policies\Microsoft\Office\Common\ClientTelemetry",
+                Key = "DisableTelemetry",
+                Value = 1
+            });
             officeTelemetryCommon.Add(new Tweak("qmenable", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\Common",
                 Key = "qmenable",
                 Value = 0
             });
             officeTelemetryCommon.Add(new Tweak("sendcustomerdata", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\Common",
                 Key = "sendcustomerdata",
                 Value = 0
             });
             officeTelemetryCommon.Add(new Tweak("updatereliabilitydata", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\Common",
                 Key = "updatereliabilitydata",
                 Value = 0
             });
-
             // *** Disable Office Telemetry 3 ***
 
             Group officeTelemetryFeadback = new Group("Disable Telemetry Feadback", true);
             officeCat.Add(officeTelemetryFeadback);
             officeTelemetryFeadback.Add(new Tweak("feedback", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\Common\feedback",
                 Key = "enabled",
                 Value = 0
             });
             officeTelemetryFeadback.Add(new Tweak("includescreenshot", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\Common\feedback",
                 Key = "includescreenshot",
                 Value = 0
             });
             officeTelemetryFeadback.Add(new Tweak("ptwoptin", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\Common\ptwatson",
                 Key = "ptwoptin",
                 Value = 0
@@ -984,54 +1013,63 @@ namespace PrivateWin10
             officeCat.Add(officeTelemetryByApp);
             officeTelemetryByApp.Add(new Tweak("access", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedapplications",
                 Key = "accesssolution",
                 Value = 1
             });
             officeTelemetryByApp.Add(new Tweak("olk", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedapplications",
                 Key = "olksolution",
                 Value = 1
             });
             officeTelemetryByApp.Add(new Tweak("onenote", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedapplications",
                 Key = "onenotesolution",
                 Value = 1
             });
             officeTelemetryByApp.Add(new Tweak("ppt", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedapplications",
                 Key = "pptsolution",
                 Value = 1
             });
             officeTelemetryByApp.Add(new Tweak("project", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedapplications",
                 Key = "projectsolution",
                 Value = 1
             });
             officeTelemetryByApp.Add(new Tweak("publisher", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedapplications",
                 Key = "publishersolution",
                 Value = 1
             });
             officeTelemetryByApp.Add(new Tweak("visio", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedapplications",
                 Key = "visiosolution",
                 Value = 1
             });
             officeTelemetryByApp.Add(new Tweak("wd", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedapplications",
                 Key = "wdsolution",
                 Value = 1
             });
             officeTelemetryByApp.Add(new Tweak("xl", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedapplications",
                 Key = "xlsolution",
                 Value = 1
@@ -1043,30 +1081,35 @@ namespace PrivateWin10
             officeCat.Add(officeTelemetryByType);
             officeTelemetryByType.Add(new Tweak("agave", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedsolutiontypes",
                 Key = "agave",
                 Value = 1
             });
             officeTelemetryByType.Add(new Tweak("appaddins", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedsolutiontypes",
                 Key = "appaddins",
                 Value = 1
             });
             officeTelemetryByType.Add(new Tweak("comaddins", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedsolutiontypes",
                 Key = "comaddins",
                 Value = 1
             });
             officeTelemetryByType.Add(new Tweak("documentfiles", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedsolutiontypes",
                 Key = "documentfiles",
                 Value = 1
             });
             officeTelemetryByType.Add(new Tweak("templatefiles", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\OSM\preventedsolutiontypes",
                 Key = "templatefiles",
                 Value = 1
@@ -1079,22 +1122,87 @@ namespace PrivateWin10
             officeCat.Add(officeOnline);
             officeOnline.Add(new Tweak("skydrivesigninoption", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\Common\General",
                 Key = "skydrivesigninoption",
                 Value = 0
             });
             officeOnline.Add(new Tweak("shownfirstrunoptin", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\Common\General",
                 Key = "shownfirstrunoptin",
                 Value = 1
             });
             officeOnline.Add(new Tweak("disablemovie", TweakType.SetGPO, WinVer.Win7)
             {
+                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\Firstrun",
                 Key = "disablemovie",
                 Value = 1
             });
+
+            /*  
+            *  #########################################
+            *          Visual Studio
+            *  #########################################
+            */
+
+            Category vsCat = new Category("Visual Studio"); //, "visual_studio");
+            Categorys.Add(vsCat.Name, vsCat);
+
+            Group vsTelemetry = new Group("Turn off VS telemetry", true);
+            vsCat.Add(vsTelemetry);
+            vsTelemetry.Add(new Tweak("Turn off VS telemetry", TweakType.SetGPO, WinVer.Win7)
+            {
+                usrLevel = true,
+                Path = @"Software\Microsoft\VisualStudio\Telemetry",
+                Key = "TurnOffSwitch",
+                Value = 1
+            });
+            vsTelemetry.Add(new Tweak("Turn off PerfWatson2.exe", TweakType.SetGPO, WinVer.Win7)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\VisualStudio\SQM",
+                Key = "OptIn",
+                Value = 0
+            });
+            vsTelemetry.Add(new Tweak("Disable Microsoft.ServiceHub.Controller.exe", TweakType.BlockFile, WinVer.Win7)
+            {
+                Path = @"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\ServiceHub\controller\Microsoft.ServiceHub.Controller.exe",
+                Hint = Tweak.Hints.Optional
+            });
+            vsTelemetry.Add(new Tweak("Disable Microsoft.ServiceHub.Controller.exe", TweakType.BlockFile, WinVer.Win7)
+            {
+                Path = @"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Professional\Common7\ServiceHub\controller\Microsoft.ServiceHub.Controller.exe",
+                Hint = Tweak.Hints.Optional
+            });
+            vsTelemetry.Add(new Tweak("Disable Microsoft.ServiceHub.Controller.exe", TweakType.BlockFile, WinVer.Win7)
+            {
+                Path = @"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community\Common7\ServiceHub\controller\Microsoft.ServiceHub.Controller.exe",
+                Hint = Tweak.Hints.Optional
+            });
+
+            Group vsFeadback = new Group("Turn off the Feedback button", true);
+            vsCat.Add(vsFeadback);
+            vsFeadback.Add(new Tweak("DisableFeedbackDialog", TweakType.SetGPO, WinVer.Win7)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\VisualStudio\Feedback",
+                Key = "DisableFeedbackDialog",
+                Value = 1
+            });
+            vsFeadback.Add(new Tweak("DisableEmailInput", TweakType.SetGPO, WinVer.Win7)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\VisualStudio\Feedback",
+                Key = "DisableEmailInput",
+                Value = 1
+            });
+            vsFeadback.Add(new Tweak("DisableScreenshotCapture", TweakType.SetGPO, WinVer.Win7)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\VisualStudio\Feedback",
+                Key = "DisableScreenshotCapture",
+                Value = 1
+            });
+
 
             /*  
              *  #########################################
@@ -1365,31 +1473,21 @@ namespace PrivateWin10
                 Value = 1
             });
 
-            ie.Add(new Tweak("Disable ActiveX Black List", TweakType.SetGPO, WinVer.WinXP)
-            {
-                usrLevel = true,
-                Path = @"Software\Policies\Microsoft\Internet Explorer\BrowserEmulation",
-                Key = "DisableSiteListEditing",
-                Value = 0,
-                Hint = Tweak.Hints.Optional
-            });
             ie.Add(new Tweak("Disable First Run Wizard", TweakType.SetGPO, WinVer.WinXP)
             {
-                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Internet Explorer\Main",
                 Key = "DisableFirstRunCustomize",
                 Value = 1
             });
-            ie.Add(new Tweak("Set Blank Stat Page", TweakType.SetGPO, WinVer.Win2k)
+            /*ie.Add(new Tweak("Set Blank Stat Page", TweakType.SetGPO, WinVer.Win2k)
             {
                 usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Internet Explorer\Main",
                 Key = "Start Page",
                 Value = "about:blank"
-            });
+            });*/
             ie.Add(new Tweak("Keep New Tabs Empty", TweakType.SetGPO, WinVer.WinXP)
             {
-                usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Internet Explorer\TabbedBrowsing",
                 Key = "NewTabPageShow",
                 Value = 0

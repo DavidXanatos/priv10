@@ -48,11 +48,42 @@
     <BitmapImage x:Key="Icon_Search" UriSource="icons8-suche-16.png" />
 
     <BitmapImage x:Key="Icon_NoFilter" UriSource="icons8-filter-löschen-32.png" />
+    <BitmapImage x:Key="Icon_Filter2" UriSource="icons8-filter-32.png" />
     <BitmapImage x:Key="Icon_Filter" UriSource="icons8-filter-16.png" />
 
     <BitmapImage x:Key="Icon_AddFilter" UriSource="icons8-plus-16.png" />
     <BitmapImage x:Key="Icon_DelFilter" UriSource="icons8-minus-16.png" />
+
+
+    <BitmapImage x:Key="Icon_NoLocal" UriSource="icons8-computer-16.png" />
+    <BitmapImage x:Key="Icon_NoLocal2" UriSource="icons8-computer-16-not.png" />
+
+    <BitmapImage x:Key="Icon_NoMulti" UriSource="icons8-broadcast-16.png" />
+    <BitmapImage x:Key="Icon_NoMulti2" UriSource="icons8-broadcast-16-not.png" />
+
+    <BitmapImage x:Key="Icon_NoLan" UriSource="icons8-baumstruktur-16.png" />
+    <BitmapImage x:Key="Icon_NoLan2" UriSource="icons8-baumstruktur-16-not.png" />
+
+    <BitmapImage x:Key="Icon_NoINet" UriSource="icons8-geographie-16.png" />
+    <BitmapImage x:Key="Icon_NoINet2" UriSource="icons8-geographie-16-not.png" />
+
+    <BitmapImage x:Key="Icon_Deny" UriSource="icons8-deny-16.png" />
+    <BitmapImage x:Key="Icon_Warning" UriSource="icons8-hazard-warning-flasher-16.png" />
+
+    <BitmapImage x:Key="Icon_Edit" UriSource="icons8-edit-file-16.png" />
+    <BitmapImage x:Key="Icon_EditL" UriSource="icons8-edit-file-32.png" />
+    <BitmapImage x:Key="Icon_Clone" UriSource="icons8-copy-16.png" />
+
+    <BitmapImage x:Key="Icon_Disable" UriSource="icons8-unchecked-checkbox-16.png" />
+    <BitmapImage x:Key="Icon_Enable" UriSource="icons8-tick-box-16.png" />
+    <BitmapImage x:Key="Icon_Disable2" UriSource="icons8-unchecked-checkbox-16-not.png" />
     
+    <BitmapImage x:Key="Icon_Check" UriSource="icons8-checkmark-16.png" />
+
+    <BitmapImage x:Key="Icon_Approve" UriSource="icons8-approval-16.png" />
+    <BitmapImage x:Key="Icon_Undo" UriSource="icons8-undo-16.png" />
+    <BitmapImage x:Key="Icon_Redo" UriSource="icons8-redo-16.png" />
+
     <SolidColorBrush x:Key="SidePanel.off" Color="#a9aaac"/>
     <SolidColorBrush x:Key="SidePanel.on" Color="White"/>
     <SolidColorBrush x:Key="SidePanel.Back" Color="#FF17316C"/>

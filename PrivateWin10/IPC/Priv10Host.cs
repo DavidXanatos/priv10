@@ -86,6 +86,10 @@ namespace PrivateWin10
                 {
                     call.args = App.engine.RemoveRule((FirewallRule)call.args);
                 }
+                else if (call.func == "SetRuleApproval")
+                {
+                    call.args = App.engine.SetRuleApproval(RemoteCall.GetArg<Engine.ApprovalMode>(call.args, 0), RemoteCall.GetArg<FirewallRule>(call.args, 1));
+                }
                 else if (call.func == "BlockInternet")
                 {
                     call.args = App.engine.BlockInternet((bool)call.args);
@@ -97,6 +101,10 @@ namespace PrivateWin10
                 else if (call.func == "CleanUpPrograms")
                 {
                     call.args = App.engine.CleanUpPrograms();
+                }
+                else if (call.func == "CleanUpRules")
+                {
+                    call.args = App.engine.CleanUpRules();
                 }
                 else if (call.func == "GetConnections")
                 {
@@ -123,6 +131,10 @@ namespace PrivateWin10
                 {
                     call.args = App.engine.UndoTweak((TweakManager.Tweak)call.args);
                 }
+                else if (call.func == "Quit")
+                {
+                    call.args = App.engine.Quit();
+                }
 
                 else
                 {
@@ -139,12 +151,25 @@ namespace PrivateWin10
 
         public void NotifyActivity(Guid guid, Program.LogEntry entry, ProgramID progID, List<String> services = null, bool update = false)
         {
-            SendPushNotification("ActivityNotification", new object[] { guid, entry, progID, services, update });
+            Engine.FwEventArgs args = new Engine.FwEventArgs()
+            {
+                guid = guid,
+                entry = entry,
+                progID = progID,
+                services = services,
+                update = update
+            };
+            SendPushNotification("ActivityNotification", args);
         }
 
-        public void NotifyChange(ProgramList.ListEvent args)
+        public void NotifyChange(Guid guid, Engine.ChangeArgs.Types type)
         {
-            SendPushNotification("ChangeNotification", new object[] { args.guid });
+            Engine.ChangeArgs args = new Engine.ChangeArgs()
+            {
+                guid = guid,
+                type = type
+            };
+            SendPushNotification("ChangeNotification", args);
         }
     }
 }

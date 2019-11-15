@@ -17,6 +17,7 @@ namespace PrivateWin10
 
         public int EnabledRules = 0;
         public int DisabledRules = 0;
+        public int ChgedRules = 0;
 
         public int SocketsWeb = 0;
         public int SocketsTcp = 0;
@@ -37,7 +38,9 @@ namespace PrivateWin10
                 CustomConfig,
                 LocalOnly,
                 BlockAccess,
-                StopNotify
+                StopNotify,
+                AnyValue,
+                WarningState
             }
 
             public bool? Notify = null;
@@ -72,14 +75,17 @@ namespace PrivateWin10
         {
             EnabledRules = 0;
             DisabledRules = 0;
+            ChgedRules = 0;
             foreach (Program prog in Programs.Values)
             {
-                foreach (FirewallRule rule in prog.Rules.Values)
+                foreach (FirewallRuleEx rule in prog.Rules.Values)
                 {
                     if(rule.Enabled)
                         EnabledRules++;
                     else
                         DisabledRules++;
+                    if (rule.State != FirewallRuleEx.States.Approved)
+                        ChgedRules++;
                 }
             }
 
@@ -141,8 +147,28 @@ namespace PrivateWin10
             return bRet;
         }
 
+        public int CleanUp()
+        {
+            int Count = 0;
+            foreach (Program prog in Programs.Values.ToList())
+            {
+                if (!prog.Exists())
+                {
+                    // remove all rules for this program
+                    foreach (var guid in prog.Rules.Keys.ToList())
+                        App.engine.FirewallManager.RemoveRule(guid);
+
+                    Programs.Remove(prog.ID);
+
+                    App.LogInfo("CleanUp Removed program: {0}", prog.ID.FormatString());
+                    Count++;
+                }
+            }
+            return Count;
+        }
+
         /////////////////////////////////////////////////////////////
-        ///
+        // merged data
 
         public DateTime GetLastActivity(bool Allowed = true, bool Blocked = true)
         {

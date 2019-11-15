@@ -26,9 +26,32 @@ namespace PrivateWin10
         ManualResetEvent mStarted = new ManualResetEvent(false);
         ManualResetEvent mFinished = new ManualResetEvent(false);
         DispatcherTimer mTimer;
+        bool mDoQuit = false;
+        UInt64 LastSaveTime = MiscFunc.GetTickCount64();
 
         public delegate void FX();
 
+        [Serializable()]
+        public class FwEventArgs : EventArgs
+        {
+            public Guid guid;
+            public Program.LogEntry entry;
+            public ProgramID progID;
+            public List<String> services = null;
+            public bool update;
+        }
+
+        [Serializable()]
+        public class ChangeArgs : EventArgs
+        {
+            public Guid guid;
+            public enum Types
+            {
+                ProgSet = 0,
+                Rules
+            }
+            public Types type;
+        }
 
         public void RunInEngineThread(FX fx)
         {
@@ -141,21 +164,17 @@ namespace PrivateWin10
 
             mStarted.Set();
 
-            ProgramList.Changed += OnChanged;
+            ProgramList.Changed += (object sender, ProgramList.ListEvent e) =>
+            {
+                NotifyProgramChange(e.guid);
+            };
 
             AppLog.Debug("Starting engine timer...");
 
-            // todo
-            // test
-            /*try
-            {
-                throw new Exception("blabla");
-            }
-            catch (Exception ex)
-            {
-                AppLog.Exception(ex);
-            }*/
-            //
+
+            // test here
+            //...
+
 
             mTimer = new DispatcherTimer();
             mTimer.Tick += new EventHandler(OnTimerTick);
@@ -164,7 +183,7 @@ namespace PrivateWin10
 
             // queue a refresh push
             RunInEngineThread(() => {
-                App.host.NotifyChange(new ProgramList.ListEvent());
+                NotifyProgramChange(Guid.Empty);
             });
 
             Dispatcher.Run(); // run
@@ -185,6 +204,8 @@ namespace PrivateWin10
             App.host.Close();
 
             mFinished.Set();
+
+            mDispatcher = null;
 
             AppLog.Debug("Engine Thread Terminating");
         }
@@ -212,6 +233,15 @@ namespace PrivateWin10
 
             if ((mTickCount % (4 * 60 * 30)) == 0)
                 DnsInspector.CleanupCache();
+
+            if (MiscFunc.GetTickCount64() - LastSaveTime > 15 * 60 * 1000) // every 15 minutes
+            {
+                LastSaveTime = MiscFunc.GetTickCount64();
+                ProgramList.StoreList();
+            }
+
+            if (mDoQuit)
+                mDispatcher.InvokeShutdown();
         }
 
         public void Stop()
@@ -221,7 +251,6 @@ namespace PrivateWin10
 
             mDispatcher.InvokeShutdown();
             mDispatcher.Thread.Join(); // Note: this waits for thread finish
-            mDispatcher = null;
 
             mFinished.WaitOne();
         }
@@ -241,12 +270,10 @@ namespace PrivateWin10
             if (serviceTag != null)
                 return ProgramID.NewSvcID(serviceTag, fileName);
 
-            if (App.PkgMgr != null)
-            {
-                string SID = App.PkgMgr.GetAppPackageSidByPID(PID);
-                if (SID != null)
-                    return ProgramID.NewAppID(SID, fileName);
-            }
+
+            string SID = App.PkgMgr?.GetAppPackageSidByPID(PID);
+            if (SID != null)
+                return ProgramID.NewAppID(SID, fileName);
 
             return ProgramID.NewProgID(fileName);
         }
@@ -444,12 +471,35 @@ namespace PrivateWin10
             }).Start();
         }
 
-        public void OnChanged(object sender, ProgramList.ListEvent args) // todo: should be private
+        public void NotifyProgramChange(Guid guid)
         {
-            if (App.host == null) // early start stage
-                return;
+            if (App.host != null)
+            App.host.NotifyChange(guid, ChangeArgs.Types.ProgSet);
+        }
 
-            App.host.NotifyChange(args);
+        public void NotifyRulesChange(Guid guid)
+        {
+            if (App.host != null)
+                App.host.NotifyChange(guid, ChangeArgs.Types.Rules);
+        }
+
+        public void OnRulesChanged(ProgramSet progSet)
+        {
+            foreach (Program prog in progSet.Programs.Values)
+            {
+                foreach (NetworkSocket Socket in prog.Sockets.Values)
+                    Socket.Access = prog.LookupRuleAccess(Socket);
+            }
+
+            NotifyRulesChange(progSet.guid);
+        }
+
+        public void OnRulesChanged(Program prog)
+        {
+            foreach (NetworkSocket Socket in prog.Sockets.Values)
+                Socket.Access = prog.LookupRuleAccess(Socket);
+
+            NotifyRulesChange(prog.ProgSet.guid);
         }
 
 #if FW_COM_ITF
@@ -654,6 +704,7 @@ namespace PrivateWin10
             FirewallGuard.Mode Mode = (FirewallGuard.Mode)App.GetConfigInt("Firewall", "GuardMode", 0);
             if (knownRule.Enabled && (Mode == FirewallGuard.Mode.Fix || Mode == FirewallGuard.Mode.Disable))
             {
+                knownRule.Backup = knownRule.Duplicate();
                 knownRule.Enabled = false;
                 FirewallManager.UpdateRule(knownRule);
                 actionTaken = RuleFixAction.Disabled;
@@ -711,6 +762,10 @@ namespace PrivateWin10
 
             if (Mode == FirewallGuard.Mode.Fix)
             {
+                if(knownRule.Backup == null)
+                    knownRule.Backup = rule.Duplicate();
+                knownRule.State = FirewallRuleEx.States.Changed;
+
                 FirewallManager.UpdateRule(knownRule);
                 actionTaken = RuleFixAction.Restored;
             }
@@ -730,12 +785,13 @@ namespace PrivateWin10
             }
             else if (Mode == FirewallGuard.Mode.Disable)
             {
-                if (match == FirewallRule.MatchResult.DataChanged)
+                if (match == FirewallRule.MatchResult.DataChanged || match == FirewallRule.MatchResult.StateChanged) // data changed disable rule
                 {
                     if (rule.Enabled) // if the rule changed, disable it
                     {
+                        if (knownRule.Backup == null)
+                            knownRule.Backup = rule.Duplicate();
                         knownRule.Enabled = false;
-
                         rule.Enabled = false;
                         FirewallManager.UpdateRule(rule);
                         actionTaken = RuleFixAction.Disabled;
@@ -746,7 +802,7 @@ namespace PrivateWin10
                     else if (knownRule.State == FirewallRuleEx.States.Approved || knownRule.State == FirewallRuleEx.States.Deleted)
                         knownRule.State = FirewallRuleEx.States.Changed;
                 }
-                else if (match == FirewallRule.MatchResult.StateChanged)
+                /*else if (match == FirewallRule.MatchResult.StateChanged) // state changed restore original state
                 {
                     rule.Enabled = knownRule.Enabled;
                     rule.Action = knownRule.Action;
@@ -754,7 +810,7 @@ namespace PrivateWin10
                     // if only the state changed, in this mode we restore it
                     FirewallManager.UpdateRule(rule);
                     actionTaken = RuleFixAction.Restored;
-                }
+                }*/
             }
             else //if (Mode == FirewallGuard.Mode.Alert)
             {
@@ -785,6 +841,8 @@ namespace PrivateWin10
             }
             else if (Mode == FirewallGuard.Mode.Fix)
             {
+                knownRule.State = FirewallRuleEx.States.Deleted;
+
                 FirewallManager.UpdateRule(knownRule);
                 actionTaken = RuleFixAction.Restored;
             }
@@ -813,8 +871,7 @@ namespace PrivateWin10
 
         private void LogRuleEvent(Program prog, FirewallRuleEx rule, RuleEventType type, RuleFixAction action)
         {
-            // Issue an update for the UI
-            OnChanged(null, new ProgramList.ListEvent() { guid = prog.ProgSet.guid });
+            OnRulesChanged(prog);
 
             // Logg the event
             Dictionary<string, string> Params = new Dictionary<string, string>();
@@ -840,12 +897,18 @@ namespace PrivateWin10
                                             EventID = App.EventIDs.RuleChanged; break;
             }
 
+            string RuleName = rule.Name;
+            if (RuleName.Substring(0, 2) == "@{" && App.PkgMgr != null)
+                RuleName = App.PkgMgr.GetAppResourceStr(RuleName);
+            else if (RuleName.Substring(0, 1) == "@")
+                RuleName = MiscFunc.GetResourceStr(RuleName);
+
             string Message; // "Firewall rule \"{0}\" for \"{1}\" was {2}."
             switch (action)
             {
-                case RuleFixAction.Disabled:    Message = Translate.fmt("msg_rule_event", rule.Name, prog.Description, strEvent + Translate.fmt("msg_rule_disabled")); break;
-                case RuleFixAction.Restored:    Message = Translate.fmt("msg_rule_event", rule.Name, prog.Description, strEvent + Translate.fmt("msg_rule_restored")); break;
-                default:                        Message = Translate.fmt("msg_rule_event", rule.Name, prog.Description, strEvent); break;
+                case RuleFixAction.Disabled:    Message = Translate.fmt("msg_rule_event", RuleName, prog.Description, strEvent + Translate.fmt("msg_rule_disabled")); break;
+                case RuleFixAction.Restored:    Message = Translate.fmt("msg_rule_event", RuleName, prog.Description, strEvent + Translate.fmt("msg_rule_restored")); break;
+                default:                        Message = Translate.fmt("msg_rule_event", RuleName, prog.Description, strEvent); break;
             }
 
             if (type == RuleEventType.UnChanged || action == RuleFixAction.Restored)
@@ -880,7 +943,7 @@ namespace PrivateWin10
                 {
                     if (rule.Expiration != 0 && (bAll || curTime >= rule.Expiration))
                     {
-                        if (App.engine.FirewallManager.RemoveRule(rule))
+                        if (App.engine.FirewallManager.RemoveRule(rule.guid))
                         {
                             bRemoved = true;
                             prog.Rules.Remove(rule.guid);
@@ -890,7 +953,7 @@ namespace PrivateWin10
                 }
 
                 if(bRemoved)
-                    OnChanged(null, new ProgramList.ListEvent() { guid = prog.ProgSet.guid });
+                    OnRulesChanged(prog);
             }
             return Count;
         }
@@ -936,10 +999,12 @@ namespace PrivateWin10
         public bool SetFirewallGuard(bool guard, FirewallGuard.Mode mode)
         {
             return mDispatcher.Invoke(new Func<bool>(() => {
-                if(guard)
+                App.SetConfig("Firewall", "GuardMode", ((int)mode).ToString());
+                if (guard == FirewallGuard.HasAuditPolicy())
+                    return true; // don't do much if only the mode changed
+                if (guard)
                     ApproveRules();
                 App.SetConfig("Firewall", "RuleGuard", guard == true ? 1 : 0);
-                App.SetConfig("Firewall", "GuardMode", ((int)mode).ToString());
                 return FirewallGuard.SetAuditPolicy(guard);
             }));
         }
@@ -1033,7 +1098,7 @@ namespace PrivateWin10
                         {
                             FirewallRule Rule = FirewallManager.GetRule(Rules[i].guid);
                             if (Rule != null)
-                                Rules[i] = new FirewallRuleEx(Rules[i], Rule);
+                                Rules[i] = new FirewallRuleEx(Rules[i], Rule);// { Backup = Rules[i] };
                         }
                     }
 
@@ -1070,7 +1135,7 @@ namespace PrivateWin10
                     {
                         old_prog?.Rules.Remove(old_rule.guid);
 
-                        OnChanged(null, new ProgramList.ListEvent() { guid = prog.ProgSet.guid });
+                        OnRulesChanged(prog);
                     }
                 }
 
@@ -1078,18 +1143,24 @@ namespace PrivateWin10
                 if (!FirewallManager.ApplyRule(prog, rule, expiration)) // if the rule is new this will set the guid
                     return false;
 
-                App.engine.FirewallManager.EvaluateRules(prog.ProgSet);
-
-                OnChanged(null, new ProgramList.ListEvent() { guid = prog.ProgSet.guid });
+                OnRulesChangedEx(prog);
 
                 return true;
             }));
         }
 
+        private void OnRulesChangedEx(Program prog)
+        {
+            OnRulesChanged(prog);
+
+            App.engine.FirewallManager.EvaluateRules(prog.ProgSet);
+            NotifyProgramChange(prog.ProgSet.guid);
+        }
+
         public bool RemoveRule(FirewallRule rule)
         {
             return mDispatcher.Invoke(new Func<bool>(() => {
-                if (!FirewallManager.RemoveRule(rule))
+                if (!FirewallManager.RemoveRule(rule.guid))
                     return false;
                 
                 var prog = ProgramList.GetProgram(rule.ProgID);
@@ -1097,9 +1168,100 @@ namespace PrivateWin10
                 {
                     prog.Rules.Remove(rule.guid);
 
-                    OnChanged(null, new ProgramList.ListEvent() { guid = prog.ProgSet.guid });
+                    OnRulesChanged(prog);
                 }
                 return true;
+            }));
+        }
+
+        private bool ApproveRule(bool bApply, Program prog, FirewallRuleEx ruleEx)
+        {
+            if (ruleEx.State == FirewallRuleEx.States.Deleted)
+            {
+                if (bApply)
+                {
+                    if (!FirewallManager.RemoveRule(ruleEx.guid))
+                        return false;
+                }
+                prog.Rules.Remove(ruleEx.guid);
+            }
+            else if (ruleEx.State == FirewallRuleEx.States.Changed || ruleEx.State == FirewallRuleEx.States.Unknown)
+            {
+                if (bApply && ruleEx.Backup != null) // set the rule as it was mae by the 3rd party
+                {
+                    ruleEx.Assign(ruleEx.Backup);
+                    FirewallManager.ApplyRule(prog, ruleEx);
+                }
+                else // just approve the curent state (rule is probably disabled)
+                {
+                    FirewallRule rule = FirewallManager.GetRule(ruleEx.guid);
+                    ruleEx.Assign(rule);
+                    ruleEx.SetApplied();
+                }
+            }
+
+            OnRulesChangedEx(prog);
+            return true;
+        }
+
+        private bool RestoreRule(Program prog, FirewallRuleEx ruleEx)
+        {
+            if (ruleEx.State == FirewallRuleEx.States.Changed || ruleEx.State == FirewallRuleEx.States.Deleted)
+            {
+                if (!FirewallManager.ApplyRule(prog, ruleEx))
+                    return false;
+            }
+            else if (ruleEx.State == FirewallRuleEx.States.Unknown)
+            {
+                if(!FirewallManager.RemoveRule(ruleEx.guid))
+                    return false;
+            }
+            ruleEx.Backup = null;
+
+            OnRulesChangedEx(prog);
+            return true;
+        }
+
+        public enum ApprovalMode
+        {
+            ApproveCurrent = 0,
+            RestoreRules,
+            ApproveChanges
+        }
+
+        public int SetRuleApproval(ApprovalMode Mode, FirewallRule rule)
+        {
+            return mDispatcher.Invoke(new Func<int>(() => {
+                int count = 0;
+                if (rule != null)
+                {
+                    var prog = ProgramList.GetProgram(rule.ProgID);
+                    if (prog != null)
+                    {
+                        FirewallRuleEx ruleEx;
+                        if (prog.Rules.TryGetValue(rule.guid, out ruleEx))
+                        {
+                            if (Mode != ApprovalMode.RestoreRules ? ApproveRule(Mode == ApprovalMode.ApproveChanges, prog, ruleEx) : RestoreRule(prog, ruleEx))
+                                count++;
+                        }
+                    }
+                }
+                else // all rules
+                {
+                    List<ProgramSet> progs = ProgramList.GetPrograms();
+                    foreach (ProgramSet progSet in progs)
+                    {
+                        foreach (Program prog in progSet.Programs.Values)
+                        {
+                            foreach (FirewallRuleEx ruleEx in prog.Rules.Values.ToList())
+                            {
+                                if (Mode != ApprovalMode.RestoreRules ? ApproveRule(Mode == ApprovalMode.ApproveChanges, prog, ruleEx) : RestoreRule(prog, ruleEx))
+                                    count++;
+                            }
+                        }
+                    }
+                }
+                return count;
             }));
         }
 
@@ -1145,10 +1307,18 @@ namespace PrivateWin10
                 return true;
             }));
         }
+
         public int CleanUpPrograms()
         {
             return mDispatcher.Invoke(new Func<int>(() => {
                 return ProgramList.CleanUp();
+            }));
+        }
+
+        public int CleanUpRules()
+        {
+            return mDispatcher.Invoke(new Func<int>(() => {
+                return CleanupFwRules(true);
             }));
         }
 
@@ -1205,6 +1375,13 @@ namespace PrivateWin10
             return mDispatcher.Invoke(new Func<bool>(() => {
                 return TweakEngine.UndoTweak(tweak);
             }));
+        }
+
+
+        public bool Quit()
+        {
+            mDoQuit = true;
+            return true;
         }
     }
 }

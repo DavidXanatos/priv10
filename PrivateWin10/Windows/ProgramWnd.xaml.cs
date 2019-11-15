@@ -152,7 +152,7 @@ namespace PrivateWin10.Windows
                 ServiceModel.Service name = (cmbService.SelectedItem as ServiceModel.Service);
                 ID = ProgramID.NewSvcID(name != null ? name.Value : cmbService.Text, pathStr);
             }
-            else if (radProgram.IsChecked == true)
+            else if (radApp.IsChecked == true)
             {
                 AppModel.AppPkg name = (cmbApp.SelectedItem as AppModel.AppPkg);
                 ID = ProgramID.NewAppID(name != null ? name.Value : cmbApp.Text, pathStr);

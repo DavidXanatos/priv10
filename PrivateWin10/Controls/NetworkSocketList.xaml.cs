@@ -28,13 +28,28 @@ namespace PrivateWin10.Controls
 
         public FirewallPage firewallPage = null;
 
-        string mSockFilter = "";
+        FirewallPage.FilterPreset.Socket socketFilter = FirewallPage.FilterPreset.Socket.Any;
+        string textFilter = "";
 
         ObservableCollection<SocketItem> SocketList;
 
         public NetworkSocketList()
         {
             InitializeComponent();
+
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_all"), FirewallPage.FilterPreset.Socket.Any);
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_web"), FirewallPage.FilterPreset.Socket.Web).Background = new SolidColorBrush(Colors.DodgerBlue);
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_tcp"), FirewallPage.FilterPreset.Socket.TCP).Background = new SolidColorBrush(Colors.Turquoise);
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_client"), FirewallPage.FilterPreset.Socket.Client).Background = new SolidColorBrush(Colors.Gold);
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_server"), FirewallPage.FilterPreset.Socket.Server).Background = new SolidColorBrush(Colors.DarkOrange);
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_udp"), FirewallPage.FilterPreset.Socket.UDP).Background = new SolidColorBrush(Colors.Violet);
+            //WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_raw"), FirewallPage.FilterPreset.Socket.Raw);
+
+            this.lblFilter.Content = Translate.fmt("lbl_filter");
+            this.chkNoINet.ToolTip = Translate.fmt("str_no_inet");
+            this.chkNoLAN.ToolTip = Translate.fmt("str_no_lan");
+            //this.chkNoMulti.ToolTip = Translate.fmt("str_no_multi");
+            this.chkNoLocal.ToolTip = Translate.fmt("str_no_local");
 
             this.socksGrid.Columns[1].Header = Translate.fmt("lbl_name");
             this.socksGrid.Columns[2].Header = Translate.fmt("lbl_time_stamp");
@@ -44,9 +59,10 @@ namespace PrivateWin10.Controls
             this.socksGrid.Columns[6].Header = Translate.fmt("lbl_remote_port");
             this.socksGrid.Columns[7].Header = Translate.fmt("lbl_local_ip");
             this.socksGrid.Columns[8].Header = Translate.fmt("lbl_local_port");
-            this.socksGrid.Columns[9].Header = Translate.fmt("lbl_upload");
-            this.socksGrid.Columns[10].Header = Translate.fmt("lbl_download");
-            this.socksGrid.Columns[11].Header = Translate.fmt("lbl_program");
+            this.socksGrid.Columns[9].Header = Translate.fmt("lbl_access");
+            this.socksGrid.Columns[10].Header = Translate.fmt("lbl_upload");
+            this.socksGrid.Columns[11].Header = Translate.fmt("lbl_download");
+            this.socksGrid.Columns[12].Header = Translate.fmt("lbl_program");
 
             socksGridExt = new DataGridExt(socksGrid);
             socksGridExt.Restore(App.GetConfig("GUI", "socksGrid_Columns", ""));
@@ -54,8 +70,17 @@ namespace PrivateWin10.Controls
             SocketList = new ObservableCollection<SocketItem>();
             socksGrid.ItemsSource = SocketList;
 
-            mSockFilter = App.GetConfig("GUI", "SockFilter", "");
-            txtSockFilter.Text = mSockFilter;
+            try
+            {
+                textFilter = App.GetConfig("NetSocks", "Filter", "");
+                txtSockFilter.Text = textFilter;
+                WpfFunc.CmbSelect(sockType, ((FirewallPage.FilterPreset.Socket)App.GetConfigInt("NetSocks", "Types", 0)).ToString());
+                this.chkNoLocal.IsChecked = App.GetConfigInt("NetSocks", "NoLocal", 0) == 1;
+                //this.chkNoMulti.IsChecked = App.GetConfigInt("NetSocks", "NoMulti", 0) == 1;
+                this.chkNoLAN.IsChecked = App.GetConfigInt("NetSocks", "NoLan", 0) == 1;
+                this.chkNoINet.IsChecked = App.GetConfigInt("NetSocks", "NoINet", 0) == 1;
+            }
+            catch { }
 
             CheckSockets();
         }
@@ -77,7 +102,7 @@ namespace PrivateWin10.Controls
             foreach (SocketItem oldItem in SocketList)
                 oldLog.Add(oldItem.sock.guid, oldItem);
 
-            Dictionary<Guid, List<NetworkSocket>> entries = App.client.GetSockets(firewallPage.GetCurGuids(mSockFilter));
+            Dictionary<Guid, List<NetworkSocket>> entries = App.client.GetSockets(firewallPage.GetCurGuids());
             foreach (var entrySet in entries)
             {
                 ProgramControl item = null;
@@ -107,12 +132,13 @@ namespace PrivateWin10.Controls
             foreach (SocketItem item in oldLog.Values)
                 SocketList.Remove(item);
 
+
             // force sort
             // todo: improve that
-            /*if (sockGrid.Items.SortDescriptions.Count > 0)
+            /*if (socksGrid.Items.SortDescriptions.Count > 0)
             {
-                sockGrid.Items.SortDescriptions.Insert(0, sockGrid.Items.SortDescriptions.First());
-                sockGrid.Items.SortDescriptions.RemoveAt(0);
+                socksGrid.Items.SortDescriptions.Insert(0, socksGrid.Items.SortDescriptions.First());
+                socksGrid.Items.SortDescriptions.RemoveAt(0);
             }*/
         }
 
@@ -128,12 +154,90 @@ namespace PrivateWin10.Controls
 
         private void txtSockFilter_TextChanged(object sender, TextChangedEventArgs e)
         {
-            mSockFilter = txtSockFilter.Text;
-            App.SetConfig("GUI", "SockFilter", mSockFilter);
-            UpdateSockets(true);
+            textFilter = txtSockFilter.Text;
+            App.SetConfig("NetSocks", "Filter", textFilter);
+            //UpdateSockets(true);
+
+            socksGrid.Items.Filter = new Predicate<object>(item => SocksFilter(item));
         }
 
+        private void sockType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            socketFilter = (FirewallPage.FilterPreset.Socket)(sockType.SelectedItem as ComboBoxItem).Tag;
+            sockType.Background = (sockType.SelectedItem as ComboBoxItem).Background;
+            App.SetConfig("NetSocks", "Types", (int)socketFilter);
+            //UpdateRules(true);
 
+            socksGrid.Items.Filter = new Predicate<object>(item => SocksFilter(item));
+        }
+
+        private void SocketTypeFilters_Click(object sender, RoutedEventArgs e)
+        {
+            App.SetConfig("NetSocks", "NoLocal", this.chkNoLocal.IsChecked == true ? 1 : 0);
+            //App.SetConfig("NetSocks", "NoMulti", this.chkNoMulti.IsChecked == true ? 1 : 0);
+            App.SetConfig("NetSocks", "NoLan", this.chkNoLAN.IsChecked == true ? 1 : 0);
+            App.SetConfig("NetSocks", "NoINet", this.chkNoINet.IsChecked == true ? 1 : 0);
+            //UpdateConnections(true);
+
+            socksGrid.Items.Filter = new Predicate<object>(item => SocksFilter(item));
+        }
+
+        private bool SocksFilter(object obj)
+        {
+            var item = obj as SocketItem;
+
+            if (socketFilter != FirewallPage.FilterPreset.Socket.Any)
+            {
+                switch (socketFilter)
+                {
+                    case FirewallPage.FilterPreset.Socket.TCP:
+                        if ((item.sock.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == 0)
+                            return false;
+                        break;
+                    case FirewallPage.FilterPreset.Socket.Client:
+                        if ((item.sock.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == 0 || item.sock.State == (int)IPHelper.MIB_TCP_STATE.LISTENING)
+                            return false;
+                        break;
+                    case FirewallPage.FilterPreset.Socket.Server:
+                        if ((item.sock.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == 0 || item.sock.State != (int)IPHelper.MIB_TCP_STATE.LISTENING)
+                            return false;
+                        break;
+                    case FirewallPage.FilterPreset.Socket.UDP:
+                        if ((item.sock.ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == 0)
+                            return false;
+                        break;
+                    case FirewallPage.FilterPreset.Socket.Web:
+                        if ((item.sock.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == 0 || !(item.sock.RemotePort == 80 || item.sock.RemotePort == 443))
+                            return false;
+                        break;
+                }
+            }
+
+            if (item.sock.RemoteAddress != null)
+            {
+                if (NetFunc.IsLocalHost(item.sock.RemoteAddress))
+                {
+                    if (chkNoLocal.IsChecked == true)
+                        return false;
+                }
+                /*else if (NetFunc.IsMultiCast(item.sock.RemoteAddress))
+                {
+                    if (chkNoMulti.IsChecked == true)
+                        return false;
+                }*/
+                else if (FirewallRule.MatchAddress(item.sock.RemoteAddress, "LocalSubnet"))
+                {
+                    if (chkNoLAN.IsChecked == true)
+                        return false;
+                }
+                else if (chkNoINet.IsChecked == true)
+                    return false;
+            }
+
+            if (FirewallPage.DoFilter(textFilter, item.name, new List<ProgramID>() { item.sock.ProgID }))
+                return false;
+            return true;
+        }
 
         /////////////////////////////////
         /// SocketItem
@@ -149,10 +253,6 @@ namespace PrivateWin10.Controls
                 this.name = name != null ? name : "[unknown progream]";
             }
 
-            void DoUpdate()
-            {
-                NotifyPropertyChanged(null);
-            }
 
             public ImageSource Icon { get { return ImgFunc.GetIcon(sock.ProgID.Path, 16); } }
 
@@ -171,6 +271,42 @@ namespace PrivateWin10.Controls
             public string SrcAddress { get { return sock.LocalAddress?.ToString(); } }
             public string SrcPorts { get { return sock.LocalPort.ToString(); } }
 
+            public string Access { get {
+                    List<string> profiles = new List<string>();
+
+                    bool CanIn = true;
+                    bool CanOut = true;
+                    if ((sock.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) != 0)
+                    {
+                        if (sock.State != (int)IPHelper.MIB_TCP_STATE.LISTENING)
+                            CanIn = false;
+                        else
+                            CanOut = false;
+                    }
+
+                    if ((sock.Access.Item1 & (int)FirewallRule.Profiles.Private) != 0 && (sock.Access.Item2 & (int)FirewallRule.Profiles.Private) != 0 && CanIn && CanOut)
+                        profiles.Add(Translate.fmt("str_private") + " In/Out");
+                    else if ((sock.Access.Item1 & (int)FirewallRule.Profiles.Private) != 0 && CanOut)
+                        profiles.Add(Translate.fmt("str_private") + " Out");
+                    else if((sock.Access.Item2 & (int)FirewallRule.Profiles.Private) != 0 && CanIn)
+                        profiles.Add(Translate.fmt("str_private") + " In");
+
+                    if ((sock.Access.Item1 & (int)FirewallRule.Profiles.Domain) != 0 && (sock.Access.Item2 & (int)FirewallRule.Profiles.Domain) != 0 && CanIn && CanOut)
+                        profiles.Add(Translate.fmt("str_domain") + " In/Out");
+                    else if ((sock.Access.Item1 & (int)FirewallRule.Profiles.Domain) != 0 && CanOut)
+                        profiles.Add(Translate.fmt("str_domain") + " Out");
+                    else if ((sock.Access.Item2 & (int)FirewallRule.Profiles.Domain) != 0 && CanIn)
+                        profiles.Add(Translate.fmt("str_domain") + " In");
+
+                    if ((sock.Access.Item1 & (int)FirewallRule.Profiles.Public) != 0 && (sock.Access.Item2 & (int)FirewallRule.Profiles.Public) != 0 && CanIn && CanOut)
+                        profiles.Add(Translate.fmt("str_public") + " In/Out");
+                    else if ((sock.Access.Item1 & (int)FirewallRule.Profiles.Public) != 0 && CanOut)
+                        profiles.Add(Translate.fmt("str_public") + " Out");
+                    else if ((sock.Access.Item2 & (int)FirewallRule.Profiles.Public) != 0 && CanIn)
+                        profiles.Add(Translate.fmt("str_public") + " In");
+
+                    return string.Join(",", profiles.ToArray().Reverse());
+                } }
 
             public UInt64 Upload { get { return sock.Stats.UploadRate.ByteRate; } }
             //public string UploadTxt { get { return FileOps.FormatSize(sock.Stats.UploadRate.ByteRate) + "/s"; } }
@@ -185,7 +321,7 @@ namespace PrivateWin10.Controls
                 NotifyPropertyChanged(Name);
             }
 
-            internal void Update(NetworkSocket new_sock)
+            public void Update(NetworkSocket new_sock)
             {
                 UpdateValue(ref sock.CreationTime, new_sock.CreationTime, "TimeStamp");
                 UpdateValue(ref sock.State, new_sock.State, "State");
@@ -216,10 +352,7 @@ namespace PrivateWin10.Controls
 
             private void NotifyPropertyChanged(string propertyName)
             {
-                if (PropertyChanged != null)
-                {
-                    PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-                }
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
 
             #endregion

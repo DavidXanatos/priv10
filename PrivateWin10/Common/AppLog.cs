@@ -259,6 +259,6 @@ public class AppLog : IDisposable
 
     static public void Debug(string message, params object[] args)
     {
-        Console.WriteLine(string.Format(message, args));
+        Console.WriteLine(args.Length == 0 ? message : string.Format(message, args));
     }
 }

@@ -82,6 +82,8 @@ namespace PrivateWin10
             try
             {
                 App.engine.Run();
+
+                this.Stop();
             }
             catch
             {

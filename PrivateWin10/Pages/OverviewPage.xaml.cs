@@ -161,13 +161,13 @@ namespace PrivateWin10.Pages
             public string Event { get { return ((App.EventIDs)args.eventID).ToString(); } } // Todo
             public string Message { get { return args.strMessage; } }
 
-            #region INotifyPropertyChanged Members
+#region INotifyPropertyChanged Members
 
             public event PropertyChangedEventHandler PropertyChanged;
 
-            #endregion
+#endregion
 
-            #region Private Helpers
+#region Private Helpers
 
             private void NotifyPropertyChanged(string propertyName)
             {
@@ -177,7 +177,7 @@ namespace PrivateWin10.Pages
                 }
             }
 
-            #endregion
+#endregion
         }
     }
 }

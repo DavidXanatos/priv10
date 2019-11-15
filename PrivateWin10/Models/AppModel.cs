@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -43,13 +44,17 @@ namespace PrivateWin10
             if (App.PkgMgr != null)
             {
                 foreach (AppManager.AppInfo app in App.PkgMgr.GetAllApps())
-                    Apps.Add(new AppPkg() { Content = app.Name + " (" + app.ID + ")", Value = app.SID, Group = Translate.fmt("lbl_known") });
+                    Apps.Add(new AppPkg() {
+                        Content = app.Name + " (" + app.ID + ")",
+                        Value = app.SID,
+                        Group = Translate.fmt("lbl_known") });
 
                 Apps.Add(new AppPkg() { Content = Translate.fmt("app_reload"), Value = null });
             }
 
             ListCollectionView lcv = new ListCollectionView(Apps);
             lcv.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
+            lcv.SortDescriptions.Add(new SortDescription("Content", ListSortDirection.Ascending));
             return lcv;
         }
     }

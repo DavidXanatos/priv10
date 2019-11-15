@@ -78,7 +78,7 @@ namespace PrivateWin10.Windows
 
             //txtName.Text = Rule.Name;
             viewModel.RuleName = Rule.Name;
-            cmbGroup.ItemsSource = GroupModel.GetInstance().Groups;
+            cmbGroup.ItemsSource = GroupModel.GetInstance().GetGroups();
             WpfFunc.CmbSelect(cmbGroup, Rule.Grouping);
             if (cmbGroup.SelectedItem == null)
                 cmbGroup.Text = Rule.Grouping;

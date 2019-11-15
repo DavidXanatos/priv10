@@ -165,7 +165,7 @@ namespace PrivateWin10
                 case Types.System: return Translate.fmt("name_system");
                 case Types.Service: return Translate.fmt("name_service", Path, Aux);
                 case Types.Program: return Path;
-                case Types.App: return Translate.fmt("name_app", Path, Aux);
+                case Types.App: return Translate.fmt("name_app", Path, GetPackageName());
                 default:
                 case Types.Global: return Translate.fmt("name_global");
             }

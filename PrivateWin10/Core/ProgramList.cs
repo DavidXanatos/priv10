@@ -216,7 +216,7 @@ namespace PrivateWin10
                 Programs.Remove(progID);
 
                 foreach (FirewallRule rule in prog.Rules.Values)
-                    App.engine.FirewallManager.RemoveRule(rule);
+                    App.engine.FirewallManager.RemoveRule(rule.guid);
 
                 foreach (NetworkSocket socket in prog.Sockets.Values)
                     socket.Assigned = false;
@@ -238,19 +238,17 @@ namespace PrivateWin10
 
         public int CleanUp()
         {
-            // todo: xxx check if program still exists
-
             int Count = 0;
             foreach (ProgramSet progSet in ProgramSets.Values.ToList())
             {
-                if (progSet.GetSocketCount() > 0 || progSet.GetRules().Count > 0)
-                    continue;
-                
-                App.LogInfo("Removing: {0}", progSet.config.Name);
-                Count++;
+                Count += progSet.CleanUp();
 
-                RemoveProgram(progSet.guid);
+                if (progSet.Programs.Count == 0)
+                    ProgramSets.Remove(progSet.guid);
             }
+
+            if(Count > 0)
+                Changed?.Invoke(this, new ListEvent());
             return Count;
         }
 
@@ -332,7 +330,5 @@ namespace PrivateWin10
         }
 
         public event EventHandler<ListEvent> Changed;
-
-
     }
 }

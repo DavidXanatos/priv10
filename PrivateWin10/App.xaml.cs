@@ -28,7 +28,11 @@ namespace PrivateWin10
         public static string mVersion = "0.0";
         public static string mName = "Private WinTen";
         public static string mAppName = "PrivateWin10";
+#if DEBUG
+        public static string mSvcName = "priv10dbg";
+#else
         public static string mSvcName = "priv10";
+#endif
         public static string appPath = "";
         public static string dataPath = "";
         public static bool isPortable = false;
@@ -82,12 +86,10 @@ namespace PrivateWin10
 
         public enum EventFlags : short
         {
-            DebugMessages = 0x0A00,
-            DebugEvents = 0x0B00,
-            AppLogEntries = 0x0C00,
-            InfoLogEntries = 0x0D00,
-            Notifications = 0x0E00, // Show a Notification
-            PopUpMessages = 0x0F00, // Show a PopUp Message
+            DebugEvents = 0x0100,
+            AppLogEntries = 0x0200,
+            Notifications = 0x0400, // Show a Notification
+            PopUpMessages = 0x0800, // Show a PopUp Message
         }
 
         [STAThread]
@@ -344,6 +346,19 @@ namespace PrivateWin10
                     }
                 case TrayIcon.Actions.CloseApplication:
                     {
+                        if (svc.IsInstalled())
+                        {
+                            MessageBoxResult res = MessageBox.Show(Translate.fmt("msg_stop_svc"), App.mName, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                            switch (res)
+                            {
+                                case MessageBoxResult.Yes:
+                                    if(!client.Quit())
+                                        MessageBox.Show(Translate.fmt("msg_stop_svc_err"), App.mName, MessageBoxButton.OK, MessageBoxImage.Stop);
+                                    break;
+                                case MessageBoxResult.Cancel:
+                                    return;
+                            }
+                        }
                         Application.Current.Shutdown();
                         break;
                     }
@@ -503,32 +518,32 @@ namespace PrivateWin10
 
         static public void LogError(string message, params object[] args)
         {
-            AppLog.Add(EventLogEntryType.Error, (long)EventIDs.AppError, (short)EventFlags.AppLogEntries, string.Format(message, args));
+            AppLog.Add(EventLogEntryType.Error, (long)EventIDs.AppError, (short)EventFlags.AppLogEntries, args.Length == 0 ? message : string.Format(message, args));
         }
 
         static public void LogError(App.EventIDs eventID, Dictionary<string, string> Params, App.EventFlags flags, string message, params object[] args)
         {
-            AppLog.Add(EventLogEntryType.Error, (long)eventID, (short)flags, string.Format(message, args), Params);
+            AppLog.Add(EventLogEntryType.Error, (long)eventID, (short)flags, args.Length == 0 ? message : string.Format(message, args), Params);
         }
 
         static public void LogWarning(string message, params object[] args)
         {
-            AppLog.Add(EventLogEntryType.Warning, (long)EventIDs.AppWarning, (short)EventFlags.AppLogEntries, string.Format(message, args));
+            AppLog.Add(EventLogEntryType.Warning, (long)EventIDs.AppWarning, (short)EventFlags.AppLogEntries, args.Length == 0 ? message : string.Format(message, args));
         }
 
         static public void LogWarning(App.EventIDs eventID, Dictionary<string, string> Params, App.EventFlags flags, string message, params object[] args)
         {
-            AppLog.Add(EventLogEntryType.Warning, (long)eventID, (short)flags, string.Format(message, args), Params);
+            AppLog.Add(EventLogEntryType.Warning, (long)eventID, (short)flags, args.Length == 0 ? message : string.Format(message, args), Params);
         }
 
         static public void LogInfo(string message, params object[] args)
         {
-            AppLog.Add(EventLogEntryType.Information, (long)EventIDs.AppInfo, (short)EventFlags.AppLogEntries, string.Format(message, args));
+            AppLog.Add(EventLogEntryType.Information, (long)EventIDs.AppInfo, (short)EventFlags.AppLogEntries, args.Length == 0 ? message : string.Format(message, args));
         }
 
         static public void LogInfo(App.EventIDs eventID, Dictionary<string, string> Params, App.EventFlags flags, string message, params object[] args)
         {
-            AppLog.Add(EventLogEntryType.Information, (long)eventID, (short)flags, string.Format(message, args), Params);
+            AppLog.Add(EventLogEntryType.Information, (long)eventID, (short)flags, args.Length == 0 ? message : string.Format(message, args), Params);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////

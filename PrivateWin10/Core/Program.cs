@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
@@ -131,16 +132,29 @@ namespace PrivateWin10
             return false;
         }
 
+        public bool Exists()
+        {
+            bool PathMissing = (ID.Path != null && ID.Path.Length > 0 && !File.Exists(ID.Path));
+
+            switch (ID.Type)
+            {
+                case ProgramID.Types.Program:   return !PathMissing;
+                case ProgramID.Types.Service:   return (ServiceHelper.GetServiceStatus(ID.GetServiceId()) != ServiceHelper.ServiceState.NotFound) && !PathMissing;
+                case ProgramID.Types.App:       return App.PkgMgr?.GetAppInfoBySid(ID.GetPackageSID()) != null && !PathMissing;
+                default:        return true;
+            }
+        }
+
         public void AddLogEntry(LogEntry logEntry)
         {
             switch (logEntry.FwEvent.Action)
             {
                 case FirewallRule.Actions.Allow:
-                    countBlocked++;
+                    countAllowed++; 
                     lastAllowed = logEntry.FwEvent.TimeStamp;
                     break;
                 case FirewallRule.Actions.Block:
-                    countAllowed++;
+                    countBlocked++;
                     lastBlocked = logEntry.FwEvent.TimeStamp;
                     break;
             }
@@ -182,6 +196,84 @@ namespace PrivateWin10
             if (AllowRules > 0)
                 return FirewallRule.Actions.Allow;
             return FirewallRule.Actions.Undefined;
+        }
+
+        public Tuple<int, int> LookupRuleAccess(NetworkSocket Socket)
+        {
+            int AllowOutProfiles = 0;
+            int BlockOutProfiles = 0;
+            int AllowInProfiles = 0;
+            int BlockInProfiles = 0;
+
+            int Protocol = 0;
+            if ((Socket.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) != 0)
+                Protocol = (int)IPHelper.AF_PROT.TCP;
+            else if ((Socket.ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) != 0)
+                Protocol = (int)IPHelper.AF_PROT.UDP;
+            else
+                return Tuple.Create(0, 0);
+
+            foreach (FirewallRule rule in Rules.Values)
+            {
+                if (!rule.Enabled)
+                    continue;
+
+                if (rule.Protocol != (int)NetFunc.KnownProtocols.Any && Protocol != rule.Protocol)
+                    continue;
+                if (Protocol == (int)IPHelper.AF_PROT.TCP)
+                {
+                    if (!rule.MatchRemoteEndpoint(Socket.RemoteAddress, Socket.RemotePort))
+                        continue;
+                }
+                if (!rule.MatchLocalEndpoint(Socket.LocalAddress, Socket.LocalPort))
+                    continue;
+
+                switch (rule.Direction)
+                {
+                    case FirewallRule.Directions.Outboun:
+                    {
+                        if (rule.Action == FirewallRule.Actions.Allow)
+                            AllowOutProfiles |= rule.Profile;
+                        else if (rule.Action == FirewallRule.Actions.Block)
+                            BlockOutProfiles |= rule.Profile;
+                        break;
+                    }
+                    case FirewallRule.Directions.Inbound:
+                    {
+                        if (rule.Action == FirewallRule.Actions.Allow)
+                            AllowInProfiles |= rule.Profile;
+                        else if (rule.Action == FirewallRule.Actions.Block)
+                            BlockInProfiles |= rule.Profile;
+                        break;
+                    }
+                }
+            }
+
+            for (int i = 0; i < FirewallManager.FwProfiles.Length; i++)
+            {
+                if ((AllowOutProfiles & (int)FirewallManager.FwProfiles[i]) == 0
+                 && (BlockOutProfiles & (int)FirewallManager.FwProfiles[i]) == 0)
+                {
+                    if (App.engine.FirewallManager.GetDefaultOutboundAction(FirewallManager.FwProfiles[i]) == FirewallRule.Actions.Allow)
+                        AllowOutProfiles |= (int)FirewallManager.FwProfiles[i];
+                    else
+                        BlockOutProfiles |= (int)FirewallManager.FwProfiles[i];
+                }
+
+                if ((AllowInProfiles & (int)FirewallManager.FwProfiles[i]) == 0
+                 && (BlockInProfiles & (int)FirewallManager.FwProfiles[i]) == 0)
+                {
+                    if (App.engine.FirewallManager.GetDefaultInboundAction(FirewallManager.FwProfiles[i]) == FirewallRule.Actions.Allow)
+                        AllowInProfiles |= (int)FirewallManager.FwProfiles[i];
+                    else
+                        BlockInProfiles |= (int)FirewallManager.FwProfiles[i];
+                }
+            }
+
+            AllowOutProfiles &= ~BlockOutProfiles;
+            AllowInProfiles &= ~BlockInProfiles;
+
+            return Tuple.Create(AllowOutProfiles, AllowInProfiles);
         }
 
         [Serializable()]

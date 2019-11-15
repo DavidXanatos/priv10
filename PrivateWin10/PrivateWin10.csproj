@@ -66,7 +66,9 @@
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceProcess" />
-    <Reference Include="System.Windows.Controls.Ribbon" />
+    <Reference Include="System.Windows.Controls.Ribbon">
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -400,6 +402,43 @@
     <Resource Include="Resources\icons8-minus-16.png" />
     <Resource Include="Resources\icons8-plus-16.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\icons8-filter-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons8-baumstruktur-16-not.png" />
+    <Resource Include="Resources\icons8-baumstruktur-16.png" />
+    <Resource Include="Resources\icons8-broadcast-16-not.png" />
+    <Resource Include="Resources\icons8-broadcast-16.png" />
+    <Resource Include="Resources\icons8-computer-16-not.png" />
+    <Resource Include="Resources\icons8-computer-16.png" />
+    <Resource Include="Resources\icons8-geographie-16-not.png" />
+    <Resource Include="Resources\icons8-geographie-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons8-deny-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons8-hazard-warning-flasher-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons8-approval-16.png" />
+    <Resource Include="Resources\icons8-checkmark-16.png" />
+    <Resource Include="Resources\icons8-copy-16.png" />
+    <Resource Include="Resources\icons8-edit-file-16.png" />
+    <Resource Include="Resources\icons8-road-closure-16.png" />
+    <Resource Include="Resources\icons8-tick-box-16.png" />
+    <Resource Include="Resources\icons8-unchecked-checkbox-16.png" />
+    <Resource Include="Resources\icons8-undo-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons8-unchecked-checkbox-16-not.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons8-edit-file-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons8-redo-16.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

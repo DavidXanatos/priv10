@@ -16,15 +16,6 @@ namespace PrivateWin10
     public class FirewallManager : WinNetFwAPI
 #endif
     {
-        public class NotifyArgs : EventArgs
-        {
-            public Guid guid;
-            public Program.LogEntry entry;
-            public ProgramID progID;
-            public List<String> services = null;
-            public bool update;
-        }
-
         private struct RuleStat
         {
             internal int AllowAll;
@@ -225,7 +216,7 @@ namespace PrivateWin10
 
             progSet.config.CurAccess = progSet.config.NetAccess;
 
-            App.engine.OnChanged(null, new ProgramList.ListEvent() { guid = progSet.guid });
+            App.engine.OnRulesChanged(progSet);
         }
 
         public bool ApplyRule(Program prog, FirewallRule rule, UInt64 expiration = 0)
@@ -252,7 +243,7 @@ namespace PrivateWin10
             {
                 if (rule.Name.IndexOf(RulePrefix) == 0) // Note: all internal rules start with priv10 - 
                 {
-                    if(RemoveRule(rule))
+                    if(RemoveRule(rule.guid))
                         prog.Rules.Remove(rule.guid);
                 }
                 // do not remove forign rules, onyl disable them if required
@@ -328,7 +319,7 @@ namespace PrivateWin10
             return FilteringModes.Unknown;
         }
 
-        static FirewallRule.Profiles[] FwProfiles = { FirewallRule.Profiles.Private, FirewallRule.Profiles.Public, FirewallRule.Profiles.Domain };
+        static public FirewallRule.Profiles[] FwProfiles = { FirewallRule.Profiles.Private, FirewallRule.Profiles.Public, FirewallRule.Profiles.Domain };
 
         protected void SetDefaultOutboundAction(FirewallRule.Actions Action)
         {
