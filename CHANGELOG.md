@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.51] - 2019-11-15
+## [0.55] - 2019-11-15
 
 ### Added
 - added tweaks to disable visual studio tlemetry
