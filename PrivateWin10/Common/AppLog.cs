@@ -79,22 +79,8 @@ public class AppLog : IDisposable
     public AppLog(string LogName = null)
     {
         mInstance = this;
-
-        if (LogName == null)
-            return;
-            
-        if (EventLog.Exists(LogName))
+        if (LogName != null && EventLog.Exists(LogName))
             mLogName = LogName;
-        else if (AdminFunc.IsAdministrator())
-        {
-            try
-            {
-                if (!EventLog.SourceExists(LogName))
-                    EventLog.CreateEventSource(LogName, LogName);
-                mLogName = LogName;
-            }
-            catch { }
-        }
     }
 
     public void Dispose()
@@ -111,18 +97,39 @@ public class AppLog : IDisposable
     {
         mLogList = new List<LogEntry>();
 
-        if (mLogName == null)
-            return;
-
-        mEventWatcher = new EventLogWatcher(new EventLogQuery(mLogName, PathType.LogName));
-        mEventWatcher.EventRecordWritten += new EventHandler<EventRecordWrittenEventArgs>(OnLogEntry);
-        mEventWatcher.Enabled = true;
+        if (mLogName != null)
+        {
+            mEventWatcher = new EventLogWatcher(new EventLogQuery(mLogName, PathType.LogName));
+            mEventWatcher.EventRecordWritten += new EventHandler<EventRecordWrittenEventArgs>(OnLogEntry);
+            mEventWatcher.Enabled = true;
+        }
     }
 
-    public static void RemoveLog(string LogName)
+    public bool SetupEventLog(string LogName)
+    {
+        if (mLogName != null)
+            return true;
+
+        try
+        {
+            if (!EventLog.SourceExists(LogName))
+                EventLog.CreateEventSource(LogName, LogName);
+            mLogName = LogName;
+            return true;
+        }
+        catch { }
+        return false;
+    }
+
+    public void RemoveEventLog(string LogName)
     {
         try { EventLog.Delete(LogName); } catch { }
         try { EventLog.DeleteEventSource(LogName); } catch { }
+    }
+
+    public bool UsingEventLog()
+    {
+        return mLogName != null;
     }
 
     public static void Add(EventLogEntryType entryType, long eventID, short categoryID, string strMessage, Dictionary<string, string> Params = null/*, byte[] binData = null*/)

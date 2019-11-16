@@ -372,7 +372,7 @@ namespace PrivateWin10.Pages
                 }
 
                 if ((chkNoLocal.IsChecked != true || (!NetFunc.IsLocalHost(args.entry.FwEvent.RemoteAddress) && !NetFunc.IsMultiCast(args.entry.FwEvent.RemoteAddress)))
-                 && (chkNoLan.IsChecked != true || !FirewallRule.MatchAddress(args.entry.FwEvent.RemoteAddress, "LocalSubnet")))
+                 && (chkNoLan.IsChecked != true || !FirewallRule.MatchAddress(args.entry.FwEvent.RemoteAddress, FirewallRule.AddrKeywordLocalSubnet)))
                 {
                     switch (args.entry.FwEvent.Action)
                     {
@@ -415,7 +415,7 @@ namespace PrivateWin10.Pages
 
         private void ShowNotification(ProgramSet prog, Engine.FwEventArgs args)
         {
-            if (notificationWnd == null)
+            if (notificationWnd == null && !args.update) // dont show on update events
             {
                 notificationWnd = new NotificationWnd();
                 notificationWnd.Closing += NotificationClosing;
@@ -551,7 +551,7 @@ namespace PrivateWin10.Pages
         static public bool DoTest(string Filter, string Name, List<ProgramID> IDs)
         {
             bool bNot = false;
-            if (Filter.Substring(0, 1) == "-")
+            if (Filter.Length > 1 && Filter.Substring(0, 1) == "-")
             {
                 bNot = true;
                 Filter = Filter.Substring(1);
@@ -988,6 +988,26 @@ namespace PrivateWin10.Pages
 
             MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.mName, MessageBoxButton.OK, MessageBoxImage.Information);
         }
+
+
+        private void btnCleanupEx_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show(Translate.fmt("msg_clean_progs_ex"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                return;
+
+            //foreach (ProgramControl item in mPrograms.Values)
+            //    item.SetError(false);
+
+            int Count = App.client.CleanUpPrograms(true);
+
+            MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.mName, MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void btnClearLog_Click(object sender, RoutedEventArgs e)
+        {
+            this.consList.ClearLog();
+        }
+
 
         public void ShowRuleWindow(FirewallRule rule)
         {

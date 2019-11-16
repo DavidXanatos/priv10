@@ -39,9 +39,9 @@ namespace PrivateWin10
                     if (rule.Grouping != null && rule.Grouping.Length > 0)
                     {
                         string temp = rule.Grouping;
-                        if (temp.Substring(0, 2) == "@{" && App.PkgMgr != null)
+                        if (temp.Length > 2 && temp.Substring(0, 2) == "@{" && App.PkgMgr != null)
                             temp = App.PkgMgr.GetAppResourceStr(temp);
-                        else if (temp.Substring(0, 1) == "@")
+                        else if (temp.Length > 1 && temp.Substring(0, 1) == "@")
                             temp = MiscFunc.GetResourceStr(temp);
 
                         if (temp.Substring(0, 1) == "@")

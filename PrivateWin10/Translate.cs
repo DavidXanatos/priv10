@@ -83,6 +83,7 @@ namespace PrivateWin10
             mStrings.Add("msg_cat_name", "Enter new Category name:");
             mStrings.Add("msg_cat_some", "Some Category");
             mStrings.Add("msg_clean_progs", "Are you sure you want clean up the program list?");
+            mStrings.Add("msg_clean_progs_ex", "Are you sure you want to remove all program entries which do not have firewall rules or corrently open sockets?");
             mStrings.Add("msg_clean_res", "Removed {0} entries");
             mStrings.Add("msg_no_split_all", "At least one ID must remain in the Program entry!");
             mStrings.Add("svc_all", "[All Services]");
@@ -236,7 +237,7 @@ namespace PrivateWin10
             mStrings.Add("lbl_audit_all", "Blocked & Allowed");
             mStrings.Add("lbl_audit_blocked", "Blocked Only");
             mStrings.Add("lbl_audit_off", "Disabled");
-            mStrings.Add("wnd_setup", "Private WinTen Initial Setup");
+            mStrings.Add("wnd_setup", "{0} Initial Setup");
             mStrings.Add("mnu_exit", "E&xit");
             mStrings.Add("mnu_block", "&Block Internet");
             mStrings.Add("msg_dupliate_session", "An other instance is already running.");
@@ -340,6 +341,9 @@ namespace PrivateWin10
             mStrings.Add("filter_access", "Granted Access:");
             mStrings.Add("acl_any", "[No Filter]");
             mStrings.Add("acl_warn", "[Warning State]");
+            mStrings.Add("menu_setup", "Run Setup Wizard");
+            mStrings.Add("menu_uninstall", "Uninstall This Application");
+            mStrings.Add("msg_uninstall_this", "Do you really want to uninstall {0}?");
             //mStrings.Add("", "");
 
 

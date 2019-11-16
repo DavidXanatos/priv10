@@ -147,14 +147,18 @@ namespace PrivateWin10
             return bRet;
         }
 
-        public int CleanUp()
+        public int CleanUp(bool ExtendedCleanup = false)
         {
             int Count = 0;
             foreach (Program prog in Programs.Values.ToList())
             {
-                if (!prog.Exists())
+                bool Remove = !prog.Exists();
+                if (ExtendedCleanup && prog.Rules.Count == 0 && prog.Sockets.Count == 0)
+                    Remove = true;
+
+                if (Remove)
                 {
-                    // remove all rules for this program
+                    // remove all rules for this program, if there are any
                     foreach (var guid in prog.Rules.Keys.ToList())
                         App.engine.FirewallManager.RemoveRule(guid);
 

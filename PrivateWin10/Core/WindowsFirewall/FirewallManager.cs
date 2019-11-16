@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -35,13 +37,9 @@ namespace PrivateWin10
 
         public void EvaluateRules(ProgramSet progSet, bool StrictTest = false)
         {
-            String InetRanges = NetFunc.GetNonLocalNet();
-
-            // todo: remove test code
-            /*if (progSet.config.Name == "Microsoft Edge (microsoftedge.exe)")
-            {
-                progSet.config.Name = "bam!";
-            }*/
+            String InetRanges = FirewallRule.AddrKeywordIntErnet;
+            if (UwpFunc.IsWindows7OrLower)
+                InetRanges = FirewallRule.GetSpecialNet(InetRanges);
 
             progSet.config.CurAccess = ProgramSet.Config.AccessLevels.Unconfigured;
 
@@ -89,7 +87,7 @@ namespace PrivateWin10
                         if (rule.Action == FirewallRule.Actions.Block && AllProts)
                             Stat.BlockInet |= ((int)rule.Direction);
                     }
-                    else if (rule.RemoteAddresses == "LocalSubnet")
+                    else if (rule.RemoteAddresses == FirewallRule.AddrKeywordLocalSubnet)
                     {
                         if (rule.Action == FirewallRule.Actions.Allow && InetProts)
                             Stat.AllowLan |= ((int)rule.Direction);
@@ -182,7 +180,10 @@ namespace PrivateWin10
                             rule1.Action = FirewallRule.Actions.Block;
                             rule1.Direction = direction;
                             rule1.Enabled = true;
-                            rule1.RemoteAddresses = NetFunc.GetNonLocalNet();
+                            if (UwpFunc.IsWindows7OrLower)
+                                rule1.RemoteAddresses = FirewallRule.GetSpecialNet(FirewallRule.AddrKeywordIntErnet); 
+                            else
+                                rule1.RemoteAddresses = FirewallRule.AddrKeywordIntErnet;
                             ApplyRule(prog, rule1, expiration);
                             //}
 
@@ -193,8 +194,8 @@ namespace PrivateWin10
                             rule2.Action = FirewallRule.Actions.Allow;
                             rule2.Direction = direction;
                             rule2.Enabled = true;
-                            //rule.RemoteAddresses = NetFunc.GetSpecialNet("LocalSubnet");
-                            rule2.RemoteAddresses = "LocalSubnet";
+                            //rule.RemoteAddresses = FirewallRule.GetSpecialNet(FirewallRule.AddrKeywordLocalSubnet);
+                            rule2.RemoteAddresses = FirewallRule.AddrKeywordLocalSubnet;
                             ApplyRule(prog, rule2, expiration);
                             break;
                         }
@@ -255,6 +256,9 @@ namespace PrivateWin10
             }
         }
 
+
+        ////////////////////////////////////////////////////////
+        // Firewall Config
 
         public enum FilteringModes
         {
@@ -375,7 +379,7 @@ namespace PrivateWin10
             return true;
         }
 
-        public FirewallRule.Actions LookupRuleAction(FirewallEvent FwEvent, int FwProfile)
+        public FirewallRule.Actions LookupRuleAction(FirewallEvent FwEvent, NetworkMonitor.AdapterInfo NicInfo)
         {
             // Note: FwProfile should have only one bit set, but just in case we can haldnel more than one, but not accurately
             int BlockRules = 0;
@@ -383,7 +387,7 @@ namespace PrivateWin10
 
             for (int i = 0; i < FwProfiles.Length; i++)
             {
-                if ((FwProfile & (int)FwProfiles[i]) == 0)
+                if (((int)NicInfo.Profile & (int)FwProfiles[i]) == 0)
                     continue;
 
                 switch (FwEvent.Direction)

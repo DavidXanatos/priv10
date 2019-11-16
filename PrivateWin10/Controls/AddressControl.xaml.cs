@@ -69,8 +69,19 @@ namespace PrivateWin10.Controls
                 cmbEdit.Items.Clear();
                 if (Remote)
                 {
-                    foreach (string specialAddress in FirewallRule.SpecialAddresses)
-                        cmbEdit.Items.Add(new ContentControl() { Content = specialAddress, Tag = specialAddress });
+                    WpfFunc.CmbAdd(cmbEdit, FirewallRule.AddrKeywordLocalSubnet, FirewallRule.AddrKeywordLocalSubnet);
+                    WpfFunc.CmbAdd(cmbEdit, FirewallRule.AddrKeywordDNS, FirewallRule.AddrKeywordDNS);
+                    WpfFunc.CmbAdd(cmbEdit, FirewallRule.AddrKeywordDHCP, FirewallRule.AddrKeywordDHCP);
+                    WpfFunc.CmbAdd(cmbEdit, FirewallRule.AddrKeywordWINS, FirewallRule.AddrKeywordWINS);
+                    WpfFunc.CmbAdd(cmbEdit, FirewallRule.AddrKeywordDefaultGateway, FirewallRule.AddrKeywordDefaultGateway);
+
+                    if (!UwpFunc.IsWindows7OrLower)
+                    {
+                        WpfFunc.CmbAdd(cmbEdit, FirewallRule.AddrKeywordIntrAnet, FirewallRule.AddrKeywordIntrAnet);
+                        //WpfFunc.CmbAdd(cmbEdit, FirewallRule.AddrKeywordRmtIntrAnet, FirewallRule.AddrKeywordRmtIntrAnet);
+                        WpfFunc.CmbAdd(cmbEdit, FirewallRule.AddrKeywordIntErnet, FirewallRule.AddrKeywordIntErnet);
+                        //WpfFunc.CmbAdd(cmbEdit, FirewallRule.AddrKeywordPly2Renders, FirewallRule.AddrKeywordPly2Renders);
+                    }
                 }
             }
         }

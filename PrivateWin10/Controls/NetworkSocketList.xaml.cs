@@ -225,7 +225,7 @@ namespace PrivateWin10.Controls
                     if (chkNoMulti.IsChecked == true)
                         return false;
                 }*/
-                else if (FirewallRule.MatchAddress(item.sock.RemoteAddress, "LocalSubnet"))
+                else if (FirewallRule.MatchAddress(item.sock.RemoteAddress, FirewallRule.AddrKeywordLocalSubnet))
                 {
                     if (chkNoLAN.IsChecked == true)
                         return false;

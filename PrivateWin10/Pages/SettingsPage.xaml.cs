@@ -169,6 +169,7 @@ namespace PrivateWin10.Pages
                 }
 
                 App.svc.Install(true);
+                App.Log.SetupEventLog(App.mAppName);
             }
             else
             {

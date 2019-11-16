@@ -294,6 +294,12 @@ namespace PrivateWin10.Controls
 
         private void btnClearLog_Click(object sender, RoutedEventArgs e)
         {
+            ClearLog();
+        }
+        */
+
+        public void ClearLog()
+        {
             MessageBoxResult res = MessageBox.Show(Translate.fmt("msg_clear_log"), App.mName, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
             if (res == MessageBoxResult.Cancel)
@@ -302,7 +308,6 @@ namespace PrivateWin10.Controls
             if (App.client.ClearLog(res == MessageBoxResult.Yes))
                 LogList.Clear();
         }
-        */
 
         private void CheckLogLines()
         {
@@ -334,7 +339,7 @@ namespace PrivateWin10.Controls
 
                 this.IsLocal = NetFunc.IsLocalHost(entry.FwEvent.RemoteAddress);
                 this.IsMulti = NetFunc.IsMultiCast(entry.FwEvent.RemoteAddress);
-                this.IsLan = FirewallRule.MatchAddress(entry.FwEvent.RemoteAddress, "LocalSubnet");
+                this.IsLan = FirewallRule.MatchAddress(entry.FwEvent.RemoteAddress, FirewallRule.AddrKeywordLocalSubnet);
             }
 
             public ImageSource Icon { get { return ImgFunc.GetIcon(entry.ProgID.Path, 16); } }

@@ -106,7 +106,7 @@ namespace PrivateWin10
 
                 else if (node.Name == "Backup")
                 {
-                    Backup = new FirewallRule();
+                    Backup = new FirewallRule(ProgID);
                     if (!Backup.Load(node))
                         Backup = null;
                 }

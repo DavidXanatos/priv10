@@ -55,6 +55,7 @@ namespace PrivateWin10
         public WinNetFwAPI()
         {
             FWOpenPolicyStore(fwApiVersion, null, FW_STORE_TYPE.FW_STORE_TYPE_LOCAL, FW_POLICY_ACCESS_RIGHT.FW_POLICY_ACCESS_RIGHT_READ_WRITE, FW_POLICY_STORE_FLAGS.FW_POLICY_STORE_FLAGS_NONE, out policyHandle);
+            //FWOpenPolicyStore(fwApiVersion, null, FW_STORE_TYPE.FW_STORE_TYPE_DYNAMIC, FW_POLICY_ACCESS_RIGHT.FW_POLICY_ACCESS_RIGHT_READ_WRITE, FW_POLICY_STORE_FLAGS.FW_POLICY_STORE_FLAGS_NONE, out policyHandle); // for testing only
         }
 
         public void Dispose()
@@ -132,7 +133,9 @@ namespace PrivateWin10
             FW_ENUM_RULES_FLAGS wFlags = FW_ENUM_RULES_FLAGS.FW_ENUM_RULES_FLAG_NONE;
             //wFlags |= FW_ENUM_RULES_FLAGS.FW_ENUM_RULES_FLAG_RESOLVE_NAME | FW_ENUM_RULES_FLAGS.FW_ENUM_RULES_FLAG_RESOLVE_DESCRIPTION;
             //wFlags |= FW_ENUM_RULES_FLAGS.FW_ENUM_RULES_FLAG_RESOLVE_APPLICATION;
-            
+            //wFlags |= FW_ENUM_RULES_FLAGS.FW_ENUM_RULES_FLAG_RESOLVE_KEYWORD; // for testing only dynamic_store
+
+
             uint dwNumRules;
             IntPtr fwRules;
             if (FWEnumFirewallRules(policyHandle, FW_RULE_STATUS_CLASS.FW_RULE_STATUS_CLASS_ALL, FW_PROFILE_TYPE.FW_PROFILE_TYPE_ALL, wFlags, out dwNumRules, out fwRules) != ERROR_SUCCESS)
@@ -973,19 +976,19 @@ namespace PrivateWin10
                 fwAddressKeyword |= FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_DHCP;
             if (addressList.Contains(FirewallRule.AddrKeywordWINS))
                 fwAddressKeyword |= FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_WINS;
-            if (addressList.Contains(FirewallRule.AddrKeywordDefaultgateway))
+            if (addressList.Contains(FirewallRule.AddrKeywordDefaultGateway))
                 fwAddressKeyword |= FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_DEFAULT_GATEWAY;
 
             if (fwApiVersion < (ushort)FW_BINARY_VERSION.FW_BINARY_VERSION_WIN8)
                 return fwAddressKeyword;
 
-            if (addressList.Contains(FirewallRule.AddrKeywordIntranet))
+            if (addressList.Contains(FirewallRule.AddrKeywordIntrAnet))
                 fwAddressKeyword |= FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_INTRANET;
-            if (addressList.Contains(FirewallRule.AddrKeywordInternet))
+            if (addressList.Contains(FirewallRule.AddrKeywordIntErnet))
                 fwAddressKeyword |= FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_INTERNET;
             if (addressList.Contains(FirewallRule.AddrKeywordPly2Renders))
                 fwAddressKeyword |= FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_PLAYTO_RENDERERS;
-            if (addressList.Contains(FirewallRule.AddrKeywordRmttranet))
+            if (addressList.Contains(FirewallRule.AddrKeywordRmtIntrAnet))
                 fwAddressKeyword |= FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_REMOTE_INTRANET;
 
             if (fwApiVersion < (ushort)FW_BINARY_VERSION.FW_BINARY_VERSION_19Hx)
@@ -1210,16 +1213,16 @@ namespace PrivateWin10
             if ((addressKeywords & FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_WINS) != 0)
                 addressList.Add(FirewallRule.AddrKeywordWINS);
             if ((addressKeywords & FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_DEFAULT_GATEWAY) != 0)
-                addressList.Add(FirewallRule.AddrKeywordDefaultgateway);
+                addressList.Add(FirewallRule.AddrKeywordDefaultGateway);
 
             if ((addressKeywords & FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_INTRANET) != 0)
-                addressList.Add(FirewallRule.AddrKeywordIntranet);
+                addressList.Add(FirewallRule.AddrKeywordIntrAnet);
             if ((addressKeywords & FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_INTERNET) != 0)
-                addressList.Add(FirewallRule.AddrKeywordInternet);
+                addressList.Add(FirewallRule.AddrKeywordIntErnet);
             if ((addressKeywords & FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_PLAYTO_RENDERERS) != 0)
                 addressList.Add(FirewallRule.AddrKeywordPly2Renders);
             if ((addressKeywords & FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_REMOTE_INTRANET) != 0)
-                addressList.Add(FirewallRule.AddrKeywordRmttranet);
+                addressList.Add(FirewallRule.AddrKeywordRmtIntrAnet);
 
             if ((addressKeywords & FW_ADDRESS_KEYWORD.FW_ADDRESS_KEYWORD_CAPTIVE_PORTAL) != 0)
                 addressList.Add(FirewallRule.AddrKeywordCaptivePortal);
@@ -1344,6 +1347,16 @@ namespace PrivateWin10
             SetFWConfig((FW_PROFILE_TYPE)profileType, FW_PROFILE_CONFIG.FW_PROFILE_CONFIG_SHIELDED, Block ? 1u : 0u);
         }
 
+        public bool GetInboundEnabled(FirewallRule.Profiles profileType)
+        {
+            return GetFWConfig((FW_PROFILE_TYPE)profileType, FW_PROFILE_CONFIG.FW_PROFILE_CONFIG_DISABLE_INBOUND_NOTIFICATIONS) == 0u;
+        }
+
+        public void SetInboundEnabled(FirewallRule.Profiles profileType, bool Enable)
+        {
+            SetFWConfig((FW_PROFILE_TYPE)profileType, FW_PROFILE_CONFIG.FW_PROFILE_CONFIG_DISABLE_INBOUND_NOTIFICATIONS, Enable ? 0u : 1u);
+        }
+
         public FirewallRule.Actions GetDefaultInboundAction(FirewallRule.Profiles profileType)
         {
             if (GetFWConfig((FW_PROFILE_TYPE)profileType, FW_PROFILE_CONFIG.FW_PROFILE_CONFIG_DEFAULT_INBOUND_ACTION) == 1u)
@@ -1367,6 +1380,7 @@ namespace PrivateWin10
         {
             SetFWConfig((FW_PROFILE_TYPE)profileType, FW_PROFILE_CONFIG.FW_PROFILE_CONFIG_DEFAULT_OUTBOUND_ACTION, Action == FirewallRule.Actions.Block ? 1u : 0u);
         }
+
 
         ////////////////////////////////////////////////
         // App Package List

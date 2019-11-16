@@ -15,7 +15,7 @@
             <RowDefinition Height="100*"/>
         </Grid.RowDefinitions>
 
-        <ribbon:Ribbon Grid.Row="0" Loaded="Ribbon_Loaded" Name="rbbBar" SelectedIndex="0">
+        <ribbon:Ribbon Grid.Row="0" Loaded="Ribbon_Loaded" Name="rbbBar" SelectedIndex="1">
             <Ribbon.QuickAccessToolBar>
                 <RibbonQuickAccessToolBar />
             </Ribbon.QuickAccessToolBar>
@@ -134,7 +134,14 @@
                     <RibbonButton Name="btnAdd" Label="Add" LargeImageSource="{StaticResource Icon_Plus}" Click="btnAdd_Click"/>
                     <RibbonButton Name="btnMerge" Label="Merge" SmallImageSource="{StaticResource Icon_Merge}" Click="btnMerge_Click"/>
                     <RibbonButton Name="btnRemove" Label="Remove" SmallImageSource="{StaticResource Icon_Remove}" Click="btnRemove_Click"/>
-                    <RibbonButton Name="btnCleanup" Label="Programs" SmallImageSource="{StaticResource Icon_CleanUp}" Click="btnCleanup_Click"/>
+                </RibbonGroup>
+
+                <RibbonGroup Header="Cleanup">
+                    <RibbonSplitButton Name="btnCleanup" Label="Missing Programs" SmallImageSource="{StaticResource Icon_CleanUp}" Click="btnCleanup_Click" >
+                        <RibbonMenuItem Header="Extended Cleanup" Click="btnCleanupEx_Click"/>
+                    </RibbonSplitButton>
+
+                    <RibbonButton Name="btnClearLog" Label="Clear Firewall Log" SmallImageSource="{StaticResource Icon_Erase}" Click="btnClearLog_Click"/>
                 </RibbonGroup>
             </RibbonTab>
 
@@ -191,7 +198,7 @@
                     
                     <Separator/>
 
-                    <ToggleButton Name="chkNoLan" Click="ChkNoLan_Click" ToolTip="Ignore LocalHost">
+                    <ToggleButton Name="chkNoLan" Click="ChkNoLan_Click" ToolTip="Ignore LAN">
                         <Image Width="16" Height="16">
                             <Image.Style>
                                 <Style TargetType="{x:Type Image}">

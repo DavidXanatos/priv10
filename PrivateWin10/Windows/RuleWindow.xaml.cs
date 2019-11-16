@@ -79,8 +79,7 @@ namespace PrivateWin10.Windows
             //txtName.Text = Rule.Name;
             viewModel.RuleName = Rule.Name;
             cmbGroup.ItemsSource = GroupModel.GetInstance().GetGroups();
-            WpfFunc.CmbSelect(cmbGroup, Rule.Grouping);
-            if (cmbGroup.SelectedItem == null)
+            if(!WpfFunc.CmbSelect(cmbGroup, Rule.Grouping))
                 cmbGroup.Text = Rule.Grouping;
             txtInfo.Text = Rule.Description;
 
@@ -376,7 +375,7 @@ namespace PrivateWin10.Windows
                     Rule.Profile |= (int)FirewallRule.Profiles.Public;
             }
 
-            if (radProfileAll.IsChecked == true || (chkLAN.IsChecked == true && chkVPN.IsChecked == true && chkWiFi.IsChecked == true))
+            if (radNicAll.IsChecked == true || (chkLAN.IsChecked == true && chkVPN.IsChecked == true && chkWiFi.IsChecked == true))
                 Rule.Interface = (int)FirewallRule.Interfaces.All;
             else
             {

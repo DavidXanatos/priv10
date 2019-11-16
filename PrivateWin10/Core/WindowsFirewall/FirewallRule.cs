@@ -53,28 +53,40 @@ namespace PrivateWin10
             RemoteAccess = 0x0004
         }
 
-        public const string PortKeywordIpTlsIn = "IPHTTPS"; //"IPHTTPSIn"
-        public const string PortKeywordIpTlsOut = "IPHTTPS"; //"IPHTTPSOut"
-        public const string PortKeywordPly2Disc = "Ply2Disc";
-        public const string PortKeywordTeredo = "Teredo";
+        // supported port keywords:
         public const string PortKeywordRpc = "RPC";
         public const string PortKeywordRpcEp = "RPC-EPMap";
+        public const string PortKeywordTeredo = "Teredo";
+#if (!FW_COM_ITF)
+        // sinve win7
+        public const string PortKeywordIpTlsIn = "IPHTTPSIn";
+        public const string PortKeywordIpTlsOut = "IPHTTPSOut";
+        // since win8
         public const string PortKeywordDhcp = "DHCP";
+        public const string PortKeywordPly2Disc = "Ply2Disc";
+        // since win10
         public const string PortKeywordMDns = "mDNS";
+        // since 1607
         public const string PortKeywordCortan = "Cortana";
+        // since 1903
         public const string PortKeywordProximalTcpCdn = "ProximalTcpCdn"; // wtf is that?
+#endif
 
-        public const string AddrKeywordDefaultgateway = "Defaultgateway";
-        public const string AddrKeywordDHCP = "DHCP";
-        public const string AddrKeywordDNS = "DNS";
-        public const string AddrKeywordWINS = "WINS";
-        public const string AddrKeywordIntranet = "Intranet"; // supported on Windows versions 1809+
-        public const string AddrKeywordRmttranet = "Rmttranet"; // supported on Windows versions 1809+
-        public const string AddrKeywordInternet = "Internet"; // supported on Windows versions 1809+
-        public const string AddrKeywordPly2Renders = "Ply2Renders"; // supported on Windows versions 1809+
+        // supported address keywords:
         public const string AddrKeywordLocalSubnet = "LocalSubnet"; // indicates any local address on the local subnet.
+        public const string AddrKeywordDNS = "DNS";
+        public const string AddrKeywordDHCP = "DHCP";
+        public const string AddrKeywordWINS = "WINS";
+        public const string AddrKeywordDefaultGateway = "DefaultGateway";
+#if (!FW_COM_ITF)
+        // since win8
+        public const string AddrKeywordIntrAnet = "LocalIntranet";
+        public const string AddrKeywordRmtIntrAnet = "RemoteIntranet";
+        public const string AddrKeywordIntErnet = "Internet";
+        public const string AddrKeywordPly2Renders = "Ply2Renders";
+        // since 1903
         public const string AddrKeywordCaptivePortal = "CaptivePortal";
-
+#endif
 
 
         public string guid = null; // Note: usually this is a guid but some default windows rules use a sting name instead
@@ -109,23 +121,6 @@ namespace PrivateWin10
             UDP = 17,
             ICMPv6 = 58,
         }
-
-        static public List<string> SpecialPorts = new List<string>() {
-            "IPHTTPS",
-            "RPC-EPMap",
-            "RPC",
-            "Teredo",
-            "Ply2Disc",
-            "mDNS"
-        };
-
-        static public List<string> SpecialAddresses = new List<string>() {
-            "LocalSubnet",
-            "DefaultGateway",
-            "DNS",
-            "DHCP",
-            "WINS"
-        };
 
         public FirewallRule(ProgramID id)
         {
@@ -290,16 +285,6 @@ namespace PrivateWin10
             return string.Join(",", Strs); // Note: white spaces are not valid
         }
 
-        public bool MatchRemoteEndpoint(IPAddress Address, UInt16 Port)
-        {
-            return MatchEndpoint(RemoteAddresses, RemotePorts, Address, Port);
-        }
-
-        public bool MatchLocalEndpoint(IPAddress Address, UInt16 Port)
-        {
-            return MatchEndpoint(LocalAddresses, LocalPorts, Address, Port);
-        }
-
         public virtual void Store(XmlWriter writer, bool bRaw = false)
         {
             if(!bRaw) writer.WriteStartElement("FwRule");
@@ -395,25 +380,35 @@ namespace PrivateWin10
 
         public static bool MatchPort(UInt16 numPort, string strPorts)
         {
-            // todo: xxx some rule port values are strings :(
             foreach (string range in strPorts.Split(','))
             {
                 string[] strTemp = range.Split('-');
                 if (strTemp.Length == 1)
                 {
-                    if (MiscFunc.parseInt(strTemp[0]) == numPort)
+                    UInt16 Port = 0;
+                    if (!UInt16.TryParse(strTemp[0], out Port))
+                    {
+                        // todo: xxx some rule port values are strings :(
+                        // how can we test that?!
+                    }
+                    else if (Port == numPort)
                         return true;
                 }
                 else if (strTemp.Length == 2)
                 {
-                    if (MiscFunc.parseInt(strTemp[0]) <= numPort && numPort <= MiscFunc.parseInt(strTemp[1]))
-                        return true;
+                    UInt16 beginPort = 0;
+                    UInt16 endPort = 0;
+                    if (UInt16.TryParse(strTemp[0], out beginPort) && UInt16.TryParse(strTemp[0], out endPort))
+                    {
+                        if (beginPort <= numPort && numPort <= endPort)
+                            return true;
+                    }
                 }
             }
             return false;
         }
 
-        public static bool MatchAddress(IPAddress Address, string strRanges)
+        public static bool MatchAddress(IPAddress Address, string strRanges, NetworkMonitor.AdapterInfo NicInfo = null)
         {
             int type = Address.GetAddressBytes().Length == 4 ? 4 : 6;
             BigInteger numIP = NetFunc.IpToInt(Address);
@@ -434,14 +429,21 @@ namespace PrivateWin10
                         if (type == temp && num1 <= numIP && numIP <= num2)
                             return true;
                     }
-                    else if (FirewallRule.SpecialAddresses.Contains(strTemp[0].Trim(), StringComparer.OrdinalIgnoreCase))
-                        return MatchAddress(Address, GetSpecialNet(strTemp[0].Trim()));
                     else
                     {
-                        int temp;
-                        BigInteger num1 = NetFunc.IpStrToInt(strTemp[0], out temp);
-                        if (type == temp && num1 == numIP)
-                            return true;
+                        string Addresses = GetSpecialNet(strTemp[0].Trim(), NicInfo);
+                        if (Addresses != null)
+                        {
+                            if (Addresses.Length > 0)
+                                return MatchAddress(Address, Addresses);
+                        }
+                        else
+                        {
+                            int temp;
+                            BigInteger num1 = NetFunc.IpStrToInt(strTemp[0], out temp);
+                            if (type == temp && num1 == numIP)
+                                return true;
+                        }
                     }
                 }
                 else if (strTemp.Length == 2)
@@ -456,32 +458,95 @@ namespace PrivateWin10
             return false;
         }
 
-        public static bool MatchEndpoint(string Addresses, string Ports, IPAddress Address, UInt16 Port)
+        public static bool MatchEndpoint(string Addresses, string Ports, IPAddress Address, UInt16 Port, NetworkMonitor.AdapterInfo NicInfo = null)
         {
-            if (!IsEmptyOrStar(Ports) && !MatchPort(Port, Ports))
+            if (!FirewallRule.IsEmptyOrStar(Ports) && !MatchPort(Port, Ports))
                 return false;
-            if (Address != null && !IsEmptyOrStar(Addresses) && !MatchAddress(Address, Addresses))
+            if (Address != null && !FirewallRule.IsEmptyOrStar(Addresses) && !MatchAddress(Address, Addresses, NicInfo))
                 return false;
             return true;
         }
 
-        public static string GetSpecialNet(string SubNet)
+        public static List<string> CopyStrIPs(ICollection<IPAddress> IPs)
+        {
+            List<string> StrIPs = new List<string>();
+            if (IPs != null)
+            {
+                foreach (var ip in IPs)
+                {
+                    var _ip = new IPAddress(ip.GetAddressBytes());
+                    StrIPs.Add(_ip.ToString());
+                }
+            }
+            return StrIPs;
+        }
+
+        public static string GetSpecialNet(string SubNet, NetworkMonitor.AdapterInfo NicInfo = null)
         {
             List<string> IpRanges = new List<string>();
-            if (SubNet.Equals("LocalSubnet", StringComparison.OrdinalIgnoreCase))
+            if (SubNet.Equals(FirewallRule.AddrKeywordLocalSubnet, StringComparison.OrdinalIgnoreCase) || SubNet.Equals(FirewallRule.AddrKeywordIntrAnet, StringComparison.OrdinalIgnoreCase))
             {
+                // todo: ceate the list base on NicInfo.Addresses
                 // IPv4
                 IpRanges.Add("10.0.0.0-10.255.255.255");
-                IpRanges.Add("127.0.0.0-127.255.255.255");
+                IpRanges.Add("127.0.0.0-127.255.255.255"); // localhost
                 IpRanges.Add("172.16.0.0-172.31.255.255");
                 IpRanges.Add("192.168.0.0-192.168.255.255");
+                IpRanges.Add("224.0.0.0-239.255.255.255"); // multicast
 
                 // IPv6
-                IpRanges.Add("::1"); // Note: if this is present windows firewall does not accept this range
-                IpRanges.Add("fc00::-fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
-                IpRanges.Add("fe80::-febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
+                IpRanges.Add("::1"); // localhost
+                IpRanges.Add("fc00::-fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"); // Unique local address
+                IpRanges.Add("fe80::-fe80::ffff:ffff:ffff:ffff"); //IpRanges.Add("fe80::-febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff"); // Link-local address
+                IpRanges.Add("ff00::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"); // multicast
             }
-            // else // todo
+            else if (SubNet.Equals(FirewallRule.AddrKeywordIntErnet, StringComparison.OrdinalIgnoreCase))
+            {
+                // todo: ceate the list base on NicInfo.Addresses
+                // IPv4
+                IpRanges.Add("0.0.0.0-9.255.255.255");
+                // 10.0.0.0 - 10.255.255.255
+                IpRanges.Add("11.0.0.0-126.255.255.255");
+                // 127.0.0.0 - 127.255.255.255 // localhost
+                IpRanges.Add("128.0.0.0-172.15.255.255");
+                // 172.16.0.0 - 172.31.255.255
+                IpRanges.Add("172.32.0.0-192.167.255.255");
+                // 192.168.0.0 - 192.168.255.255
+                IpRanges.Add("192.169.0.0-223.255.255.255");
+                // 224.0.0.0-239.255.255.255 // multicast
+                IpRanges.Add("240.0.0.0-255.255.255.255");
+
+                // ipv6
+                //"::1" // localhost
+                IpRanges.Add("::2-fc00::");
+                //"fc00::-fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff" // Unique local address
+                IpRanges.Add("fc00::ffff:ffff:ffff:ffff-fe80::");
+                //"fe80::-fe80::ffff:ffff:ffff:ffff" // fe80::-febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff // Link-local address 
+                IpRanges.Add("fe80::ffff:ffff:ffff:ffff-ff00::");
+                //"ff00::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff" // multicast
+            }
+            else if (SubNet.Equals(FirewallRule.AddrKeywordDNS, StringComparison.OrdinalIgnoreCase))
+            {
+                IpRanges = CopyStrIPs(NicInfo?.DnsAddresses);
+            }
+            else if (SubNet.Equals(FirewallRule.AddrKeywordDHCP, StringComparison.OrdinalIgnoreCase))
+            {
+                IpRanges = CopyStrIPs(NicInfo?.DhcpServerAddresses);
+            }
+            else if (SubNet.Equals(FirewallRule.AddrKeywordWINS, StringComparison.OrdinalIgnoreCase))
+            {
+                IpRanges = CopyStrIPs(NicInfo?.WinsServersAddresses);
+            }
+            else if (SubNet.Equals(FirewallRule.AddrKeywordDefaultGateway, StringComparison.OrdinalIgnoreCase))
+            {
+                IpRanges = CopyStrIPs(NicInfo?.GatewayAddresses);
+            }
+            else if (SubNet.Equals(FirewallRule.AddrKeywordRmtIntrAnet, StringComparison.OrdinalIgnoreCase)
+                  || SubNet.Equals(FirewallRule.AddrKeywordPly2Renders, StringComparison.OrdinalIgnoreCase)
+                  || SubNet.Equals(FirewallRule.AddrKeywordCaptivePortal, StringComparison.OrdinalIgnoreCase))
+                ; // todo:
+            else
+                return null;
             return string.Join(",", IpRanges.ToArray());
         }
     }

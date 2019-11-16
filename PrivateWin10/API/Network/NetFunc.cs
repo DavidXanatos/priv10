@@ -437,31 +437,4 @@ public class NetFunc
             return addressBytes[0] >= 224 && addressBytes[0] <= 239;
         return false;
     }
-
-    public static string GetNonLocalNet()
-    {
-        List<string> IpRanges = new List<string>();
-
-        // IPv4
-        IpRanges.Add("0.0.0.0-9.255.255.255");
-        // 10.0.0.0 - 10.255.255.255
-        IpRanges.Add("11.0.0.0-126.255.255.255");
-        // 127.0.0.0 - 127.255.255.255
-        IpRanges.Add("128.0.0.0-172.15.255.255");
-        // 172.16.0.0 - 172.31.255.255
-        IpRanges.Add("172.32.0.0-192.167.255.255");
-        // 192.168.0.0 - 192.168.255.255
-        IpRanges.Add("192.169.0.0-255.255.255.255");
-
-        // IPv6
-        // ::1
-        IpRanges.Add("::2-fbff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
-        // fc00:: - fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff             - Unique local address
-        IpRanges.Add("fe00::-fe7f:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
-        // fe80:: - febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff             - Link-local address
-        IpRanges.Add("fec0::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
-
-        return string.Join(",", IpRanges.ToArray());
-    }
-    
 }

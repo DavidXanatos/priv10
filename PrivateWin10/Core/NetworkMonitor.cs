@@ -332,29 +332,42 @@ namespace PrivateWin10
                 Marshal.FreeHGlobal(udp6Table);
         }
 
-        private Dictionary<IPAddress, int> FirewallProfilesByIP = new Dictionary<IPAddress, int>();
+        public class AdapterInfo
+        {
+            public FirewallRule.Profiles Profile = FirewallRule.Profiles.Undefined;
+            public FirewallRule.Interfaces Type = FirewallRule.Interfaces.All;
+
+            public ICollection<UnicastIPAddressInformation> Addresses = null;
+
+            public ICollection<IPAddress> GatewayAddresses = null;
+            public ICollection<IPAddress> DnsAddresses = null;
+            public ICollection<IPAddress> DhcpServerAddresses = null;
+            public ICollection<IPAddress> WinsServersAddresses = null;
+        }
+
+        private Dictionary<IPAddress, AdapterInfo> AdapterInfoByIP = new Dictionary<IPAddress, AdapterInfo>();
 
         private static NetworkListManagerClass netMgr = new NetworkListManagerClass();
 
         private UInt64 LastNetworkUpdate = 0;
 
         // todo: get the right default behavioure there is a policy for that
-        public int DefaultProfile = (int)FirewallRule.Profiles.Public; // default windows behavioure: default profile is public
+        public FirewallRule.Profiles DefaultProfile = FirewallRule.Profiles.Public; // default windows behavioure: default profile is public
 
         public void UpdateNetworks()
         {
             LastNetworkUpdate = MiscFunc.GetTickCount64();
 
-            Dictionary<string, int> NetworkProfiles = new Dictionary<string, int>();
+            Dictionary<string, FirewallRule.Profiles> NetworkProfiles = new Dictionary<string, FirewallRule.Profiles>();
 
             foreach (INetwork network in netMgr.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED).Cast<INetwork>())
             {
-                int FirewallProfile = 0;
+                FirewallRule.Profiles FirewallProfile = FirewallRule.Profiles.Undefined;
                 switch (network.GetCategory())
                 {
-                    case NLM_NETWORK_CATEGORY.NLM_NETWORK_CATEGORY_PRIVATE:                 FirewallProfile = (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_PRIVATE; break;
-                    case NLM_NETWORK_CATEGORY.NLM_NETWORK_CATEGORY_PUBLIC:                  FirewallProfile = (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_PUBLIC; break;
-                    case NLM_NETWORK_CATEGORY.NLM_NETWORK_CATEGORY_DOMAIN_AUTHENTICATED:    FirewallProfile = (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_DOMAIN; break;
+                    case NLM_NETWORK_CATEGORY.NLM_NETWORK_CATEGORY_PRIVATE:                 FirewallProfile = FirewallRule.Profiles.Private; break;
+                    case NLM_NETWORK_CATEGORY.NLM_NETWORK_CATEGORY_PUBLIC:                  FirewallProfile = FirewallRule.Profiles.Public; break;
+                    case NLM_NETWORK_CATEGORY.NLM_NETWORK_CATEGORY_DOMAIN_AUTHENTICATED:    FirewallProfile = FirewallRule.Profiles.Domain; break;
                 }
 
                 foreach (INetworkConnection connection in network.GetNetworkConnections().Cast<INetworkConnection>())
@@ -367,40 +380,79 @@ namespace PrivateWin10
 
             //DefaultProfile = App.engine.FirewallManager.GetCurrentProfiles();
 
-            FirewallProfilesByIP.Clear();
+            AdapterInfoByIP.Clear();
+            //AppLog.Debug("ListingNetworks:");
 
             foreach (NetworkInterface adapter in NetworkInterface.GetAllNetworkInterfaces()) // this is a bit slow!
             {
                 string id = adapter.Id.ToLower();
 
-                foreach (var ip in adapter.GetIPProperties().UnicastAddresses)
+                AdapterInfo Info = new AdapterInfo();
+                if (!NetworkProfiles.TryGetValue(id, out Info.Profile))
+                    Info.Profile = DefaultProfile;
+
+                switch (adapter.NetworkInterfaceType)
                 {
-                    int profile = 0;
-                    if (!NetworkProfiles.TryGetValue(id, out profile))
-                        profile = DefaultProfile;
+                    case NetworkInterfaceType.Ethernet:
+                    case NetworkInterfaceType.GigabitEthernet:
+                    case NetworkInterfaceType.FastEthernetT:
+                    case NetworkInterfaceType.FastEthernetFx:
+                    case NetworkInterfaceType.Ethernet3Megabit:
+                    case NetworkInterfaceType.TokenRing: Info.Type = FirewallRule.Interfaces.Lan; break;
+                    case NetworkInterfaceType.Wireless80211: Info.Type = FirewallRule.Interfaces.Wireless; break;
+                    case NetworkInterfaceType.Ppp: Info.Type = FirewallRule.Interfaces.RemoteAccess; break;
+                    default: Info.Type = FirewallRule.Interfaces.All; break;
+                }
+
+                Info.Addresses = new List<UnicastIPAddressInformation>();
+                IPInterfaceProperties ip_info = adapter.GetIPProperties();
+                Info.GatewayAddresses = new List<IPAddress>();
+                foreach (var gw in ip_info.GatewayAddresses)
+                    Info.GatewayAddresses.Add(gw.Address);
+                Info.DnsAddresses = ip_info.DnsAddresses;
+                Info.DhcpServerAddresses = ip_info.DhcpServerAddresses;
+                Info.WinsServersAddresses = ip_info.WinsServersAddresses;
+
+                foreach (UnicastIPAddressInformation ip in adapter.GetIPProperties().UnicastAddresses)
+                {
+                    Info.Addresses.Add(ip);
 
                     // Sanitize IPv6 addresses 
                     IPAddress _ip = new IPAddress(ip.Address.GetAddressBytes());
 
-                    FirewallProfilesByIP[_ip] = profile;
+                    //AppLog.Debug("{2}({5}) has IP {0}/{3}/{4} has profile {1}", ip.Address.ToString(), ((FirewallRule.Profiles)Info.Profile).ToString(),
+                    //    adapter.Description, ip.IPv4Mask.ToString(), ip.PrefixLength.ToString(), adapter.NetworkInterfaceType.ToString());
+
+                    if (!AdapterInfoByIP.ContainsKey(_ip))
+                        AdapterInfoByIP[_ip] = Info;
                 }
             }
+            //AppLog.Debug("+++");
         }
 
-        public int GetFirewallProfileByIP(IPAddress IP)
+        public AdapterInfo GetAdapterInfoByIP(IPAddress IP)
         {
-            int Profile = 0;
-            if (!FirewallProfilesByIP.TryGetValue(IP, out Profile))
+            AdapterInfo Info = null;
+
+            if (!AdapterInfoByIP.TryGetValue(IP, out Info))
             {
+                // if the last network list update was more than a second ago, update again and retry
                 if (MiscFunc.GetTickCount64() - LastNetworkUpdate >= 1000)
                 {
                     UpdateNetworks();
 
                     // retry
-                    FirewallProfilesByIP.TryGetValue(IP, out Profile);
+                    AdapterInfoByIP.TryGetValue(IP, out Info);
                 }
             }
-            return Profile != 0 ? Profile : DefaultProfile;
+
+            if (Info == null)
+            {
+                Info = new AdapterInfo();
+                Info.Profile = DefaultProfile;
+            }
+
+            return Info;
         }
     }
 }

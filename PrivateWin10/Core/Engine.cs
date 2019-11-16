@@ -281,7 +281,7 @@ namespace PrivateWin10
         struct QueuedFwEvent
         {
             public FirewallEvent FwEvent;
-            public int FwProfile;
+            public NetworkMonitor.AdapterInfo NicInfo;
             public List<ServiceHelper.ServiceInfo> Services;
         }
 
@@ -289,12 +289,12 @@ namespace PrivateWin10
 
         protected void OnFirewallEvent(FirewallEvent FwEvent)
         {
-            int FwProfile = NetworkMonitor.GetFirewallProfileByIP(FwEvent.LocalAddress);
+            NetworkMonitor.AdapterInfo NicInfo = NetworkMonitor.GetAdapterInfoByIP(FwEvent.LocalAddress);
 
-            OnFirewallEvent(FwEvent, FwProfile);
+            OnFirewallEvent(FwEvent, NicInfo);
         }
 
-        protected void OnFirewallEvent(FirewallEvent FwEvent, int FwProfile)
+        protected void OnFirewallEvent(FirewallEvent FwEvent, NetworkMonitor.AdapterInfo NicInfo)
         {
             ProgramID ProgID;
             if (FwEvent.ProcessFileName.Equals("System", StringComparison.OrdinalIgnoreCase))
@@ -312,24 +312,24 @@ namespace PrivateWin10
                 {
                     // we don't have a unique service match, the process is hosting multiple services :/
 
-                    QueuedFwEvents.Add(new QueuedFwEvent() { FwEvent = FwEvent, FwProfile = FwProfile, Services = Services });
+                    QueuedFwEvents.Add(new QueuedFwEvent() { FwEvent = FwEvent, NicInfo = NicInfo, Services = Services });
                     return;
                 }
             }
 
-            OnFirewallEvent(FwEvent, FwProfile, ProgID);
+            OnFirewallEvent(FwEvent, NicInfo, ProgID);
         }
 
-        protected void OnFirewallEvent(FirewallEvent FwEvent, int FwProfile, ProgramID progID)
+        protected void OnFirewallEvent(FirewallEvent FwEvent, NetworkMonitor.AdapterInfo NicInfo, ProgramID progID)
         {
             Program prog = ProgramList.GetProgram(progID, true, ProgramList.FuzzyModes.Any);
 
             Program.LogEntry entry = new Program.LogEntry(FwEvent, progID);
-            if (FwProfile == -1)
+            if (NicInfo.Profile == FirewallRule.Profiles.All)
                 entry.State = Program.LogEntry.States.FromLog;
             else
             {
-                FirewallRule.Actions RuleAction = prog.LookupRuleAction(FwEvent, FwProfile);
+                FirewallRule.Actions RuleAction = prog.LookupRuleAction(FwEvent, NicInfo);
                 entry.CheckAction(RuleAction);
             }
             prog.AddLogEntry(entry);
@@ -372,7 +372,7 @@ namespace PrivateWin10
                     NetworkSocket Socket = NetworkMonitor.FindSocket(cur.FwEvent.ProcessId, ProtocolType, cur.FwEvent.LocalAddress, cur.FwEvent.LocalPort, cur.FwEvent.RemoteAddress, cur.FwEvent.RemotePort, NetworkSocket.MatchMode.Strict);
                     if (Socket != null && Socket.ProgID != null)
                     {
-                        OnFirewallEvent(cur.FwEvent, cur.FwProfile, Socket.ProgID);
+                        OnFirewallEvent(cur.FwEvent, cur.NicInfo, Socket.ProgID);
                         return;
                     }
                 }
@@ -388,7 +388,7 @@ namespace PrivateWin10
                     ProgramID progID = GetProgIDbyPID(cur.FwEvent.ProcessId, info.ServiceName, cur.FwEvent.ProcessFileName);
                     Program prog = ProgramList.GetProgram(progID, false, ProgramList.FuzzyModes.Tag); // fuzzy match i.e. service tag match is enough
 
-                    FirewallRule.Actions RuleAction = prog == null ? FirewallRule.Actions.Undefined : prog.LookupRuleAction(cur.FwEvent, cur.FwProfile);
+                    FirewallRule.Actions RuleAction = prog == null ? FirewallRule.Actions.Undefined : prog.LookupRuleAction(cur.FwEvent, cur.NicInfo);
 
                     // check if the program has any matchign rules
                     if (RuleAction == cur.FwEvent.Action)
@@ -400,11 +400,11 @@ namespace PrivateWin10
 
                 // did we found one matching service?
                 if (machingIDs.Count == 1)
-                    OnFirewallEvent(cur.FwEvent, cur.FwProfile, machingIDs[0]);
+                    OnFirewallEvent(cur.FwEvent, cur.NicInfo, machingIDs[0]);
 
                 // if we have found no services with matching rules, but one service without any roules
                 else if (machingIDs.Count == 0 && unruledIDs.Count == 1)
-                    OnFirewallEvent(cur.FwEvent, cur.FwProfile, unruledIDs[0]);
+                    OnFirewallEvent(cur.FwEvent, cur.NicInfo, unruledIDs[0]);
 
                 // well damn it we dont couldn't find out which service this event belongs to
                 else
@@ -413,7 +413,7 @@ namespace PrivateWin10
                     bool bHasMatches = machingIDs.Count > 0;
 
                     // get the default action for if there is no rule
-                    FirewallRule.Actions DefaultAction = FirewallManager.LookupRuleAction(cur.FwEvent, cur.FwProfile);
+                    FirewallRule.Actions DefaultAction = FirewallManager.LookupRuleAction(cur.FwEvent, cur.NicInfo);
 
                     // if the action taken matches the default action, than unruled results are equivalent to the matches once
                     if (DefaultAction == cur.FwEvent.Action)
@@ -425,7 +425,7 @@ namespace PrivateWin10
                     {
                         // emit an event for every possible match
                         foreach (var progID in machingIDs)
-                            OnFirewallEvent(cur.FwEvent, cur.FwProfile, progID);
+                            OnFirewallEvent(cur.FwEvent, cur.NicInfo, progID);
                     }
                     else
                     {
@@ -464,7 +464,7 @@ namespace PrivateWin10
                     if (FileName == null || !entry.ProcessFileName.Equals(FileName, StringComparison.OrdinalIgnoreCase))
                         continue;
 
-                    OnFirewallEvent(entry, -1);
+                    OnFirewallEvent(entry, new NetworkMonitor.AdapterInfo() { Profile = FirewallRule.Profiles.All });
                 }
 
                 AppLog.Debug("Finished loading log asynchroniusly");
@@ -589,16 +589,18 @@ namespace PrivateWin10
 
         public bool LoadFwRules()
         {
-            AppLog.Debug("Loading firewall rules...");
+            AppLog.Debug("Loading Windows Firewall rules...");
             List<FirewallRule> rules = FirewallManager.LoadRules();
             if (rules == null)
                 return false; // failed to load rules
 
+            if (FirewallGuard.HasAuditPolicy())
+            {
+                AppLog.Debug("Loading Known Firewall rules...");
+
 #if FW_COM_ITF
             // todo
 #else
-            if (FirewallGuard.HasAuditPolicy())
-            {
                 Dictionary<string, Tuple<FirewallRuleEx, Program>> OldRules = new Dictionary<string, Tuple<FirewallRuleEx, Program>>();
 
                 foreach (Program prog in ProgramList.Programs.Values)
@@ -644,10 +646,12 @@ namespace PrivateWin10
 
                     OnRuleRemoved(value.Item1, value.Item2);
                 }
+#endif
             }
             else
-#endif
             {
+                AppLog.Debug("Assigning Firewall rules...");
+
                 // clear all old rules
                 foreach (Program prog in ProgramList.Programs.Values)
                     prog.Rules.Clear();
@@ -898,9 +902,9 @@ namespace PrivateWin10
             }
 
             string RuleName = rule.Name;
-            if (RuleName.Substring(0, 2) == "@{" && App.PkgMgr != null)
+            if (RuleName.Length > 2 && RuleName.Substring(0, 2) == "@{" && App.PkgMgr != null)
                 RuleName = App.PkgMgr.GetAppResourceStr(RuleName);
-            else if (RuleName.Substring(0, 1) == "@")
+            else if (RuleName.Length > 11 && RuleName.Substring(0, 1) == "@")
                 RuleName = MiscFunc.GetResourceStr(RuleName);
 
             string Message; // "Firewall rule \"{0}\" for \"{1}\" was {2}."
@@ -1308,10 +1312,10 @@ namespace PrivateWin10
             }));
         }
 
-        public int CleanUpPrograms()
+        public int CleanUpPrograms(bool ExtendedCleanup = false)
         {
             return mDispatcher.Invoke(new Func<int>(() => {
-                return ProgramList.CleanUp();
+                return ProgramList.CleanUp(ExtendedCleanup);
             }));
         }
 

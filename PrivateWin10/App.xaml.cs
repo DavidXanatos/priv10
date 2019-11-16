@@ -26,7 +26,8 @@ namespace PrivateWin10
         public static string[] args = null;
         public static string exePath = "";
         public static string mVersion = "0.0";
-        public static string mName = "Private WinTen";
+        //public static string mName = "Private WinTen";
+        public static string mName = "Private Win10";
         public static string mAppName = "PrivateWin10";
 #if DEBUG
         public static string mSvcName = "priv10dbg";
@@ -56,8 +57,7 @@ namespace PrivateWin10
         {
             Normal = 0,
             Service,
-            Engine,
-            Worker
+            Engine
         }
 
         public enum EventIDs : long
@@ -102,31 +102,42 @@ namespace PrivateWin10
             if (TestArg("-dbg_wait"))
                 MessageBox.Show("Waiting for debugger. (press ok when attached)");
 
-            Log = new AppLog(mAppName);
-            AppLog.ExceptionLogID = (long)EventIDs.Exception;
-            AppLog.ExceptionCategory = (short)EventFlags.DebugEvents;
-
-            StartModes startMode = StartModes.Normal;
+            StartModes startMode = StartModes.Normal; // Normal GUI Mode
             if (TestArg("-svc"))
                 startMode = StartModes.Service;
             else if (TestArg("-engine"))
                 startMode = StartModes.Engine;
-            else // Normal (GUI) mode
+
+            svc = new Service(mSvcName);
+
+            Log = new AppLog(mAppName);
+            AppLog.ExceptionLogID = (long)EventIDs.Exception;
+            AppLog.ExceptionCategory = (short)EventFlags.DebugEvents;
+
+            if (startMode == StartModes.Normal)
             {
                 Log.EnableLogging();
-                Log.LoadLog();
+                Log.LoadLog(); 
             }
+            // When running as worker we need the windows event log
+            else if (!Log.UsingEventLog())
+                Log.SetupEventLog(mAppName);
 
-            App.LogInfo("PrivateWin10 Process Started, Mode {0}.", startMode.ToString());
+            // execute service commands
+            if (ExecuteCommands())
+                return;
 
-            //Thread.CurrentThread.Name = "Main";
-
+            // load current version
             exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(exePath);
             mVersion = fvi.FileMajorPart + "." + fvi.FileMinorPart;
             if (fvi.FileBuildPart != 0)
                 mVersion += (char)('a' + (fvi.FileBuildPart - 1));
             appPath = Path.GetDirectoryName(exePath);
+
+            Translate.Load();
+
+            App.LogInfo("PrivateWin10 Process Started, Mode {0}.", startMode.ToString());
 
             dataPath = appPath;
             if (File.Exists(GetINIPath())) // if an ini exists in the app path, its considdered to be a portable run
@@ -153,13 +164,9 @@ namespace PrivateWin10
 
             mSession = Process.GetCurrentProcess().SessionId;
 
+            // setup custom assembly resolution for x86/x64 synamic compatybility
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyResolve += new ResolveEventHandler(currentDomain_AssemblyResolve);
-
-
-            Translate.Load();
-
-            svc = new Service(mSvcName);
 
             if (!UwpFunc.IsWindows7OrLower)
             {
@@ -167,36 +174,15 @@ namespace PrivateWin10
                 PkgMgr = new AppManager();
             }
 
-            switch (startMode)
+            // is the process starting as a service/worker?
+            if (startMode != StartModes.Normal)
             {
-                case StartModes.Engine:
-                {
-                    engine = new Engine();
+                engine = new Engine();
+                if(startMode == StartModes.Service)
+                    ServiceBase.Run(svc);
+                else
                     engine.Run();
-                    return;
-                }
-                case StartModes.Service:
-                {
-                    if (TestArg("-install"))
-                    {
-                        AppLog.Debug("Installing service...");
-                        svc.Install(TestArg("-start"));
-                        AppLog.Debug("... done");
-                    }
-                    else if (TestArg("-remove"))
-                    {
-                        AppLog.Debug("Removing service...");
-                        svc.Uninstall();
-                        AppLog.Debug("... done");
-                    }
-                    else
-                    {
-                        engine = new Engine();
-
-                        ServiceBase.Run(svc);
-                    }
-                    return;
-                }
+                return;
             }
 
             client = new Priv10Client(mSvcName);
@@ -332,6 +318,121 @@ namespace PrivateWin10
             return MyAssembly;
         }
 
+        static bool ExecuteCommands()
+        {
+            if (TestArg("-help") || TestArg("/?"))
+            {
+                string Message = "Available command line options\r\n";
+                string[] Help = {
+                                    "Available Console Commands:",
+                                    "========================================",
+                                    "",
+                                    "-state\t\t\tShow instalation state",
+                                    "-uninstall\t\tUninstall PrivateWinTen",
+                                    "",
+                                    "-svc_install\t\tInstall priv10 service (invokes -log_install)",
+                                    "-svc_remove\t\tRemove priv10 service",
+                                    "",
+                                    "-log_install\t\tInstall PrivateWin10 Custom Event Log",
+                                    "-log_remove\t\tRemove PrivateWin10 Custom Event Log",
+                                    "",
+                                    "-console\t\tShow console with debug output",
+                                    "-help\t\t\tShow this help message" };
+                if (!HasConsole)
+                    MessageBox.Show(Message + string.Join("\r\n", Help));
+                else
+                {
+                    Console.WriteLine(Message);
+                    for (int j = 0; j < Help.Length; j++)
+                        Console.WriteLine(" " + Help[j]);
+                }
+                return true;
+            }
+
+           
+            bool bDone = false;
+
+            if (TestArg("-svc_install"))
+            {
+                AppLog.Debug("Installing Service...");
+                svc.Install(TestArg("-svc_start"));
+                bDone = true;
+            }
+
+            if (TestArg("-log_install") || TestArg("-svc_install")) // service needs the event log
+            {
+                AppLog.Debug("Setting up Event Log...");
+                Log.SetupEventLog(mAppName);
+                bDone = true;
+            }
+
+            if (TestArg("-uninstall"))
+            {
+                AppLog.Debug("Uninstalling PrivateWinTen");
+                bDone = true;
+            }
+
+            if (TestArg("-svc_remove") || (svc.IsInstalled() && TestArg("-uninstall")))
+            {
+                AppLog.Debug("Removing Service...");
+                svc.Uninstall();
+                bDone = true;
+            }
+
+            if (TestArg("-log_remove") || (Log.UsingEventLog() && TestArg("-uninstall")))
+            {
+                AppLog.Debug("Removing Event Log...");
+                Log.RemoveEventLog(mAppName);
+                bDone = true;
+            }
+
+            if (TestArg("-uninstall") && AdminFunc.IsSkipUac(mName))
+            {
+                AppLog.Debug("Removing UAC Bypass...");
+                AdminFunc.SkipUacEnable(mName, false);
+                bDone = true;
+            }
+
+            if (TestArg("-uninstall") && App.IsAutoStart())
+            {
+                AppLog.Debug("Removing Autostart...");
+                App.AutoStart(false);
+                bDone = true;
+            }
+
+            if (bDone)
+                AppLog.Debug("done");
+
+
+            if (TestArg("-state"))
+            {
+                Console.WriteLine();
+                Console.WriteLine("Instalation State:");
+                Console.WriteLine("========================="); // 25
+                Console.Write("Auto Start:\t");
+                Console.WriteLine(App.IsAutoStart());
+                Console.Write("UAC Bypass:\t");
+                Console.WriteLine(AdminFunc.IsSkipUac(mName));
+                Console.Write("Event Log:\t");
+                Console.WriteLine(Log.UsingEventLog());
+                Console.Write("Service:\t");
+                Console.WriteLine(svc.IsInstalled());
+                Console.WriteLine();
+            }
+
+            if (TestArg("-wait"))
+            {
+                Console.WriteLine();
+                for (int i = 10; i >= 0; i--)
+                {
+                    Console.Write("\r{0}%   ", i);
+                    Thread.Sleep(1000);
+                }
+            }
+
+            return bDone;
+        }
+
         static void TrayAction(object sender, TrayIcon.TrayEventArgs args)
         {
             switch (args.Action)
@@ -395,7 +496,6 @@ namespace PrivateWin10
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Config
-
 
         static public string GetConfig(string Section, string Key, string Default = "")
         {

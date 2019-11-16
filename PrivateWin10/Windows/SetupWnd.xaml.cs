@@ -23,7 +23,7 @@ namespace PrivateWin10.Windows
         {
             InitializeComponent();
 
-            this.Title = Translate.fmt("wnd_setup");
+            this.Title = Translate.fmt("wnd_setup", App.mName);
 
             this.lblStartup.Text = Translate.fmt("lbl_startup_options");
             this.chkAutoStart.Content = Translate.fmt("chk_autorun");
@@ -51,6 +51,7 @@ namespace PrivateWin10.Windows
                 if (chkService.IsChecked == true)
                 {
                     App.svc.Install();
+                    App.Log.SetupEventLog(App.mAppName);
                     Restart = true;
                 }
             }

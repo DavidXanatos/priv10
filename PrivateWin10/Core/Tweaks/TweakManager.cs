@@ -41,10 +41,10 @@ namespace PrivateWin10
 
         public TweakManager()
         {
-            if(!LoadTweaks(Categorys))
-            {
-                TweakStore.InitTweaks(Categorys);
+            TweakStore.InitTweaks(Categorys);
 
+            if (!LoadTweaks(Categorys))
+            {
                 foreach (Tweak tweak in GetAllTweaks())
                     tweak.State = TweakEngine.TestTweak(tweak) ? Tweak.States.SelGroupe : Tweak.States.Unsellected;
 

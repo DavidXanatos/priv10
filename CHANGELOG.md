@@ -2,6 +2,26 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.57] - 2019-11-16
+
+### Added
+- a few new tweaks
+- aded windows 8 and newer address keywords
+- added app context menu option to uninstall the client (remove service, autorun, event log)
+- added -help command to show all available console ocmmands
+
+### Changed
+- on windows 8 and above the "Internet" address keyword is used for rules, instead of a manually assembled range
+- rule lookup now properly handles the interface type parameters
+- improved special address handling
+- priv10 is now by default only using the windows event log when being installed as a service
+
+### Fixed
+- fixed issue with grouping combobox
+- fixed issue with original rule backup
+
+
+
 ## [0.55] - 2019-11-15
 
 ### Added

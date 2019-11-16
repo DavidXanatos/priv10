@@ -243,7 +243,7 @@ namespace PrivateWin10.Controls
         {
             int Count = App.client.CleanUpRules();
 
-            //MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.mName, MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.mName, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void btnEditRule_Click(object sender, RoutedEventArgs e)
@@ -512,9 +512,9 @@ namespace PrivateWin10.Controls
             {
                 get
                 {
-                    if (Rule.Name.Substring(0, 2) == "@{" && App.PkgMgr != null)
+                    if (Rule.Name.Length > 2 && Rule.Name.Substring(0, 2) == "@{" && App.PkgMgr != null)
                         return App.PkgMgr.GetAppResourceStr(Rule.Name);
-                    else if (Rule.Name.Substring(0, 1) == "@")
+                    else if (Rule.Name.Length > 1 && Rule.Name.Substring(0, 1) == "@")
                         return MiscFunc.GetResourceStr(Rule.Name);
                     return Rule.Name;
                 }
@@ -525,7 +525,7 @@ namespace PrivateWin10.Controls
             {
                 get
                 {
-                    if (Rule.Grouping != null && Rule.Grouping.Substring(0, 1) == "@")
+                    if (Rule.Grouping != null && Rule.Grouping.Length > 1 && Rule.Grouping.Substring(0, 1) == "@")
                         return MiscFunc.GetResourceStr(Rule.Grouping);
                     return Rule.Grouping;
                 }

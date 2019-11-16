@@ -236,12 +236,12 @@ namespace PrivateWin10
                 process.Log.Clear();
         }
 
-        public int CleanUp()
+        public int CleanUp(bool ExtendedCleanup = false)
         {
             int Count = 0;
             foreach (ProgramSet progSet in ProgramSets.Values.ToList())
             {
-                Count += progSet.CleanUp();
+                Count += progSet.CleanUp(ExtendedCleanup);
 
                 if (progSet.Programs.Count == 0)
                     ProgramSets.Remove(progSet.guid);

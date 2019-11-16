@@ -115,9 +115,9 @@ namespace PrivateWin10
             return RemoteExec("ClearLog", ClearSecLog, false);
         }
         
-        public int CleanUpPrograms()
+        public int CleanUpPrograms(bool ExtendedCleanup = false)
         {
-            return RemoteExec("CleanUpPrograms", null, 0);
+            return RemoteExec("CleanUpPrograms", ExtendedCleanup, 0);
         }
 
         public int CleanUpRules()

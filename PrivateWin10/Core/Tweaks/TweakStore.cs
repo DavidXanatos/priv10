@@ -699,7 +699,11 @@ namespace PrivateWin10
                 Key = "NoRegistration",
                 Value = 1
             });
-
+            privOther.Add(new Tweak("Disable LicenseManager Service", TweakType.DisableService, WinVer.Win10)
+            {
+                Key = "LicenseManager",
+                Hint = Tweak.Hints.Optional
+            });
 
             // *** No Push Notifications ***
 

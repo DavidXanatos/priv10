@@ -2,6 +2,7 @@
 using PrivateWin10.Windows;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -37,7 +38,9 @@ namespace PrivateWin10
         public const Int32 WM_SYSCOMMAND = 0x112;
         public const Int32 MF_SEPARATOR = 0x800;
         public const Int32 MF_BYPOSITION = 0x400;
-        public const Int32 MF_STRING = 0x0;
+        public const Int32 MF_ENABLED = 0x02;
+        public const Int32 MF_DISABLED = 0x00;
+        public const Int32 MF_STRING = 0x00;
 
         /// <summary>
         /// This is the Win32 Interop Handle for this Window
@@ -50,16 +53,19 @@ namespace PrivateWin10
             }
         }
 
+        // The constants we'll use to identify our custom system menu items
+        public const Int32 SysMenu_Setup = 1000;
+        public const Int32 SysMenu_Uninstall = 1001;
 
-        private void UpdateSysMenu(object sender, RoutedEventArgs e)
+        private void UpdateSysMenu()
         {
             /// Get the Handle for the Forms System Menu
             IntPtr systemMenuHandle = GetSystemMenu(this.Handle, false);
 
             /// Create our new System Menu items just before the Close menu item
             InsertMenu(systemMenuHandle, 5, MF_BYPOSITION | MF_SEPARATOR, 0, string.Empty); // <-- Add a menu seperator
-            InsertMenu(systemMenuHandle, 6, MF_BYPOSITION, _SettingsSysMenuID, "Settings...");
-            InsertMenu(systemMenuHandle, 7, MF_BYPOSITION, _AboutSysMenuID, "About...");
+            InsertMenu(systemMenuHandle, 6, MF_BYPOSITION | (AdminFunc.IsAdministrator() ? MF_DISABLED : MF_ENABLED), SysMenu_Setup, Translate.fmt("menu_setup"));
+            InsertMenu(systemMenuHandle, 7, MF_BYPOSITION | (AdminFunc.IsAdministrator() ? MF_DISABLED : MF_ENABLED), SysMenu_Uninstall, Translate.fmt("menu_uninstall"));
 
             // Attach our WndProc handler to this Window
             HwndSource source = HwndSource.FromHwnd(this.Handle);
@@ -74,12 +80,12 @@ namespace PrivateWin10
                 // Execute the appropriate code for the System Menu item that was clicked
                 switch (wParam.ToInt32())
                 {
-                    case _SettingsSysMenuID:
-                        MessageBox.Show("\"Settings\" was clicked");
+                    case SysMenu_Setup:
+                        App.mMainWnd.ShowSetup();
                         handled = true;
                         break;
-                    case _AboutSysMenuID:
-                        MessageBox.Show("\"About\" was clicked");
+                    case SysMenu_Uninstall:
+                        App.mMainWnd.RunUninstall();
                         handled = true;
                         break;
                 }
@@ -87,13 +93,6 @@ namespace PrivateWin10
 
             return IntPtr.Zero;
         }
-
-
-        // The constants we'll use to identify our custom system menu items
-        public const Int32 _SettingsSysMenuID = 1000;
-        public const Int32 _AboutSysMenuID = 1001;
-
-
         #endregion
 
         private Dictionary<String, UserControl> mPages = new Dictionary<String, UserControl>();
@@ -263,14 +262,31 @@ namespace PrivateWin10
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //UpdateSysMenu(); // Install system menu
+            UpdateSysMenu(); // Install system menu
 
             if (AdminFunc.IsAdministrator() && App.GetConfigInt("Startup", "ShowSetup", 1) == 1 && !App.svc.IsInstalled())
-            {
-                SetupWnd wnd = new SetupWnd();
-                wnd.Owner = this;
-                wnd.ShowDialog();
-            }
+                ShowSetup();
+        }
+
+        private void ShowSetup()
+        {
+            SetupWnd wnd = new SetupWnd();
+            wnd.Owner = this;
+            wnd.ShowDialog();
+        }
+
+        private void RunUninstall()
+        {
+            if (MessageBox.Show(Translate.fmt("msg_uninstall_this", App.mName), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                return;
+
+            var exeName = Process.GetCurrentProcess().MainModule.FileName;
+            string arguments = "-console -uninstall -wait";
+            ProcessStartInfo startInfo = new ProcessStartInfo(exeName, arguments);
+            startInfo.UseShellExecute = true;
+            startInfo.Verb = "runas";
+            Process.Start(startInfo);
+            Environment.Exit(-1);
         }
     }
 }

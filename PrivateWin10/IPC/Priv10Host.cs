@@ -100,7 +100,7 @@ namespace PrivateWin10
                 }
                 else if (call.func == "CleanUpPrograms")
                 {
-                    call.args = App.engine.CleanUpPrograms();
+                    call.args = App.engine.CleanUpPrograms((bool)call.args);
                 }
                 else if (call.func == "CleanUpRules")
                 {

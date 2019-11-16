@@ -165,7 +165,7 @@ namespace PrivateWin10
                 Log.RemoveAt(0);
         }
 
-        public FirewallRule.Actions LookupRuleAction(FirewallEvent FwEvent, int FwProfile)
+        public FirewallRule.Actions LookupRuleAction(FirewallEvent FwEvent, NetworkMonitor.AdapterInfo NicInfo)
         {
             int BlockRules = 0;
             int AllowRules = 0;
@@ -177,11 +177,13 @@ namespace PrivateWin10
                     continue;
                 if (rule.Protocol != (int)NetFunc.KnownProtocols.Any && FwEvent.Protocol != rule.Protocol)
                     continue;
-                if ((FwProfile & rule.Profile) == 0)
+                if (((int)NicInfo.Profile & rule.Profile) == 0)
                     continue;
-                if (!rule.MatchRemoteEndpoint(FwEvent.RemoteAddress, FwEvent.RemotePort))
+                if (rule.Interface != (int)FirewallRule.Interfaces.All && (int)NicInfo.Type != rule.Interface)
                     continue;
-                if (!rule.MatchLocalEndpoint(FwEvent.LocalAddress, FwEvent.LocalPort))
+                if (!FirewallRule.MatchEndpoint(rule.RemoteAddresses, rule.RemotePorts, FwEvent.RemoteAddress, FwEvent.RemotePort, NicInfo))
+                    continue;
+                if (!FirewallRule.MatchEndpoint(rule.LocalAddresses, rule.LocalPorts, FwEvent.RemoteAddress, FwEvent.RemotePort, NicInfo))
                     continue;
 
                 if (rule.Action == FirewallRule.Actions.Allow)
@@ -222,10 +224,10 @@ namespace PrivateWin10
                     continue;
                 if (Protocol == (int)IPHelper.AF_PROT.TCP)
                 {
-                    if (!rule.MatchRemoteEndpoint(Socket.RemoteAddress, Socket.RemotePort))
+                    if (!FirewallRule.MatchEndpoint(rule.RemoteAddresses, rule.RemotePorts, Socket.RemoteAddress, Socket.RemotePort))
                         continue;
                 }
-                if (!rule.MatchLocalEndpoint(Socket.LocalAddress, Socket.LocalPort))
+                if (!FirewallRule.MatchEndpoint(rule.LocalAddresses, rule.LocalPorts, Socket.LocalAddress, Socket.LocalPort))
                     continue;
 
                 switch (rule.Direction)
