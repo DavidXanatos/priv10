@@ -85,7 +85,7 @@ namespace PrivateWin10
             {
                 //tweak.StatusChanged += OnStatusChanged;
 
-                if (Tweaks.ContainsKey(tweak.Name)) // loaded items have proproty
+                if (Tweaks.ContainsKey(tweak.Name)) // loaded items have property
                     Tweaks.Remove(tweak.Name);
                 if (Recommended && tweak.Hint == Tweak.Hints.None) // do not un set optional !!!
                     tweak.Hint = Tweak.Hints.Recommended;
@@ -100,9 +100,9 @@ namespace PrivateWin10
             //}
         }
 
-        static public bool InitTweaks(Dictionary<string, Category> Categorys)
+        static public bool InitTweaks(Dictionary<string, Category> Categories)
         {
-            /*  Structore:
+            /*  Structure:
              *      Category
              *          Groupe
              *              Tweak
@@ -121,7 +121,7 @@ namespace PrivateWin10
              */
 
             Category telemetryCat = new Category("Telemetry & Error Reporting"); //, "windows_telemetry");
-            Categorys.Add(telemetryCat.Name, telemetryCat);
+            Categories.Add(telemetryCat.Name, telemetryCat);
 
 
             // *** Telemetry ***
@@ -173,14 +173,14 @@ namespace PrivateWin10
 
 
             // *** AppCompat ***
-            Group appExp = new Group("Disable Application Expirience", true);
+            Group appExp = new Group("Disable Application Experience", true);
             telemetryCat.Add(appExp);
-            appExp.Add(new Tweak("Disable Application Expirience Tasks", TweakType.DisableTask, WinVer.Win6) // or 7?
+            appExp.Add(new Tweak("Disable Application Experience Tasks", TweakType.DisableTask, WinVer.Win6) // or 7?
             {
                 Path = @"\Microsoft\Windows\Application Experience",
                 Key = "*"
             });
-            appExp.Add(new Tweak("Disable Application Expirience Service", TweakType.DisableService, WinVer.Win7to81)
+            appExp.Add(new Tweak("Disable Application Experience Service", TweakType.DisableService, WinVer.Win7to81)
             {
                 Key = "AeLookupSvc"
             });
@@ -230,7 +230,7 @@ namespace PrivateWin10
                 Value = 0, // must be 0 according to https://getadmx.com/?Category=Windows_10_2016&Policy=Microsoft.Policies.InternetExplorer::SQM_DisableCEIP
                 Hint = Tweak.Hints.Optional
             });
-            ceip.Add(new Tweak("Disable Live Messager CEIP", TweakType.SetGPO, WinVer.WinXPto7)
+            ceip.Add(new Tweak("Disable Live Messenger CEIP", TweakType.SetGPO, WinVer.WinXPto7)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\Messenger\Client",
                 Key = "CEIP",
@@ -240,7 +240,7 @@ namespace PrivateWin10
             //  Set USER GPO "SOFTWARE\\Policies\\Microsoft\\Messenger\\Client" "CEIP" "2"(deprecated)
 
 
-            // *** Error Repoering ***
+            // *** Error Reporting ***
 
             Group werr = new Group("Disable Error Reporting", true);
             telemetryCat.Add(werr);
@@ -272,7 +272,7 @@ namespace PrivateWin10
                 Key = "*"
             });
             //(Disable file WerSvc.dll)
-            //(Disable filea wer*.exe)
+            //(Disable file wer*.exe)
 
 
             // *** Other Diagnostics ***
@@ -320,7 +320,7 @@ namespace PrivateWin10
              */
 
             Category searchCat = new Category("Search & Cortana"); //, "windows_search");
-            Categorys.Add(searchCat.Name, searchCat);
+            Categories.Add(searchCat.Name, searchCat);
 
 
             // *** Disable Cortana ***
@@ -401,7 +401,7 @@ namespace PrivateWin10
             */
 
             Category defenderCat = new Category("Windows Defender"); //, "microsoft_defender" );
-            Categorys.Add(defenderCat.Name, defenderCat);
+            Categories.Add(defenderCat.Name, defenderCat);
 
 
             // *** Disable Defender ***
@@ -542,12 +542,12 @@ namespace PrivateWin10
             */
 
             Category privacyCat = new Category("Privacy & Advertisement"); //, "windows_privacy");
-            Categorys.Add(privacyCat.Name, privacyCat);
+            Categories.Add(privacyCat.Name, privacyCat);
 
 
-            // *** Disable Advertizement ***
+            // *** Disable Advertisement ***
 
-            Group privacy = new Group("Disable Advertizement", true);
+            Group privacy = new Group("Disable Advertisement", true);
             privacyCat.Add(privacy);
             privacy.Add(new Tweak("Turn off Advertising ID", TweakType.SetGPO, WinVer.Win81)
             {
@@ -624,7 +624,7 @@ namespace PrivateWin10
 
             Group spying = new Group("No Personalization", true);
             privacyCat.Add(spying);
-            spying.Add(new Tweak("Diable input personalization", TweakType.SetGPO, WinVer.Win8)
+            spying.Add(new Tweak("Disable input personalization", TweakType.SetGPO, WinVer.Win8)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\InputPersonalization",
                 Key = "AllowInputPersonalization",
@@ -731,7 +731,7 @@ namespace PrivateWin10
             */
 
             Category accountCat = new Category("Microsoft Account"); //, "microsoft_account");
-            Categorys.Add(accountCat.Name, accountCat);
+            Categories.Add(accountCat.Name, accountCat);
 
 
             // *** Disable OneDrive ***
@@ -818,9 +818,9 @@ namespace PrivateWin10
             });
 
 
-            // *** No Cloud Messges ***
+            // *** No Cloud Messages ***
 
-            Group msgbak = new Group("No Cloud Messges", true);
+            Group msgbak = new Group("No Cloud Messages", true);
             accountCat.Add(msgbak);
             msgbak.Add(new Tweak("Don't Sync Messages", TweakType.SetGPO, WinVer.Win1709)
             {
@@ -861,11 +861,11 @@ namespace PrivateWin10
             });
 
 
-            // *** No Cross Device Expirience ***
+            // *** No Cross Device Experience ***
 
-            Group cdp = new Group("No Cross Device Expirience", true);
+            Group cdp = new Group("No Cross Device Experience", true);
             accountCat.Add(cdp);
-            cdp.Add(new Tweak("Disable Cross Device Expirience", TweakType.SetGPO, WinVer.Win10)
+            cdp.Add(new Tweak("Disable Cross Device Experience", TweakType.SetGPO, WinVer.Win10)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\Windows\System",
                 Key = "EnableCdp",
@@ -879,7 +879,7 @@ namespace PrivateWin10
             */
 
             Category officeCat = new Category("Microsoft Office"); //, "microsoft_office");
-            Categorys.Add(officeCat.Name, officeCat);
+            Categories.Add(officeCat.Name, officeCat);
 
 
             // *** Disable Office Telemetry 0 ***
@@ -987,23 +987,23 @@ namespace PrivateWin10
             });
             // *** Disable Office Telemetry 3 ***
 
-            Group officeTelemetryFeadback = new Group("Disable Telemetry Feadback", true);
-            officeCat.Add(officeTelemetryFeadback);
-            officeTelemetryFeadback.Add(new Tweak("feedback", TweakType.SetGPO, WinVer.Win7)
+            Group officeTelemetryFeedback = new Group("Disable Telemetry Feedback", true);
+            officeCat.Add(officeTelemetryFeedback);
+            officeTelemetryFeedback.Add(new Tweak("feedback", TweakType.SetGPO, WinVer.Win7)
             {
                 usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\Common\feedback",
                 Key = "enabled",
                 Value = 0
             });
-            officeTelemetryFeadback.Add(new Tweak("includescreenshot", TweakType.SetGPO, WinVer.Win7)
+            officeTelemetryFeedback.Add(new Tweak("includescreenshot", TweakType.SetGPO, WinVer.Win7)
             {
                 usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\Common\feedback",
                 Key = "includescreenshot",
                 Value = 0
             });
-            officeTelemetryFeadback.Add(new Tweak("ptwoptin", TweakType.SetGPO, WinVer.Win7)
+            officeTelemetryFeedback.Add(new Tweak("ptwoptin", TweakType.SetGPO, WinVer.Win7)
             {
                 usrLevel = true,
                 Path = @"Software\Policies\Microsoft\Office\16.0\Common\ptwatson",
@@ -1153,7 +1153,7 @@ namespace PrivateWin10
             */
 
             Category vsCat = new Category("Visual Studio"); //, "visual_studio");
-            Categorys.Add(vsCat.Name, vsCat);
+            Categories.Add(vsCat.Name, vsCat);
 
             Group vsTelemetry = new Group("Turn off VS telemetry", true);
             vsCat.Add(vsTelemetry);
@@ -1186,21 +1186,21 @@ namespace PrivateWin10
                 Hint = Tweak.Hints.Optional
             });
 
-            Group vsFeadback = new Group("Turn off the Feedback button", true);
-            vsCat.Add(vsFeadback);
-            vsFeadback.Add(new Tweak("DisableFeedbackDialog", TweakType.SetGPO, WinVer.Win7)
+            Group vsFeedback = new Group("Turn off the Feedback button", true);
+            vsCat.Add(vsFeedback);
+            vsFeedback.Add(new Tweak("DisableFeedbackDialog", TweakType.SetGPO, WinVer.Win7)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\VisualStudio\Feedback",
                 Key = "DisableFeedbackDialog",
                 Value = 1
             });
-            vsFeadback.Add(new Tweak("DisableEmailInput", TweakType.SetGPO, WinVer.Win7)
+            vsFeedback.Add(new Tweak("DisableEmailInput", TweakType.SetGPO, WinVer.Win7)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\VisualStudio\Feedback",
                 Key = "DisableEmailInput",
                 Value = 1
             });
-            vsFeadback.Add(new Tweak("DisableScreenshotCapture", TweakType.SetGPO, WinVer.Win7)
+            vsFeedback.Add(new Tweak("DisableScreenshotCapture", TweakType.SetGPO, WinVer.Win7)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\VisualStudio\Feedback",
                 Key = "DisableScreenshotCapture",
@@ -1216,7 +1216,7 @@ namespace PrivateWin10
 
 
             Category miscCat = new Category("Various Others"); //, "windows_misc");
-            Categorys.Add(miscCat.Name, miscCat);
+            Categories.Add(miscCat.Name, miscCat);
 
 
             // *** Disable Driver Update ***
@@ -1273,9 +1273,9 @@ namespace PrivateWin10
             });
 
 
-            // *** No Certificat Updates ***
+            // *** No Certificate Updates ***
 
-            Group cert = new Group("No Certificat Updates");
+            Group cert = new Group("Automatic certificate updates");
             miscCat.Add(cert);
             cert.Add(new Tweak("Disable Certificate Auto Update", TweakType.SetGPO, WinVer.WinXP)
             {
@@ -1287,7 +1287,7 @@ namespace PrivateWin10
 
             // *** Disable NtpClient ***
 
-            Group ntp = new Group("Disable NtpClient");
+            Group ntp = new Group("Date and Time (NTP Client)");
             miscCat.Add(ntp);
             ntp.Add(new Tweak("Disable NTP Client", TweakType.SetGPO, WinVer.WinXP)
             {
@@ -1321,11 +1321,11 @@ namespace PrivateWin10
             });
 
 
-            // *** Disable Delivery Optimisations ***
+            // *** Disable Delivery Optimizations ***
 
-            Group dodm = new Group("No Delivery Optimisations", true);
+            Group dodm = new Group("No Delivery Optimizations", true);
             miscCat.Add(dodm);
-            dodm.Add(new Tweak("Disable Delivery Optimisations", TweakType.SetGPO, WinVer.Win10)
+            dodm.Add(new Tweak("Disable Delivery Optimizations", TweakType.SetGPO, WinVer.Win10)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization",
                 Key = "DODownloadMode",
@@ -1370,11 +1370,11 @@ namespace PrivateWin10
             });
 
 
-            // *** Lockdown Edge ***
+            // *** Lockdown MS Edge ***
 
-            Group edge = new Group("Lockdown Edge");
+            Group edge = new Group("Lockdown MS Edge (non Chromium");
             miscCat.Add(edge);
-            edge.Add(new Tweak("Don't Update Compatyblity Lists", TweakType.SetGPO, WinVer.Win10)
+            edge.Add(new Tweak("Don't Update Compatibility Lists", TweakType.SetGPO, WinVer.Win10)
             {
                 Path = @"Software\Policies\Microsoft\MicrosoftEdge\BrowserEmulation",
                 Key = "MSCompatibilityMode",
@@ -1410,13 +1410,13 @@ namespace PrivateWin10
                 Key = "Use FormSuggest",
                 Value = "no"
             });
-            edge.Add(new Tweak("Disable AddressBar Sugestions", TweakType.SetGPO, WinVer.Win10)
+            edge.Add(new Tweak("Disable AddressBar Suggestions", TweakType.SetGPO, WinVer.Win10)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\MicrosoftEdge\SearchScopes",
                 Key = "ShowSearchSuggestionsGlobal",
                 Value = 0
             });
-            edge.Add(new Tweak("Disable AddressBar (drop down) Sugestions", TweakType.SetGPO, WinVer.Win10)
+            edge.Add(new Tweak("Disable AddressBar (drop down) Suggestions", TweakType.SetGPO, WinVer.Win10)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\MicrosoftEdge\ServiceUI",
                 Key = "ShowOneBox",
@@ -1438,9 +1438,9 @@ namespace PrivateWin10
 
             // *** Lockdown IE ***
 
-            Group ie = new Group("Lockdown IE");
+            Group ie = new Group("Lockdown Internet Explorer");
             miscCat.Add(ie);
-            ie.Add(new Tweak("Disable Enchanced AddressBar Sugestions", TweakType.SetGPO, WinVer.Win7)
+            ie.Add(new Tweak("Disable Enhanced AddressBar Suggestions", TweakType.SetGPO, WinVer.Win7)
             {
                 Path = @"SOFTWARE\Policies\Microsoft\Internet Explorer",
                 Key = "AllowServicePoweredQSA",
@@ -1470,7 +1470,7 @@ namespace PrivateWin10
                 Key = "BackgroundSyncStatus",
                 Value = 0
             });
-            ie.Add(new Tweak("Disable Compatybility View", TweakType.SetGPO, WinVer.WinXP)
+            ie.Add(new Tweak("Disable Compatibility View", TweakType.SetGPO, WinVer.WinXP)
             {
                 Path = @"Software\Policies\Microsoft\Internet Explorer\BrowserEmulation",
                 Key = "DisableSiteListEditing",
@@ -1506,7 +1506,7 @@ namespace PrivateWin10
              */
 
             Category appCat = new Category("Apps & Store"); //, "store_and_apps");
-            Categorys.Add(appCat.Name, appCat);
+            Categories.Add(appCat.Name, appCat);
 
 
             // *** Disable Store ***
@@ -1643,7 +1643,7 @@ namespace PrivateWin10
             });
 
 
-            // *** No Mail and People ***
+            // *** Disable Mail and People ***
 
             Group mail = new Group("Block Mail and People", true);
             appCat.Add(mail);
