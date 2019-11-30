@@ -138,7 +138,7 @@ namespace PrivateWin10
 
         public void ApplyRules(ProgramSet progSet, UInt64 expiration = 0)
         {
-            EvaluateRules(progSet);
+            EvaluateRules(progSet, true);
 
             if (progSet.config.NetAccess == ProgramSet.Config.AccessLevels.Unconfigured || progSet.config.NetAccess == ProgramSet.Config.AccessLevels.CustomConfig)
                 return;

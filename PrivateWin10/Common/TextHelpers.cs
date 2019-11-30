@@ -54,7 +54,7 @@ public class TextHelpers
         if (str == null)
             return false;
         //var like = "^" + Regex.Escape(find).Replace("_", ".").Replace("%", ".*") + "$";
-        var like = Regex.Escape(find).Replace("_", ".").Replace("%", ".*");
+        var like = Regex.Escape(find).Replace("_", ".").Replace("\\*", ".*");
         return Regex.IsMatch(str, like, RegexOptions.IgnoreCase);
     }
 
@@ -73,8 +73,15 @@ public class TextHelpers
 
     public static List<string> SplitStr(string str, string sep, bool bKeepEmpty = false)
     {
+        List<string> strList = new List<string>();
         String[] spearator = { sep };
-        return str.Split(spearator, bKeepEmpty ? StringSplitOptions.None : StringSplitOptions.RemoveEmptyEntries).ToList();
+        foreach (var curStr in str.Split(spearator, StringSplitOptions.None))
+        {
+            var tmpStr = curStr.Trim();
+            if (tmpStr.Length > 0 || bKeepEmpty)
+                strList.Add(tmpStr);
+        }
+        return strList;
     }
 }
 

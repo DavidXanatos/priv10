@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using System.Threading;
@@ -102,6 +103,9 @@ namespace PrivateWin10
             if (TestArg("-dbg_wait"))
                 MessageBox.Show("Waiting for debugger. (press ok when attached)");
 
+            if (TestArg("-dbg_log"))
+                AppDomain.CurrentDomain.FirstChanceException += FirstChanceExceptionHandler;
+
             StartModes startMode = StartModes.Normal; // Normal GUI Mode
             if (TestArg("-svc"))
                 startMode = StartModes.Service;
@@ -159,14 +163,13 @@ namespace PrivateWin10
                     FileOps.SetAnyDirSec(dataPath);
                 }
 
-                AppLog.Debug("Config Directory: {0}", progData);
+                AppLog.Debug("Config Directory: {0}", dataPath);
             }
 
             mSession = Process.GetCurrentProcess().SessionId;
 
             // setup custom assembly resolution for x86/x64 synamic compatybility
-            AppDomain currentDomain = AppDomain.CurrentDomain;
-            currentDomain.AssemblyResolve += new ResolveEventHandler(currentDomain_AssemblyResolve);
+            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolveHandler;
 
             if (!UwpFunc.IsWindows7OrLower)
             {
@@ -184,6 +187,8 @@ namespace PrivateWin10
                     engine.Run();
                 return;
             }
+
+            Thread.CurrentThread.Name = "Gui";
 
             client = new Priv10Client(mSvcName);
 
@@ -278,13 +283,13 @@ namespace PrivateWin10
 
             client.Close();
 
-            tweaks.StoreTweaks();
+            tweaks.Store();
 
             if (engine != null)
                 engine.Stop();
         }
 
-        static private Assembly currentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        static private Assembly AssemblyResolveHandler(object sender, ResolveEventArgs args)
         {
             //This handler is called only when the common language runtime tries to bind to the assembly and fails.
 
@@ -318,6 +323,11 @@ namespace PrivateWin10
             return MyAssembly;
         }
 
+        static private void FirstChanceExceptionHandler(object source, FirstChanceExceptionEventArgs e)
+        {
+            AppLog.Debug("FirstChanceException event raised in {0}: {1}\r\n{2}", AppDomain.CurrentDomain.FriendlyName, e.Exception.Message, e.Exception.StackTrace);
+        }
+
         static bool ExecuteCommands()
         {
             if (TestArg("-help") || TestArg("/?"))
@@ -335,6 +345,8 @@ namespace PrivateWin10
                                     "",
                                     "-log_install\t\tInstall PrivateWin10 Custom Event Log",
                                     "-log_remove\t\tRemove PrivateWin10 Custom Event Log",
+                                    "",
+                                    "-restore_dns\t\tRestore original DNS Configuration",
                                     "",
                                     "-console\t\tShow console with debug output",
                                     "-help\t\t\tShow this help message" };
@@ -386,6 +398,13 @@ namespace PrivateWin10
                 bDone = true;
             }
 
+            if (TestArg("-restore_dns") || (DnsConfigurator.IsAnyLocalDNS() && TestArg("-uninstall")))
+            {
+                AppLog.Debug("Restoring DNS Config...");
+                DnsConfigurator.RestoreDNS();
+                bDone = true;
+            }
+
             if (TestArg("-uninstall") && AdminFunc.IsSkipUac(mName))
             {
                 AppLog.Debug("Removing UAC Bypass...");
@@ -413,11 +432,14 @@ namespace PrivateWin10
                 Console.WriteLine(App.IsAutoStart());
                 Console.Write("UAC Bypass:\t");
                 Console.WriteLine(AdminFunc.IsSkipUac(mName));
-                Console.Write("Event Log:\t");
-                Console.WriteLine(Log.UsingEventLog());
                 Console.Write("Service:\t");
                 Console.WriteLine(svc.IsInstalled());
+                Console.Write("Event Log:\t");
+                Console.WriteLine(Log.UsingEventLog());
+                Console.Write("Local DNS:\t");
+                Console.WriteLine(DnsConfigurator.IsAnyLocalDNS());
                 Console.WriteLine();
+                bDone = true;
             }
 
             if (TestArg("-wait"))

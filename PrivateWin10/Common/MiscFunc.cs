@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -30,6 +31,17 @@ static class MiscFunc
     public static UInt64 GetUTCTime()
     {
         return (UInt64)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0)).TotalSeconds;
+    }
+
+    public static UInt64 GetUTCTimeMs()
+    {
+        return (UInt64)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0)).TotalMilliseconds;
+    }
+
+
+    public static UInt64 DateTime2Ms(DateTime dateTime)
+    {
+        return (UInt64)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0)).TotalMilliseconds;
     }
 
     public static TValue GetOrCreate<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
@@ -286,5 +298,21 @@ static class MiscFunc
             }
         }
         return false;
+    }
+
+    public static bool IsValidRegex(string pattern)
+    {
+        if (string.IsNullOrEmpty(pattern)) return false;
+
+        try
+        {
+            Regex.Match("", pattern);
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+
+        return true;
     }
 }

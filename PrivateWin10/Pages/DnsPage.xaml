@@ -1,0 +1,212 @@
+﻿<UserControl x:Class="PrivateWin10.Pages.DnsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PrivateWin10.Pages"
+             xmlns:controls="clr-namespace:PrivateWin10.Controls"
+             mc:Ignorable="d" MinWidth="600" MinHeight="400">
+    <UserControl.Resources>
+        <Style TargetType="{x:Type TabControl}">
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabControl}">
+                        <Grid KeyboardNavigation.TabNavigation="Local">
+                            <Grid.ColumnDefinitions>
+                                <!--ColumnDefinition Width="Auto" /-->
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <!--VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Disabled">
+                                        <Storyboard>
+                                            <ColorAnimationUsingKeyFrames Storyboard.TargetName="Border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+                                                <EasingColorKeyFrame KeyTime="0" Value="#FFAAAAAA" />
+                                            </ColorAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(TabItem.FontWeight)">
+                                                <DiscreteObjectKeyFrame KeyTime="0">
+                                                    <DiscreteObjectKeyFrame.Value>
+                                                        <FontWeight></FontWeight>
+                                                    </DiscreteObjectKeyFrame.Value>
+                                                </DiscreteObjectKeyFrame>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </-->
+                            <ContentPresenter x:Name="PART_SelectedContentHost"
+                                              Grid.Column="1"
+                                              Margin="0"
+                                              ContentSource="SelectedContent" />
+
+                            <StackPanel Margin="0,0,4,-1">
+                                <StackPanel x:Name="StatusPanel" MinHeight="40">
+                                    
+                                </StackPanel>
+                                <Label Content="Navigation Menu" FontSize="14" Foreground="DarkGray"/>
+                                <StackPanel x:Name="HeaderPanel"
+                                            Grid.Row="0"
+                                            Panel.ZIndex="1"
+                                            Background="Transparent"
+                                            IsItemsHost="True"
+                                            KeyboardNavigation.TabIndex="1" />
+                            </StackPanel>
+                            <!--Border x:Name="Border"
+                                    Grid.Row="1"
+                                    BorderThickness="1"
+                                    CornerRadius="2"
+                                    KeyboardNavigation.DirectionalNavigation="Contained"
+                                    KeyboardNavigation.TabIndex="2"
+                                    KeyboardNavigation.TabNavigation="Local" /-->
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type TabItem}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabItem}">
+                        <Grid x:Name="Root">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="SelectionStates">
+                                    <VisualState x:Name="Unselected" />
+                                    <VisualState x:Name="Selected">
+                                        <Storyboard>
+                                            <ColorAnimationUsingKeyFrames Storyboard.TargetName="Border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+                                                <EasingColorKeyFrame KeyTime="0" Value="#FF0000FF" />
+                                            </ColorAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(TabItem.FontWeight)">
+                                                <DiscreteObjectKeyFrame KeyTime="0">
+                                                    <DiscreteObjectKeyFrame.Value>
+                                                        <FontWeight>Bold</FontWeight>
+                                                    </DiscreteObjectKeyFrame.Value>
+                                                </DiscreteObjectKeyFrame>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="MouseOver" />
+                                    <VisualState x:Name="Disabled" />
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Border x:Name="Border"
+                                    Margin="0,0,0,0"
+                                    BorderBrush="Gainsboro"
+                                    BorderThickness="0,0,2,0" />
+                            <StackPanel Orientation="Horizontal" x:Name="StackPanel" Margin="0,0,2,0">
+
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Background" Value="#FFDCDCDC"/>
+                                        <!--Setter Property="TextBlock.FontWeight" Value="Bold"/-->
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsMouseOver}" Value="False"/>
+                                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=TabItem}}" Value="False" />
+                                                </MultiDataTrigger.Conditions>
+
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <!--Setter Property="TextBlock.FontWeight" Value="Normal"/-->
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <Image Margin="12,10,3,10" Source="{TemplateBinding Tag}" Width="20" Height="20"/>
+                                <TextBlock Margin="3,10,12,10" Text="{TemplateBinding Header}">
+                                    <!--TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property= "TextDecorations" Value=""/>
+                                            <Style.Triggers>
+                                                <Trigger Property ="IsMouseOver" Value="True">
+                                                    <Setter Property= "TextDecorations" Value="Underline"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </-->
+                                    <TextBlock.LayoutTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform />
+                                            <SkewTransform />
+                                            <!--RotateTransform Angle="-90" /-->
+                                            <TranslateTransform />
+                                        </TransformGroup>
+                                    </TextBlock.LayoutTransform>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DrawingImage x:Key="Icon_QueryLog">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_QueryLog}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <DrawingImage x:Key="Icon_Whitelist">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_Whitelist}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <DrawingImage x:Key="Icon_Blacklist">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_Blacklist}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+    
+        <DrawingImage x:Key="Icon_Blocklists">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_Blocklists}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        
+    </UserControl.Resources>
+
+    <Grid Margin="48,0,0,0" Background="WhiteSmoke">
+
+
+        <TabControl Name="tabs" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <TabItem Name="tabQueryLog" Header="Query Log" Tag="{StaticResource Icon_QueryLog}" FontSize="16" >
+                <Grid Background="#FFE5E5F5">
+                    <controls:DnsQueryLogControl x:Name="queryLog" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+                </Grid>
+            </TabItem>
+            <TabItem Name="tabWhitelist" Header="Whitelist" Tag="{StaticResource Icon_Whitelist}" FontSize="16" >
+                <Grid Background="#FFEBF5E5">
+                    <controls:DnsFilterListControl x:Name="whiteList" Caption="WhiteList" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+                </Grid>
+            </TabItem>
+            <TabItem Name="tabBlacklist" Header="Blacklist" Tag="{StaticResource Icon_Blacklist}" FontSize="16" >
+                <Grid Background="#FFF5E5E5">
+                    <controls:DnsFilterListControl x:Name="blackList" Caption="Blacklist" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+                </Grid>
+            </TabItem>
+            <TabItem Name="tabBlocklists" Header="Blocklists" Tag="{StaticResource Icon_Blocklists}" FontSize="16" >
+                <Grid Background="#FFF5F5E5">
+                    <controls:DnsBlockListsControl x:Name="blockLists" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</UserControl>

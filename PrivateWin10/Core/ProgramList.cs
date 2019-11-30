@@ -254,7 +254,7 @@ namespace PrivateWin10
 
         static double xmlVersion = 1;
 
-        public bool LoadList()
+        public bool Load()
         {
             if (!File.Exists(App.dataPath + @"\Programs.xml"))
                 return false;
@@ -303,7 +303,7 @@ namespace PrivateWin10
             return true;
         }
 
-        public void StoreList()
+        public void Store()
         {
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;

@@ -29,6 +29,8 @@ namespace PrivateWin10.Controls
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null)
+                return "";
             return ((DateTime)value).ToString("HH:mm:ss dd.MM.yyyy");
         }
 

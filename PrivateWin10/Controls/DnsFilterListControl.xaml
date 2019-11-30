@@ -1,0 +1,110 @@
+﻿<UserControl x:Class="PrivateWin10.Controls.DnsFilterListControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PrivateWin10.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <local:DateConverter x:Key="dateConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Name="caption" Text="Filterlist" HorizontalAlignment="Left" Margin="10,10,10,10" FontSize="36" />
+
+        <Grid Grid.Row="1" Margin="10,10,10,10" Height="32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Name="txtDomain" Text="" VerticalContentAlignment="Center" TextChanged="TxtDomain_TextChanged">
+                <!--TextBox.Style>
+                    <Style TargetType="{x:Type TextBox}">
+                        <Style.Resources>
+                            <VisualBrush x:Key="HintBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                <VisualBrush.Visual>
+                                    <Label Content="Add a domain (example.com or sub.example.com)" Foreground="Gray"/>
+                                </VisualBrush.Visual>
+                            </VisualBrush>
+                        </Style.Resources>
+                        <Style.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter Property="Background" Value="{StaticResource HintBrush}" />
+                            </Trigger>
+                            <Trigger Property="Text" Value="{x:Null}">
+                                <Setter Property="Background" Value="{StaticResource HintBrush}" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </-->
+            </TextBox>
+            <TextBlock IsHitTestVisible="False" Name="lblHint" Text="Add a domain (example.com or sub.example.com)" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="DarkGray">
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Text, ElementName=txtDomain}" Value="">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <Button Grid.Column="1" Name="btnAdd" Content="Add Domain" Padding="5,2" Click="BtnAdd_Click"/>
+            <Button Grid.Column="2" Name="btnAddEx" Content="Add Domain (regex)" Padding="5,2" Click="BtnAddEx_Click"/>
+        </Grid>
+
+        <DataGrid Name="filterGrid" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="None" AlternationCount="2" Margin="10,10,10,10" SelectionChanged="FilterGrid_SelectionChanged">
+            <DataGrid.RowStyle>
+                <Style TargetType="{x:Type DataGridRow}">
+                    <Style.Triggers>
+                        <Trigger Property="AlternationIndex" Value="0">
+                            <Setter Property="Background" Value="White" />
+                        </Trigger>
+                        <Trigger Property="AlternationIndex" Value="1">
+                            <Setter Property="Background" Value="WhiteSmoke" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="*" Header="Domain">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox IsChecked="{Binding Enabled, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                                <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="10,0,2,0" VerticalAlignment="Center" Text="{Binding Domain}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Hits" Binding="{Binding HitCount}" />
+                <DataGridTextColumn Header="Last Hit" Binding="{Binding LastHit, Converter={StaticResource dateConverter}}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Row="3" Margin="10,0,10,10" Height="32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="1" Name="btnEnable" Content="Enable" Padding="5,2" Margin="2,0" Click="BtnEnable_Click"/>
+            <Button Grid.Column="2" Name="btnDisable" Content="Disable" Padding="5,2" Margin="2,0" Click="BtnDisable_Click"/>
+            <Button Grid.Column="3" Name="btnRemove" Content="Remove" Padding="5,2" Margin="2,0" Click="BtnRemove_Click"/>
+        </Grid>
+    </Grid>
+</UserControl>

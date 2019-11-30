@@ -2,13 +2,42 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [0.60] - 2019-11-30
+
+### Added
+- added DNS proxy to monitor all DNS requests
+- added ability to set priv10 as system DNS 
+- added DNS Query Log based on DNS Proxy events
+- added system DNS cache monitor
+- added dns proxy page 
+	- added dns querry log
+	- added dns blacklist/whitelist page
+	- added dns blocklists page
+- added blocklist update mechanism
+
+### Changed
+- reworked DNS Inspector class
+- changed from tne .NET reverse dns facility to using native windows API's for better performance
+- dns inspector can now be switched on or off
+
+### Fixed
+- issue where the accept button in the notifiction window would get disabled again 
+- issue with aplpyung rules when some rules were already present for the given programm
+- issue saving gpo's, sometimes it failed with a file is in use error
+- issue where file blockign tweaks were never shown as available after a recent change
+
+
+
 ## [0.57] - 2019-11-16
 
 ### Added
-- a few new tweaks
+- added a few new tweaks
 - aded windows 8 and newer address keywords
 - added app context menu option to uninstall the client (remove service, autorun, event log)
 - added -help command to show all available console ocmmands
+- added clear firewall log option
+- added extended program cleanup option
 
 ### Changed
 - on windows 8 and above the "Internet" address keyword is used for rules, instead of a manually assembled range

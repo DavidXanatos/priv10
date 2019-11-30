@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace PrivateWin10
 {
     [Serializable()]
-    public class NetworkSocket : DnsInspector.WithHost
+    public class NetworkSocket : WithHost
     {
         public Guid guid;
         public ProgramID ProgID;
@@ -81,11 +81,7 @@ namespace PrivateWin10
         public bool MatchIP(IPAddress L, IPAddress R)
         {
             if (L == null)
-            {
-                if (R == null)
-                    return true;
-                return false;
-            }
+                return (R == null);
             return L.GetAddressBytes().SequenceEqual(R.GetAddressBytes());
         }
 

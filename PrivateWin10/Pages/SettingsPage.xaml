@@ -24,14 +24,21 @@
             </DrawingImage.Drawing>
         </DrawingImage>
 
-
         <DrawingImage x:Key="Icon_Privacy">
             <DrawingImage.Drawing>
                 <DrawingGroup>
                     <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Privacy}"/>
                 </DrawingGroup>
             </DrawingImage.Drawing>
-        </DrawingImage>        
+        </DrawingImage>
+
+        <DrawingImage x:Key="Icon_Dns">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Dns}"/>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
     </FrameworkElement.Resources>
 
     <Grid Margin="48,0,0,0">
@@ -53,7 +60,7 @@
             <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
                 <Grid Margin="0,5,0,5">
                     <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Privacy}" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <TextBlock Name="lblProvacy"  HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Tweak Guard" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <TextBlock Name="lblPrivacy"  HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Tweak Guard" VerticalAlignment="Top" FontWeight="Bold"/>
                     <StackPanel Orientation="Vertical" Margin="0,45,0,0">
                         <CheckBox Name="chkTweakCheck"  Content="Monitor Tweaks for changes" HorizontalAlignment="Left" Margin="20,5,0,0" VerticalAlignment="Top" Click="ChkTweakCheck_Click"/>
                         <CheckBox Name="chkTweakFix"  Content="Re Apply Tweaks that got un done" HorizontalAlignment="Left" Margin="35,5,0,0" VerticalAlignment="Top" Click="ChkTweakFix_Click"/>
@@ -87,7 +94,21 @@
                             <ComboBoxItem Name="lblAuditBlock" Content="Blocked Only"/>
                             <ComboBoxItem Name="lblAuditNone" Content="Disabled"/>
                         </ComboBox>
+                        <CheckBox Name="chkDnsInspector"  Content="Monitor host names queries (DNS Inspector)" HorizontalAlignment="Left" Margin="20,15,0,0" VerticalAlignment="Top" Click="ChkDnsInspector_Click" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
 
+            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
+                <Grid Margin="0,5,0,5">
+                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Dns}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <TextBlock Name="lblDNS"  HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="DNS Filtering" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <StackPanel Orientation="Vertical" Margin="0,45,0,0">
+                        <CheckBox Name="chkEnableDNS"  Content="Enable DNS Proxy" HorizontalAlignment="Left" Margin="20,5,0,0" VerticalAlignment="Top" Click="ChkEnableDNS_Click"/>
+                        <CheckBox Name="chkLocalDNS"  Content="Setup DNS Proxy as default DNS in Windows" HorizontalAlignment="Left" Margin="35,5,0,0" VerticalAlignment="Top" Click="ChkLocalDNS_Click"/>
+                        <Label Name="lblRootDNS" Margin="20,5,0,0" VerticalAlignment="Top" Content="Upstream DNS Server"/>
+                        <ComboBox Name="cmbRootDNS" HorizontalAlignment="Left" Margin="60,0,0,0" VerticalAlignment="Top" MinWidth="200" IsEditable="True" SelectionChanged="CmbRootDNS_SelectionChanged" KeyDown="CmbRootDNS_KeyDown">
+                        </ComboBox>
                     </StackPanel>
                 </Grid>
             </Grid>

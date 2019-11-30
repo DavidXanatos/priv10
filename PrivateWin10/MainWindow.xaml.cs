@@ -95,7 +95,14 @@ namespace PrivateWin10
         }
         #endregion
 
-        private Dictionary<String, UserControl> mPages = new Dictionary<String, UserControl>();
+        public class PageItem
+        {
+            public PageItem(UserControl ctrl) { this.ctrl = ctrl; }
+            public UserControl ctrl;
+            public TabItem tab;
+        }
+
+        private Dictionary<String, PageItem> mPages = new Dictionary<String, PageItem>();
         UserControl mCurPage = null;
 
         public MainWindow()
@@ -109,29 +116,32 @@ namespace PrivateWin10
 
             WpfFunc.LoadWnd(this, "Main");
 
-            mPages.Add("Overview", new OverviewPage());
-            mPages.Add("Privacy", new PrivacyPage());
-            if (App.client.IsConnected())
-                mPages.Add("Firewall", new FirewallPage());
-            else
-                mPages.Add("Firewall", null);
-            //mPages.Add("VPN", new VPNPage());
-            mPages.Add("Settings", new SettingsPage());
-            mPages.Add("About", new AboutPage());
+            bool HasEngine = App.client.IsConnected();
+            mPages.Add("Overview", new PageItem(new OverviewPage()));
+            mPages.Add("Privacy", new PageItem(new PrivacyPage()));
+            mPages.Add("Firewall", new PageItem(HasEngine ? new FirewallPage() : null));
+            mPages.Add("Dns", new PageItem(new DnsPage()));
+            //mPages.Add("VPN", new PageItem(new VPNPage()));
+            mPages.Add("Settings", new PageItem(new SettingsPage()));
+            mPages.Add("About", new PageItem(new AboutPage()));
 
-            foreach (UserControl page in mPages.Values)
+            foreach (var page in mPages.Values)
             {
-                if (page == null)
-                    continue;
-                page.Visibility = Visibility.Collapsed;
-                this.Main.Children.Add(page);
+                if (page.ctrl != null)
+                {
+                    page.ctrl.Visibility = Visibility.Collapsed;
+                    this.Main.Children.Add(page.ctrl);
+                }
             }
 
             Brush brushOn = (TryFindResource("SidePanel.on") as Brush);
             Brush brushOff = (TryFindResource("SidePanel.off") as Brush);
-            foreach (string name in mPages.Keys)
+            foreach (var val in mPages)
             {
+                string name = val.Key;
+
                 TabItem item = new TabItem();
+                val.Value.tab = item;
                 this.SidePanel.Items.Add(item);
 
                 item.KeyDown += SidePanel_Click;
@@ -165,16 +175,17 @@ namespace PrivateWin10
 
             SwitchPage(App.GetConfig("GUI", "CurPage", "Overview"));
 
+            UpdateEnabled();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             WpfFunc.StoreWnd(this, "Main");
 
-            foreach (IUserPage page in mPages.Values)
+            foreach (var page in mPages.Values)
             {
-                if (page != null)
-                    page.OnClose();
+                if (page.ctrl != null)
+                    (page.ctrl as IUserPage).OnClose();
             }
 
             if (App.mTray.Visible)
@@ -187,6 +198,20 @@ namespace PrivateWin10
         private void Window_Closed(object sender, EventArgs e)
         {
 
+        }
+
+        public void UpdateEnabled()
+        {
+            bool HasEngine = App.client.IsConnected();
+            foreach (var val in mPages)
+            {
+                string name = val.Key;
+
+                if (name == "Firewall")
+                    val.Value.tab.IsEnabled = HasEngine;
+                else if (name == "Dns")
+                    val.Value.tab.IsEnabled = HasEngine && App.GetConfigInt("DnsProxy", "Enabled", 0) != 0;
+            }
         }
 
         public void SidePanel_Click(object sender, RoutedEventArgs e)
@@ -210,11 +235,10 @@ namespace PrivateWin10
                 mCurPage.Visibility = Visibility.Collapsed;
                 (mCurPage as IUserPage).OnHide();
             }
-            if (!mPages.TryGetValue(name, out UserControl page))
+            PageItem page;
+            if (!mPages.TryGetValue(name, out page) || !page.tab.IsEnabled || page.ctrl == null)
                 return;
-            if (page == null)
-                return;
-            mCurPage = page;
+            mCurPage = page.ctrl;
             mCurPage.Visibility = Visibility.Visible;
             (mCurPage as IUserPage).OnShow();
             foreach (TabItem item in this.SidePanel.Items)

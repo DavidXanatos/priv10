@@ -43,12 +43,12 @@ namespace PrivateWin10
         {
             TweakStore.InitTweaks(Categorys);
 
-            if (!LoadTweaks(Categorys))
+            if (!Load(Categorys))
             {
                 foreach (Tweak tweak in GetAllTweaks())
                     tweak.State = TweakEngine.TestTweak(tweak) ? Tweak.States.SelGroupe : Tweak.States.Unsellected;
 
-                StoreTweaks();
+                Store();
             }
 
             /*foreach (TweakStore.Category category in Categorys.Values)
@@ -85,7 +85,7 @@ namespace PrivateWin10
             if (MiscFunc.GetTickCount64() - LastSaveTime > 15 * 60 * 1000) // every 15 minutes
             {
                 LastSaveTime = MiscFunc.GetTickCount64();
-                StoreTweaks();
+                Store();
             }
         }
 
@@ -115,6 +115,7 @@ namespace PrivateWin10
                 success = TweakEngine.ApplyTweak(tweak);
             else
                 success = App.client.ApplyTweak(tweak);
+
             //StatusChanged?.Invoke(this, new EventArgs());
             return success;
         }
@@ -156,7 +157,7 @@ namespace PrivateWin10
                 return false;
 
             bool status;
-            if (AdminFunc.IsAdministrator() || tweak.usrLevel)
+            if (AdminFunc.IsAdministrator() || tweak.usrLevel || !App.client.IsConnected())
                 status = TweakEngine.TestTweak(tweak);
             else
                 status = App.client.TestTweak(tweak);
@@ -203,9 +204,9 @@ namespace PrivateWin10
         }
 
         // tweak storage
-        static double xmlVersion = 1.1;
+        static double xmlVersion = 1.2;
 
-        public bool LoadTweaks(Dictionary<string, TweakStore.Category> Categorys)
+        public bool Load(Dictionary<string, TweakStore.Category> Categorys)
         {
             if (!File.Exists(App.dataPath + @"\Tweaks.xml"))
                 return false;
@@ -264,7 +265,7 @@ namespace PrivateWin10
             return true;
         }
 
-        public void StoreTweaks()
+        public void Store()
         {
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
@@ -362,7 +363,13 @@ namespace PrivateWin10
                 {
                     case TweakType.DisableService: return ServiceHelper.GetServiceStatus(Key) != ServiceHelper.ServiceState.NotFound;
                     case TweakType.DisableTask: return TweakEngine.IsTaskPresent(Path, Key);
-                    case TweakType.BlockFile: return File.Exists(Path);
+                    case TweakType.BlockFile:
+                    {
+                        string FullPath = Environment.ExpandEnvironmentVariables(Path);
+                        bool ret = File.Exists(FullPath);
+                        return ret;
+                    }
+                        
                 }
                 return winVer.TestHost();
             }

@@ -723,6 +723,29 @@ namespace PrivateWin10
                 Value = 1
             });
 
+            /*Group oobe = new Group("Disable OOBE Post Setup", true);
+            privacyCat.Add(oobe);
+            oobe.Add(new Tweak("Disable OOBE Post Setup 1", TweakType.SetRegistry, WinVer.Win19H1)
+            {
+                Path = @"SOFTWARE\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\Wireless",
+                Key = "NetworkState",
+                Value = 0,
+                usrLevel = true
+            });
+            oobe.Add(new Tweak("Disable OOBE Post Setup 2", TweakType.SetRegistry, WinVer.Win19H1)
+            {
+                Path = @"SOFTWARE\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\Wireless",
+                Key = "ScoobeOnFirstConnect",
+                Value = 1,
+                usrLevel = true
+            });
+            oobe.Add(new Tweak("Disable OOBE Post Setup 3", TweakType.SetRegistry, WinVer.Win19H1)
+            {
+                Path = @"SOFTWARE\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\Wireless",
+                Key = "ScoobeCheckCompleted",
+                Value = 1,
+                usrLevel = true
+            });*/
 
             /*  
             *  #########################################
@@ -1671,6 +1694,19 @@ namespace PrivateWin10
 
             //[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Features]
             //"TamperProtection" = dword:00000000
+
+            /*
+            Windows Registry Editor Version 5.00
+
+            [HKEY_CURRENT_USER]
+
+            [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent]
+
+            [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\Wireless]
+            "NetworkState"=dword:00000000
+            "ScoobeOnFirstConnect"=dword:00000001
+            "ScoobeCheckCompleted"=dword:00000001
+             */
 
             return true;
         }

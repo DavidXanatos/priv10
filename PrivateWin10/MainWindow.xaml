@@ -30,9 +30,14 @@
                                 <Setter TargetName="Border" Property="Border.Background" Value="{StaticResource SidePanel.Back}"/>
                                 <Setter TargetName="Border" Property="Border.CornerRadius" Value="0,0,0,0"/>
                             </Trigger>
-                            <Trigger Property="UIElement.IsMouseOver" Value="true">
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="UIElement.IsMouseOver" Value="true"/>
+                                    <Condition Property="UIElement.IsEnabled" Value="true"/>
+                                </MultiTrigger.Conditions>
                                 <Setter TargetName="Border" Property="Border.Background" Value="{StaticResource SidePanel.Hover}"/>
-                            </Trigger>
+                            </MultiTrigger>
+                            
                             <MultiTrigger>
                                 <MultiTrigger.Conditions>
                                     <Condition Property="TabItem.IsSelected" Value="true"/>

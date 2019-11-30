@@ -11,6 +11,7 @@ using LocalPolicy;
 using Microsoft.Win32;
 using static PrivateWin10.TweakManager;
 using System.IO;
+using System.Threading;
 
 namespace PrivateWin10
 {
@@ -178,8 +179,7 @@ namespace PrivateWin10
                 var key = gpo.GetRootRegistryKey(usrLevel ? GroupPolicySection.User : GroupPolicySection.Machine);
                 var subKey = key.CreateSubKey(path);
                 SetRegistryValue(subKey, name, value);
-                gpo.Save();
-                return true;
+                return SafeGpoSave(gpo);
             }
             catch (Exception err)
             {
@@ -196,12 +196,30 @@ namespace PrivateWin10
                 var key = gpo.GetRootRegistryKey(usrLevel ? GroupPolicySection.User : GroupPolicySection.Machine);
                 var subKey = key.CreateSubKey(path);
                 subKey.DeleteValue(name, false);
-                gpo.Save();
-                return true;
+                return SafeGpoSave(gpo);
             }
             catch (Exception err)
             {
                 AppLog.Exception(err);
+            }
+            return false;
+        }
+
+        private static bool SafeGpoSave(ComputerGroupPolicyObject gpo)
+        {
+            // soemtimes we get an error that a file is in use, so just wait a few m and retry
+            for (int i = 1; i <= 3; i++)
+            {
+                try
+                {
+                    gpo.Save();
+                    return true;
+                }
+                catch (FileLoadException)
+                {
+                    AppLog.Debug("Retrying gpo.Save() ({0})", i);
+                    Thread.Sleep(100 * i);
+                }
             }
             return false;
         }

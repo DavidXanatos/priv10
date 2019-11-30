@@ -344,6 +344,11 @@ namespace PrivateWin10
             mStrings.Add("menu_setup", "Run Setup Wizard");
             mStrings.Add("menu_uninstall", "Uninstall This Application");
             mStrings.Add("msg_uninstall_this", "Do you really want to uninstall {0}?");
+            mStrings.Add("msg_dns_proxy_err", "Failed to start the DNS Proxy, check if port UDP {0} is not in use by an other application and retry.");
+            mStrings.Add("msg_bad_dns_filter", "The entered filter expression is not valid.");
+            mStrings.Add("msg_dns_filter_dup", "Tne entered domain is already listed.");
+            mStrings.Add("msg_remove_items", "Do you really want to remove the selected items?");
+            mStrings.Add("msg_restore_std", "Do you really want to overwrite the current configuration with default values?");
             //mStrings.Add("", "");
 
 

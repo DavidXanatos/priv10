@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{EBCB8F53-C56A-4245-893F-CE67D69D0087}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DNS</RootNamespace>
+    <AssemblyName>DNS</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Client\DnsClient.cs" />
+    <Compile Include="Client\ClientRequest.cs" />
+    <Compile Include="Client\ClientResponse.cs" />
+    <Compile Include="Client\RequestResolver\IRequestResolver.cs" />
+    <Compile Include="Client\RequestResolver\NullRequestResolver.cs" />
+    <Compile Include="Client\RequestResolver\TcpRequestResolver.cs" />
+    <Compile Include="Client\RequestResolver\UdpRequestResolver.cs" />
+    <Compile Include="Client\ResponseException.cs" />
+    <Compile Include="Protocol\IMessage.cs" />
+    <Compile Include="Protocol\IMessageEntry.cs" />
+    <Compile Include="Protocol\IRequest.cs" />
+    <Compile Include="Protocol\IResponse.cs" />
+    <Compile Include="Protocol\OperationCode.cs" />
+    <Compile Include="Protocol\ResourceRecords\IPAddressResourceRecord.cs" />
+    <Compile Include="Protocol\ResponseCode.cs" />
+    <Compile Include="Protocol\Utils\ByteExtensions.cs" />
+    <Compile Include="Protocol\Domain.cs" />
+    <Compile Include="Protocol\Header.cs" />
+    <Compile Include="Server\MasterFile.cs" />
+    <Compile Include="Protocol\Marshalling\EndianAttribute.cs" />
+    <Compile Include="Protocol\Marshalling\Endianness.cs" />
+    <Compile Include="Protocol\Marshalling\Struct.cs" />
+    <Compile Include="Protocol\ResourceRecords\CanonicalNameResourceRecord.cs" />
+    <Compile Include="Protocol\ResourceRecords\IResourceRecord.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protocol\Question.cs" />
+    <Compile Include="Protocol\Request.cs" />
+    <Compile Include="Protocol\RecordClass.cs" />
+    <Compile Include="Protocol\RecordType.cs" />
+    <Compile Include="Protocol\ResourceRecords\MailExchangeResourceRecord.cs" />
+    <Compile Include="Protocol\ResourceRecords\NameServerResourceRecord.cs" />
+    <Compile Include="Protocol\ResourceRecords\PointerResourceRecord.cs" />
+    <Compile Include="Protocol\ResourceRecords\ResourceRecord.cs" />
+    <Compile Include="Protocol\ResourceRecords\BaseResourceRecord.cs" />
+    <Compile Include="Protocol\ResourceRecords\ResourceRecordFactory.cs" />
+    <Compile Include="Protocol\ResourceRecords\StartOfAuthorityResourceRecord.cs" />
+    <Compile Include="Protocol\Response.cs" />
+    <Compile Include="Protocol\Utils\ByteStream.cs" />
+    <Compile Include="Protocol\Utils\ObjectStringifier.cs" />
+    <Compile Include="Server\DnsServer.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

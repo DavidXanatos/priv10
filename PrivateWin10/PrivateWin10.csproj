@@ -15,6 +15,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -27,7 +28,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -88,13 +88,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\AppManager.cs" />
+    <Compile Include="API\EtwLogger.cs" />
     <Compile Include="API\FileOps.cs" />
     <Compile Include="API\MiscStats.cs" />
+    <Compile Include="API\Network\DnsApi.cs" />
     <Compile Include="API\Network\IPHelper.cs" />
+    <Compile Include="API\RegistryMonitor.cs" />
     <Compile Include="API\UwpFunc.cs" />
     <Compile Include="API\ProcFunc.cs" />
     <Compile Include="API\WindowsFirewall.cs" />
     <Compile Include="Common\DataGridExt.cs" />
+    <Compile Include="Common\HttpTask.cs" />
     <Compile Include="Common\IconExtractor.cs" />
     <Compile Include="Common\ImgFunc.cs" />
     <Compile Include="Common\MyLicense.cs" />
@@ -102,8 +106,17 @@
       <DependentUpon>AddressControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Converters.cs" />
+    <Compile Include="Controls\DnsBlockListsControl.xaml.cs">
+      <DependentUpon>DnsBlockListsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DnsFilterListControl.xaml.cs">
+      <DependentUpon>DnsFilterListControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\DnsLogList.xaml.cs">
       <DependentUpon>DnsLogList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DnsQueryLogControl.xaml.cs">
+      <DependentUpon>DnsQueryLogControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\FirewallLogList.xaml.cs">
       <DependentUpon>FirewallLogList.xaml</DependentUpon>
@@ -123,7 +136,13 @@
     <Compile Include="Controls\TweakGroup.xaml.cs">
       <DependentUpon>TweakGroup.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Core\DnsInspector\DnsCacheMonitor.cs" />
     <Compile Include="Core\DnsInspector.cs" />
+    <Compile Include="Core\DnsProxy\DnsConfigurator.cs" />
+    <Compile Include="Core\DnsProxy\DnsProxyServer.cs" />
+    <Compile Include="Core\DnsInspector\DnsQueryWatcher.cs" />
+    <Compile Include="Core\DnsProxy\DnsBlockList.cs" />
+    <Compile Include="Core\DnsInspector\HostNameResolver.cs" />
     <Compile Include="Core\Tweaks\TweakEngine.cs" />
     <Compile Include="Core\WindowsFirewall\FirewallRuleEx.cs" />
     <Compile Include="Core\WindowsFirewall\WinNetFwAPI.cs" />
@@ -163,6 +182,9 @@
     <Compile Include="Pages\AboutPage.xaml.cs">
       <DependentUpon>AboutPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\DnsPage.xaml.cs">
+      <DependentUpon>DnsPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\FirewallPage.xaml.cs">
       <DependentUpon>FirewallPage.xaml</DependentUpon>
     </Compile>
@@ -201,9 +223,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Controls\DnsBlockListsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\DnsFilterListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\DnsLogList.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\DnsQueryLogControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\FirewallLogList.xaml">
       <SubType>Designer</SubType>
@@ -253,6 +287,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Pages\DnsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\FirewallPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -355,6 +393,10 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DNS\DNS.csproj">
+      <Project>{ebcb8f53-c56a-4245-893f-ce67d69d0087}</Project>
+      <Name>DNS</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ETW\O365.Security.Native.ETW\O365.Security.Native.ETW.vcxproj">
       <Project>{ed4e6027-541f-440a-a5ee-15dbb7b89423}</Project>
       <Name>Microsoft.O365.Security.Native.ETW</Name>
@@ -443,5 +485,6 @@
   <ItemGroup>
     <Resource Include="Resources\icons8-radiergummi-16.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

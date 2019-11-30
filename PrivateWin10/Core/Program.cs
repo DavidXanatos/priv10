@@ -279,7 +279,7 @@ namespace PrivateWin10
         }
 
         [Serializable()]
-        public class LogEntry : DnsInspector.WithHost
+        public class LogEntry : WithHost
         {
             public Guid guid;
 
@@ -353,7 +353,6 @@ namespace PrivateWin10
             {
                 guid = Guid.NewGuid();
                 ProgID = progID;
-                LastSeen = DateTime.Now;
                 SeenCounter = 0;
             }
 
@@ -383,7 +382,7 @@ namespace PrivateWin10
             }
         }
 
-        public void LogDomain(string HostName)
+        public void LogDomain(string HostName, DateTime TimeStamp)
         {
             DnsEntry Entry = null;
             if (!DnsLog.TryGetValue(HostName, out Entry))
@@ -392,8 +391,10 @@ namespace PrivateWin10
                 Entry.HostName = HostName;
                 DnsLog.Add(HostName, Entry);
             }
-            else
-                Entry.LastSeen = DateTime.Now;
+            else if (Entry.LastSeen == TimeStamp)
+                return; // dont count duplicates
+
+            Entry.LastSeen = TimeStamp;
             //Entry.LastSeenIP = IP;
             Entry.SeenCounter++;
         }

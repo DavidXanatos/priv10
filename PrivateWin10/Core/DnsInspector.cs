@@ -6,298 +6,42 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+
 namespace PrivateWin10
 {
-    public class DnsInspectorEtw: IDisposable
+    [Flags]
+    public enum NameSources : int
     {
-        Microsoft.O365.Security.ETW.UserTrace userTrace;
-        Microsoft.O365.Security.ETW.Provider dnsCaptureProvider;
-        Thread userThread;
-
-        public DnsInspectorEtw(Microsoft.O365.Security.ETW.IEventRecordDelegate OnDnsQueryEvent)
-        {
-            userTrace = new Microsoft.O365.Security.ETW.UserTrace("priv10_UserLogger");
-            dnsCaptureProvider = new Microsoft.O365.Security.ETW.Provider(Guid.Parse("{55404E71-4DB9-4DEB-A5F5-8F86E46DDE56}"));
-            dnsCaptureProvider.Any = Microsoft.O365.Security.ETW.Provider.AllBitsSet;
-            dnsCaptureProvider.OnEvent += OnDnsQueryEvent;
-            userTrace.Enable(dnsCaptureProvider);
-
-            userThread = new Thread(() => { userTrace.Start(); });
-            userThread.Start();
-        }
-
-        public void Dispose()
-        {
-            userTrace.Stop();
-            userThread.Join();
-        }
+        None            = 0x00,
+        ReverseDns      = 0x01,
+        CachedQuery     = 0x02, // good
+        CapturedQuery   = 0x04 // best
     }
 
-    public class DnsInspector
+    public class HostNameEntry
     {
-        class DnsCacheEntry
-        {
-            public DnsCacheEntry()
-            {
-                Counter = 0;
-            }
+        public string HostName;
+        public DateTime TimeStamp;
+    }
 
-            public int Counter;
-            //public UInt64 LastSeen; // todo: xxx
-        };
+    public class DnsInspector : IDisposable
+    {
+        private DnsQueryWatcher queryWatcher = null;
+        private DnsCacheMonitor dnsCacheMonitor = null;
+        private HostNameResolver hostNameResolver = null;
 
-        // map<int, multi_map<IPAddress, TEntry>>
-        Dictionary<int, Dictionary<IPAddress, Dictionary<string, DnsCacheEntry>>> dnsQueryCache = new Dictionary<int, Dictionary<IPAddress, Dictionary<string, DnsCacheEntry>>>();
-
-        [Serializable()]
-        public class DnsEvent : EventArgs
-        {
-            public int ProcessId;
-            public string HostName;
-        }
-
-        public event EventHandler<DnsEvent> DnsQueryEvent;
-
-        DnsInspectorEtw Etw = null;
-
-        public DnsInspector()
-        {
-            try
-            {
-                InitEtw();
-                //AppLog.Debug("Successfully initialized DnsInspectorETW");
-            }
-            catch
-            {
-                AppLog.Debug("Failed to initialized DnsInspectorETW");
-            }
-        }
-
-        private void InitEtw()
-        {
-            Etw = new DnsInspectorEtw(OnDnsQueryEvent);
-        }
-
-        public void Dispose()
-        {
-            if (Etw != null)
-                Etw.Dispose();
-        }
-
-
-        private void OnDnsQueryEvent(Microsoft.O365.Security.ETW.IEventRecord record)
-        {
-            // WARNING: this function is called from the worker thread
-
-            if (record.Id != 1001)
-                return;
-
-            if (record.GetUInt32("Status", 0) != 0)
-                return;
-
-            int ProcessId = (int)record.ProcessId;
-            int ThreadId = (int)record.ThreadId;
-            var HostName = record.GetUnicodeString("NodeName", null);
-            var Results = record.GetUnicodeString("Result", null);
-
-            if (ProcessId == ProcFunc.CurID)
-                return; // ignore these events as thay are the result of reverse dns querries....
-
-            /*
-            "192.168.163.1" "192.168.163.1;"
-            "localhost" "[::1]:8307;127.0.0.1:8307;" <- wtf is this why is there a port?!
-            "DESKTOP" "fe80::189a:f1c3:3e87:be81%12;192.168.10.12;"
-            "telemetry.malwarebytes.com" "54.149.69.204;54.200.191.52;54.70.191.27;54.149.66.105;54.244.17.248;54.148.98.86;"
-            "web.whatsapp.com" "31.13.84.51;"
-            */
-
-            App.engine?.RunInEngineThread(() =>
-            {
-                // Note: this happens in the engine thread
-
-                DnsQueryEvent?.Invoke(this, new DnsEvent() { ProcessId = ProcessId, HostName = HostName });
-
-                foreach (string Result in Results.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    IPAddress Address = null;
-                    if (!IPAddress.TryParse(Result, out Address) && !IPAddress.TryParse(TextHelpers.Split2(Result, ":", true).Item1, out Address))
-                        continue;
-
-                    OnHostName(ProcessId, Address, HostName);
-
-                    Dictionary<IPAddress, Dictionary<string, DnsCacheEntry>> dnsCache = dnsQueryCache.GetOrCreate(ProcessId);
-
-                    Dictionary<string, DnsCacheEntry> cacheEntries = dnsCache.GetOrCreate(Address);
-
-                    DnsCacheEntry cacheEntry = cacheEntries.GetOrCreate(HostName);
-
-                    cacheEntry.Counter++;
-                }
-            });
-        }
-
-        public enum NameSources : int
-        {
-            None = 0,
-            ReverseDNS = 1,
-            FoundInCache = 2, // todo
-            CapturedQuery = 3
-        }
-
-        [Serializable()]
-        public class WithHost
-        {
-            public NameSources RemoteHostNameSource = NameSources.None;
-            public string RemoteHostName;
-
-            static public readonly Action<object, string, NameSources> HostSetter = (object obj, string name, NameSources source) => {
-                WithHost This = (obj as WithHost);
-                if (source > This.RemoteHostNameSource)
-                {
-                    This.RemoteHostName = name;
-                    This.RemoteHostNameSource = source;
-                }
-            };
-
-            public bool Update(WithHost other)
-            {
-                if (RemoteHostName != null && other.RemoteHostName != null && RemoteHostName.Equals(other.RemoteHostName))
-                    return false;
-                RemoteHostNameSource = other.RemoteHostNameSource;
-                RemoteHostName = other.RemoteHostName;
-                return true;
-            }
-
-            public bool HasHostName()
-            {
-                return RemoteHostNameSource != NameSources.None;
-            }
-
-            public string GetHostName()
-            {
-                return RemoteHostName;
-            }
-        }
-
-        public void GetHostName(int processId, IPAddress remoteAddress, object target, Action<object, string, NameSources> setter)
-        {
-            LookupHostName(remoteAddress, target, setter);
-            FindQueryName(processId, remoteAddress, target, setter);
-        }
-
-        public class HostLookupJob
+        private class HostObserveJob
         {
             public WeakReference target;
             public Action<object, string, NameSources> setter;
-            
-            public void SetHostName(string hostName, NameSources source)
-            {
-                object obj = target.Target;
-                if (obj != null)
-                    setter(obj, hostName, source);
-            }
-        }
 
-        public class ReverseDnsEntry
-        {
-            public UInt64 TimeStamp;
-            public string HostName;
-            public List<HostLookupJob> PendingJobs = null;
-        }
-
-        private Dictionary<IPAddress, ReverseDnsEntry> ReverseDnsCache = new Dictionary<IPAddress, ReverseDnsEntry>();
-
-        public bool LookupHostName(IPAddress remoteAddress, object target, Action<object, string, NameSources> setter)
-        {
-            if (remoteAddress.Equals(IPAddress.Any) || remoteAddress.Equals(IPAddress.IPv6Any))
-                return true;
-
-            if (remoteAddress.Equals(IPAddress.Loopback) || remoteAddress.Equals(IPAddress.IPv6Loopback))
-                return true;
-
-            ReverseDnsEntry Entry = null;
-            if (ReverseDnsCache.TryGetValue(remoteAddress, out Entry))
-            {
-                if ((Entry.TimeStamp + (5 * 60 * 1000) >= MiscFunc.GetCurTick()))
-                {
-                    if(Entry.HostName != null)
-                        setter(target, Entry.HostName, NameSources.ReverseDNS);
-                    return true;
-                }
-            }
-
-            if (Entry == null)
-            {
-                Entry = new ReverseDnsEntry();
-                ReverseDnsCache.Add(remoteAddress, Entry);
-            }
-
-            if (Entry.PendingJobs == null)
-            {
-                Entry.PendingJobs = new List<HostLookupJob>();
-
-                //AppLog.Debug("reverse looking up : {0}", remoteAddress.ToString());
-
-                // todo: use matibe api to save oin dns queries
-                Dns.BeginGetHostEntry(remoteAddress, (x) =>
-                {
-                    // WARNING: this function is called from the worker thread
-
-                    //x.AsyncState
-                    IPHostEntry hostInfo = null;
-                    try
-                    {
-                        hostInfo = Dns.EndGetHostEntry(x);
-                    }
-                    catch { }
-
-                    App.engine?.RunInEngineThread(() =>
-                    {
-                        // Note: this happens in the engine thread
-
-                        Entry.TimeStamp = MiscFunc.GetCurTick();
-                        if (hostInfo != null)
-                            Entry.HostName = hostInfo.HostName;
-
-                        if (Entry.HostName != null)
-                        {
-                            foreach(var job in Entry.PendingJobs)
-                                job.SetHostName(Entry.HostName, NameSources.ReverseDNS);
-                        }
-                        Entry.PendingJobs = null;
-                    });
-                }, null);
-            }
-            Entry.PendingJobs.Add(new HostLookupJob() { target = new WeakReference(target), setter = setter });
-
-            return false;
-        }
-
-        public void CleanupCache()
-        {
-            Dictionary<int, System.Diagnostics.Process> Processes = new Dictionary<int, System.Diagnostics.Process>();
-            foreach (var process in System.Diagnostics.Process.GetProcesses())
-                Processes.Add(process.Id, process);
-
-            // Remove all entries for no longer existing processes
-            foreach (int ProcessId in dnsQueryCache.Keys.ToList())
-            {
-                if (!Processes.ContainsKey(ProcessId))
-                    dnsQueryCache.Remove(ProcessId);
-            }
-        }
-
-        public class HostObserveJob
-        {
-            public WeakReference target;
-            public Action<object, string, NameSources> setter;
             public int processId;
             public IPAddress remoteAddress;
-            public UInt64 timeOut;
 
-            //public UInt64 CreationTime = MiscFunc.GetCurTick();
+            public NameSources Await = NameSources.None;
+            public DateTime timeOut;
 
-            public bool IsValid() { return target.IsAlive && timeOut > MiscFunc.GetUTCTime(); }
+            public bool IsValid() { return target.IsAlive && Await != NameSources.None && timeOut > DateTime.Now; }
 
             public void SetHostName(string hostName, NameSources source)
             {
@@ -309,38 +53,217 @@ namespace PrivateWin10
 
         private MultiValueDictionary<IPAddress, HostObserveJob> ObserverJobs = new MultiValueDictionary<IPAddress, HostObserveJob>();
 
-        public bool FindQueryName(int processId, IPAddress remoteAddress, object target, Action<object, string, NameSources> setter)
-        {
-            Dictionary<IPAddress, Dictionary<string, DnsCacheEntry>> dnsCache;
-            if (dnsQueryCache.TryGetValue(processId, out dnsCache))
-            {
-                Dictionary<string, DnsCacheEntry> cacheEntries;
-                if (dnsCache.TryGetValue(remoteAddress, out cacheEntries) && cacheEntries.Count > 0)
-                {
-                    // we found an entry
-                    setter(target, cacheEntries.Keys.First(), NameSources.CapturedQuery);
-                    return true;
-                }
-            }
+        DateTime LastCleanupTime = DateTime.Now;
 
-            HostObserveJob job = new HostObserveJob() { target = new WeakReference(target), setter = setter, processId = processId, remoteAddress = remoteAddress, timeOut = MiscFunc.GetUTCTime() + 30 };
-            ObserverJobs.Add(remoteAddress, job);
-            return false;
+        public DnsInspector()
+        {
+            queryWatcher = new DnsQueryWatcher();
+            queryWatcher.DnsQueryEvent += OnDnsQueryWatched;
+
+            dnsCacheMonitor = new DnsCacheMonitor();
+            dnsCacheMonitor.DnsCacheEvent += OnDnsCacheEvent;
+
+            hostNameResolver = new HostNameResolver();
+            hostNameResolver.HostNameResolved += OnResolvedHostName;
         }
 
-        private void OnHostName(int processId, IPAddress remoteAddress, string hostName)
+        public void Dispose()
+        {
+            queryWatcher.Dispose();
+            dnsCacheMonitor.Dispose();
+        }
+
+        private void OnDnsQueryWatched(object sender, DnsQueryWatcher.DnsEvent Event)
+        {
+            foreach (IPAddress remoteAddress in Event.RemoteAddresses)
+                OnHostName(remoteAddress, Event.HostName, NameSources.CapturedQuery, Event.ProcessId);
+
+            List<ServiceHelper.ServiceInfo> Services = ServiceHelper.GetServicesByPID(Event.ProcessId);
+            ProgramID ProgID = App.engine.GetProgIDbyPID(Event.ProcessId, (Services == null || Services.Count > 1) ? null : Services[0].ServiceName);
+            if (ProgID != null)
+            {
+                Program prog = App.engine.ProgramList.GetProgram(ProgID, true, ProgramList.FuzzyModes.Any);
+                prog?.LogDomain(Event.HostName, Event.TimeStamp);
+            }
+            else
+                App.LogWarning("Watched a DNS query for a terminated process with id {0}", Event.ProcessId);
+        }
+
+        private void OnDnsCacheEvent(object sender, DnsCacheMonitor.DnsEvent Event)
+        {
+            //OnHostName(Event.Entry.Address, Event.Entry.HostName, NameSources.CachedQuery); // see comment in Process
+        }
+
+        private void OnResolvedHostName(object sender, HostNameResolver.DnsEvent Event)
+        {
+            OnHostName(Event.RemoteAddress, Event.HostNames.FirstOrDefault(), NameSources.ReverseDns);
+        }
+
+        private void OnHostName(IPAddress remoteAddress, string hostName, NameSources source, int processId = 0)
         {
             CloneableList<HostObserveJob> Jobs = ObserverJobs.GetValues(remoteAddress, false);
             if (Jobs == null)
                 return;
-            foreach (HostObserveJob Job in Jobs.Clone())
+
+            foreach (HostObserveJob curJob in Jobs.Clone())
             {
-                if (Job.processId == processId)
-                    Job.SetHostName(hostName, NameSources.CapturedQuery);
-                else if (Job.IsValid())
-                    continue;
-                ObserverJobs.Remove(remoteAddress, Job);
+                if (processId != 0 && curJob.processId == processId)
+                {
+                    curJob.SetHostName(hostName, NameSources.CapturedQuery);
+                    curJob.Await &= ~source; // clear the await
+                }
+
+                if (!curJob.IsValid())
+                    ObserverJobs.Remove(remoteAddress, curJob);
             }
+        }
+
+        public void Process()
+        {
+            // if we are using the DNS proxy we have first hand data and not need to monitor the system DNS cache.
+            if(App.engine.DnsProxy == null || App.GetConfigInt("DnsInspector", "AlwaysMonitor", 0) != 0)
+                dnsCacheMonitor.SyncCache();
+
+            if (LastCleanupTime.AddMinutes(15) < DateTime.Now) // every 15 minutes
+            {
+                LastCleanupTime = DateTime.Now;
+
+                queryWatcher.CleanupCache();
+                dnsCacheMonitor.CleanupCache();
+                hostNameResolver.CleanupCache();
+            }
+
+            foreach (var Address in ObserverJobs.Keys.ToList())
+            {
+                CloneableList<HostObserveJob> curJobs = ObserverJobs[Address];
+                for (int i = 0; i < curJobs.Count; i++)
+                {
+                    HostObserveJob curJob = curJobs[i];
+
+                    // Note: the cache emits events on every record found, if we have to a CNAME -> A -> IP case 
+                    //          we need to wait untill all records are in the cache and than properly search it
+                    if ((curJob.Await & NameSources.CachedQuery) != 0)
+                    {
+                        string cachedName = FindMostRecentHost(dnsCacheMonitor.FindHostNames(curJob.remoteAddress));
+                        if (cachedName != null)
+                            curJob.SetHostName(cachedName, NameSources.CapturedQuery);
+                        curJob.Await &= ~NameSources.CachedQuery; // if after one cache update we still dont have a result we wont get it
+                    }
+
+                    if (!curJob.IsValid())
+                        curJobs.RemoveAt(i--);
+                }
+                if (curJobs.Count == 0)
+                    ObserverJobs.Remove(Address);
+            }
+        }
+
+        static public string FindMostRecentHost(List<HostNameEntry> cacheEntries)
+        {
+            if(cacheEntries == null)
+                return null;
+
+            HostNameEntry bestEntry = null;
+            foreach (var curEntry in cacheEntries)
+            {
+                if (bestEntry == null || curEntry.TimeStamp > bestEntry.TimeStamp)
+                    bestEntry = curEntry;
+            }
+            return bestEntry?.HostName;
+        }
+
+        public void GetHostName(int processId, IPAddress remoteAddress, object target, Action<object, string, NameSources> setter)
+        {
+            // sanity check
+            if (remoteAddress.Equals(IPAddress.Any) || remoteAddress.Equals(IPAddress.IPv6Any))
+                return;
+            if (remoteAddress.Equals(IPAddress.Loopback) || remoteAddress.Equals(IPAddress.IPv6Loopback))
+            {
+                setter(target, "localhost", NameSources.ReverseDns);
+                return;
+            }
+            if (NetFunc.IsMultiCast(remoteAddress))
+            {
+                setter(target, "multicast.arpa", NameSources.ReverseDns);
+                return;
+            }
+
+            NameSources Await = NameSources.None;
+
+            if (queryWatcher.IsActive())
+            {
+                string capturedName = FindMostRecentHost(queryWatcher.FindHostNames(processId, remoteAddress));
+                if (capturedName == null)
+                    Await |= NameSources.CapturedQuery;
+                else
+                    setter(target, capturedName, NameSources.CapturedQuery);
+            }
+
+            if (Await != NameSources.None)
+            {
+                string cachedName = FindMostRecentHost(dnsCacheMonitor.FindHostNames(remoteAddress));
+                if (cachedName == null)
+                    Await |= NameSources.CachedQuery;
+                else
+                    setter(target, cachedName, NameSources.CachedQuery);
+            }
+
+            int ReverseResolve = App.GetConfigInt("DnsInspector", "UseReverseDNS", 0); // todo: xxx set default 1
+            if (ReverseResolve == 2 || (ReverseResolve == 1 && (Await & NameSources.CachedQuery) != 0))
+            {
+                string resolvedName = FindMostRecentHost(hostNameResolver.ResolveHostNames(remoteAddress));
+                if (resolvedName == null)
+                    Await |= NameSources.ReverseDns;
+                else
+                    setter(target, resolvedName, NameSources.ReverseDns);
+            }
+
+            if (Await != NameSources.None)
+            {
+                HostObserveJob job = new HostObserveJob() { target = new WeakReference(target), setter = setter, processId = processId, remoteAddress = remoteAddress, Await = Await, timeOut = DateTime.Now.AddSeconds(30) };
+                ObserverJobs.Add(remoteAddress, job);
+            }
+        }
+
+        public void AddDnsCacheEntry(DnsCacheMonitor.DnsCacheEntry curEntry)
+        {
+            dnsCacheMonitor.AddCacheEntry(curEntry);
+        }
+    }
+
+
+    [Serializable()]
+    public class WithHost
+    {
+        public NameSources RemoteHostNameSource = NameSources.None;
+        public string RemoteHostName;
+
+        static public readonly Action<object, string, NameSources> HostSetter = (object obj, string name, NameSources source) => {
+            WithHost This = (obj as WithHost);
+            if (source > This.RemoteHostNameSource) // the bigger the better
+            {
+                This.RemoteHostName = name;
+                This.RemoteHostNameSource = source;
+            }
+        };
+
+        public bool Update(WithHost other)
+        {
+            if (RemoteHostName != null && other.RemoteHostName != null && RemoteHostName.Equals(other.RemoteHostName))
+                return false;
+            RemoteHostNameSource = other.RemoteHostNameSource;
+            RemoteHostName = other.RemoteHostName;
+            return true;
+        }
+
+        public bool HasHostName()
+        {
+            return RemoteHostNameSource != NameSources.None;
+        }
+
+        public string GetHostName()
+        {
+            return RemoteHostName;
         }
     }
 }

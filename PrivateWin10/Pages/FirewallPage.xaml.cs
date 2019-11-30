@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -249,6 +250,8 @@ namespace PrivateWin10.Pages
             //consList.chkAllowed.IsEnabled = (pol & FirewallMonitor.Auditing.Allowed) != 0;
             //consList.chkBlocked.IsEnabled = (pol & FirewallMonitor.Auditing.Blocked) != 0;
 
+            inspectorTab.IsEnabled = App.GetConfigInt("DnsInspector", "Enabled", 0) != 0;
+
             UpdateProgramList();
         }
 
@@ -372,7 +375,8 @@ namespace PrivateWin10.Pages
                 }
 
                 if ((chkNoLocal.IsChecked != true || (!NetFunc.IsLocalHost(args.entry.FwEvent.RemoteAddress) && !NetFunc.IsMultiCast(args.entry.FwEvent.RemoteAddress)))
-                 && (chkNoLan.IsChecked != true || !FirewallRule.MatchAddress(args.entry.FwEvent.RemoteAddress, FirewallRule.AddrKeywordLocalSubnet)))
+                 && (chkNoLan.IsChecked != true || !FirewallRule.MatchAddress(args.entry.FwEvent.RemoteAddress, FirewallRule.AddrKeywordLocalSubnet))
+                 && args.entry.FwEvent.ProcessId != ProcFunc.CurID) // Note: When DNS proxy is nabled we are always very active, so ignore it
                 {
                     switch (args.entry.FwEvent.Action)
                     {

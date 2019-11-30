@@ -180,6 +180,8 @@ namespace PrivateWin10
 
         public const string FirewallRulesKey  = @"SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\FirewallRules";
 
+        public const string FirewallProfilesKey = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles";
+
         public const string PrivateProfileKey = @"SYSTEM\CurrentControlSet\services\SharedAccess\Parameters\FirewallPolicy\StandardProfile";
         public const string DomainProfileKey  = @"SYSTEM\CurrentControlSet\services\SharedAccess\Parameters\FirewallPolicy\DomainProfile";
         public const string PublicProfileKey  = @"SYSTEM\CurrentControlSet\services\SharedAccess\Parameters\FirewallPolicy\PublicProfile";

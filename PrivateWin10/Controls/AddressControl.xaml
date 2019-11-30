@@ -38,7 +38,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <ComboBox Name="cmbEdit" Grid.Column="0" Margin="2,2,0,2" IsEditable="True" VerticalAlignment="Center" HorizontalAlignment="Stretch" Text="{Binding AddressTxt, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" SelectedItem="{Binding Address}"/>
-            <Button Name="btnOk" Grid.Column="1" Content="Ok" HorizontalAlignment="Left" Margin="2,2" VerticalAlignment="Center" Width="Auto" Style="{DynamicResource SquareButtonStyle}" Click="btnOk_Click" />
+            <Button Name="btnOk" Grid.Column="1" Content="Ok" HorizontalAlignment="Left" Margin="2,2" VerticalAlignment="Center" Width="Auto" Click="btnOk_Click" />
         </Grid>
     </Grid>
 </UserControl>

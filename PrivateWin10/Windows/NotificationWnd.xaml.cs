@@ -142,9 +142,9 @@ namespace PrivateWin10.Windows
 
                 cmbAccess.Background = ProgramControl.GetAccessColor(NetAccess);
                 WpfFunc.CmbSelect(cmbAccess, NetAccess.ToString());
-            }
 
-            btnApply.IsEnabled = false;
+                btnApply.IsEnabled = false;
+            }
 
             ProgramID id = mEventList.ElementAt(curIndex);
             Tuple<Program, List<Engine.FwEventArgs>> list = mEvents[id];

@@ -15,7 +15,7 @@
             <RowDefinition Height="100*"/>
         </Grid.RowDefinitions>
 
-        <ribbon:Ribbon Grid.Row="0" Loaded="Ribbon_Loaded" Name="rbbBar" SelectedIndex="1">
+        <ribbon:Ribbon Grid.Row="0" Loaded="Ribbon_Loaded" Name="rbbBar" SelectedIndex="0">
             <Ribbon.QuickAccessToolBar>
                 <RibbonQuickAccessToolBar />
             </Ribbon.QuickAccessToolBar>
@@ -414,7 +414,7 @@
                     <TabItem Name="logTab" Header="Connection Log">
                         <controls:FirewallLogList x:Name="consList" VerticalAlignment="Stretch"/>
                     </TabItem>
-                    <TabItem Header="Dns Log">
+                    <TabItem Name="inspectorTab" Header="Dns Inspector">
                         <controls:DnsLogList x:Name="dnsList" VerticalAlignment="Stretch"/>
                     </TabItem>
                 </TabControl>

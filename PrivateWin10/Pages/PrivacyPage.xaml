@@ -6,7 +6,12 @@
              xmlns:local="clr-namespace:PrivateWin10.Pages"
              mc:Ignorable="d" >
     <Grid Margin="48,0,0,0">
-        <ScrollViewer Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="200" Margin="5,5,5,5" VerticalScrollBarVisibility="Auto">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        
+        <ScrollViewer Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" MinWidth="200" Margin="5,5,5,5" VerticalScrollBarVisibility="Auto">
             <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Name="catGrid">
 
             </Grid>
@@ -24,7 +29,7 @@
             </TabItem>
         </-->
 
-        <Grid Margin="210,0,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Grid Grid.Column="1" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" MinWidth="250" MaxWidth="400" />

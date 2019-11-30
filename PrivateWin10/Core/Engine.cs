@@ -21,13 +21,18 @@ namespace PrivateWin10
         public FirewallGuard FirewallGuard;
         public NetworkMonitor NetworkMonitor;
         public DnsInspector DnsInspector;
+        public DnsProxyServer DnsProxy;
 
         Dispatcher mDispatcher;
         ManualResetEvent mStarted = new ManualResetEvent(false);
-        ManualResetEvent mFinished = new ManualResetEvent(false);
+        //ManualResetEvent mFinished = new ManualResetEvent(false);
         DispatcherTimer mTimer;
-        bool mDoQuit = false;
-        UInt64 LastSaveTime = MiscFunc.GetTickCount64();
+        volatile bool mDoQuit = false;
+        DateTime LastSaveTime = DateTime.Now;
+
+#if DEBUG
+        List<EtwAbstractLogger> EtwLoggers = new List<EtwAbstractLogger>();
+#endif
 
         public delegate void FX();
 
@@ -97,7 +102,7 @@ namespace PrivateWin10
             // Init
             AppLog.Debug("Loading program list...");
             ProgramList = new ProgramList();
-            ProgramList.LoadList();
+            ProgramList.Load();
 
             AppLog.Debug("Starting firewall monitor...");
             FirewallMonitor = new FirewallMonitor();
@@ -148,14 +153,26 @@ namespace PrivateWin10
             LoadFwRules();
             CleanupFwRules();
 
-            AppLog.Debug("Starting network manger...");
+            AppLog.Debug("Starting Network Monitor...");
             NetworkMonitor = new NetworkMonitor();
-            DnsInspector = new DnsInspector();
-
-            DnsInspector.DnsQueryEvent += (object sender, DnsInspector.DnsEvent DnsEvent) =>
+            NetworkMonitor.NetworksChanged += (object sender, EventArgs e) =>
             {
-                OnDnsEvent(DnsEvent);
+                DnsProxy?.ConfigureSystemDNS();
             };
+
+            if (App.GetConfigInt("DnsInspector", "Enabled", 0) != 0)
+            {
+                AppLog.Debug("Starting Dns Inspector...");
+                DnsInspector = new DnsInspector();
+            }
+
+            if (App.GetConfigInt("DnsProxy", "Enabled", 0) != 0)
+            {
+                AppLog.Debug("Starting Dns Proxy...");
+                DnsProxy = new DnsProxyServer();
+                if (!DnsProxy.Init())                   
+                    DnsProxy = null;
+            }
             //
 
             AppLog.Debug("Setting up IPC host...");
@@ -174,7 +191,11 @@ namespace PrivateWin10
 
             // test here
             //...
-
+#if DEBUG
+            //EtwLoggers.Add(new EtwUserLogger("dns_client", Guid.Parse("1c95126e-7eea-49a9-a3fe-a378b03ddb4d")));
+            //EtwLoggers.Add(new EtwUserLogger("winsock_dns", Guid.Parse("55404e71-4db9-4deb-a5f5-8f86e46dde56")));
+            //EtwLoggers.Add(new EtwUserLogger("winsock_afd", Guid.Parse("e53c6823-7bb8-44bb-90dc-3f86090d48a6")));
+#endif
 
             mTimer = new DispatcherTimer();
             mTimer.Tick += new EventHandler(OnTimerTick);
@@ -192,18 +213,20 @@ namespace PrivateWin10
 
             // UnInit
             AppLog.Debug("Saving program list...");
-            ProgramList.StoreList();
+            ProgramList.Store();
 
             FirewallMonitor.StopEventWatcher();
-
             NetworkMonitor.Dispose();
-            DnsInspector.Dispose();
+            if (DnsInspector != null)
+                DnsInspector.Dispose();
+            if(DnsProxy != null)
+                DnsProxy.Dispose();
             //
 
             AppLog.Debug("Shuttin down IPC host...");
             App.host.Close();
 
-            mFinished.Set();
+            //mFinished.Set();
 
             mDispatcher = null;
 
@@ -214,11 +237,10 @@ namespace PrivateWin10
 
         protected void OnTimerTick(object sender, EventArgs e)
         {
-            if ((mTickCount++ % 4) == 0)
+            if ((mTickCount++ % 4) != 0)
                 return;
 
-            if ((mTickCount % (4 * 60)) == 0)
-                NetworkMonitor.UpdateNetworks();
+            NetworkMonitor.UpdateNetworks();
 
             NetworkMonitor.UpdateSockets();
 
@@ -228,16 +250,19 @@ namespace PrivateWin10
 
             ProgramList.UpdatePrograms(); // data rates and so on
 
-            if ((mTickCount % (4 * 60)) == 0)
-                CleanupFwRules();
-
-            if ((mTickCount % (4 * 60 * 30)) == 0)
-                DnsInspector.CleanupCache();
-
-            if (MiscFunc.GetTickCount64() - LastSaveTime > 15 * 60 * 1000) // every 15 minutes
+            if ((mTickCount % (4 * 60)) == 0) // every minute
             {
-                LastSaveTime = MiscFunc.GetTickCount64();
-                ProgramList.StoreList();
+                CleanupFwRules(); // remove temporary rules
+            }
+
+            DnsProxy?.blockList?.CheckForUpdates();
+
+            DnsInspector?.Process();
+
+            if (LastSaveTime.AddMinutes(15) < DateTime.Now) // every 15 minutes
+            {
+                LastSaveTime = DateTime.Now;
+                ProgramList.Store();
             }
 
             if (mDoQuit)
@@ -252,7 +277,7 @@ namespace PrivateWin10
             mDispatcher.InvokeShutdown();
             mDispatcher.Thread.Join(); // Note: this waits for thread finish
 
-            mFinished.WaitOne();
+            //mFinished.WaitOne();
         }
 
         public ProgramID GetProgIDbyPID(int PID, string serviceTag, string fileName = null)
@@ -341,15 +366,19 @@ namespace PrivateWin10
         {
             bool Delayed = false;
             //DnsInspector.ResolveHost(entry.FwEvent.ProcessId, entry.FwEvent.RemoteAddress, entry, Program.LogEntry.HostSetter);
-            DnsInspector.GetHostName(entry.FwEvent.ProcessId, entry.FwEvent.RemoteAddress, entry, (object obj, string name, DnsInspector.NameSources source) => {
+            if (DnsInspector != null)
+            {
+                DnsInspector.GetHostName(entry.FwEvent.ProcessId, entry.FwEvent.RemoteAddress, entry, (object obj, string name, NameSources source) =>
+                {
 
-                var old_source = (obj as Program.LogEntry).RemoteHostNameSource;
-                Program.LogEntry.HostSetter(obj, name, source);
+                    var old_source = (obj as Program.LogEntry).RemoteHostNameSource;
+                    Program.LogEntry.HostSetter(obj, name, source);
 
-                // if the resolution was delayed, re emit this event, its unique gui wil prevent it form being logged twice
-                if (Delayed && source > old_source) // only update if we got a better host name
-                    App.host.NotifyActivity(prog.ProgSet.guid, entry, prog.ID, services, true);
-            });
+                    // if the resolution was delayed, re emit this event, its unique gui wil prevent it form being logged twice
+                    if (Delayed && source > old_source) // only update if we got a better host name
+                        App.host.NotifyActivity(prog.ProgSet.guid, entry, prog.ID, services, true);
+                });
+            }
             Delayed = true;
 
             // Note: services is to be specifyed only if multiple services are hosted by the process and a unique resolution was not possible 
@@ -931,7 +960,7 @@ namespace PrivateWin10
                     rule.SetApplied();
             }
 
-            ProgramList.StoreList(); 
+            ProgramList.Store(); 
         }
 
         public int CleanupFwRules(bool bAll = false)
@@ -962,22 +991,10 @@ namespace PrivateWin10
             return Count;
         }
 
-        protected void OnDnsEvent(DnsInspector.DnsEvent DnsEvent)
-        {
-            List<ServiceHelper.ServiceInfo> Services = ServiceHelper.GetServicesByPID(DnsEvent.ProcessId);
-
-            ProgramID ProgID = GetProgIDbyPID(DnsEvent.ProcessId, (Services == null || Services.Count > 1) ? null : Services[0].ServiceName);
-            if (ProgID == null)
-                return; // proces was already terminated
-
-            Program prog = ProgramList.GetProgram(ProgID, true, ProgramList.FuzzyModes.Any);
-
-            prog?.LogDomain(DnsEvent.HostName);
-        }
-
         ///////////////////////////////////////////////////////////////////////////////////////////////////
-        // Interface
-        //
+
+        /////////////////////////////////////////
+        // Windows Firewall
 
         public FirewallManager.FilteringModes GetFilteringMode()
         {
@@ -1348,6 +1365,25 @@ namespace PrivateWin10
             }));
         }
 
+        public bool SetupDnsInspector(bool Enable)
+        {
+            return mDispatcher.Invoke(new Func<bool>(() => {
+                App.SetConfig("DnsInspector", "Enabled", Enable ? 1 : 0);
+
+                if (DnsInspector != null && !Enable)
+                {
+                    DnsInspector.Dispose();
+                    DnsInspector = null;
+                }
+                else if (DnsInspector == null && Enable)
+                {
+                    DnsInspector = new DnsInspector();
+                }
+
+                return true;
+            }));
+        }
+
         public Dictionary<Guid, List<Program.DnsEntry>> GetDomains(List<Guid> guids = null)
         {
             return mDispatcher.Invoke(new Func<Dictionary<Guid, List<Program.DnsEntry>>>(() => {
@@ -1359,6 +1395,118 @@ namespace PrivateWin10
             }));
         }
 
+        /////////////////////////////////////////
+        // Dns Proxy
+
+        public bool ConfigureDNSProxy(bool Enable, bool? setLocal = null, string UpstreamDNS = null)
+        {
+            return mDispatcher.Invoke(new Func<bool>(() => {
+
+                App.SetConfig("DnsProxy", "Enabled", Enable == true ? 1 : 0);
+                if (setLocal != null)
+                    App.SetConfig("DnsProxy", "SetLocal", setLocal == true ? 1 : 0);
+                if (UpstreamDNS != null)
+                    App.SetConfig("DnsProxy", "UpstreamDNS", UpstreamDNS);
+
+                if (Enable)
+                {
+                    if (DnsProxy == null)
+                    {
+                        DnsProxy = new DnsProxyServer();
+                        if (!DnsProxy.Init())
+                        {
+                            DnsProxy = null;
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        DnsProxy.SetupUpstreamDNS();
+                        DnsProxy.ConfigureSystemDNS();
+                    }
+                }
+                else
+                {
+                    if (DnsProxy != null)
+                    {
+                        DnsProxy.Dispose();
+                        DnsProxy = null;
+                    }
+                    DnsConfigurator.RestoreDNS();
+                }
+                return true;
+            }));
+        }
+
+
+        // Querylog
+        public List<DnsCacheMonitor.DnsCacheEntry> GetLoggedDnsQueries()
+        {
+            return mDispatcher.Invoke(new Func<List<DnsCacheMonitor.DnsCacheEntry>>(() => {
+                return DnsProxy?.GetLoggedDnsQueries();
+            }));
+        }
+
+        public bool ClearLoggedDnsQueries()
+        {
+            return mDispatcher.Invoke(new Func<bool>(() => {
+                return DnsProxy?.ClearLoggedDnsQueries() == true;
+            }));
+        }
+
+        // Whitelist/Blacklist
+        public List<DomainFilter> GetDomainFilter(DnsBlockList.Lists List)
+        {
+            return mDispatcher.Invoke(new Func<List<DomainFilter>>(() => {
+                return DnsProxy?.blockList?.GetDomainFilter(List);
+            }));
+        }
+
+        public bool UpdateDomainFilter(DnsBlockList.Lists List, DomainFilter Filter)
+        {
+            return mDispatcher.Invoke(new Func<bool?>(() => {
+                return DnsProxy?.blockList?.UpdateDomainFilter(List, Filter);
+            })) == true;
+        }
+
+        public bool RemoveDomainFilter(DnsBlockList.Lists List, string Domain)
+        {
+            return mDispatcher.Invoke(new Func<bool?>(() => {
+                return DnsProxy?.blockList?.RemoveDomainFilter(List, Domain);
+            })) == true;
+        }
+
+        // Blocklist
+        public List<DomainBlocklist> GetDomainBlocklists()
+        {
+            return mDispatcher.Invoke(new Func<List<DomainBlocklist>>(() => {
+                return DnsProxy?.blockList?.GetDomainBlocklists();
+            }));
+        }
+
+        public bool UpdateDomainBlocklist(DomainBlocklist Blocklist)
+        {
+            return mDispatcher.Invoke(new Func<bool?>(() => {
+                return DnsProxy?.blockList?.UpdateDomainBlocklist(Blocklist);
+            })) == true;
+        }
+
+        public bool RemoveDomainBlocklist(string Url)
+        {
+            return mDispatcher.Invoke(new Func<bool?>(() => {
+                return DnsProxy?.blockList?.RemoveDomainBlocklist(Url);
+            })) == true;
+        }
+
+        public bool RefreshDomainBlocklist(string Url = "") // empty means all
+        {
+            return mDispatcher.Invoke(new Func<bool?>(() => {
+                return DnsProxy?.blockList?.RefreshDomainBlocklist(Url);
+            })) == true;
+        }
+
+        /////////////////////////////////////////
+        // Privacy tweaks
 
         public bool ApplyTweak(TweakManager.Tweak tweak)
         {
@@ -1381,6 +1529,8 @@ namespace PrivateWin10
             }));
         }
 
+        /////////////////////////////////////////
+        // Misc
 
         public bool Quit()
         {

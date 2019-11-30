@@ -18,6 +18,9 @@ namespace PrivateWin10
         {
             //try
             {
+                /////////////////////////////////////////
+                // Windows Firewall
+
                 if (call.func == "GetFilteringMode")
                 {
                     call.args = App.engine.GetFilteringMode();
@@ -114,10 +117,67 @@ namespace PrivateWin10
                 {
                     call.args = App.engine.GetSockets((List<Guid>)call.args);
                 }
+                else if (call.func == "SetupDnsInspector")
+                {
+                    call.args = App.engine.SetupDnsInspector(RemoteCall.GetArg<bool>(call.args, 0));
+                }
                 else if (call.func == "GetDomains")
                 {
                     call.args = App.engine.GetDomains((List<Guid>)call.args);
                 }
+
+                /////////////////////////////////////////
+                // Dns Proxy
+
+                else if (call.func == "ConfigureDNSProxy")
+                {
+                    call.args = App.engine.ConfigureDNSProxy(RemoteCall.GetArg<bool>(call.args, 0), RemoteCall.GetArg<bool?>(call.args, 1), RemoteCall.GetArg<string>(call.args, 2));
+                }
+
+                // Querylog
+                else if (call.func == "GetLoggedDnsQueries")
+                {
+                    call.args = App.engine.GetLoggedDnsQueries();
+                }
+                else if (call.func == "ClearLoggedDnsQueries")
+                {
+                    call.args = App.engine.ClearLoggedDnsQueries();
+                }
+
+                // Whitelist/Blacklist
+                else if (call.func == "GetDomainFilter")
+                {
+                    call.args = App.engine.GetDomainFilter(RemoteCall.GetArg<DnsBlockList.Lists>(call.args, 0));
+                }
+                else if (call.func == "UpdateDomainFilter")
+                {
+                    call.args = App.engine.UpdateDomainFilter(RemoteCall.GetArg<DnsBlockList.Lists>(call.args, 0), RemoteCall.GetArg<DomainFilter>(call.args, 1));
+                }
+                else if (call.func == "RemoveDomainFilter")
+                {
+                    call.args = App.engine.RemoveDomainFilter(RemoteCall.GetArg<DnsBlockList.Lists>(call.args, 0), RemoteCall.GetArg<string>(call.args, 1));
+                }
+
+                // Blocklist
+                else if (call.func == "GetDomainBlocklists")
+                {
+                    call.args = App.engine.GetDomainBlocklists();
+                }
+                else if (call.func == "UpdateDomainBlocklist")
+                {
+                    call.args = App.engine.UpdateDomainBlocklist((DomainBlocklist)call.args);
+                }
+                else if (call.func == "RemoveDomainBlocklist")
+                {
+                    call.args = App.engine.RemoveDomainBlocklist((string)call.args);
+                }
+                else if (call.func == "RemoveDomainFilter")
+                {
+                    call.args = App.engine.RefreshDomainBlocklist((string)call.args);
+                }
+
+                /////////////////////////////////////////
+                // Privacy tweaks
 
                 else if (call.func == "ApplyTweak")
                 {
@@ -131,6 +191,10 @@ namespace PrivateWin10
                 {
                     call.args = App.engine.UndoTweak((TweakManager.Tweak)call.args);
                 }
+
+                /////////////////////////////////////////
+                // Misc
+
                 else if (call.func == "Quit")
                 {
                     call.args = App.engine.Quit();

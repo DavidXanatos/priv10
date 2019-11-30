@@ -55,6 +55,18 @@ namespace PrivateWin10.Pages
             this.lblAuditBlock.Content = Translate.fmt("lbl_audit_blocked");
             this.lblAuditNone.Content = Translate.fmt("lbl_audit_off");
 
+            // todo: xxx
+            //chkDnsInspector
+            //lblDNS
+            //chkEnableDNS
+            //chkLocalDNS
+            //lblRootDNS
+
+            WpfFunc.CmbAdd(this.cmbRootDNS, "Google", "8.8.8.8|8.8.4.4");
+            WpfFunc.CmbAdd(this.cmbRootDNS, "OpenDNS", "208.67.222.222|208.67.220.220");
+            WpfFunc.CmbAdd(this.cmbRootDNS, "Level3", "209.244.0.3|209.244.0.4");
+            WpfFunc.CmbAdd(this.cmbRootDNS, "DNS.WATCH", "84.200.69.80|84.200.70.40");
+            WpfFunc.CmbAdd(this.cmbRootDNS, "Cloudflare", "1.1.1.1|1.0.0.1");
 
             Refresh();
         }
@@ -104,6 +116,8 @@ namespace PrivateWin10.Pages
                 }
 
                 chkGuardFW.IsChecked = App.client.IsFirewallGuard();
+
+                chkEnableDNS.IsChecked = App.GetConfigInt("DnsProxy", "Enabled", 0) != 0;
             }
             else
             {
@@ -115,6 +129,8 @@ namespace PrivateWin10.Pages
                 cmbAudit.IsEnabled = false;
 
                 chkGuardFW.IsEnabled = false;
+
+                chkEnableDNS.IsEnabled = false;
             }
 
             var fix_mode = App.GetConfigInt("Firewall", "GuardMode", 0);
@@ -128,6 +144,13 @@ namespace PrivateWin10.Pages
 
             chkNotifyFW.IsEnabled = chkUseFW.IsChecked == true;
             chkNotifyFW.IsChecked = App.GetConfigInt("Firewall", "NotifyBlocked", 1) != 0;
+
+            chkDnsInspector.IsChecked = App.GetConfigInt("DnsInspector", "Enabled", 0) != 0;
+
+            // DNS
+            chkLocalDNS.IsChecked = App.GetConfigInt("DnsProxy", "SetLocal", 0) != 0;
+            WpfFunc.CmbSelect(cmbRootDNS, App.GetConfig("DNSProxy", "UpstreamDNS", "8.8.8.8"));
+            CheckDNS();
 
             bHold = false;
         }
@@ -183,6 +206,8 @@ namespace PrivateWin10.Pages
                 }
             }
             App.client.Connect();
+
+            App.mMainWnd.UpdateEnabled();
         }
 
         private void chkNoUAC_Click(object sender, RoutedEventArgs e)
@@ -299,6 +324,71 @@ namespace PrivateWin10.Pages
                 Mode = FirewallGuard.Mode.Alert;
 
             App.client.SetFirewallGuard(chkGuardFW.IsChecked != false, Mode);
+        }
+
+        private void ChkDnsInspector_Click(object sender, RoutedEventArgs e)
+        {
+            if (bHold) return;
+
+            App.client.SetupDnsInspector(chkDnsInspector.IsChecked == true);
+        }
+
+        private void ChkEnableDNS_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigureDNS();
+        }
+
+        private void ChkLocalDNS_Click(object sender, RoutedEventArgs e)
+        {
+            // todo: xxx check if there are any 3rd party dns's set
+
+            ConfigureDNS(true);
+        }
+
+        private void CmbRootDNS_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+                CmbRootDNS_SelectionChanged(sender, null);
+        }
+
+        private void CmbRootDNS_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ConfigureDNS();
+        }
+
+        private void ConfigureDNS(bool setLocal = false)
+        {
+            CheckDNS();
+            if (bHold) return;
+
+            string UpstreamDNS = cmbRootDNS.Text;
+            if (cmbRootDNS.SelectedItem != null && (cmbRootDNS.SelectedItem as ComboBoxItem).Tag != null)
+                UpstreamDNS = (cmbRootDNS.SelectedItem as ComboBoxItem).Tag.ToString();
+            else
+            {
+                // todo: xxx check if upstream dns is a valid IP
+            }
+
+            if (!App.client.ConfigureDNSProxy(chkEnableDNS.IsChecked == true, setLocal ? chkLocalDNS.IsChecked : null, UpstreamDNS))
+            {
+                MessageBox.Show(Translate.fmt("msg_dns_proxy_err", App.GetConfigInt("DNSProxy", "Port", DnsProxyServer.DEFAULT_PORT)), App.mName, MessageBoxButton.OK, MessageBoxImage.Stop);
+
+                bHold = true;
+                App.SetConfig("DnsProxy", "Enabled", 0);
+                chkEnableDNS.IsChecked = false;
+                bHold = false;
+            }
+            App.mMainWnd.UpdateEnabled();
+        }
+
+        private void CheckDNS()
+        {
+            bool is_dns_standard = App.GetConfig("DNSProxy", "BindIP", "").Length == 0 && App.GetConfigInt("DNSProxy", "Port", DnsProxyServer.DEFAULT_PORT) == DnsProxyServer.DEFAULT_PORT;
+
+            // always allow unchecking, allow checking only when the DNS Proxy is in a compatible way and enabled
+            chkLocalDNS.IsEnabled = chkLocalDNS.IsChecked == true || is_dns_standard && chkEnableDNS.IsChecked == true;
+
+            cmbRootDNS.IsEnabled = chkEnableDNS.IsChecked == true;
         }
     }
 }

@@ -15,6 +15,9 @@ namespace PrivateWin10
             Name = name;
         }
 
+        /////////////////////////////////////////
+        // Windows Firewall
+
         public FirewallManager.FilteringModes GetFilteringMode()
         {
             return RemoteExec("GetFilteringMode", null, FirewallManager.FilteringModes.Unknown);
@@ -134,11 +137,75 @@ namespace PrivateWin10
         {
             return RemoteExec<Dictionary<Guid, List<NetworkSocket>>>("GetSockets", guids, null);
         }
+
+        public bool SetupDnsInspector(bool Enable)
+        {
+            return RemoteExec("SetupDnsInspector", new object[1] { Enable }, false);
+        }
+
         public Dictionary<Guid, List<Program.DnsEntry>> GetDomains(List<Guid> guids = null)
         {
             return RemoteExec<Dictionary<Guid, List<Program.DnsEntry>>>("GetDomains", guids, null);
         }
 
+        /////////////////////////////////////////
+        // Dns Proxy
+
+        public bool ConfigureDNSProxy(bool Enable, bool? setLocal = null, string UpstreamDNS = null)
+        {
+            return RemoteExec("ConfigureDNSProxy", new object[3] { Enable, setLocal, UpstreamDNS }, false);
+        }
+
+        // Querylog
+        public List<DnsCacheMonitor.DnsCacheEntry> GetLoggedDnsQueries()
+        {
+            return RemoteExec<List<DnsCacheMonitor.DnsCacheEntry>>("GetLoggedDnsQueries", null, null);
+        }
+
+        public bool ClearLoggedDnsQueries()
+        {
+            return RemoteExec("ClearLoggedDnsQueries", null, false);
+        }
+
+        // Whitelist/Blacklist
+        public List<DomainFilter> GetDomainFilter(DnsBlockList.Lists List)
+        {
+            return RemoteExec<List<DomainFilter>>("GetDomainFilter", new object[1] { List }, null);
+        }
+
+        public bool UpdateDomainFilter(DnsBlockList.Lists List, DomainFilter Filter)
+        {
+            return RemoteExec("UpdateDomainFilter", new object[2] { List, Filter }, false);
+        }
+
+        public bool RemoveDomainFilter(DnsBlockList.Lists List, string Domain)
+        {
+            return RemoteExec("RemoveDomainFilter", new object[2] { List, Domain }, false);
+        }
+
+        // Blocklist
+        public List<DomainBlocklist> GetDomainBlocklists()
+        {
+            return RemoteExec<List<DomainBlocklist>>("GetDomainBlocklists", null, null);
+        }
+
+        public bool UpdateDomainBlocklist(DomainBlocklist Blocklist)
+        {
+            return RemoteExec("UpdateDomainBlocklist", Blocklist, false);
+        }
+
+        public bool RemoveDomainBlocklist(string Url)
+        {
+            return RemoteExec("RemoveDomainBlocklist", Url, false);
+        }
+
+        public bool RefreshDomainBlocklist(string Url = "") // empty means all
+        {
+            return RemoteExec("RefreshDomainBlocklist", Url, false);
+        }
+
+        /////////////////////////////////////////
+        // Privacy tweaks
 
         public bool ApplyTweak(TweakManager.Tweak tweak)
         {
@@ -155,6 +222,8 @@ namespace PrivateWin10
             return RemoteExec("UndoTweak", tweak, false);
         }
 
+        /////////////////////////////////////////
+        // Misc
 
         public bool Quit()
         {

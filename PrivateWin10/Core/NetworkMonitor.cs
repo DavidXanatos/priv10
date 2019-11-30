@@ -1,4 +1,5 @@
-﻿using NetFwTypeLib;
+﻿using Microsoft.Win32;
+using NetFwTypeLib;
 using NETWORKLIST;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace PrivateWin10
 
         public NetworkMonitorEtw(Microsoft.O365.Security.ETW.IEventRecordDelegate OnNetworkEvent)
         {
-            kernelTrace = new Microsoft.O365.Security.ETW.KernelTrace("priv10_KernelLogger");
+            kernelTrace = new Microsoft.O365.Security.ETW.KernelTrace("priv10_TcpipLogger");
             networkProvider = new Microsoft.O365.Security.ETW.Kernel.NetworkTcpipProvider();
             networkProvider.OnEvent += OnNetworkEvent;
             kernelTrace.Enable(networkProvider);
@@ -40,10 +41,11 @@ namespace PrivateWin10
     public class NetworkMonitor: IDisposable
     {
         MultiValueDictionary<UInt64, NetworkSocket> SocketList = new MultiValueDictionary<UInt64, NetworkSocket>();
-
         UInt64 LastUpdate = 0;
 
         NetworkMonitorEtw Etw = null;
+
+        RegistryMonitor[] regWatchers;
 
         public NetworkMonitor()
         {
@@ -58,6 +60,18 @@ namespace PrivateWin10
             {
                 AppLog.Debug("Failed to initialized NetworkMonitorETW");
             }
+
+            regWatchers = new RegistryMonitor[] {
+                new RegistryMonitor(RegistryHive.LocalMachine, @"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces"),
+                new RegistryMonitor(RegistryHive.LocalMachine, @"SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters\Interfaces"),
+                new RegistryMonitor(RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles") // firewall profile configuration
+            };
+
+            foreach (var regWatcher in regWatchers)
+            {
+                regWatcher.RegChanged += new EventHandler(OnRegChanged);
+                regWatcher.Start();
+            }
         }
 
         private void InitEtw()
@@ -69,6 +83,9 @@ namespace PrivateWin10
         {
             if (Etw != null)
                 Etw.Dispose();
+
+            foreach (var regWatcher in regWatchers)
+                regWatcher.Stop();
         }
 
         public enum EtwNetEventType
@@ -267,8 +284,11 @@ namespace PrivateWin10
                 {
                     Socket.CreationTime = SocketRow.CreationTime;
 
-                    if(Socket.RemoteAddress != null)
-                        App.engine.DnsInspector.GetHostName(Socket.ProcessId, Socket.RemoteAddress, Socket, NetworkSocket.HostSetter);
+                    if (App.engine.DnsInspector != null)
+                    {
+                        if (Socket.RemoteAddress != null)
+                            App.engine.DnsInspector.GetHostName(Socket.ProcessId, Socket.RemoteAddress, Socket, NetworkSocket.HostSetter);
+                    }
 
                     var moduleInfo = SocketRow.Module;
                     if (moduleInfo == null || moduleInfo.ModulePath.Equals("System", StringComparison.OrdinalIgnoreCase))
@@ -349,14 +369,27 @@ namespace PrivateWin10
 
         private static NetworkListManagerClass netMgr = new NetworkListManagerClass();
 
-        private UInt64 LastNetworkUpdate = 0;
-
         // todo: get the right default behavioure there is a policy for that
         public FirewallRule.Profiles DefaultProfile = FirewallRule.Profiles.Public; // default windows behavioure: default profile is public
 
-        public void UpdateNetworks()
+        private bool UpdateInterfaces = true;
+        public event EventHandler<EventArgs> NetworksChanged;
+
+        private void OnRegChanged(object sender, EventArgs e)
         {
-            LastNetworkUpdate = MiscFunc.GetTickCount64();
+            UpdateInterfaces = true;
+        }
+
+        private NetworkInterface[] Interfaces = new NetworkInterface[0];
+
+        public bool UpdateNetworks()
+        {
+            //  foreach (NetworkInterface adapter in Interfaces) 
+            // todo: get data rates etc... adapter.GetIPStatistics()
+
+            if (!UpdateInterfaces)
+                return false;
+            UpdateInterfaces = false;
 
             Dictionary<string, FirewallRule.Profiles> NetworkProfiles = new Dictionary<string, FirewallRule.Profiles>();
 
@@ -383,75 +416,74 @@ namespace PrivateWin10
             AdapterInfoByIP.Clear();
             //AppLog.Debug("ListingNetworks:");
 
-            foreach (NetworkInterface adapter in NetworkInterface.GetAllNetworkInterfaces()) // this is a bit slow!
+            Interfaces = NetworkInterface.GetAllNetworkInterfaces(); // this is a bit slow!
+            foreach (NetworkInterface adapter in Interfaces) 
             {
-                string id = adapter.Id.ToLower();
-
-                AdapterInfo Info = new AdapterInfo();
-                if (!NetworkProfiles.TryGetValue(id, out Info.Profile))
-                    Info.Profile = DefaultProfile;
-
-                switch (adapter.NetworkInterfaceType)
+                try
                 {
-                    case NetworkInterfaceType.Ethernet:
-                    case NetworkInterfaceType.GigabitEthernet:
-                    case NetworkInterfaceType.FastEthernetT:
-                    case NetworkInterfaceType.FastEthernetFx:
-                    case NetworkInterfaceType.Ethernet3Megabit:
-                    case NetworkInterfaceType.TokenRing: Info.Type = FirewallRule.Interfaces.Lan; break;
-                    case NetworkInterfaceType.Wireless80211: Info.Type = FirewallRule.Interfaces.Wireless; break;
-                    case NetworkInterfaceType.Ppp: Info.Type = FirewallRule.Interfaces.RemoteAccess; break;
-                    default: Info.Type = FirewallRule.Interfaces.All; break;
+                    //AppLog.Debug("{0} {1} {2} {3}", adapter.Description, adapter.Id, adapter.NetworkInterfaceType.ToString(), adapter.OperationalStatus.ToString());
+
+                    string id = adapter.Id.ToLower();
+
+                    AdapterInfo Info = new AdapterInfo();
+                    if (!NetworkProfiles.TryGetValue(id, out Info.Profile))
+                        Info.Profile = DefaultProfile;
+
+                    switch (adapter.NetworkInterfaceType)
+                    {
+                        case NetworkInterfaceType.Ethernet:
+                        case NetworkInterfaceType.GigabitEthernet:
+                        case NetworkInterfaceType.FastEthernetT:
+                        case NetworkInterfaceType.FastEthernetFx:
+                        case NetworkInterfaceType.Ethernet3Megabit:
+                        case NetworkInterfaceType.TokenRing: Info.Type = FirewallRule.Interfaces.Lan; break;
+                        case NetworkInterfaceType.Wireless80211: Info.Type = FirewallRule.Interfaces.Wireless; break;
+                        case NetworkInterfaceType.Ppp: Info.Type = FirewallRule.Interfaces.RemoteAccess; break;
+                        default: Info.Type = FirewallRule.Interfaces.All; break;
+                    }
+
+                    Info.Addresses = new List<UnicastIPAddressInformation>();
+                    IPInterfaceProperties ip_info = adapter.GetIPProperties();
+                    Info.GatewayAddresses = new List<IPAddress>();
+                    foreach (var gw in ip_info.GatewayAddresses)
+                        Info.GatewayAddresses.Add(gw.Address);
+                    Info.DnsAddresses = ip_info.DnsAddresses;
+                    Info.DhcpServerAddresses = ip_info.DhcpServerAddresses;
+                    Info.WinsServersAddresses = ip_info.WinsServersAddresses;
+
+                    foreach (UnicastIPAddressInformation ip in adapter.GetIPProperties().UnicastAddresses)
+                    {
+                        Info.Addresses.Add(ip);
+
+                        // Sanitize IPv6 addresses 
+                        IPAddress _ip = new IPAddress(ip.Address.GetAddressBytes());
+
+                        //AppLog.Debug("{2}({5}) has IP {0}/{3}/{4} has profile {1}", ip.Address.ToString(), ((FirewallRule.Profiles)Info.Profile).ToString(),
+                        //    adapter.Description, ip.IPv4Mask.ToString(), ip.PrefixLength.ToString(), adapter.NetworkInterfaceType.ToString());
+
+                        if (!AdapterInfoByIP.ContainsKey(_ip))
+                            AdapterInfoByIP[_ip] = Info;
+                    }
                 }
-
-                Info.Addresses = new List<UnicastIPAddressInformation>();
-                IPInterfaceProperties ip_info = adapter.GetIPProperties();
-                Info.GatewayAddresses = new List<IPAddress>();
-                foreach (var gw in ip_info.GatewayAddresses)
-                    Info.GatewayAddresses.Add(gw.Address);
-                Info.DnsAddresses = ip_info.DnsAddresses;
-                Info.DhcpServerAddresses = ip_info.DhcpServerAddresses;
-                Info.WinsServersAddresses = ip_info.WinsServersAddresses;
-
-                foreach (UnicastIPAddressInformation ip in adapter.GetIPProperties().UnicastAddresses)
-                {
-                    Info.Addresses.Add(ip);
-
-                    // Sanitize IPv6 addresses 
-                    IPAddress _ip = new IPAddress(ip.Address.GetAddressBytes());
-
-                    //AppLog.Debug("{2}({5}) has IP {0}/{3}/{4} has profile {1}", ip.Address.ToString(), ((FirewallRule.Profiles)Info.Profile).ToString(),
-                    //    adapter.Description, ip.IPv4Mask.ToString(), ip.PrefixLength.ToString(), adapter.NetworkInterfaceType.ToString());
-
-                    if (!AdapterInfoByIP.ContainsKey(_ip))
-                        AdapterInfoByIP[_ip] = Info;
-                }
+                catch { } // in case a adapter becomes invalid justa fter the enumeration
             }
             //AppLog.Debug("+++");
+
+            NetworksChanged?.Invoke(this, new EventArgs());
+            return true;
         }
 
         public AdapterInfo GetAdapterInfoByIP(IPAddress IP)
         {
+            if(UpdateInterfaces)
+                UpdateNetworks();
+
             AdapterInfo Info = null;
-
             if (!AdapterInfoByIP.TryGetValue(IP, out Info))
-            {
-                // if the last network list update was more than a second ago, update again and retry
-                if (MiscFunc.GetTickCount64() - LastNetworkUpdate >= 1000)
-                {
-                    UpdateNetworks();
-
-                    // retry
-                    AdapterInfoByIP.TryGetValue(IP, out Info);
-                }
-            }
-
-            if (Info == null)
             {
                 Info = new AdapterInfo();
                 Info.Profile = DefaultProfile;
             }
-
             return Info;
         }
     }
