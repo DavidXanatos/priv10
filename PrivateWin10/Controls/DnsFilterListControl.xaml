@@ -76,7 +76,7 @@
                 </Style>
             </DataGrid.RowStyle>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Width="*" Header="Domain">
+                <DataGridTemplateColumn Width="*" Header="Domain" ClipboardContentBinding="{Binding Domain}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>

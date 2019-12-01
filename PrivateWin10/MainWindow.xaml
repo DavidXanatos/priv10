@@ -60,7 +60,7 @@
 
     </FrameworkElement.Resources>
 
-    <Grid x:Name="Main" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Margin="0,0,0,0" Background="White">
+    <Grid Name="Main" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Margin="0,0,0,0" Background="White">
         <Grid Width="48" HorizontalAlignment="Left" Background="{StaticResource SidePanel.Back}"/>
         <TabControl x:Name="SidePanel" Width="50" Margin="-2,-1,0,0" HorizontalAlignment="Left" VerticalAlignment="Stretch" TabStripPlacement="Left">
 

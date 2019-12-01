@@ -149,7 +149,9 @@ namespace PrivateWin10.Pages
 
             // DNS
             chkLocalDNS.IsChecked = App.GetConfigInt("DnsProxy", "SetLocal", 0) != 0;
-            WpfFunc.CmbSelect(cmbRootDNS, App.GetConfig("DNSProxy", "UpstreamDNS", "8.8.8.8"));
+            string UpstreamDNS = App.GetConfig("DNSProxy", "UpstreamDNS", "8.8.8.8");
+            if (!WpfFunc.CmbSelect(cmbRootDNS, UpstreamDNS))
+                cmbRootDNS.Text = UpstreamDNS;
             CheckDNS();
 
             bHold = false;

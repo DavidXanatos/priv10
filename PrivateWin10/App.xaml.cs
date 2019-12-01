@@ -328,6 +328,15 @@ namespace PrivateWin10
             AppLog.Debug("FirstChanceException event raised in {0}: {1}\r\n{2}", AppDomain.CurrentDomain.FriendlyName, e.Exception.Message, e.Exception.StackTrace);
         }
 
+        //https://stackoverflow.com/questions/12769264/openclipboard-failed-when-copy-pasting-data-from-wpf-datagrid
+        void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            var comException = e.Exception as System.Runtime.InteropServices.COMException;
+
+            if (comException != null && comException.ErrorCode == -2147221040)
+                e.Handled = true;
+        }
+
         static bool ExecuteCommands()
         {
             if (TestArg("-help") || TestArg("/?"))

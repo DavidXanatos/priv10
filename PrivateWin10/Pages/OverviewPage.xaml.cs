@@ -48,7 +48,7 @@ namespace PrivateWin10.Pages
             }
 
             App.Log.LogEvent += (object sender, AppLog.LogEventArgs args) => {
-                this.Dispatcher.Invoke(new Action(()=> {
+                this.Dispatcher.InvokeAsync(new Action(()=> {
                     OnLogEvent(args.entry);
                 }));
             };

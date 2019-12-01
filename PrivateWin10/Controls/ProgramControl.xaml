@@ -149,6 +149,7 @@
                 <DataGrid x:Name="progGrid" AutoGenerateColumns="False" IsReadOnly="true" HorizontalScrollBarVisibility="Visible" MouseDoubleClick="progGrid_MouseDoubleClick" GridLinesVisibility="All">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="">
+                            <!-- ClipboardContentBinding="{Binding Name}"-->
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Grid>

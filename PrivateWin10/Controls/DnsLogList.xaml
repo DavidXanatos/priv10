@@ -38,6 +38,7 @@
             <DataGrid Name="dnsGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="DnsGrid_SelectionChanged">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Ico">
+                        <!-- ClipboardContentBinding="{Binding Name}"-->
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>

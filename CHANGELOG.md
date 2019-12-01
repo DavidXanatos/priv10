@@ -3,6 +3,20 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.60.1] - 2019-12-01
+
+### Added
+- added process monitor, using ETW events to aid resolving PID to program, when the prgram in question already exited.
+- added upstream dns diplay to the dns proxy page
+
+### Changed
+
+### Fixed
+- fixed critical hang issue when not using the system event log
+- issue where a custom upstream dns would not be displayed
+- fixed issues with copying text from datagrids
+
+
 ## [0.60] - 2019-11-30
 
 ### Added

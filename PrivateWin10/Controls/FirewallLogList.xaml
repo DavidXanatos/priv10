@@ -118,6 +118,7 @@
             <DataGrid Name="logGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="ConsGrid_SelectionChanged">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Ico">
+                        <!-- ClipboardContentBinding="{Binding Name}"-->
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>

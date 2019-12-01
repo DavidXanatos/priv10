@@ -95,7 +95,7 @@
             <GroupBox Grid.Row="3" Name="grpLog" Header="Privacy Log">
                 <DataGrid Name="logGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="LogGrid_SelectionChanged">
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Level">
+                        <DataGridTemplateColumn Header="Level" ClipboardContentBinding="{Binding Level}">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Grid>

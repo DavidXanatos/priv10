@@ -106,6 +106,7 @@
             <DataGrid Name="socksGrid" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="All" SelectionChanged="SockGrid_SelectionChanged">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Ico">
+                        <!-- ClipboardContentBinding="{Binding Name}"-->
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>

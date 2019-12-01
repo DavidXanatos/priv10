@@ -56,7 +56,7 @@
                 </Style>
             </DataGrid.RowStyle>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Width="*" Header="List">
+                <DataGridTemplateColumn Width="*" Header="List" ClipboardContentBinding="{Binding Url}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>

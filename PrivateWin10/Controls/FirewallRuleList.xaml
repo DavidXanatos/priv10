@@ -76,6 +76,7 @@
             <DataGrid Name="rulesGrid" AutoGenerateColumns="False" IsReadOnly="true" MouseDoubleClick="ruleGrid_MouseDoubleClick" GridLinesVisibility="All" SelectionChanged="RuleGrid_SelectionChanged" ContextMenuOpening="RulesGrid_ContextMenuOpening">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Ico">
+                        <!-- ClipboardContentBinding="{Binding Name}"-->
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>

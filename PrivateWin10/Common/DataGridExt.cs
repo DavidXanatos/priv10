@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 
 namespace PrivateWin10
 {
@@ -38,7 +39,18 @@ namespace PrivateWin10
             dataGrid.ContextMenuOpening += (sender, e) => {  };
 
             dataGrid.ColumnReordered += (sender, e) => { if (!Hold) CreateHeaderMenu(); };
+
+            //dataGrid.PreviewKeyDown += DataGrid_KeyDown;
         }
+
+        /*private void DataGrid_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                //MiscFunc.ClipboardNative.CopyTextToClipboard("test");
+                //e.Handled = true;
+            }
+        }*/
 
         private void CreateHeaderMenu()
         {

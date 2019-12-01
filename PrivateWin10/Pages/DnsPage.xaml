@@ -13,7 +13,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type TabControl}">
-                        <Grid KeyboardNavigation.TabNavigation="Local">
+                        <Grid KeyboardNavigation.TabNavigation="Local" x:Name="test">
                             <Grid.ColumnDefinitions>
                                 <!--ColumnDefinition Width="Auto" /-->
                                 <ColumnDefinition Width="150" />
@@ -43,10 +43,19 @@
                                               ContentSource="SelectedContent" />
 
                             <StackPanel Margin="0,0,4,-1">
-                                <StackPanel x:Name="StatusPanel" MinHeight="40">
-                                    
-                                </StackPanel>
-                                <Label Content="Navigation Menu" FontSize="14" Foreground="DarkGray"/>
+                                <Grid Height="80">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <Label x:Name="lblUpstreamDns" Content="Upstream DNS:" Grid.Row="0" Foreground="DarkGray" />
+                                    <TextBlock x:Name="txtUpstreamDns"  Text="8.8.8.8; 8.8.4.4" Grid.Row="1" Margin="15,-2,5,0" TextWrapping="Wrap" Foreground="DarkGray"  HorizontalAlignment="Left" />
+
+                                    <Label x:Name="lblNavMenu" Content="Navigation Menu" Grid.Row="3" FontSize="14" Foreground="DarkGray"/>
+                                </Grid>
                                 <StackPanel x:Name="HeaderPanel"
                                             Grid.Row="0"
                                             Panel.ZIndex="1"

@@ -28,6 +28,13 @@ namespace PrivateWin10.Pages
         {
             InitializeComponent();
 
+            tabs.Loaded += (sender, e) => {
+
+                // todo: localize
+
+                UpdateStats();
+            };
+
             try {
                 tabs.SelectedIndex = App.GetConfigInt("GUI", "DnsPage", 0);
             } catch { }
@@ -37,6 +44,8 @@ namespace PrivateWin10.Pages
 
         public void OnShow()
         {
+            UpdateStats();
+
             Tabs_SelectionChanged(null, null);
         }
 
@@ -47,6 +56,14 @@ namespace PrivateWin10.Pages
         public void OnClose()
         {
             App.SetConfig("GUI", "DnsPage", tabs.SelectedIndex);
+        }
+
+        public void UpdateStats()
+        {
+            var txtUpstreamDns = tabs.Template.FindName("txtUpstreamDns", tabs) as TextBlock;
+            if (txtUpstreamDns == null)
+                return;
+            txtUpstreamDns.Text = App.GetConfig("DNSProxy", "UpstreamDNS", "");
         }
 
         //
