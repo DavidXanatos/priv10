@@ -6,7 +6,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.60.1] - 2019-12-01
 
 ### Added
-- added process monitor, using ETW events to aid resolving PID to program, when the prgram in question already exited.
 - added upstream dns diplay to the dns proxy page
 
 ### Changed
