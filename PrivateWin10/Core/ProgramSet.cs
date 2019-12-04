@@ -15,15 +15,6 @@ namespace PrivateWin10
 
         public SortedDictionary<ProgramID, Program> Programs = new SortedDictionary<ProgramID, Program>();
 
-        public int EnabledRules = 0;
-        public int DisabledRules = 0;
-        public int ChgedRules = 0;
-
-        public int SocketsWeb = 0;
-        public int SocketsTcp = 0;
-        public int SocketsSrv = 0;
-        public int SocketsUdp = 0;
-
         [Serializable()]
         public class Config
         {
@@ -51,6 +42,22 @@ namespace PrivateWin10
             public AccessLevels NetAccess = AccessLevels.Unconfigured;
             public AccessLevels CurAccess = AccessLevels.Unconfigured;
 
+            public Config Clone()
+            {
+                var config = new Config();
+
+                config.Name = this.Name;
+                config.Category = this.Category;
+                config.Icon = this.Icon;
+
+                config.Notify = this.Notify;
+                config.SilenceUntill = this.SilenceUntill;
+                config.NetAccess = this.NetAccess;
+                config.CurAccess = this.CurAccess;
+
+                return config;
+            }
+
             // Custom option
             // todo
         }
@@ -70,55 +77,30 @@ namespace PrivateWin10
             config.Name = prog.Description;
         }
 
-        [OnSerializing]
-        private void OnSerializing(StreamingContext c)
-        {
-            EnabledRules = 0;
-            DisabledRules = 0;
-            ChgedRules = 0;
-            foreach (Program prog in Programs.Values)
-            {
-                foreach (FirewallRuleEx rule in prog.Rules.Values)
-                {
-                    if(rule.Enabled)
-                        EnabledRules++;
-                    else
-                        DisabledRules++;
-                    if (rule.State != FirewallRuleEx.States.Approved)
-                        ChgedRules++;
-                }
-            }
-
-            SocketsWeb = 0;
-            SocketsTcp = 0;
-            SocketsUdp = 0;
-            SocketsSrv = 0;
-            foreach (Program prog in Programs.Values)
-            {
-                foreach (NetworkSocket entry in prog.Sockets.Values)
-                {
-                    if ((entry.ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) != 0)
-                    {
-                        SocketsUdp++;
-                    }
-                    else if ((entry.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) != 0)
-                    {
-                        SocketsTcp++;
-                        if (entry.RemotePort == 80 || entry.RemotePort == 443)
-                            SocketsWeb++;
-                        if (entry.State == (int)IPHelper.MIB_TCP_STATE.LISTENING)
-                            SocketsSrv++;
-                    }
-                }
-            }
-        }
-
-        [OnDeserializing]
-        private void OnDeserializing(StreamingContext c)
+        [OnSerializing()]
+        private void OnSerializing(StreamingContext context)
         {
             
         }
-        
+
+        [OnSerialized()]
+        private void OnSerialized(StreamingContext context)
+        {
+            
+        }
+
+        [OnDeserializing()]
+        private void OnDeserializing(StreamingContext context)
+        {
+            
+        }
+
+        [OnDeserialized()]
+        private void OnDeserialized(StreamingContext context)
+        {
+
+        }
+
         public string GetIcon()
         {
             if (config.Icon != null && config.Icon.Length > 0)
@@ -179,10 +161,10 @@ namespace PrivateWin10
             DateTime lastActivity = DateTime.MinValue;
             foreach (Program prog in Programs.Values)
             {
-                if (Allowed && prog.lastAllowed > lastActivity)
-                    lastActivity = prog.lastAllowed;
-                if (Blocked && prog.lastBlocked > lastActivity)
-                    lastActivity = prog.lastBlocked;
+                if (Allowed && prog.LastAllowed > lastActivity)
+                    lastActivity = prog.LastAllowed;
+                if (Blocked && prog.LastBlocked > lastActivity)
+                    lastActivity = prog.LastBlocked;
             }
             return lastActivity;
         }

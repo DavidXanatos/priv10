@@ -136,7 +136,9 @@ namespace PrivateWin10
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(exePath);
             mVersion = fvi.FileMajorPart + "." + fvi.FileMinorPart;
             if (fvi.FileBuildPart != 0)
-                mVersion += (char)('a' + (fvi.FileBuildPart - 1));
+                mVersion += "." + fvi.FileBuildPart;
+            if (fvi.FilePrivatePart != 0)
+                mVersion += (char)('a' + (fvi.FilePrivatePart - 1));
             appPath = Path.GetDirectoryName(exePath);
 
             Translate.Load();

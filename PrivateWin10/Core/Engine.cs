@@ -19,6 +19,7 @@ namespace PrivateWin10
         public FirewallManager FirewallManager;
         public FirewallMonitor FirewallMonitor;
         public FirewallGuard FirewallGuard;
+        //public ProcessMonitor ProcessMonitor;
         public NetworkMonitor NetworkMonitor;
         public DnsInspector DnsInspector;
         public DnsProxyServer DnsProxy;
@@ -153,6 +154,9 @@ namespace PrivateWin10
             LoadFwRules();
             CleanupFwRules();
 
+            //AppLog.Debug("Starting Process Monitor...");
+            //ProcessMonitor = new ProcessMonitor();
+
             AppLog.Debug("Starting Network Monitor...");
             NetworkMonitor = new NetworkMonitor();
             NetworkMonitor.NetworksChanged += (object sender, EventArgs e) =>
@@ -216,6 +220,7 @@ namespace PrivateWin10
             ProgramList.Store();
 
             FirewallMonitor.StopEventWatcher();
+            //ProcessMonitor.Dispose();
             NetworkMonitor.Dispose();
             if (DnsInspector != null)
                 DnsInspector.Dispose();

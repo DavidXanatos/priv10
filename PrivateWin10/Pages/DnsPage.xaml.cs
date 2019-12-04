@@ -35,6 +35,10 @@ namespace PrivateWin10.Pages
                 UpdateStats();
             };
 
+            blockLists.listGridExt.Restore(App.GetConfig("GUI", "blockListsGrid_Columns", ""));
+            whiteList.filterGridExt.Restore(App.GetConfig("GUI", "whiteListsGrid_Columns", ""));
+            blackList.filterGridExt.Restore(App.GetConfig("GUI", "blackListsGrid_Columns", ""));
+
             try {
                 tabs.SelectedIndex = App.GetConfigInt("GUI", "DnsPage", 0);
             } catch { }
@@ -56,6 +60,10 @@ namespace PrivateWin10.Pages
         public void OnClose()
         {
             App.SetConfig("GUI", "DnsPage", tabs.SelectedIndex);
+
+            App.SetConfig("GUI", "blockListsGrid_Columns", blockLists.listGridExt.Save());
+            App.SetConfig("GUI", "whiteListsGrid_Columns", whiteList.filterGridExt.Save());
+            App.SetConfig("GUI", "blackListsGrid_Columns", blackList.filterGridExt.Save());
         }
 
         public void UpdateStats()

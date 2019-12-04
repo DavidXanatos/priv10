@@ -138,7 +138,6 @@ namespace PrivateWin10
             mStrings.Add("lbl_name", "Name");
             mStrings.Add("lbl_group", "Group");
             mStrings.Add("lbl_index", "Index");
-            mStrings.Add("lbl_progam", "Program");
             mStrings.Add("wnd_notify", "Connection Notification Window");
             mStrings.Add("lbl_prev", "Previouse");
             mStrings.Add("lbl_next", "Next");
@@ -177,7 +176,9 @@ namespace PrivateWin10
             mStrings.Add("lbl_local_ip", "Local Address");
             mStrings.Add("lbl_remote_ip", "Remote Address");
             mStrings.Add("btn_add_prog", "Add Program");
+            mStrings.Add("btn_add_to_set", "Add Program to set");
             mStrings.Add("btn_merge_progs", "Merge Programs");
+            mStrings.Add("btn_split_progs", "Split Programs");
             mStrings.Add("btn_del_progs", "Remove Program(s)");
             mStrings.Add("btn_cleanup_list", "Cleanup List");
             mStrings.Add("chk_ignore_local", "Ignore localHost");
@@ -349,6 +350,18 @@ namespace PrivateWin10
             mStrings.Add("msg_dns_filter_dup", "Tne entered domain is already listed.");
             mStrings.Add("msg_remove_items", "Do you really want to remove the selected items?");
             mStrings.Add("msg_restore_std", "Do you really want to overwrite the current configuration with default values?");
+            mStrings.Add("lbl_prog_set", "Program Group");
+            mStrings.Add("lbl_fw_rules", "Firewall Rules");
+            mStrings.Add("btn_blacklist", "Blacklist");
+            mStrings.Add("btn_whitelist", "Whitelist");
+            mStrings.Add("btn_copy_query", "Copy query");
+            mStrings.Add("btn_copy_answer", "Copy answer");
+            mStrings.Add("btn_rename_prog", "Rename Set");
+            mStrings.Add("btn_icon_prog", "Change Icon");
+            mStrings.Add("btn_cat_prog", "Set Category");
+            mStrings.Add("btn_access_prog", "Set Network Access");
+            mStrings.Add("msg_rename", "Rename Program Set");
+            mStrings.Add("msg_set_cat", "Set Category");
             //mStrings.Add("", "");
 
 

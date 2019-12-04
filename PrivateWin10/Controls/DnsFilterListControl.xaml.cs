@@ -49,7 +49,7 @@ namespace PrivateWin10.Controls
 
         ObservableCollection<FilterListItem> FilterList;
 
-        DataGridExt filterGridExt;
+        public DataGridExt filterGridExt;
 
         public DnsFilterListControl()
         {
@@ -206,5 +206,12 @@ namespace PrivateWin10.Controls
             }
         }
 
+        private void FilterGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (filterGrid.SelectedItems.Count == 1)
+            {
+                txtDomain.Text = (filterGrid.SelectedItems[0] as FilterListItem).Filter.Domain;
+            }
+        }
     }
 }

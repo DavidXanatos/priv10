@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <local:SizeConverter x:Key="sizeConverter"/>
+        <local:RateConverter x:Key="rateConverter"/>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>

@@ -74,8 +74,7 @@ namespace PrivateWin10.Controls
             Dictionary<Guid, List<Program.DnsEntry>> entries = App.client.GetDomains(firewallPage.GetCurGuids(mDnsFilter));
             foreach (var entrySet in entries)
             {
-                ProgramControl item = null;
-                ProgramSet prog = firewallPage.GetProgSet(entrySet.Key, null, out item);
+                ProgramSet prog = firewallPage.GetProgSet(entrySet.Key);
                 if (prog == null)
                     continue;
 

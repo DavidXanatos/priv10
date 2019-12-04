@@ -173,7 +173,10 @@ namespace PrivateWin10
                 image.Tag = new Tuple<DrawingImage, DrawingImage>(new DrawingImage(new GeometryDrawing(brushOn, null, geometry)), new DrawingImage(new GeometryDrawing(brushOff, null, geometry)));
             }
 
-            SwitchPage(App.GetConfig("GUI", "CurPage", "Overview"));
+            //Main.Loaded += (sender, e) =>{
+                SwitchPage(App.GetConfig("GUI", "CurPage", "Overview"));
+            //};
+            
 
             UpdateEnabled();
         }

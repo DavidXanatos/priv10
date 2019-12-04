@@ -116,8 +116,7 @@ namespace PrivateWin10.Controls
             Dictionary<Guid, List<Program.LogEntry>> entries = App.client.GetConnections(firewallPage.GetCurGuids());
             foreach (var entrySet in entries)
             {
-                ProgramControl item = null;
-                ProgramSet prog = firewallPage.GetProgSet(entrySet.Key, null, out item);
+                ProgramSet prog = firewallPage.GetProgSet(entrySet.Key);
                 if (prog == null)
                     continue;
 

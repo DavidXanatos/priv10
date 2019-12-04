@@ -28,6 +28,21 @@ namespace PrivateWin10
             txtValue.Text = defValue;
         }
 
+        public InputWnd(string prompt, List<string> items, string defValue = "", bool editable = true, string title = null)
+        {
+            InitializeComponent();
+            if (title != null)
+                this.Title = title;
+            lblPrompt.Content = prompt;
+            txtValue.Visibility = Visibility.Collapsed;
+            cmbValue.Visibility = Visibility.Visible;
+            cmbValue.IsEditable = editable;
+            foreach (var item in items)
+                cmbValue.Items.Add(new ComboBoxItem() { Content = item, Tag = item });
+            if (!WpfFunc.CmbSelect(cmbValue, defValue))
+                cmbValue.Text = defValue;
+        }
+
         private void btnOk_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
@@ -35,13 +50,22 @@ namespace PrivateWin10
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
-            txtValue.SelectAll();
-            txtValue.Focus();
+            if (txtValue.Visibility == Visibility.Visible)
+            {
+                txtValue.SelectAll();
+                txtValue.Focus();
+            }
+            else
+                cmbValue.Focus();
         }
 
         public string Value
         {
-            get { return txtValue.Text; }
+            get {
+                if (txtValue.Visibility == Visibility.Visible)
+                    return txtValue.Text;
+                return cmbValue.Text;
+            }
         }
     }
 }

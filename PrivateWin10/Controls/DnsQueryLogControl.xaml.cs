@@ -28,6 +28,8 @@ namespace PrivateWin10.Controls
 
         string textFilter = "";
 
+        ContextMenu contextMenu;
+
         public DnsQueryLogControl()
         {
             InitializeComponent();
@@ -36,7 +38,20 @@ namespace PrivateWin10.Controls
 
             QueryLogList = new ObservableCollection<DnsQueryItem>();
             logGrid.ItemsSource = QueryLogList;
+
+            contextMenu = new ContextMenu();
+
+            WpfFunc.AddMenu(contextMenu, Translate.fmt("btn_blacklist"), btnBlacklist_Click);
+            WpfFunc.AddMenu(contextMenu, Translate.fmt("btn_whitelist"), btnWhitelist_Click);
+            contextMenu.Items.Add(new Separator());
+            WpfFunc.AddMenu(contextMenu, Translate.fmt("btn_copy_query"), btnCopyDomain_Click);
+            WpfFunc.AddMenu(contextMenu, Translate.fmt("btn_copy_answer"), btnCopyReply_Click);
+
+            contextMenu.IsEnabled = false;
+
+            logGrid.ContextMenu = contextMenu;
         }
+
 
         public void UpdateList()
         {
@@ -57,7 +72,35 @@ namespace PrivateWin10.Controls
 
         private void LogGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
+            contextMenu.IsEnabled = logGrid.SelectedItems.Count > 0;
+        }
+
+        private void btnBlacklist_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (DnsQueryItem item in logGrid.SelectedItems)
+                App.client.UpdateDomainFilter(DnsBlockList.Lists.Blacklist, new DomainFilter() { Domain = item.Question, Enabled = true, Format = DomainFilter.Formats.Plain });
+        }
+
+        private void btnWhitelist_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (DnsQueryItem item in logGrid.SelectedItems)
+                App.client.UpdateDomainFilter(DnsBlockList.Lists.Whitelist, new DomainFilter() { Domain = item.Question, Enabled = true, Format = DomainFilter.Formats.Plain });
+        }
+
+        private void btnCopyDomain_Click(object sender, RoutedEventArgs e)
+        {
+            List<string> Lines = new List<string>();
+            foreach (DnsQueryItem item in logGrid.SelectedItems)
+                Lines.Add(item.Question);
+            MiscFunc.ClipboardNative.CopyTextToClipboard(String.Join("\r\n", Lines));
+        }
+
+        private void btnCopyReply_Click(object sender, RoutedEventArgs e)
+        {
+            List<string> Lines = new List<string>();
+            foreach (DnsQueryItem item in logGrid.SelectedItems)
+                Lines.Add(item.Reply);
+            MiscFunc.ClipboardNative.CopyTextToClipboard(String.Join("\r\n", Lines));
         }
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)

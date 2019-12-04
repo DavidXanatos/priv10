@@ -24,7 +24,7 @@ namespace PrivateWin10.Controls
     {
         ObservableCollection<BlocklistItem> BlocklistList;
 
-        DataGridExt listGridExt;
+        public DataGridExt listGridExt;
 
         public DnsBlockListsControl()
         {

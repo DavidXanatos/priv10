@@ -23,6 +23,8 @@ namespace PrivateWin10.Windows
     /// </summary>
     public partial class NotificationWnd : Window
     {
+        DataGridExt consGridExt;
+
         public NotificationWnd()
         {
             InitializeComponent();
@@ -38,6 +40,9 @@ namespace PrivateWin10.Windows
             this.consGrid.Columns[2].Header = Translate.fmt("lbl_remote_host");
             this.consGrid.Columns[3].Header = Translate.fmt("lbl_time_stamp");
             this.consGrid.Columns[4].Header = Translate.fmt("lbl_pid");
+
+            consGridExt = new DataGridExt(consGrid);
+            consGridExt.Restore(App.GetConfig("GUI", "consGrid_Columns", ""));
 
             this.Topmost = true;
 
@@ -70,6 +75,7 @@ namespace PrivateWin10.Windows
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             WpfFunc.StoreWnd(this, "Notify");
+            App.SetConfig("GUI", "consGrid_Columns", consGridExt.Save());
         }
 
         int curIndex = -1;

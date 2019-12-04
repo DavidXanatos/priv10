@@ -1,0 +1,145 @@
+﻿<UserControl x:Class="PrivateWin10.Controls.ProgramListControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PrivateWin10.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="100*"/>
+        </Grid.RowDefinitions>
+
+        <ToolBar Grid.Row="0">
+            <Label Name="lblSort" Content="Sort:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
+            <Grid Margin="2,2">
+                <ComboBox Name="cmbSort" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center" Background="White" MinWidth ="100" Width="Auto" SelectionChanged="cmbSort_SelectionChanged"/>
+            </Grid>
+
+            <Separator/>
+
+            <ToggleButton Name="chkNoLan" Click="ChkNoLan_Click" ToolTip="Ignore LAN">
+                <Image Width="16" Height="16">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=chkNoLan, Path=IsChecked}" Value="true">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoLan2}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=chkNoLan, Path=IsChecked}" Value="false">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoLan}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </ToggleButton>
+
+            <ToggleButton Name="chkNoLocal" Click="ChkNoLocal_Click" ToolTip="Ignore LocalHost" IsChecked="true">
+                <Image Width="16" Height="16">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=chkNoLocal, Path=IsChecked}" Value="true">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoLocal2}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=chkNoLocal, Path=IsChecked}" Value="false">
+                                    <Setter Property="Source" Value="{StaticResource Icon_NoLocal}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </ToggleButton>
+        </ToolBar>
+
+        <!--WrapPanel Grid.Row="0" Orientation="Horizontal">
+                    <Button Name="btnAdd" Margin="2,2" Content="Add Program" Click="btnAdd_Click"/>
+                    <Button Name="btnMerge" Margin="2,2" Content="Merge Programs" Click="btnMerge_Click"/>
+                    <Button Name="btnRemove" Margin="2,2" Content="Remove Program(s)" Click="btnRemove_Click"/>
+                    <Button Name="btnCleanup" Margin="2,2" Content="Cleanup List" Click="btnCleanup_Click"/>
+                    <CheckBox Name="chkNoLocal" Content="Ignore localHost" VerticalAlignment="Center" IsChecked="True"/>
+                </-->
+
+        <!--WrapPanel Grid.Row="1" Orientation="Horizontal">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Name="lblSort" Content="Sort:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
+                        <ComboBox Name="cmbSort" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center" MinWidth ="100" Width="Auto"  Grid.Column="1" 
+                                  SelectionChanged="cmbSort_SelectionChanged"/>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Name="lblType" Content="Type" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
+                        <ComboBox Name="cmbFilter" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center" MinWidth ="100" Width="Auto"  Grid.Column="1" 
+                                  IsEditable="True"
+                                  Height="25"
+                                  SelectionChanged="cmbFilter_SelectionChanged" DropDownClosed="cmbFilter_DropDownClosed" TextBoxBase.TextChanged="cmbFilter_TextChanged" DropDownOpened="cmbFilter_DropDownOpened">
+                            <ComboBox.GroupStyle>
+                                <GroupStyle>
+                                    <GroupStyle.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}"/>
+                                        </DataTemplate>
+                                    </GroupStyle.HeaderTemplate>
+                                </GroupStyle>
+                            </ComboBox.GroupStyle>
+                            <!-ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Content}"/>
+                                </DataTemplate>
+                            </->
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate DataType="ComboBox">
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox Visibility="{Binding IsCheckVisible}" IsChecked="{Binding IsSelected}" IsThreeState="True" Width="20" VerticalAlignment="Center" Click="cmbFilter_CheckClicked" />
+                                        <TextBlock Text="{Binding Content}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Name="lblFilter" Content="Filter" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Width="Auto" Grid.Column="0"/>
+                        <TextBox Name="txtFilter" HorizontalAlignment="Left" Height="23" Margin="0,2,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" MinWidth ="150" Width="Auto" Grid.Column="1" TextChanged="txtFilter_TextChanged">
+                            <!-TextBox.Style>
+                                <Style BasedOn="{StaticResource MetroTextBox}" TargetType="{x:Type TextBox}">
+                                    <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
+                                    <Style.Triggers>
+                                        <Trigger Property="Controls:TextBoxHelper.HasText" Value="False">
+                                            <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="False" />
+                                            <Setter Property="Controls:TextBoxHelper.Watermark" Value="Enter Filter..." />
+                                        </Trigger>
+                                        <Trigger Property="Controls:TextBoxHelper.HasText" Value="True">
+                                            <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </->
+                        </TextBox>
+                    </Grid>
+
+                </-->
+
+        <ScrollViewer Name="processScroll" Grid.Row="2" Margin="0,0,0,0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="LightGray">
+            <Grid Margin="0,2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Name="processGrid">
+
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

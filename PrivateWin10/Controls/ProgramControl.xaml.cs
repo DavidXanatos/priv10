@@ -54,7 +54,7 @@ namespace PrivateWin10
             btnRemove.Content = Translate.fmt("lbl_remove");
 
             progGrid.Columns[1].Header = Translate.fmt("lbl_name");
-            progGrid.Columns[2].Header = Translate.fmt("lbl_progam");
+            progGrid.Columns[2].Header = Translate.fmt("lbl_program");
 
             SuspendChange++;
 
@@ -132,8 +132,8 @@ namespace PrivateWin10
             UInt64 downloadRate = 0;
             foreach (Program prog in Program.Programs.Values)
             {
-                blockedConnections += prog.countBlocked;
-                allowedConnections += prog.countAllowed;
+                blockedConnections += prog.BlockedCount;
+                allowedConnections += prog.AllowedCount;
 
                 socketCount += prog.SocketCount;
 
@@ -308,23 +308,32 @@ namespace PrivateWin10
 
             if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2) // double click
             {
-                IconExtractor.PickerDialog picker = new IconExtractor.PickerDialog();
-                var pathIndex = TextHelpers.Split2(Program.GetIcon(), "|");
-                picker.FileName = pathIndex.Item1;
-                picker.IconIndex = MiscFunc.parseInt(pathIndex.Item2);
-                if (picker.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-                    return;
-
-                IconExtractor extractor = new IconExtractor(picker.FileName);
-                if (extractor.Count == 0)
-                    return;
-
-                Program.config.Icon = picker.FileName + "|" + picker.IconIndex;
-                App.client.UpdateProgram(Program.guid, Program.config);
-                icon.Source = ImgFunc.GetIcon(Program.GetIcon(), icon.Width);
+                string iconFile = OpenIconPicker(Program.GetIcon());
+                if (iconFile != null)
+                {
+                    Program.config.Icon = iconFile;
+                    App.client.UpdateProgram(Program.guid, Program.config);
+                    icon.Source = ImgFunc.GetIcon(Program.GetIcon(), icon.Width);
+                }
             }
         }
 
+
+        static public string OpenIconPicker(string iconFile)
+        {
+            IconExtractor.PickerDialog picker = new IconExtractor.PickerDialog();
+            var pathIndex = TextHelpers.Split2(iconFile, "|");
+            picker.FileName = pathIndex.Item1;
+            picker.IconIndex = MiscFunc.parseInt(pathIndex.Item2);
+            if (picker.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                return null;
+
+            IconExtractor extractor = new IconExtractor(picker.FileName);
+            if (extractor.Count == 0)
+                return null;
+
+            return picker.FileName + "|" + picker.IconIndex;
+        }
 
         public class ProgEntry : INotifyPropertyChanged
         {

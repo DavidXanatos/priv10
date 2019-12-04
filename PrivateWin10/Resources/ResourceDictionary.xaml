@@ -103,6 +103,26 @@
 
     <BitmapImage x:Key="Icon_Erase" UriSource="icons8-radiergummi-16.png" />
 
+    <BitmapImage x:Key="Icon_NoConf" UriSource="icons8-undefined-16.png" />
+    <BitmapImage x:Key="Icon_Custom" UriSource="icons8-sortier-optionen-16.png" />
+    <BitmapImage x:Key="Icon_Stop" UriSource="icons8-stoppschild-16.png" />
+    <BitmapImage x:Key="Icon_Grant" UriSource="icons8-checkbox-markiert-2-16.png" />
+
+
+    <BitmapImage x:Key="Icon_Rename" UriSource="icons8-stift-16.png" />
+    <BitmapImage x:Key="Icon_SetIcon" UriSource="icons8-xlarge-symbole-16.png" />
+    <BitmapImage x:Key="Icon_Category" UriSource="icons8-ordner-öffnen-16.png" />
+
+    <BitmapImage x:Key="Icon_NormalView" UriSource="normal_view.png" />
+    <BitmapImage x:Key="Icon_FullScreen" UriSource="full_screen.png" />
+    <BitmapImage x:Key="Icon_FullHeight" UriSource="full_height.png" />
+    <BitmapImage x:Key="Icon_FullWidth" UriSource="full_width.png" />
+    <BitmapImage x:Key="Icon_ShowAll" UriSource="icons8-tabelle-16.png" />
+
+
+    <BitmapImage x:Key="Icon_NetAccess" UriSource="icons8-firewall-16.png" />
+    
+
     <SolidColorBrush x:Key="SidePanel.off" Color="#a9aaac"/>
     <SolidColorBrush x:Key="SidePanel.on" Color="White"/>
     <SolidColorBrush x:Key="SidePanel.Back" Color="#FF17316C"/>

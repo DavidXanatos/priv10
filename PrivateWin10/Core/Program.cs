@@ -18,7 +18,7 @@ namespace PrivateWin10
         public ProgramID ID;
         public string Description;
 
-        [NonSerialized()] // Note: BinaryFormatter can handle circular references
+        //[NonSerialized()] // Note: BinaryFormatter can handle circular references
         public ProgramSet ProgSet = null;
 
         [NonSerialized()]
@@ -33,14 +33,29 @@ namespace PrivateWin10
         [NonSerialized()]
         public Dictionary<string, DnsEntry> DnsLog = new Dictionary<string, DnsEntry>();
 
-        public DateTime lastAllowed = DateTime.MinValue;
-        public int countAllowed = 0;
-        public DateTime lastBlocked = DateTime.MinValue;
-        public int countBlocked = 0;
+        public int RuleCount = 0;
+        public int EnabledRules = 0;
+        public int DisabledRules = 0;
+        public int ChgedRules = 0;
+
+        public DateTime LastAllowed = DateTime.MinValue;
+        public int AllowedCount = 0;
+        public DateTime LastBlocked = DateTime.MinValue;
+        public int BlockedCount = 0;
+        public DateTime LastActivity { get { return MiscFunc.Max(LastAllowed, LastBlocked); } }
+        private bool ActivityChanged = false;
 
         public int SocketCount = 0;
+        public int SocketsWeb = 0;
+        public int SocketsTcp = 0;
+        public int SocketsSrv = 0;
+        public int SocketsUdp = 0;
+
         public UInt64 UploadRate = 0;
         public UInt64 DownloadRate = 0;
+        // todo: xxx
+        public UInt64 TotalUpload = 0;
+        public UInt64 TotalDownload = 0;
 
         public void AssignSet(ProgramSet progSet)
         {
@@ -53,12 +68,43 @@ namespace PrivateWin10
             ProgSet.Programs.Add(ID, this);
         }
 
-        [OnDeserializing]
-        private void OnDeserializing(StreamingContext c)
+        [OnSerializing]
+        private void OnSerializing(StreamingContext c)
         {
-            /*Rules = new Dictionary<Guid, FirewallRule>();
-            Sockets = new Dictionary<Guid, NetworkSocket>();
-            Log = new List<LogEntry>();*/
+            RuleCount = 0;
+            EnabledRules = 0;
+            DisabledRules = 0;
+            ChgedRules = 0;            
+            foreach (FirewallRuleEx rule in Rules.Values)
+            {
+                RuleCount++;
+                if (rule.Enabled)
+                    EnabledRules++;
+                else
+                    DisabledRules++;
+                if (rule.State != FirewallRuleEx.States.Approved)
+                    ChgedRules++;
+            }
+            
+            SocketsWeb = 0;
+            SocketsTcp = 0;
+            SocketsUdp = 0;
+            SocketsSrv = 0;
+            foreach (NetworkSocket entry in Sockets.Values)
+            {
+                if ((entry.ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) != 0)
+                {
+                    SocketsUdp++;
+                }
+                else if ((entry.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) != 0)
+                {
+                    SocketsTcp++;
+                    if (entry.RemotePort == 80 || entry.RemotePort == 443)
+                        SocketsWeb++;
+                    if (entry.State == (int)IPHelper.MIB_TCP_STATE.LISTENING)
+                        SocketsSrv++;
+                }
+            }
         }
 
         public Program()
@@ -113,15 +159,17 @@ namespace PrivateWin10
                 downloadRate += Socket.Stats.DownloadRate.ByteRate;
             }
 
-            if (UploadRate != uploadRate || DownloadRate != downloadRate || SocketCount != Sockets.Count)
+            if (UploadRate != uploadRate || DownloadRate != downloadRate || SocketCount != Sockets.Count || ActivityChanged)
             {
                 SocketCount = Sockets.Count;
 
                 UploadRate = uploadRate;
                 DownloadRate = downloadRate;
+
+                ActivityChanged = false;
+
                 return true;
             }
-
             return false;
         }
 
@@ -150,12 +198,12 @@ namespace PrivateWin10
             switch (logEntry.FwEvent.Action)
             {
                 case FirewallRule.Actions.Allow:
-                    countAllowed++; 
-                    lastAllowed = logEntry.FwEvent.TimeStamp;
+                    AllowedCount++; 
+                    LastAllowed = logEntry.FwEvent.TimeStamp;
                     break;
                 case FirewallRule.Actions.Block:
-                    countBlocked++;
-                    lastBlocked = logEntry.FwEvent.TimeStamp;
+                    BlockedCount++;
+                    LastBlocked = logEntry.FwEvent.TimeStamp;
                     break;
             }
 

@@ -159,7 +159,7 @@ namespace PrivateWin10
                         if (Address.Equals(IPAddress.Any) || Address.Equals(IPAddress.IPv6Any)) // thats wht we get from a pi hole dns proxy if the domain is blocked
                             Address = null;
 
-                        curEntry = curEntries.FirstOrDefault(e => { return e.RecordType == record.Type && IsEqual(e.Address, Address); });
+                        curEntry = curEntries.FirstOrDefault(e => { return e.RecordType == record.Type && MiscFunc.IsEqual(e.Address, Address); });
                     }
                     else // CNAME, SRV, MX, DNAME
                     {
@@ -194,7 +194,7 @@ namespace PrivateWin10
                         if (ResolvedString.Equals("null.arpa")) // I invented that or the DnsProxyServer so probably no one else uses it
                             ResolvedString = null;
 
-                        curEntry = curEntries.FirstOrDefault(e => { return e.RecordType == record.Type && IsEqual(e.ResolvedString, ResolvedString); });
+                        curEntry = curEntries.FirstOrDefault(e => { return e.RecordType == record.Type && MiscFunc.IsEqual(e.ResolvedString, ResolvedString); });
                     }
 
                     if (curEntry == null)
@@ -274,13 +274,6 @@ namespace PrivateWin10
             return curEntries;
         }
 
-        private bool IsEqual<T>(T L, T R)
-        {
-            if (L == null)
-                return (R == null);
-            return L.Equals(R);
-        }
-
         public void AddCacheEntry(DnsCacheEntry curEntry)
         {
             // todo: should we check if teh entry lookes as if it was blocked?
@@ -289,9 +282,9 @@ namespace PrivateWin10
 
             DnsCacheEntry oldEntry = null;
             if (curEntry.RecordType == DnsApi.DnsRecordType.A || curEntry.RecordType == DnsApi.DnsRecordType.AAAA)
-                oldEntry = curEntries.FirstOrDefault(e => { return e.RecordType == curEntry.RecordType && IsEqual(e.Address, curEntry.Address); });
+                oldEntry = curEntries.FirstOrDefault(e => { return e.RecordType == curEntry.RecordType && MiscFunc.IsEqual(e.Address, curEntry.Address); });
             else // CNAME, SRV, MX, DNAME
-                oldEntry = curEntries.FirstOrDefault(e => { return e.RecordType == curEntry.RecordType && IsEqual(e.ResolvedString, curEntry.ResolvedString); });
+                oldEntry = curEntries.FirstOrDefault(e => { return e.RecordType == curEntry.RecordType && MiscFunc.IsEqual(e.ResolvedString, curEntry.ResolvedString); });
 
             if (oldEntry == null)
                 AddCacheEntry(curEntries, curEntry);

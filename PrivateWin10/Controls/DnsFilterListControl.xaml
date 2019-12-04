@@ -62,7 +62,7 @@
             <Button Grid.Column="2" Name="btnAddEx" Content="Add Domain (regex)" Padding="5,2" Click="BtnAddEx_Click"/>
         </Grid>
 
-        <DataGrid Name="filterGrid" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="None" AlternationCount="2" Margin="10,10,10,10" SelectionChanged="FilterGrid_SelectionChanged">
+        <DataGrid Name="filterGrid" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="true" GridLinesVisibility="None" AlternationCount="2" Margin="10,10,10,10" SelectionChanged="FilterGrid_SelectionChanged" MouseDoubleClick="FilterGrid_MouseDoubleClick">
             <DataGrid.RowStyle>
                 <Style TargetType="{x:Type DataGridRow}">
                     <Style.Triggers>
