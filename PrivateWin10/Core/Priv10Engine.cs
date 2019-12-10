@@ -12,7 +12,7 @@ using System.Windows.Threading;
 
 namespace PrivateWin10
 {
-    public class Engine//: IDisposable
+    public class Priv10Engine //: IDisposable
     {
         public ProgramList ProgramList;
 
@@ -28,7 +28,7 @@ namespace PrivateWin10
         ManualResetEvent mStarted = new ManualResetEvent(false);
         //ManualResetEvent mFinished = new ManualResetEvent(false);
         DispatcherTimer mTimer;
-        volatile bool mDoQuit = false;
+        //volatile bool mDoQuit = false;
         DateTime LastSaveTime = DateTime.Now;
 
 #if DEBUG
@@ -180,7 +180,7 @@ namespace PrivateWin10
             //
 
             AppLog.Debug("Setting up IPC host...");
-            App.host = new Priv10Host(App.mSvcName);
+            App.host = new Priv10Host();
             App.host.Listen();
 
             mStarted.Set();
@@ -270,8 +270,8 @@ namespace PrivateWin10
                 ProgramList.Store();
             }
 
-            if (mDoQuit)
-                mDispatcher.InvokeShutdown();
+            //if (mDoQuit)
+            //    mDispatcher.InvokeShutdown();
         }
 
         public void Stop()
@@ -1537,10 +1537,10 @@ namespace PrivateWin10
         /////////////////////////////////////////
         // Misc
 
-        public bool Quit()
+        /*public bool Quit()
         {
             mDoQuit = true;
             return true;
-        }
+        }*/
     }
 }

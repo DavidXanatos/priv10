@@ -341,7 +341,7 @@ namespace PrivateWin10.Pages
             SuspendChange--;
         }
 
-        void OnActivity(object sender, Engine.FwEventArgs args)
+        void OnActivity(object sender, Priv10Engine.FwEventArgs args)
         {
             ProgramSet prog = GetProgSet(args.guid, args.progID);
             if (prog == null)
@@ -393,15 +393,18 @@ namespace PrivateWin10.Pages
 
         private NotificationWnd notificationWnd = null;
 
-        private void ShowNotification(ProgramSet prog, Engine.FwEventArgs args)
+        private void ShowNotification(ProgramSet prog, Priv10Engine.FwEventArgs args)
         {
-            if (notificationWnd == null && !args.update) // dont show on update events
+            if (notificationWnd == null)
             {
+                if (args.update) // dont show on update events
+                    return;
+
                 notificationWnd = new NotificationWnd();
                 notificationWnd.Closing += NotificationClosing;
-                notificationWnd.Show();
             }
-            notificationWnd.Add(prog, args);
+            if(notificationWnd.Add(prog, args))
+                notificationWnd.Show();
         }
 
         void NotificationClosing(object sender, CancelEventArgs e)
@@ -413,11 +416,11 @@ namespace PrivateWin10.Pages
         bool FullUpdate = false;
         bool RuleUpdate = false;
 
-        void OnChange(object sender, Engine.ChangeArgs args)
+        void OnChange(object sender, Priv10Engine.ChangeArgs args)
         {
             if (args.guid == Guid.Empty)
                 FullUpdate = true;
-            else if (args.type == Engine.ChangeArgs.Types.ProgSet)
+            else if (args.type == Priv10Engine.ChangeArgs.Types.ProgSet)
                 UpdatesProgs.Add(args.guid);
             else
                 RuleUpdate = true;
@@ -799,7 +802,7 @@ namespace PrivateWin10.Pages
             if (App.client.AddProgram(progWnd.ID, Guid.Empty))
                 return;
 
-            MessageBox.Show(Translate.fmt("msg_already_exist"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            MessageBox.Show(Translate.fmt("msg_already_exist"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
 
         private void btnAddSub_Click(object sender, RoutedEventArgs e)
@@ -813,7 +816,7 @@ namespace PrivateWin10.Pages
                 return;
 
             if (!App.client.AddProgram(progWnd.ID, SelectedProgramSets[0].guid))
-                MessageBox.Show(Translate.fmt("msg_already_exist"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show(Translate.fmt("msg_already_exist"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
 
         private void btnMerge_Click(object sender, RoutedEventArgs e)
@@ -826,7 +829,7 @@ namespace PrivateWin10.Pages
             {
                 if (progSet.Programs.First().Key.Type == ProgramID.Types.System || progSet.Programs.First().Key.Type == ProgramID.Types.Global)
                 {
-                    MessageBox.Show(Translate.fmt("msg_no_sys_merge"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    MessageBox.Show(Translate.fmt("msg_no_sys_merge"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     return;
                 }
             }
@@ -854,7 +857,7 @@ namespace PrivateWin10.Pages
 
                 if (item.Value.Count == progSet.Programs.Count)
                 {
-                    MessageBox.Show(Translate.fmt("msg_no_split_all"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    MessageBox.Show(Translate.fmt("msg_no_split_all"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     return;
                 }
 
@@ -865,7 +868,7 @@ namespace PrivateWin10.Pages
 
         private void btnRemove_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_remove_progs"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_remove_progs"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             var items = GetSelectedItems();
@@ -915,7 +918,7 @@ namespace PrivateWin10.Pages
 
             var progSet = SelectedProgramSets[0];
 
-            InputWnd wnd = new InputWnd(Translate.fmt("msg_rename"), progSet.config.Name, App.mName);
+            InputWnd wnd = new InputWnd(Translate.fmt("msg_rename"), progSet.config.Name, App.Title);
             if (wnd.ShowDialog() != true || wnd.Value.Length == 0)
                 return;
 
@@ -956,7 +959,7 @@ namespace PrivateWin10.Pages
                     Categories.Add(cat.Content.ToString());
             }
 
-            InputWnd wnd = new InputWnd(Translate.fmt("msg_set_cat"), Categories, SelectedProgramSets[0].config.Category, true, App.mName);
+            InputWnd wnd = new InputWnd(Translate.fmt("msg_set_cat"), Categories, SelectedProgramSets[0].config.Category, true, App.Title);
             if (wnd.ShowDialog() != true || wnd.Value.Length == 0)
                 return;
 
@@ -971,18 +974,18 @@ namespace PrivateWin10.Pages
 
         private void btnCleanup_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_clean_progs"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_clean_progs"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
             int Count = App.client.CleanUpPrograms();
-            MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.mName, MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.Title, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void btnCleanupEx_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_clean_progs_ex"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_clean_progs_ex"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
             int Count = App.client.CleanUpPrograms(true);
-            MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.mName, MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.Title, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void btnClearLog_Click(object sender, RoutedEventArgs e)
@@ -1035,7 +1038,7 @@ namespace PrivateWin10.Pages
                 if (App.client.UpdateRule(rule)) // Note: this also adds
                     break;
 
-                MessageBox.Show(Translate.fmt("msg_rule_failed"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show(Translate.fmt("msg_rule_failed"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
         }
 

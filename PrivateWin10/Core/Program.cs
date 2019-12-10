@@ -187,7 +187,7 @@ namespace PrivateWin10
             switch (ID.Type)
             {
                 case ProgramID.Types.Program:   return !PathMissing;
-                case ProgramID.Types.Service:   return (ServiceHelper.GetServiceStatus(ID.GetServiceId()) != ServiceHelper.ServiceState.NotFound) && !PathMissing;
+                case ProgramID.Types.Service:   return (ServiceHelper.GetServiceState(ID.GetServiceId()) != ServiceHelper.ServiceState.NotFound) && !PathMissing;
                 case ProgramID.Types.App:       return App.PkgMgr?.GetAppInfoBySid(ID.GetPackageSID()) != null && !PathMissing;
                 default:        return true;
             }

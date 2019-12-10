@@ -45,15 +45,17 @@ namespace PipeIPC
             if (!pipeStream.IsConnected)
                 return;
 
+            pipeStream.Close();
+
             if (revcRunning)
             {
                 revcRunning = false;
                 revcThread.Join();
             }
 
-            pipeStream.Flush();
+            /*pipeStream.Flush();
             pipeStream.WaitForPipeDrain();
-            pipeStream.Close();
+            pipeStream.Close();*/
         }
 
         public bool IsConnected() { return pipeStream.IsConnected; }

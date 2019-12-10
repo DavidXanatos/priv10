@@ -224,7 +224,7 @@ namespace PrivateWin10
             string Value;
             if (cat.SpecialCat == CategoryModel.Category.Special.AddNew)
             {
-                InputWnd wnd = new InputWnd(Translate.fmt("msg_cat_name"), Translate.fmt("msg_cat_some"), App.mName);
+                InputWnd wnd = new InputWnd(Translate.fmt("msg_cat_name"), Translate.fmt("msg_cat_some"), App.Title);
                 if (wnd.ShowDialog() != true || wnd.Value.Length == 0)
                     return;
 
@@ -381,14 +381,14 @@ namespace PrivateWin10
                 return;
 
             if (!App.client.AddProgram(progWnd.ID, Program.guid))
-                MessageBox.Show(Translate.fmt("msg_already_exist"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show(Translate.fmt("msg_already_exist"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
 
         private void btnSplit_Click(object sender, RoutedEventArgs e)
         {
             if (progGrid.SelectedItems.Count == progGrid.Items.Count)
             {
-                MessageBox.Show(Translate.fmt("msg_no_split_all"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show(Translate.fmt("msg_no_split_all"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
 
@@ -400,7 +400,7 @@ namespace PrivateWin10
 
         private void btnRemove_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_remove_progs"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_remove_progs"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             ProgEntry[] Temp = new ProgEntry[progGrid.SelectedItems.Count];

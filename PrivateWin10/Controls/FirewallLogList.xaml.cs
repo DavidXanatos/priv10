@@ -165,7 +165,7 @@ namespace PrivateWin10.Controls
             return true;
         }*/
 
-        public void AddEntry(ProgramSet prog, Program program, Engine.FwEventArgs args)
+        public void AddEntry(ProgramSet prog, Program program, Priv10Engine.FwEventArgs args)
         {
             //if (!TestEntry(prog, args.entry))
             //    return;
@@ -299,7 +299,7 @@ namespace PrivateWin10.Controls
 
         public void ClearLog()
         {
-            MessageBoxResult res = MessageBox.Show(Translate.fmt("msg_clear_log"), App.mName, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+            MessageBoxResult res = MessageBox.Show(Translate.fmt("msg_clear_log"), App.Title, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
             if (res == MessageBoxResult.Cancel)
                 return;

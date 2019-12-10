@@ -71,7 +71,7 @@ namespace PrivateWin10.Controls
             {
                 if (Item.Blocklist.Url.Equals(Url))
                 {
-                    MessageBox.Show(Translate.fmt("msg_dns_filter_dup"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    MessageBox.Show(Translate.fmt("msg_dns_filter_dup"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     return;
                 }
             }
@@ -92,7 +92,7 @@ namespace PrivateWin10.Controls
 
         private void BtnRemove_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_remove_items"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_remove_items"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             foreach (BlocklistItem Item in new List<BlocklistItem>(listGrid.SelectedItems.Cast<BlocklistItem>())) // copy
@@ -124,7 +124,7 @@ namespace PrivateWin10.Controls
 
         private void BtnDefault_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_restore_std"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_restore_std"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             foreach (var Item in BlocklistList)

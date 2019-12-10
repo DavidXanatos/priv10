@@ -92,7 +92,7 @@ namespace PrivateWin10
 
         public void Notify(string Message, ToolTipIcon Icon = ToolTipIcon.Info)
         {
-            notifyIcon.ShowBalloonTip(5000, App.mName, Message, Icon);
+            notifyIcon.ShowBalloonTip(5000, App.Title, Message, Icon);
         }
 
         private void notifyIcon1_Click(object Sender, EventArgs e)

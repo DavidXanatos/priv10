@@ -58,7 +58,7 @@ namespace PrivateWin10.Pages
         public void OnShow()
         {
             string running = Translate.fmt("lbl_run_as", Translate.fmt(AdminFunc.IsAdministrator() ? "str_admin" : "str_user"));
-            if (App.svc.IsInstalled())
+            if (Priv10Service.IsInstalled())
                 running += Translate.fmt("lbl_run_svc");
             lblRunning.Content = running;
 

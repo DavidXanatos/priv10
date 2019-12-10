@@ -102,7 +102,7 @@ namespace PrivateWin10.Controls
         {
             if (RegExp ? MiscFunc.IsValidRegex(Domain) : Uri.CheckHostName(Domain.Replace("*", "asterisk")) != UriHostNameType.Dns)
             {
-                MessageBox.Show(Translate.fmt("msg_bad_dns_filter"), App.mName, MessageBoxButton.OK, MessageBoxImage.Stop);
+                MessageBox.Show(Translate.fmt("msg_bad_dns_filter"), App.Title, MessageBoxButton.OK, MessageBoxImage.Stop);
                 return;
             }
 
@@ -111,7 +111,7 @@ namespace PrivateWin10.Controls
             {
                 if (Item.Filter.Domain.Equals(Domain))
                 {
-                    MessageBox.Show(Translate.fmt("msg_dns_filter_dup"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    MessageBox.Show(Translate.fmt("msg_dns_filter_dup"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     return;
                 }
             }
@@ -130,7 +130,7 @@ namespace PrivateWin10.Controls
 
         private void BtnRemove_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_remove_items"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_remove_items"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             foreach (FilterListItem Item in new List<FilterListItem>(filterGrid.SelectedItems.Cast<FilterListItem>())) // copy

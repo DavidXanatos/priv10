@@ -90,8 +90,8 @@ namespace PrivateWin10.Pages
 
             chkTray.IsChecked = App.GetConfigInt("Startup", "Tray") != 0;
             chkAutoStart.IsChecked = App.IsAutoStart();
-            chkService.IsChecked = App.svc.IsInstalled();
-            chkNoUAC.IsChecked = AdminFunc.IsSkipUac(App.mName);
+            chkService.IsChecked = Priv10Service.IsInstalled();
+            chkNoUAC.IsChecked = AdminFunc.IsSkipUac(App.Key);
 
             chkTweakCheck.IsChecked = App.GetConfigInt("TweakGuard", "AutoCheck", 1) != 0;
             chkTweakFix.IsEnabled = chkTweakCheck.IsChecked == true;
@@ -147,6 +147,8 @@ namespace PrivateWin10.Pages
 
             chkDnsInspector.IsChecked = App.GetConfigInt("DnsInspector", "Enabled", 0) != 0;
 
+            chkReverseDNS.IsChecked = App.GetConfigInt("DnsInspector", "UseReverseDNS", 0) != 0;
+
             // DNS
             chkLocalDNS.IsChecked = App.GetConfigInt("DnsProxy", "SetLocal", 0) != 0;
             string UpstreamDNS = App.GetConfig("DNSProxy", "UpstreamDNS", "8.8.8.8");
@@ -178,7 +180,7 @@ namespace PrivateWin10.Pages
 
             if (!AdminFunc.IsAdministrator())
             {
-                if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.mName), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.Title), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     App.Restart(true);
                 return;
             }
@@ -193,16 +195,16 @@ namespace PrivateWin10.Pages
                     App.engine = null;
                 }
 
-                App.svc.Install(true);
-                App.Log.SetupEventLog(App.mAppName);
+                Priv10Service.Install(true);
+                App.Log.SetupEventLog(App.Key);
             }
             else
             {
-                App.svc.Uninstall();
+                Priv10Service.Uninstall();
 
                 if (App.engine == null)
                 {
-                    App.engine = new Engine();
+                    App.engine = new Priv10Engine();
 
                     App.engine.Start();
                 }
@@ -218,12 +220,12 @@ namespace PrivateWin10.Pages
 
             if (!AdminFunc.IsAdministrator())
             {
-                if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.mName), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.Title), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     App.Restart(true);
                 return;
             }
 
-            AdminFunc.SkipUacEnable(App.mName, chkNoUAC.IsChecked == true);
+            AdminFunc.SkipUacEnable(App.Key, chkNoUAC.IsChecked == true);
         }
 
         private void radMode_Checked(object sender, RoutedEventArgs e)
@@ -335,6 +337,14 @@ namespace PrivateWin10.Pages
             App.client.SetupDnsInspector(chkDnsInspector.IsChecked == true);
         }
 
+        private void ChkReverseDNS_Click(object sender, RoutedEventArgs e)
+        {
+            if (bHold) return;
+
+            App.SetConfig("DnsInspector", "UseReverseDNS", chkReverseDNS.IsChecked == true ? 1 : 0);
+        }
+
+        
         private void ChkEnableDNS_Click(object sender, RoutedEventArgs e)
         {
             ConfigureDNS();
@@ -373,7 +383,7 @@ namespace PrivateWin10.Pages
 
             if (!App.client.ConfigureDNSProxy(chkEnableDNS.IsChecked == true, setLocal ? chkLocalDNS.IsChecked : null, UpstreamDNS))
             {
-                MessageBox.Show(Translate.fmt("msg_dns_proxy_err", App.GetConfigInt("DNSProxy", "Port", DnsProxyServer.DEFAULT_PORT)), App.mName, MessageBoxButton.OK, MessageBoxImage.Stop);
+                MessageBox.Show(Translate.fmt("msg_dns_proxy_err", App.GetConfigInt("DNSProxy", "Port", DnsProxyServer.DEFAULT_PORT)), App.Title, MessageBoxButton.OK, MessageBoxImage.Stop);
 
                 bHold = true;
                 App.SetConfig("DnsProxy", "Enabled", 0);

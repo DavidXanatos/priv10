@@ -323,7 +323,7 @@ namespace PrivateWin10.Controls
             return null;
         }
 
-        public bool OnActivity(ProgramSet prog, Program program, Engine.FwEventArgs args)
+        public bool OnActivity(ProgramSet prog, Program program, Priv10Engine.FwEventArgs args)
         {
             ProgramControl item = null; 
             if (!Programs.TryGetValue(args.guid, out item))

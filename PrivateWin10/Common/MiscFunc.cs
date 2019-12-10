@@ -187,7 +187,7 @@ static class MiscFunc
         }
         DriveLetterCacheLock.ExitReadLock();
 
-        string ret = "?:";
+        string ret = null;
         char[] lpTargetPath = new char[260 + 1];
         for (char ltr = 'A'; ltr <= 'Z'; ltr++)
         {
@@ -198,6 +198,9 @@ static class MiscFunc
                 break;
             }
         }
+
+        if (ret == null)
+            return "?:";
 
         DriveLetterCacheLock.EnterWriteLock();
         if(DriveLetterCache.ContainsKey(longPath.ToLower()) == false)

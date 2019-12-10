@@ -122,7 +122,8 @@ namespace PrivateWin10.Controls
 
         public void OnClose()
         {
-            App.SetConfig("GUI", "progTree_Columns", Save());
+            if(headerPresenter != null)
+                App.SetConfig("GUI", "progTree_Columns", Save());
         }
 
         private void TreeView_KeyDown(object sender, KeyEventArgs e)

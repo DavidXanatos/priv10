@@ -243,7 +243,7 @@ namespace PrivateWin10.Controls
         {
             int Count = App.client.CleanUpRules();
 
-            MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.mName, MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.Title, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void btnEditRule_Click(object sender, RoutedEventArgs e)
@@ -281,7 +281,7 @@ namespace PrivateWin10.Controls
 
         private void btnRemoveRule_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_remove_rules"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_remove_rules"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             foreach (RuleItem item in rulesGrid.SelectedItems)
@@ -308,7 +308,7 @@ namespace PrivateWin10.Controls
 
         private void btnCloneRule_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_clone_rules"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_clone_rules"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             foreach (RuleItem item in rulesGrid.SelectedItems)
@@ -322,43 +322,43 @@ namespace PrivateWin10.Controls
         private void btnApproveRule_Click(object sender, RoutedEventArgs e)
         {
             foreach (RuleItem item in rulesGrid.SelectedItems)
-                App.client.SetRuleApproval(Engine.ApprovalMode.ApproveCurrent, item.Rule);
+                App.client.SetRuleApproval(Priv10Engine.ApprovalMode.ApproveCurrent, item.Rule);
         }
 
         private void btnRestoreRule_Click(object sender, RoutedEventArgs e)
         {
             foreach (RuleItem item in rulesGrid.SelectedItems)
-                App.client.SetRuleApproval(Engine.ApprovalMode.RestoreRules, item.Rule);
+                App.client.SetRuleApproval(Priv10Engine.ApprovalMode.RestoreRules, item.Rule);
         }
 
         private void btnRedoRule_Click(object sender, RoutedEventArgs e)
         {
             foreach (RuleItem item in rulesGrid.SelectedItems)
-                App.client.SetRuleApproval(Engine.ApprovalMode.ApproveChanges, item.Rule);
+                App.client.SetRuleApproval(Priv10Engine.ApprovalMode.ApproveChanges, item.Rule);
         }
 
         private void btnApproveAllRules_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_approve_all"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_approve_all"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
-            App.client.SetRuleApproval(Engine.ApprovalMode.ApproveCurrent, null);
+            App.client.SetRuleApproval(Priv10Engine.ApprovalMode.ApproveCurrent, null);
         }
 
         private void btnRestoreAllRules_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_restore_all"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_restore_all"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
-            App.client.SetRuleApproval(Engine.ApprovalMode.RestoreRules, null);
+            App.client.SetRuleApproval(Priv10Engine.ApprovalMode.RestoreRules, null);
         }
 
         private void btnRedoAllRules_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_apply_all"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_apply_all"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
-            App.client.SetRuleApproval(Engine.ApprovalMode.ApproveChanges, null);
+            App.client.SetRuleApproval(Priv10Engine.ApprovalMode.ApproveChanges, null);
         }
 
         private void chkNoDisabled_Click(object sender, RoutedEventArgs e)

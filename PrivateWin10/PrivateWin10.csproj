@@ -180,11 +180,11 @@
     <Compile Include="Core\ProgramSet.cs" />
     <Compile Include="Core\ProgramID.cs" />
     <Compile Include="Common\WinConsole.cs" />
-    <Compile Include="Core\Engine.cs" />
+    <Compile Include="Core\Priv10Engine.cs" />
     <Compile Include="Core\Program.cs" />
     <Compile Include="Core\ProgramList.cs" />
     <Compile Include="Controls\MouseDownHelper.cs" />
-    <Compile Include="Core\Service.cs">
+    <Compile Include="Core\Priv10Service.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Core\Tweaks\TweakManager.cs" />

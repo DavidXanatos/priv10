@@ -2,6 +2,32 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.65.1] - 2019-12-10
+
+### Added
+- added a propper setup
+- added setting for using reverse DNS
+
+### Changed
+- changed drive letter resolcong cache strategy
+
+### Fixed
+- fixed service not proeprly terminating
+- fixed issues with service status querying
+- fixed issue with notification window oppening unnececerly on a delayed hostname update
+
+
+## [0.65] - 2019-12-04
+
+### Added
+- added new program view mode a verbose program tree, that auto enables when the program column ist stretched wider
+- added program context menu
+- added additional program options to the ribbon toolbar
+- added view modes fill screan, full height, full screen 
+- dns query log context menu with options to whitelist and blacklist entries
+- double clicking a domain in the whitelist/blacklist view copys it to the entry edit for editing
+
+
 
 ## [0.65] - 2019-12-04
 

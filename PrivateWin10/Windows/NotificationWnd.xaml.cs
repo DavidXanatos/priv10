@@ -79,23 +79,23 @@ namespace PrivateWin10.Windows
         }
 
         int curIndex = -1;
-        private SortedDictionary<ProgramID, Tuple<Program, List<Engine.FwEventArgs>>> mEvents = new SortedDictionary<ProgramID, Tuple<Program, List<Engine.FwEventArgs>>>();
+        private SortedDictionary<ProgramID, Tuple<Program, List<Priv10Engine.FwEventArgs>>> mEvents = new SortedDictionary<ProgramID, Tuple<Program, List<Priv10Engine.FwEventArgs>>>();
         private List<ProgramID> mEventList = new List<ProgramID>();
 
-        public void Add(ProgramSet progs, Engine.FwEventArgs args)
+        public bool Add(ProgramSet progs, Priv10Engine.FwEventArgs args)
         {
             ProgramID id = args.entry.ProgID;
             Program prog = null;
             if (!progs.Programs.TryGetValue(id, out prog))
-                return;
+                return false;
 
-            Tuple<Program, List<Engine.FwEventArgs>> list;
+            Tuple<Program, List<Priv10Engine.FwEventArgs>> list;
             if (!mEvents.TryGetValue(id, out list))
             {
                 if (args.update)
-                    return;
+                    return false;
 
-                list = new Tuple<Program, List<Engine.FwEventArgs>>(prog, new List<Engine.FwEventArgs>());
+                list = new Tuple<Program, List<Priv10Engine.FwEventArgs>>(prog, new List<Priv10Engine.FwEventArgs>());
                 mEvents.Add(id, list);
                 mEventList.Add(id);
             }
@@ -127,10 +127,10 @@ namespace PrivateWin10.Windows
 
             // don't update if the event is for a different entry
             int index =  mEventList.FindIndex((x) => { return id.CompareTo(x) == 0; });
-            if (curIndex != index)
-                return;
+            if (curIndex == index)
+                LoadCurrent(oldIndex == curIndex);
 
-            LoadCurrent(oldIndex == curIndex);
+            return true;
         }
 
         private void UpdateIndex()
@@ -153,7 +153,7 @@ namespace PrivateWin10.Windows
             }
 
             ProgramID id = mEventList.ElementAt(curIndex);
-            Tuple<Program, List<Engine.FwEventArgs>> list = mEvents[id];
+            Tuple<Program, List<Priv10Engine.FwEventArgs>> list = mEvents[id];
 
             //int PID = list.Item2.Count > 0 ? list.Item2.First().FwEvent.ProcessId : 0;
             string FilePath = list.Item2.Count > 0 ? list.Item2.First().entry.FwEvent.ProcessFileName : "";
@@ -167,7 +167,7 @@ namespace PrivateWin10.Windows
             List<string> services = new List<string>();
 
             consGrid.Items.Clear();
-            foreach (Engine.FwEventArgs args in list.Item2)
+            foreach (Priv10Engine.FwEventArgs args in list.Item2)
             {
                 consGrid.Items.Insert(0, new ConEntry(args.entry));
 
@@ -295,7 +295,7 @@ namespace PrivateWin10.Windows
 
             if (!App.client.UpdateRule(rule, expiration))
             {
-                MessageBox.Show(Translate.fmt("msg_rule_failed"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show(Translate.fmt("msg_rule_failed"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
 
@@ -313,7 +313,7 @@ namespace PrivateWin10.Windows
         private void btnApply_Click(object sender, RoutedEventArgs e)
         {
             ProgramID id = mEventList.ElementAt(curIndex);
-            Tuple<Program, List<Engine.FwEventArgs>> list = mEvents[id];
+            Tuple<Program, List<Priv10Engine.FwEventArgs>> list = mEvents[id];
 
             UInt64 expiration = GetExpiration();
 
@@ -354,7 +354,7 @@ namespace PrivateWin10.Windows
                 return;
 
             ProgramID id = mEventList.ElementAt(curIndex);
-            Tuple<Program, List<Engine.FwEventArgs>> list = mEvents[id];
+            Tuple<Program, List<Priv10Engine.FwEventArgs>> list = mEvents[id];
 
             UInt64 expiration = GetExpiration();
             if (MakeCustom(list.Item1, expiration, entry))

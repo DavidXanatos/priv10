@@ -95,6 +95,7 @@
                             <ComboBoxItem Name="lblAuditNone" Content="Disabled"/>
                         </ComboBox>
                         <CheckBox Name="chkDnsInspector"  Content="Monitor host names queries (DNS Inspector)" HorizontalAlignment="Left" Margin="20,15,0,0" VerticalAlignment="Top" Click="ChkDnsInspector_Click" />
+                        <CheckBox Name="chkReverseDNS"  Content="User reverse DNS for domain resolution" HorizontalAlignment="Left" Margin="35,5,0,0" VerticalAlignment="Top" Click="ChkReverseDNS_Click"/>
                     </StackPanel>
                 </Grid>
             </Grid>

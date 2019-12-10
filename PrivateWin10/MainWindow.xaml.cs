@@ -109,10 +109,21 @@ namespace PrivateWin10
         {
             InitializeComponent();
 
-            //if (!MiscFunc.IsRunningAsUwp())
-            this.Title = string.Format("{0} v{1} by David Xanatos", App.mName, App.mVersion);
-            if (!App.lic.CommercialUse)
-                this.Title += " - Freeware for Private NOT Commercial Use";
+            this.Title = string.Format("{0} v{1} by David Xanatos", App.Title, App.Version);
+            if (App.lic.LicenseStatus != QLicense.LicenseStatus.VALID)
+            {
+                if (!App.lic.CommercialUse)
+                    this.Title += " - Freeware for Private NOT Commercial Use";
+                else if (App.IsEvaluationExpired())
+                    this.Title += " - Evaluation license EXPIRED";
+                else
+                    this.Title += " - Evaluation license for Commercial Use";
+            }
+            /*else
+            {
+                if (App.lic.CommercialUse)
+                    this.Title += " - Business Edition";
+            }*/
 
             WpfFunc.LoadWnd(this, "Main");
 
@@ -291,7 +302,7 @@ namespace PrivateWin10
         {
             UpdateSysMenu(); // Install system menu
 
-            if (AdminFunc.IsAdministrator() && App.GetConfigInt("Startup", "ShowSetup", 1) == 1 && !App.svc.IsInstalled())
+            if (AdminFunc.IsAdministrator() && App.GetConfigInt("Startup", "ShowSetup", 1) == 1 && !Priv10Service.IsInstalled())
                 ShowSetup();
         }
 
@@ -304,7 +315,7 @@ namespace PrivateWin10
 
         private void RunUninstall()
         {
-            if (MessageBox.Show(Translate.fmt("msg_uninstall_this", App.mName), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_uninstall_this", App.Title), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             var exeName = Process.GetCurrentProcess().MainModule.FileName;
@@ -313,7 +324,7 @@ namespace PrivateWin10
             startInfo.UseShellExecute = true;
             startInfo.Verb = "runas";
             Process.Start(startInfo);
-            Environment.Exit(-1);
+            Environment.Exit(0);
         }
     }
 }

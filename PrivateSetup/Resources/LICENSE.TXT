@@ -1,0 +1,92 @@
+Limited Open Source License
+===========================
+Copyright (c) 2018-2020 David Xanatos (xanatosdavid[at]gmail.com)
+
+The author and copyright holder of this software using the nick 
+name David Xanatos, subsequently referred to as the author, grants 
+permissions to any person obtaining a copy of this software and 
+associated documentation files (the "Software"), to use the 
+Software under the following restrictions and obligations:
+
+
+Usage of the official binary distribution:
+
+   1. Whomever obtains a copy of the software is permitted 
+      to use it in any noncommercial setting to the full 
+      extend the software permits.
+	  
+   2. To use the software commercially an appropriate license 
+      must be obtained from the author; however it is permitted to 
+      use the software commercially for up to 30 days on no more 
+      than 3 machines for evaluation purposes.
+	  
+   3. It is permitted to redistribute the original unmodified 
+      binaries free of charge. 
+	  
+   4. Users whom obtained license codes / serial numbers for the 
+      software must keep them confidential, distribution of that 
+      information is not permitted and the associated licenses 
+      will be voided.
+
+
+Usage of the source codes:
+
+   1. Whomever obtains a copy of the source code is allowed to modify,
+      compile and redistribute the source code, as well as use the 
+      compiled binaries for private, i.e. noncommercial use. 
+	
+   2. This copyright notice and this permission notice shall be 
+      included in all copies or substantial portions of the Software.
+	
+   3. It is permitted to use small portions of the code (single lines or
+      simple functions) in 3rd party projects without further restrictions
+      or obligations. To use large portions of the code outside the
+      scope of this license a permission of the author is required.
+  
+   4. Distribution of self-compiled binaries is only permitted under 
+      the following conditions:
+        i) The entire source code with all modifications must be made 
+           publically available, such that all improvements may be back 
+           ported to the official distribution.
+        ii) The software’s name may not be changed, and no authorship or 
+           copyright information’s displayed by the software are 
+           allowed to be removed. 
+           And any licensing mechanisms may not be tempered with in any way. 
+        iii) The original author of this software reserves the right to 
+           prohibit any distribution of unofficial binaries on his own 
+           discretion. And to revoke any person, or persons, right to 
+           publish self-compiled binaries of this software. 
+	  
+   5. Using self-compiled binaries for commercial use is only permitted 
+      when an appropriate commercial use license has been obtained.
+	
+   6. Any person that contributes source code to this project, 
+      i.e. publishes modified source code of this project or submits 
+      patches/code snippets to the project’s original author, gives 
+      the project and its original author a perpetual, world-wide, 
+      irrevocable, no-charge, royalty-free copyright license to use, 
+      reproduce, prepare derivative works of, sublicense, relicence,
+      and distribute (etc, etc) the contribution in 
+      its compiled as well as source code form.
+	
+
+	  
+The author of the original version reserves the right to put the 
+entire project under an arbitrary new license including 
+all contributions made by 3rd parties.
+
+If the project would to become abandoned, that is neither updated nor 
+longer commercially offered by the original author, for a period of 
+more than 24 months, whomever has a copy of this software in its source
+code form is permitted to put the latest available source code of this
+project under an open source license approved by the Free Software 
+Foundation, to ensure the project can be continuated in the public domain.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
