@@ -693,7 +693,7 @@ namespace PrivateWin10.Pages
                     if ((prog.config.NetAccess == ProgramSet.Config.AccessLevels.Unconfigured || prog.config.CurAccess == prog.config.NetAccess) && prog.Programs.Sum(t => t.Value.ChgedRules) == 0)
                         return true;
                 }
-                else if (Filter.Access != prog.config.CurAccess)
+                else if (Filter.Access != prog.config.GetAccess())
                     return true;
             }
 
@@ -887,7 +887,7 @@ namespace PrivateWin10.Pages
             foreach (var item in items)
             {
                 var prog = item as Program;
-                if (progSets.Contains(prog.ProgSet.guid))
+                if (prog == null || progSets.Contains(prog.ProgSet.guid))
                     continue;
 
                 App.client.RemoveProgram(prog.ProgSet.guid, prog.ID);
@@ -982,6 +982,7 @@ namespace PrivateWin10.Pages
 
         private void btnCleanupEx_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true; // or else btnCleanup_Click will be triggered to
             if (MessageBox.Show(Translate.fmt("msg_clean_progs_ex"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
             int Count = App.client.CleanUpPrograms(true);

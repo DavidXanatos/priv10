@@ -2,6 +2,19 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [0.65.2] - 2019-12-13
+
+### Fixed
+- fixed crash when deleting program items
+- fixed issue with program cleanup ribbon bottons
+- fixed issues with manual blocklist update
+- fixed inconsistencies with access mode filter
+- fixed issue installer was instaling to "Program Files(x86)" instead of "Program Files", uninstall and re install to fix the path
+- fixed some translation strings
+
+
+
 ## [0.65.1] - 2019-12-10
 
 ### Added

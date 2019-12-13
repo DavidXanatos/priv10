@@ -41,6 +41,13 @@ namespace PrivateWin10
             public bool IsSilenced() { return SilenceUntill != 0 && SilenceUntill > MiscFunc.GetUTCTime(); }
             public AccessLevels NetAccess = AccessLevels.Unconfigured;
             public AccessLevels CurAccess = AccessLevels.Unconfigured;
+            public AccessLevels GetAccess()
+            {
+                if (NetAccess == AccessLevels.Unconfigured)
+                    return CurAccess;
+                else
+                    return NetAccess;
+            }
 
             public Config Clone()
             {

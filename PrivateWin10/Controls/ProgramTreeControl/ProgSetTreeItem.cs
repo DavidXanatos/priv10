@@ -17,7 +17,7 @@ namespace PrivateWin10.Controls
 
         // columns BEGIN
         public override string Category => progSet.config.Category;
-        public override string Access => progSet.config.NetAccess.ToString();
+        public override string Access => progSet.config.GetAccess().ToString(); // progSet.config.NetAccess.ToString();
 
         public override int Rules => progSet.Programs.Values.Sum(t => t.RuleCount);
         public override int Allowed => progSet.Programs.Values.Sum(t => t.AllowedCount);

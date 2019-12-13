@@ -100,7 +100,7 @@ namespace PrivateWin10.Controls
                 ProgramControl item;
                 if (Programs.TryGetValue(prog.guid, out item))
                 {
-                    item.Program = prog;
+                    item.progSet = prog;
                     item.DoUpdate();
                     OldProcesses.Remove(prog.guid);
                 }
@@ -147,7 +147,7 @@ namespace PrivateWin10.Controls
                 ProgramControl item;
                 if (Programs.TryGetValue(prog.guid, out item))
                 {
-                    item.Program = prog;
+                    item.progSet = prog;
                     item.DoUpdate();
                 }
                 else
@@ -170,12 +170,12 @@ namespace PrivateWin10.Controls
             {
                 switch (SortBy)
                 {
-                    case Sorts.Name: return l.Program.config.Name.CompareTo(r.Program.config.Name);
-                    case Sorts.NameRev: return r.Program.config.Name.CompareTo(l.Program.config.Name);
-                    case Sorts.LastActivity: return r.Program.GetLastActivity().CompareTo(l.Program.GetLastActivity());
-                    case Sorts.DataRate: return r.Program.GetDataRate().CompareTo(l.Program.GetDataRate());
-                    case Sorts.SocketCount: return r.Program.GetSocketCount().CompareTo(l.Program.GetSocketCount());
-                    case Sorts.ModuleCount: return r.Program.Programs.Count.CompareTo(l.Program.Programs.Count);
+                    case Sorts.Name: return l.progSet.config.Name.CompareTo(r.progSet.config.Name);
+                    case Sorts.NameRev: return r.progSet.config.Name.CompareTo(l.progSet.config.Name);
+                    case Sorts.LastActivity: return r.progSet.GetLastActivity().CompareTo(l.progSet.GetLastActivity());
+                    case Sorts.DataRate: return r.progSet.GetDataRate().CompareTo(l.progSet.GetDataRate());
+                    case Sorts.SocketCount: return r.progSet.GetSocketCount().CompareTo(l.progSet.GetSocketCount());
+                    case Sorts.ModuleCount: return r.progSet.Programs.Count.CompareTo(l.progSet.Programs.Count);
                 }
                 return 0;
             }
@@ -194,7 +194,7 @@ namespace PrivateWin10.Controls
                     row.Height = GridLength.Auto; //new GridLength(item.Height + 2);
                 Grid.SetRow(item, i);
 
-                item.Visibility = (CurFilter != null && FirewallPage.DoFilter(CurFilter, item.Program)) ? Visibility.Collapsed : Visibility.Visible;
+                item.Visibility = (CurFilter != null && FirewallPage.DoFilter(CurFilter, item.progSet)) ? Visibility.Collapsed : Visibility.Visible;
             }
 
             while (OrderList.Count < this.processGrid.RowDefinitions.Count)
@@ -311,7 +311,7 @@ namespace PrivateWin10.Controls
         {
             List<object> progSets = new List<object>();
             foreach (var item in SelectedPrograms)
-                progSets.Add(item.Program);
+                progSets.Add(item.progSet);
             return progSets;
         }
 
@@ -319,7 +319,7 @@ namespace PrivateWin10.Controls
         {
             ProgramControl item;
             if (Programs.TryGetValue(guid, out item))
-                return item.Program;
+                return item.progSet;
             return null;
         }
 

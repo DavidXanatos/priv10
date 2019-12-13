@@ -171,7 +171,7 @@ namespace PrivateWin10
                 {
                     call.args = App.engine.RemoveDomainBlocklist((string)call.args);
                 }
-                else if (call.func == "RemoveDomainFilter")
+                else if (call.func == "RefreshDomainBlocklist")
                 {
                     call.args = App.engine.RefreshDomainBlocklist((string)call.args);
                 }
@@ -202,7 +202,7 @@ namespace PrivateWin10
 
                 else
                 {
-                    call.args = new Exception("Unknon FunctionCall");
+                    call.args = new Exception("Unknown FunctionCall");
                 }
             }
             /*catch (Exception err)
