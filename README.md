@@ -10,4 +10,5 @@ This tool is open source; however the license is a bit more restrictive than typ
 
 # Donations
 Patreaon: https://www.patreon.com/DavidXanatos
+
 Monero: `46WUG1NqDsWEyydYdCftsN3t9GHK2S5Yr1tFHMiXfzNVFofiF2kdRhiiKqyho2zyH1cWmL1WkGekgaz3Xmob2SDa1SwrqFs`
