@@ -80,13 +80,13 @@ namespace PrivateWin10
 
             List<ServiceHelper.ServiceInfo> Services = ServiceHelper.GetServicesByPID(Event.ProcessId);
             ProgramID ProgID = App.engine.GetProgIDbyPID(Event.ProcessId, (Services == null || Services.Count > 1) ? null : Services[0].ServiceName);
-            if (ProgID != null)
+            if (ProgID == null)
+                App.LogWarning("Watched a DNS query for a terminated process with id {0}", Event.ProcessId);
+            else
             {
                 Program prog = App.engine.ProgramList.GetProgram(ProgID, true, ProgramList.FuzzyModes.Any);
                 prog?.LogDomain(Event.HostName, Event.TimeStamp);
             }
-            else
-                App.LogWarning("Watched a DNS query for a terminated process with id {0}", Event.ProcessId);
         }
 
         private void OnDnsCacheEvent(object sender, DnsCacheMonitor.DnsEvent Event)
@@ -107,7 +107,7 @@ namespace PrivateWin10
 
             foreach (HostObserveJob curJob in Jobs.Clone())
             {
-                if (processId != 0 && curJob.processId == processId)
+                if (processId == 0 || curJob.processId == processId)
                 {
                     curJob.SetHostName(hostName, NameSources.CapturedQuery);
                     curJob.Await &= ~source; // clear the await
@@ -208,7 +208,7 @@ namespace PrivateWin10
                     setter(target, cachedName, NameSources.CachedQuery);
             }
 
-            int ReverseResolve = App.GetConfigInt("DnsInspector", "UseReverseDNS", 0); // todo: xxx set default 1
+            int ReverseResolve = App.GetConfigInt("DnsInspector", "UseReverseDNS", 0);
             if (ReverseResolve == 2 || (ReverseResolve == 1 && (Await & NameSources.CachedQuery) != 0))
             {
                 string resolvedName = FindMostRecentHost(hostNameResolver.ResolveHostNames(remoteAddress));
@@ -238,13 +238,31 @@ namespace PrivateWin10
         public NameSources RemoteHostNameSource = NameSources.None;
         public string RemoteHostName;
 
+        public class ChangeEventArgs : EventArgs
+        {
+            public string oldName;
+            public string HostName;
+        }
+
+        public event EventHandler<ChangeEventArgs> HostNameChanged;
+
+        public void UpdateHostName(string name, NameSources source)
+        {
+            if (source > RemoteHostNameSource) // the bigger the better
+            {
+                string oldName = RemoteHostName;
+
+                RemoteHostName = name;
+                RemoteHostNameSource = source;
+
+                if(oldName == null || !oldName.Equals(name))
+                    HostNameChanged?.Invoke(this, new ChangeEventArgs() { oldName = oldName, HostName = name });
+            }
+        }
+
         static public readonly Action<object, string, NameSources> HostSetter = (object obj, string name, NameSources source) => {
             WithHost This = (obj as WithHost);
-            if (source > This.RemoteHostNameSource) // the bigger the better
-            {
-                This.RemoteHostName = name;
-                This.RemoteHostNameSource = source;
-            }
+            This.UpdateHostName(name, source);
         };
 
         public bool Update(WithHost other)

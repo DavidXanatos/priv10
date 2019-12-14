@@ -19,7 +19,7 @@ namespace PrivateWin10
         public FirewallManager FirewallManager;
         public FirewallMonitor FirewallMonitor;
         public FirewallGuard FirewallGuard;
-        //public ProcessMonitor ProcessMonitor;
+        public ProcessMonitor ProcessMonitor;
         public NetworkMonitor NetworkMonitor;
         public DnsInspector DnsInspector;
         public DnsProxyServer DnsProxy;
@@ -154,8 +154,8 @@ namespace PrivateWin10
             LoadFwRules();
             CleanupFwRules();
 
-            //AppLog.Debug("Starting Process Monitor...");
-            //ProcessMonitor = new ProcessMonitor();
+            AppLog.Debug("Starting Process Monitor...");
+            ProcessMonitor = new ProcessMonitor();
 
             AppLog.Debug("Starting Network Monitor...");
             NetworkMonitor = new NetworkMonitor();
@@ -220,7 +220,7 @@ namespace PrivateWin10
             ProgramList.Store();
 
             FirewallMonitor.StopEventWatcher();
-            //ProcessMonitor.Dispose();
+            ProcessMonitor.Dispose();
             NetworkMonitor.Dispose();
             if (DnsInspector != null)
                 DnsInspector.Dispose();
@@ -258,6 +258,8 @@ namespace PrivateWin10
             if ((mTickCount % (4 * 60)) == 0) // every minute
             {
                 CleanupFwRules(); // remove temporary rules
+
+                ProcessMonitor.CleanUpProcesses();
             }
 
             DnsProxy?.blockList?.CheckForUpdates();
@@ -292,14 +294,14 @@ namespace PrivateWin10
 
             if (fileName == null || fileName.Length == 0)
             {
-                fileName = ProcFunc.GetProcessName(PID);
+                //fileName = ProcFunc.GetProcessFileNameByPID(PID);
+                fileName = ProcessMonitor.GetProcessFileNameByPID(PID);
                 if (fileName == null)
                     return null;
             }
 
             if (serviceTag != null)
                 return ProgramID.NewSvcID(serviceTag, fileName);
-
 
             string SID = App.PkgMgr?.GetAppPackageSidByPID(PID);
             if (SID != null)
@@ -494,7 +496,7 @@ namespace PrivateWin10
                     if (StartTime == 0)
                         continue;
 
-                    var FileName = entry.ProcessId == ProcFunc.SystemPID ? "System" : ProcFunc.GetProcessName(entry.ProcessId);
+                    var FileName = entry.ProcessId == ProcFunc.SystemPID ? "System" : ProcFunc.GetProcessFileNameByPID(entry.ProcessId);
                     if (FileName == null || !entry.ProcessFileName.Equals(FileName, StringComparison.OrdinalIgnoreCase))
                         continue;
 

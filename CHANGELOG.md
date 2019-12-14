@@ -3,6 +3,26 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.70] - 2019-12-14
+
+### Added
+- improved the DNS Inspector
+	- added uplpad/download per domain
+	- added listing of unresolved IP's
+	- added udp endpoint logging
+- added proces monitor using ETW events to capture paths of processes that terminate quickly
+- added missing localization to all the new UI elements
+- added todal up/down-load per socket and per program columns
+
+### Changed
+- improved text filters
+
+### Fixed
+- fixed issue with reverse dns in dns inspector
+- fixed issue with etw event tracking for UDP traffic
+
+
+
 ## [0.65.2] - 2019-12-13
 
 ### Fixed

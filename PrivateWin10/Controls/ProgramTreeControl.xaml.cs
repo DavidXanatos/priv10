@@ -59,6 +59,20 @@ namespace PrivateWin10.Controls
         {
             InitializeComponent();
 
+            this.hdrDescr.Content = Translate.fmt("lbl_descr");
+            this.hdrCat.Content = Translate.fmt("lbl_log_type");
+            this.hdrAccess.Content = Translate.fmt("lbl_access");
+            this.hdrRules.Content = Translate.fmt("lbl_rules");
+            this.hdrAllowed.Content = Translate.fmt("filter_recent_allowed");
+            this.hdrBlocked.Content = Translate.fmt("filter_recent_blocked");
+            this.hdrActivity.Content = Translate.fmt("sort_act");
+            this.hdrSockets.Content = Translate.fmt("lbl_socks");
+            this.hdrUpRate.Content = Translate.fmt("lbl_upload");
+            this.hdrDownRate.Content = Translate.fmt("lbl_download");
+            this.hdrUpTotal.Content = Translate.fmt("lbl_uploaded");
+            this.hdrDownTotal.Content = Translate.fmt("lbl_downloaded");
+            this.hdrProg.Content = Translate.fmt("lbl_program");
+
             treeView.Loaded += (sender, e) => {
 
                 headerPresenter = WpfFunc.FindChild<GridViewHeaderRowPresenter>(treeView);
@@ -260,7 +274,14 @@ namespace PrivateWin10.Controls
             //root.SetSortBy(Member);
             //view.SortDescriptions.Add(new SortDescription(nameof(ITreeItem.SortKey), Direction));
 
+            // workaround for selection working properly
+            var items = treeView.SelectedItems.Cast<object>().ToList();
+
             ManualTreeSorter.Sort(root.Children, SortMember, Direction);
+
+            treeView.SelectedItems.Clear();
+            foreach (var item in items)
+                treeView.SelectedItems.Add(item);
         }
 
 

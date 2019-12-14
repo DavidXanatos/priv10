@@ -34,6 +34,18 @@ namespace PrivateWin10.Controls
         {
             InitializeComponent();
 
+            this.caption.Text = Translate.fmt("btn_query_log");
+
+            this.logGrid.Columns[0].Header = Translate.fmt("lbl_time_stamp");
+            this.logGrid.Columns[1].Header = Translate.fmt("lbl_query");
+            this.logGrid.Columns[2].Header = Translate.fmt("lbl_type");
+            this.logGrid.Columns[3].Header = Translate.fmt("lbl_state");
+            this.logGrid.Columns[4].Header = Translate.fmt("lbl_reply");
+            this.logGrid.Columns[5].Header = Translate.fmt("lbl_ttl");
+
+            this.btnClear.Content = Translate.fmt("btn_clear_log");
+            this.btnRefresh.Content = Translate.fmt("btn_refresh_log");
+
             logGridExt = new DataGridExt(logGrid);
 
             QueryLogList = new ObservableCollection<DnsQueryItem>();

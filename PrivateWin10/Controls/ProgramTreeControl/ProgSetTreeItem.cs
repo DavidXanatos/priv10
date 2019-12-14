@@ -17,7 +17,22 @@ namespace PrivateWin10.Controls
 
         // columns BEGIN
         public override string Category => progSet.config.Category;
-        public override string Access => progSet.config.GetAccess().ToString(); // progSet.config.NetAccess.ToString();
+        public override string Access => GetAccess();
+        public override string AccessTag => progSet.IsSpecial() ? "" : progSet.config.GetAccess().ToString();
+        private string GetAccess()
+        {
+            if (progSet.IsSpecial())
+                return "";
+            switch (progSet.config.GetAccess())
+            {
+                case ProgramSet.Config.AccessLevels.FullAccess:     return Translate.fmt("acl_allow");
+                case ProgramSet.Config.AccessLevels.CustomConfig:   return Translate.fmt("acl_edit");
+                case ProgramSet.Config.AccessLevels.LocalOnly:      return Translate.fmt("acl_lan");
+                case ProgramSet.Config.AccessLevels.BlockAccess:    return Translate.fmt("acl_block");
+                default:
+                case ProgramSet.Config.AccessLevels.Unconfigured:   return Translate.fmt("acl_none");
+            }
+        }
 
         public override int Rules => progSet.Programs.Values.Sum(t => t.RuleCount);
         public override int Allowed => progSet.Programs.Values.Sum(t => t.AllowedCount);

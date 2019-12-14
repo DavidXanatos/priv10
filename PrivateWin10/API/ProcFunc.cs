@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -13,7 +14,6 @@ static class ProcFunc
     public static int CurID = System.Diagnostics.Process.GetCurrentProcess().Id;
 
     public const int SystemPID = 4; // on windows system is has always PID 4
-
 
     [DllImport("kernel32.dll")]
     public static extern IntPtr OpenProcess(uint processAccess, bool bInheritHandle, int processId);
@@ -30,7 +30,7 @@ static class ProcFunc
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string GetProcessName(int pid)
+    public static string GetProcessFileNameByPID(int pid)
     {
         if (pid == ProcFunc.SystemPID)
             return MiscFunc.NtOsKrnlPath;
@@ -75,4 +75,25 @@ static class ProcFunc
 
         return RawCreationTime;
     }
+
+
+    /*
+    [DllImport("Kernel32.dll")]
+    private static extern bool QueryFullProcessImageName([In] IntPtr hProcess, [In] uint dwFlags, [Out] StringBuilder lpExeName, [In, Out] ref uint lpdwSize);
+
+    // Note: we can not access a module of a otehr bitness as we are so we need a native solution
+    public static string GetMainModuleFileName(this Process process)
+    {
+        var fileNameBuilder = new StringBuilder(1024);
+        uint bufferLength = (uint)fileNameBuilder.Capacity + 1;
+        try
+        {
+            return QueryFullProcessImageName(process.Handle, 0, fileNameBuilder, ref bufferLength) ? fileNameBuilder.ToString() : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+    */
 }

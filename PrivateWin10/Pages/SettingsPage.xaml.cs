@@ -32,6 +32,7 @@ namespace PrivateWin10.Pages
             this.chkService.Content = Translate.fmt("chk_instal_svc");
             this.chkNoUAC.Content = Translate.fmt("chk_no_uac");
 
+            this.lblPrivacy.Text = Translate.fmt("lbl_tweak_guard");
             this.chkTweakCheck.Content = Translate.fmt("chk_tweak_check");
             this.chkTweakFix.Content = Translate.fmt("chk_tweak_fix");
 
@@ -55,12 +56,12 @@ namespace PrivateWin10.Pages
             this.lblAuditBlock.Content = Translate.fmt("lbl_audit_blocked");
             this.lblAuditNone.Content = Translate.fmt("lbl_audit_off");
 
-            // todo: xxx
-            //chkDnsInspector
-            //lblDNS
-            //chkEnableDNS
-            //chkLocalDNS
-            //lblRootDNS
+            this.chkDnsInspector.Content = Translate.fmt("lbl_use_inspector");
+            this.chkReverseDNS.Content = Translate.fmt("lbl_use_rev_dns");
+            this.lblDNS.Text = Translate.fmt("lbl_dns_proxy");
+            this.chkEnableDNS.Content = Translate.fmt("lbl_use_dns_proxy");
+            this.chkLocalDNS.Content = Translate.fmt("lbl_setup_dns");
+            this.lblRootDNS.Content = Translate.fmt("lbl_dns_root");
 
             WpfFunc.CmbAdd(this.cmbRootDNS, "Google", "8.8.8.8|8.8.4.4");
             WpfFunc.CmbAdd(this.cmbRootDNS, "OpenDNS", "208.67.222.222|208.67.220.220");

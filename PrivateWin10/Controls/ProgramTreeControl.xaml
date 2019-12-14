@@ -59,7 +59,7 @@
                     <GridView.Columns>
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="300">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Description" Tag="Text"/>
+                                <GridViewColumnHeader Content="Description" Name="hdrDescr" Tag="Text"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -70,7 +70,7 @@
 
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="Auto">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Category" Tag="Category"/>
+                                <GridViewColumnHeader Content="Category" Name="hdrCat" Tag="Category"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -80,7 +80,7 @@
                         </GridViewColumn>
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="Auto">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Access" Tag="Access"/>
+                                <GridViewColumnHeader Content="Access" Name="hdrAccess" Tag="Access"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -88,19 +88,19 @@
                                         <TextBlock.Style>
                                             <Style>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Access}" Value="FullAccess">
+                                                    <DataTrigger Binding="{Binding AccessTag}" Value="FullAccess">
                                                         <Setter Property="TextBlock.Background" Value="LightGreen"></Setter>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Access}" Value="CustomConfig">
+                                                    <DataTrigger Binding="{Binding AccessTag}" Value="CustomConfig">
                                                         <Setter Property="TextBlock.Background" Value="Gold"></Setter>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Access}" Value="LocalOnly">
+                                                    <DataTrigger Binding="{Binding AccessTag}" Value="LocalOnly">
                                                         <Setter Property="TextBlock.Background" Value="LightSkyBlue"></Setter>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Access}" Value="BlockAccess">
+                                                    <DataTrigger Binding="{Binding AccessTag}" Value="BlockAccess">
                                                         <Setter Property="TextBlock.Background" Value="LightPink"></Setter>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Access}" Value="WarningState">
+                                                    <DataTrigger Binding="{Binding AccessTag}" Value="WarningState">
                                                         <Setter Property="TextBlock.Background" Value="Yellow"></Setter>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -113,7 +113,7 @@
 
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="Auto">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Rules" Tag="Rules"/>
+                                <GridViewColumnHeader Content="Rules" Name="hdrRules" Tag="Rules"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -124,7 +124,7 @@
                         
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="Auto">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Allowed" Tag="Allowed"/>
+                                <GridViewColumnHeader Content="Allowed" Name="hdrAllowed" Tag="Allowed"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -135,7 +135,7 @@
 
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="Auto">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Blocked" Tag="Blocked"/>
+                                <GridViewColumnHeader Content="Blocked" Name="hdrBlocked" Tag="Blocked"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -146,7 +146,7 @@
 
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="Auto">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Last Activity" Tag="LastActivity"/>
+                                <GridViewColumnHeader Content="Last Activity" Name="hdrActivity" Tag="LastActivity"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -158,7 +158,7 @@
 
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="Auto">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Sockets" Tag="Sockets"/>
+                                <GridViewColumnHeader Content="Sockets" Name="hdrSockets" Tag="Sockets"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -169,7 +169,7 @@
                         
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="Auto">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Upload" Tag="UpRate"/>
+                                <GridViewColumnHeader Content="Upload" Name="hdrUpRate" Tag="UpRate"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -180,7 +180,7 @@
                         
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="Auto">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Download" Tag="DownRate"/>
+                                <GridViewColumnHeader Content="Download" Name="hdrDownRate" Tag="DownRate"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -191,7 +191,7 @@
                         
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="Auto">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Uploaded" Tag="UpTotal"/>
+                                <GridViewColumnHeader Content="Uploaded" Name="hdrUpTotal" Tag="UpTotal"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -202,7 +202,7 @@
                         
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="Auto">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Downloaded" Tag="DownTotal"/>
+                                <GridViewColumnHeader Content="Downloaded" Name="hdrDownTotal" Tag="DownTotal"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -221,7 +221,7 @@
 
                         <GridViewColumn HeaderContainerStyle="{StaticResource styTreeView}" Width="Auto">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="Program" Tag="Program"/>
+                                <GridViewColumnHeader Content="Program" Name="hdrProg"  Tag="Program"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>

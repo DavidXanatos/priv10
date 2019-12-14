@@ -62,7 +62,9 @@ namespace PrivateWin10.Controls
             this.socksGrid.Columns[9].Header = Translate.fmt("lbl_access");
             this.socksGrid.Columns[10].Header = Translate.fmt("lbl_upload");
             this.socksGrid.Columns[11].Header = Translate.fmt("lbl_download");
-            this.socksGrid.Columns[12].Header = Translate.fmt("lbl_program");
+            this.socksGrid.Columns[12].Header = Translate.fmt("lbl_uploaded");
+            this.socksGrid.Columns[13].Header = Translate.fmt("lbl_downloaded");
+            this.socksGrid.Columns[14].Header = Translate.fmt("lbl_program");
 
             socksGridExt = new DataGridExt(socksGrid);
             socksGridExt.Restore(App.GetConfig("GUI", "socksGrid_Columns", ""));
@@ -151,13 +153,36 @@ namespace PrivateWin10.Controls
             CheckSockets();
         }
 
+        static int VALIDATION_DELAY = 1000;
+        System.Threading.Timer timer = null;
+
         private void txtSockFilter_TextChanged(object sender, TextChangedEventArgs e)
         {
             textFilter = txtSockFilter.Text;
             App.SetConfig("NetSocks", "Filter", textFilter);
             //UpdateSockets(true);
 
-            socksGrid.Items.Filter = new Predicate<object>(item => SocksFilter(item));
+            DisposeTimer();
+            timer = new System.Threading.Timer(TimerElapsed, null, VALIDATION_DELAY, VALIDATION_DELAY);
+
+        }
+
+        private void TimerElapsed(Object obj)
+        {
+            this.Dispatcher.Invoke(new Action(() => {
+                socksGrid.Items.Filter = new Predicate<object>(item => SocksFilter(item));
+            }));
+            
+            DisposeTimer();
+        }
+
+        private void DisposeTimer()
+        {
+            if (timer != null)
+            {
+                timer.Dispose();
+                timer = null;
+            }
         }
 
         private void sockType_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -233,7 +258,7 @@ namespace PrivateWin10.Controls
                     return false;
             }
 
-            if (FirewallPage.DoFilter(textFilter, item.name, new List<ProgramID>() { item.sock.ProgID }))
+            if (item.TestFilter(textFilter))
                 return false;
             return true;
         }
@@ -252,6 +277,23 @@ namespace PrivateWin10.Controls
                 this.name = name != null ? name : "[unknown progream]";
             }
 
+            public bool TestFilter(string textFilter)
+            {
+                string strings = this.Name;
+                strings += " " + this.TimeStamp;
+                strings += " " + this.State;
+                strings += " " + this.Protocol;
+                strings += " " + this.DestAddress;
+                strings += " " + this.DestPorts;
+                strings += " " + this.SrcAddress;
+                strings += " " + this.SrcPorts;
+                strings += " " + this.Access;
+                strings += " " + this.Upload;
+                strings += " " + this.Download;
+                strings += " " + this.Uploaded;
+                strings += " " + this.Downloaded;
+                return FirewallPage.DoFilter(textFilter, strings, new List<ProgramID>() { this.sock.ProgID });
+            }
 
             public ImageSource Icon { get { return ImgFunc.GetIcon(sock.ProgID.Path, 16); } }
 
@@ -275,7 +317,7 @@ namespace PrivateWin10.Controls
 
                     bool CanIn = true;
                     bool CanOut = true;
-                    if ((sock.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) != 0)
+                    if ((sock.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == (UInt32)IPHelper.AF_PROT.TCP)
                     {
                         if (sock.State != (int)IPHelper.MIB_TCP_STATE.LISTENING)
                             CanIn = false;
@@ -308,9 +350,12 @@ namespace PrivateWin10.Controls
                 } }
 
             public UInt64 Upload { get { return sock.Stats.UploadRate.ByteRate; } }
-            //public string UploadTxt { get { return FileOps.FormatSize(sock.Stats.UploadRate.ByteRate) + "/s"; } }
+            
             public UInt64 Download { get { return sock.Stats.UploadRate.ByteRate; } }
-            //public string DownloadTxt { get { return FileOps.FormatSize(sock.Stats.UploadRate.ByteRate) + "/s"; } }
+
+            public UInt64 Uploaded { get { return sock.Stats.SentBytes; } }
+
+            public UInt64 Downloaded { get { return sock.Stats.ReceivedBytes; } }
 
             void UpdateValue<T>(ref T value, T new_value, string Name)
             {
@@ -337,6 +382,8 @@ namespace PrivateWin10.Controls
                     sock.Stats = new_sock.Stats;
                     NotifyPropertyChanged("Upload");
                     NotifyPropertyChanged("Download");
+                    NotifyPropertyChanged("Uploaded");
+                    NotifyPropertyChanged("Downloaded");
                     // todo: other
                 }
             }

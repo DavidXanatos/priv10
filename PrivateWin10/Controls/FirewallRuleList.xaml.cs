@@ -369,13 +369,36 @@ namespace PrivateWin10.Controls
             rulesGrid.Items.Filter = new Predicate<object>(item => RuleFilter(item));
         }
 
+        static int VALIDATION_DELAY = 1000;
+        System.Threading.Timer timer = null;
+
         private void txtRuleFilter_TextChanged(object sender, TextChangedEventArgs e)
         {
             textFilter = txtRuleFilter.Text;
             App.SetConfig("FwRules", "Filter", textFilter);
             //UpdateRules(true);
 
-            rulesGrid.Items.Filter = new Predicate<object>(item => RuleFilter(item));
+            DisposeTimer();
+            timer = new System.Threading.Timer(TimerElapsed, null, VALIDATION_DELAY, VALIDATION_DELAY);
+            
+        }
+       
+        private void TimerElapsed(Object obj)
+        {
+            this.Dispatcher.Invoke(new Action(() => {
+                rulesGrid.Items.Filter = new Predicate<object>(item => RuleFilter(item));
+            }));
+            
+            DisposeTimer();
+        }
+
+        private void DisposeTimer()
+        {
+            if (timer != null)
+            {
+                timer.Dispose();
+                timer = null;
+            }
         }
 
         private void CmbDirection_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -417,7 +440,7 @@ namespace PrivateWin10.Controls
             if (chkNoDisabled.IsChecked == true && item.Rule.Enabled == false)
                 return false;
 
-            if (FirewallPage.DoFilter(textFilter, item.Name, new List<ProgramID>() { item.Rule.ProgID }))
+            if (item.TestFilter(textFilter))
                 return false;
             return true;
         }
@@ -504,6 +527,26 @@ namespace PrivateWin10.Controls
             public RuleItem(FirewallRuleEx rule)
             {
                 Rule = rule;
+            }
+
+            public bool TestFilter(string textFilter)
+            {
+                string strings = this.Name;
+                strings += " " + this.Grouping;
+                strings += " " + this.Index;
+                strings += " " + this.Enabled;
+                strings += " " + this.Profiles;
+                strings += " " + this.Action;
+                strings += " " + this.Direction;
+                strings += " " + this.Protocol;
+                strings += " " + this.DestAddress;
+                strings += " " + this.DestPorts;
+                strings += " " + this.SrcAddress;
+                strings += " " + this.SrcPorts;
+                strings += " " + this.ICMPOptions;
+                strings += " " + this.Interfaces;
+                strings += " " + this.EdgeTraversal;
+                return FirewallPage.DoFilter(textFilter, strings, new List<ProgramID>() { this.Rule.ProgID });
             }
 
             public ImageSource Icon { get { return ImgFunc.GetIcon(Rule.ProgID.Path, 16); } }

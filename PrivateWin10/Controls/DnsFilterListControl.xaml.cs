@@ -55,6 +55,18 @@ namespace PrivateWin10.Controls
         {
             InitializeComponent();
 
+            this.lblHint.Text = Translate.fmt("msg_domain_hint");
+            this.btnAdd.Content = Translate.fmt("btn_add_domain");
+            this.btnAddEx.Content = Translate.fmt("btn_add_domain_ex");
+
+            this.filterGrid.Columns[0].Header = Translate.fmt("str_domain");
+            this.filterGrid.Columns[1].Header = Translate.fmt("str_hit");
+            this.filterGrid.Columns[2].Header = Translate.fmt("str_last_hit");
+
+            this.btnEnable.Content = Translate.fmt("str_enabled");
+            this.btnDisable.Content = Translate.fmt("str_disabled");
+            this.btnRemove.Content = Translate.fmt("lbl_remove");
+
             btnAdd.IsEnabled = btnAddEx.IsEnabled = false;
             btnRemove.IsEnabled = btnEnable.IsEnabled = btnDisable.IsEnabled = false;
 

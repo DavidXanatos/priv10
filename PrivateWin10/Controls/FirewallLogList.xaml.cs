@@ -209,13 +209,37 @@ namespace PrivateWin10.Controls
             logGrid.Items.Filter = new Predicate<object>(item => LogFilter(item));
         }
 
+        static int VALIDATION_DELAY = 1000;
+        System.Threading.Timer timer = null;
+
 
         private void txtConFilter_TextChanged(object sender, TextChangedEventArgs e)
         {
             textFilter = txtConFilter.Text;
             App.SetConfig("FwLog", "Filter", textFilter);
             //UpdateConnections(true);
-            logGrid.Items.Filter = new Predicate<object>(item => LogFilter(item));
+
+            DisposeTimer();
+            timer = new System.Threading.Timer(TimerElapsed, null, VALIDATION_DELAY, VALIDATION_DELAY);
+
+        }
+
+        private void TimerElapsed(Object obj)
+        {
+            this.Dispatcher.Invoke(new Action(() => {
+                logGrid.Items.Filter = new Predicate<object>(item => LogFilter(item));
+            }));
+            
+            DisposeTimer();
+        }
+
+        private void DisposeTimer()
+        {
+            if (timer != null)
+            {
+                timer.Dispose();
+                timer = null;
+            }
         }
 
         private bool LogFilter(object obj)
@@ -246,7 +270,7 @@ namespace PrivateWin10.Controls
             else if (chkNoINet.IsChecked == true)
                 return false;
 
-            if (FirewallPage.DoFilter(textFilter, item.name, new List<ProgramID>() { item.entry.ProgID }))
+            if (item.TestFilter(textFilter))
                 return false;
             return true;
         }
@@ -339,6 +363,20 @@ namespace PrivateWin10.Controls
                 this.IsLocal = NetFunc.IsLocalHost(entry.FwEvent.RemoteAddress);
                 this.IsMulti = NetFunc.IsMultiCast(entry.FwEvent.RemoteAddress);
                 this.IsLan = FirewallRule.MatchAddress(entry.FwEvent.RemoteAddress, FirewallRule.AddrKeywordLocalSubnet);
+            }
+
+            public bool TestFilter(string textFilter)
+            {
+                string strings = this.Name;
+                strings += " " + this.TimeStamp;
+                strings += " " + this.Action;
+                strings += " " + this.Direction;
+                strings += " " + this.Protocol;
+                strings += " " + this.DestAddress;
+                strings += " " + this.DestPorts;
+                strings += " " + this.SrcAddress;
+                strings += " " + this.SrcPorts;
+                return FirewallPage.DoFilter(textFilter, strings, new List<ProgramID>() { this.entry.ProgID });
             }
 
             public ImageSource Icon { get { return ImgFunc.GetIcon(entry.ProgID.Path, 16); } }

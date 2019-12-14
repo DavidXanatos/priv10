@@ -93,6 +93,7 @@
     <Compile Include="API\MiscStats.cs" />
     <Compile Include="API\Network\DnsApi.cs" />
     <Compile Include="API\Network\IPHelper.cs" />
+    <Compile Include="API\ProcessUtilities.cs" />
     <Compile Include="API\RegistryMonitor.cs" />
     <Compile Include="API\UwpFunc.cs" />
     <Compile Include="API\ProcFunc.cs" />

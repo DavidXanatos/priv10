@@ -186,7 +186,6 @@ namespace PrivateWin10
             mStrings.Add("chk_hide_local", "Hide localHost");
             mStrings.Add("chk_hide_lan", "Hide LAN Entries");
             mStrings.Add("lbl_sort", "Sort By:");
-            mStrings.Add("lbl_type", "Type:");
             mStrings.Add("lbl_filter", "Filter:");
             mStrings.Add("btn_reload", "Reload Rules");
             mStrings.Add("chk_all", "Show All");
@@ -361,7 +360,53 @@ namespace PrivateWin10
             mStrings.Add("btn_cat_prog", "Set Category");
             mStrings.Add("btn_access_prog", "Set Network Access");
             mStrings.Add("msg_rename", "Rename Program Set");
-            mStrings.Add("msg_set_cat", "Set Category");
+            mStrings.Add("lbl_use_inspector", "Monitor host names queries (DNS Inspector)");
+            mStrings.Add("lbl_use_rev_dns", "User reverse DNS for domain resolution");
+            mStrings.Add("lbl_dns_proxy", "DNS Filtering");
+            mStrings.Add("lbl_use_dns_proxy", "Enable DNS Proxy");
+            mStrings.Add("lbl_setup_dns", "Setup DNS Proxy as default DNS in Windows");
+            mStrings.Add("lbl_dns_root", "Upstream DNS Server");
+            mStrings.Add("btn_no_filters", "Clear Filters");
+            mStrings.Add("btn_del_filter", "Remove Filter Preset");
+            mStrings.Add("btn_save_filter", "Save Filter Preset");
+            mStrings.Add("lbl_opts", "Options");
+            mStrings.Add("lbl_infos", "Informations");
+            mStrings.Add("lbl_cleanup", "Cleanup");
+            mStrings.Add("btn_ext_cleanup", "Extended Cleanup");
+            mStrings.Add("btn_clear_fw_log", "Clear Firewall Log");
+            mStrings.Add("lbl_rules", "Rules");
+            mStrings.Add("lbl_sel_rules", "Selected Rules");
+            mStrings.Add("lbl_rule_guard", "Rule Guard");
+            mStrings.Add("lbl_sockets", "Open Sockets");
+            mStrings.Add("lbl_dns_inspector", "Dns Inspector");
+            mStrings.Add("lbl_descr", "Description");
+            mStrings.Add("lbl_socks", "Sockets");
+            mStrings.Add("lbl_dns_upstream", "Upstream DNS:");
+            mStrings.Add("lbl_nav_menu", "Navigation Menu");
+            mStrings.Add("btn_query_log", "Query Log");
+            mStrings.Add("btn_blocklists", "Blocklists");
+            mStrings.Add("lbl_query", "Query");
+            mStrings.Add("lbl_type", "Type");
+            mStrings.Add("lbl_reply", "Reply");
+            mStrings.Add("lbl_ttl", "TTL");
+            mStrings.Add("btn_refresh_log", "Refresh Log");
+            mStrings.Add("msg_domain_hint", "Add a domain (example.com or sub.example.com)");
+            mStrings.Add("btn_add_domain", "Add Domain");
+            mStrings.Add("btn_add_domain_ex", "Add Domain (regex)");
+            mStrings.Add("str_hit", "Hit");
+            mStrings.Add("str_last_hit", "Last Hit");
+            mStrings.Add("btn_blocklist_hint", "Enter a download URL for a new blocklist");
+            mStrings.Add("btn_add_blocklist", "Add Blocklist");
+            mStrings.Add("str_list", "List");
+            mStrings.Add("lbl_last_update", "Last Update");
+            mStrings.Add("lbl_entry_count", "Entry Count");
+            mStrings.Add("lbl_status", "Status");
+            mStrings.Add("lbl_defaults", "Restore Defaults");
+            mStrings.Add("lbl_update", "Update");
+            mStrings.Add("lbl_tweak_guard", "Tweak Guard");
+            mStrings.Add("lbl_con_count", "Connection Count");
+
+            
             //mStrings.Add("", "");
 
 
@@ -396,6 +441,7 @@ namespace PrivateWin10
         {
             try
             {
+                //return "XXXXXXXX";
                 string str = id;
                 mStrings.TryGetValue(id, out str);
                 return string.Format(str, args);

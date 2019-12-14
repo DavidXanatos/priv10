@@ -203,6 +203,7 @@ namespace PrivateWin10.Controls
         // columns BEGIN
         public abstract string Category { get; }
         public abstract string Access { get; }
+        public abstract string AccessTag { get; }
 
 
         public abstract int Rules { get; }

@@ -30,6 +30,20 @@ namespace PrivateWin10.Controls
         {
             InitializeComponent();
 
+            this.caption.Text = Translate.fmt("btn_blocklists");
+            this.lblHint.Text = Translate.fmt("btn_blocklist_hint");
+            this.btnAdd.Content = Translate.fmt("btn_add_blocklist");
+
+
+            this.listGrid.Columns[0].Header = Translate.fmt("str_list");
+            this.listGrid.Columns[1].Header = Translate.fmt("lbl_last_update");
+            this.listGrid.Columns[2].Header = Translate.fmt("lbl_entry_count");
+            this.listGrid.Columns[3].Header = Translate.fmt("lbl_status");
+
+            this.btnDefault.Content = Translate.fmt("lbl_defaults");
+            this.btnRemove.Content = Translate.fmt("lbl_remove");
+            this.btnUpdate.Content = Translate.fmt("lbl_update");
+
             btnAdd.IsEnabled = false;
             btnRemove.IsEnabled = btnUpdate.IsEnabled = false;
 
@@ -107,6 +121,7 @@ namespace PrivateWin10.Controls
         {
             foreach (BlocklistItem Item in new List<BlocklistItem>(listGrid.SelectedItems.Cast<BlocklistItem>()))
             {
+                BlocklistList.Remove(Item);
                 App.client.RefreshDomainBlocklist(Item.Blocklist.Url);
             }
         }

@@ -102,6 +102,10 @@ namespace PrivateWin10.Pages
 
             this.rbbFilter.Header = Translate.fmt("lbl_view_filter");
 
+            this.btnNoFilter.Label = Translate.fmt("btn_no_filters");
+            this.btnDelPreset.Label = Translate.fmt("btn_del_filter");
+            this.btnAddPreset.Label = Translate.fmt("btn_save_filter");
+
             this.rbbPresets.Header = Translate.fmt("filter_presets");
 
             this.rbbActivity.Header = Translate.fmt("filter_activity");
@@ -157,10 +161,26 @@ namespace PrivateWin10.Pages
             //this.chkAll.Label = Translate.fmt("chk_all");
             //cmbViewMode.SelectedItem = modeNormal;
 
+            this.lblProgSet.Header = Translate.fmt("lbl_prog_set");
+            this.lblProgOpts.Header = Translate.fmt("lbl_opts");
+            this.lblProgInfos.Header = Translate.fmt("lbl_infos");
+            this.lblCleanUp.Header = Translate.fmt("lbl_cleanup");
+
+
+
             this.rbbProgs.Header = Translate.fmt("lbl_programs");
             this.btnAdd.Label = Translate.fmt("btn_add_prog");
+            this.btnAddSub.Header = Translate.fmt("btn_add_to_set");
             this.btnMerge.Label = Translate.fmt("btn_merge_progs");
             this.btnSplit.Label = Translate.fmt("btn_split_progs");
+
+
+            this.btnAllowAll.Label = Translate.fmt("acl_allow");
+            this.btnCustomCfg.Label = Translate.fmt("acl_edit");
+            this.btnLanOnly.Header = Translate.fmt("acl_lan");
+            this.btnNoConf.Header = Translate.fmt("acl_none");
+            this.chkNotify.Label = Translate.fmt("acl_silence");
+            this.btnBlockAll.Label = Translate.fmt("acl_block");
 
             this.btnRename.Label = Translate.fmt("btn_rename_prog");
             this.btnIcon.Label = Translate.fmt("btn_icon_prog");
@@ -169,9 +189,20 @@ namespace PrivateWin10.Pages
 
             this.btnRemove.Label = Translate.fmt("btn_del_progs");
             this.btnCleanup.Label = Translate.fmt("btn_cleanup_list");
-            // todo: xxx localize
+            this.btnCleanupEx.Header = Translate.fmt("btn_ext_cleanup");
+            this.btnClearLog.Label = Translate.fmt("btn_clear_fw_log");
 
-            //this.rbbRules // todo: localize
+            this.rbbRules.Header = Translate.fmt("lbl_rules");
+            this.rbbRule.Header = Translate.fmt("lbl_rules");
+            this.rbbRuleEdit.Header = Translate.fmt("lbl_sel_rules");
+            this.rbbRuleGuard.Header = Translate.fmt("lbl_rule_guard");
+
+            this.progTab.Header = Translate.fmt("lbl_programs");
+            this.ruleTab.Header = Translate.fmt("lbl_fw_rules");
+            this.sockTab.Header = Translate.fmt("lbl_sockets");
+            this.logTab.Header = Translate.fmt("gtp_con_log");
+            this.inspectorTab.Header = Translate.fmt("lbl_dns_inspector");
+
             #endregion
 
             rbbBar.SelectedIndex = 0;
@@ -878,6 +909,9 @@ namespace PrivateWin10.Pages
             foreach (var item in items)
             {
                 var progSet = item as ProgramSet;
+                if (progSet == null)
+                    continue;
+
                 if (!progSets.Contains(progSet.guid))
                     progSets.Add(progSet.guid);
 
@@ -959,7 +993,7 @@ namespace PrivateWin10.Pages
                     Categories.Add(cat.Content.ToString());
             }
 
-            InputWnd wnd = new InputWnd(Translate.fmt("msg_set_cat"), Categories, SelectedProgramSets[0].config.Category, true, App.Title);
+            InputWnd wnd = new InputWnd(Translate.fmt("btn_cat_prog"), Categories, SelectedProgramSets[0].config.Category, true, App.Title);
             if (wnd.ShowDialog() != true || wnd.Value.Length == 0)
                 return;
 

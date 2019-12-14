@@ -149,7 +149,7 @@
             </RibbonTab>
 
             <RibbonTab Header="Programs" Name="rbbProgs">
-                <RibbonGroup Header="Program Set">
+                <RibbonGroup Header="Program Set" Name="lblProgSet">
                     <RibbonSplitButton Name="btnAdd" Label="Add" LargeImageSource="{StaticResource Icon_Plus}" Click="btnAdd_Click" >
                         <RibbonMenuItem Name="btnAddSub" Header="Add to set" ImageSource="{StaticResource Icon_Plus}" Click="btnAddSub_Click"/>
                     </RibbonSplitButton>
@@ -158,7 +158,7 @@
                     <RibbonButton Name="btnRemove" Label="Remove" SmallImageSource="{StaticResource Icon_Remove}" Click="btnRemove_Click"/>
                 </RibbonGroup>
 
-                <RibbonGroup Header="Options">
+                <RibbonGroup Header="Options" Name="lblProgOpts">
                     <RibbonButton Name="btnAllowAll" Label="Full Access" SmallImageSource="{StaticResource Icon_Grant}" Click="btnSetAccess_Click"/>
                     <RibbonSplitButton Name="btnCustomCfg" Label="Custom Config" SmallImageSource="{StaticResource Icon_Custom}" Click="btnSetAccess_Click" >
                         <RibbonMenuItem Name="btnLanOnly" Header="Lan Only" ImageSource="{StaticResource Icon_NoLan}" Click="btnSetAccess_Click"/>
@@ -168,13 +168,13 @@
                     <RibbonButton Name="btnBlockAll" Label="Block Access" SmallImageSource="{StaticResource Icon_Stop}" Click="btnSetAccess_Click"/>
                 </RibbonGroup>
 
-                <RibbonGroup Header="Informations">
+                <RibbonGroup Header="Informations" Name="lblProgInfos">
                     <RibbonButton Name="btnRename" Label="Rename Set" SmallImageSource="{StaticResource Icon_Rename}" Click="BtnRename_Click"/>
                     <RibbonButton Name="btnIcon" Label="Change Icon" SmallImageSource="{StaticResource Icon_SetIcon}" Click="BtnIcon_Click"/>
                     <RibbonButton Name="btnCategory" Label="Set Category" SmallImageSource="{StaticResource Icon_Category}" Click="BtnCategory_Click"/>
                 </RibbonGroup>
-                
-                <RibbonGroup Header="Cleanup">
+
+                <RibbonGroup Header="Cleanup" Name="lblCleanUp">
                     <RibbonSplitButton Name="btnCleanup" Label="Missing Programs" SmallImageSource="{StaticResource Icon_CleanUp}" Click="btnCleanup_Click" >
                         <RibbonMenuItem Name="btnCleanupEx" Header="Extended Cleanup" Click="btnCleanupEx_Click"/>
                     </RibbonSplitButton>
@@ -321,7 +321,7 @@
                     <TabItem Header="Firewall Rules" Name="ruleTab" Visibility="Collapsed">
 
                     </TabItem>
-                    <TabItem Header="Open Sockets">
+                    <TabItem Header="Open Sockets" Name="sockTab">
                         <controls:NetworkSocketList x:Name="sockList" VerticalAlignment="Stretch"/>
                     </TabItem>
                     <TabItem Name="logTab" Header="Connection Log">

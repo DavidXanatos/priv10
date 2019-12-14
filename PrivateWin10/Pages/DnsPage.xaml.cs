@@ -28,9 +28,23 @@ namespace PrivateWin10.Pages
         {
             InitializeComponent();
 
+            this.tabQueryLog.Header = Translate.fmt("btn_query_log");
+            this.tabWhitelist.Header = Translate.fmt("btn_whitelist");
+            this.tabBlacklist.Header = Translate.fmt("btn_blacklist");
+            this.tabBlocklists.Header = Translate.fmt("btn_blocklists");
+
+            this.whiteList.caption.Text = Translate.fmt("btn_whitelist");
+            this.blackList.caption.Text = Translate.fmt("btn_blacklist");
+
             tabs.Loaded += (sender, e) => {
 
-                // todo: localize
+                var lblUpstreamDns = tabs.Template.FindName("lblUpstreamDns", tabs) as Label;
+                if (lblUpstreamDns != null)
+                    lblUpstreamDns.Content = Translate.fmt("lbl_dns_upstream");
+
+                var lblNavMenu = tabs.Template.FindName("lblNavMenu", tabs) as Label;
+                if (lblNavMenu != null)
+                    lblNavMenu.Content = Translate.fmt("lbl_nav_menu");
 
                 UpdateStats();
             };
@@ -69,9 +83,8 @@ namespace PrivateWin10.Pages
         public void UpdateStats()
         {
             var txtUpstreamDns = tabs.Template.FindName("txtUpstreamDns", tabs) as TextBlock;
-            if (txtUpstreamDns == null)
-                return;
-            txtUpstreamDns.Text = App.GetConfig("DNSProxy", "UpstreamDNS", "");
+            if (txtUpstreamDns != null)
+                txtUpstreamDns.Text = App.GetConfig("DNSProxy", "UpstreamDNS", "");
         }
 
         //

@@ -18,6 +18,7 @@ namespace PrivateWin10.Controls
         // columns BEGIN
         public override string Category => "";
         public override string Access => "";
+        public override string AccessTag => "";
 
         public override int Rules => prog.RuleCount;
         public override int Allowed => prog.AllowedCount;
