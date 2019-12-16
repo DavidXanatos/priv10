@@ -44,10 +44,8 @@ namespace PrivateWin10
         public static Priv10Engine engine = null;
         public static TweakManager tweaks = null;
 
-        public static AppManager PkgMgr = null; // Windows 8 & 10 App Manager
-
-        public static TrayIcon mTray = null;
-        public static MainWindow mMainWnd = null;
+        public static TrayIcon TrayIcon = null;
+        public static MainWindow MainWnd = null;
 
         public static Priv10Client client = null;
         public static Priv10Host host = null;
@@ -169,12 +167,6 @@ namespace PrivateWin10
             // setup custom assembly resolution for x86/x64 synamic compatybility
             AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolveHandler;
 
-            if (!UwpFunc.IsWindows7OrLower)
-            {
-                Console.WriteLine("Initializing app manager...");
-                PkgMgr = new AppManager();
-            }
-
             // is the process starting as a service/worker?
             if (startMode != StartModes.Normal)
             {
@@ -270,17 +262,17 @@ namespace PrivateWin10
 
             InitLicense();
 
-            mTray = new TrayIcon();
-            mTray.Action += TrayAction;
-            mTray.Visible = (GetConfigInt("Startup", "Tray", 0) != 0) || App.TestArg("-autorun");
+            TrayIcon = new TrayIcon();
+            TrayIcon.Action += TrayAction;
+            TrayIcon.Visible = (GetConfigInt("Startup", "Tray", 0) != 0) || App.TestArg("-autorun");
 
-            mMainWnd = new MainWindow();
-            if (!App.TestArg("-autorun") || !mTray.Visible)
-                mMainWnd.Show();
+            MainWnd = new MainWindow();
+            if (!App.TestArg("-autorun") || !TrayIcon.Visible)
+                MainWnd.Show();
 
             app.Run();
 
-            mTray.DestroyNotifyicon();
+            TrayIcon.DestroyNotifyicon();
 
             client.Close();
 
@@ -336,6 +328,41 @@ namespace PrivateWin10
 
             if (comException != null && comException.ErrorCode == -2147221040)
                 e.Handled = true;
+        }
+
+        static private Dictionary<string, string> AppResourceStrCache = new Dictionary<string, string>();
+        static private ReaderWriterLockSlim AppResourceStrLock = new ReaderWriterLockSlim();
+
+        static public string GetResourceStr(string resourcePath)
+        {
+            if (resourcePath == null)
+                return "";
+            if (resourcePath.Length == 0 || resourcePath[0] != '@')
+                return resourcePath;
+
+            string resourceStr = null;
+            AppResourceStrLock.EnterReadLock();
+            AppResourceStrCache.TryGetValue(resourcePath, out resourceStr);
+            AppResourceStrLock.ExitReadLock();
+            if (resourceStr != null)
+                return resourceStr;
+
+            if (resourcePath.Length > 2 && resourcePath.Substring(0, 2) == "@{")
+            {
+                if (App.engine != null)
+                    resourceStr = App.engine?.PkgMgr?.GetAppResourceStr(resourcePath) ?? resourcePath;
+                else
+                    resourceStr = App.client.GetAppPkgRes(resourcePath);
+            }
+            else
+                resourceStr = MiscFunc.GetResourceStr(resourcePath);
+
+            AppResourceStrLock.EnterWriteLock();
+            if (!AppResourceStrCache.ContainsKey(resourcePath))
+                AppResourceStrCache.Add(resourcePath, resourceStr);
+            AppResourceStrLock.ExitWriteLock();
+
+            return resourceStr;
         }
 
         static bool ExecuteCommands()
@@ -489,10 +516,10 @@ namespace PrivateWin10
             {
                 case TrayIcon.Actions.ToggleWindow:
                     {
-                        if (mMainWnd.IsVisible)
-                            mMainWnd.Hide();
+                        if (MainWnd.IsVisible)
+                            MainWnd.Hide();
                         else
-                            mMainWnd.Show();
+                            MainWnd.Show();
                         break;
                     }
                 case TrayIcon.Actions.CloseApplication:

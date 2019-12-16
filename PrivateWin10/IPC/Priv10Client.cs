@@ -117,7 +117,12 @@ namespace PrivateWin10
         {
             return RemoteExec("ClearLog", ClearSecLog, false);
         }
-        
+
+        public bool ClearDnsLog()
+        {
+            return RemoteExec("ClearDnsLog", null, false);
+        }
+
         public int CleanUpPrograms(bool ExtendedCleanup = false)
         {
             return RemoteExec("CleanUpPrograms", ExtendedCleanup, 0);
@@ -146,6 +151,16 @@ namespace PrivateWin10
         public Dictionary<Guid, List<Program.DnsEntry>> GetDomains(List<Guid> guids = null)
         {
             return RemoteExec<Dictionary<Guid, List<Program.DnsEntry>>>("GetDomains", guids, null);
+        }
+
+        public List<UwpFunc.AppInfo> GetAllAppPkgs(bool bReload = false)
+        {
+            return RemoteExec<List<UwpFunc.AppInfo>>("GetAllAppPkgs", bReload, null);
+        }
+
+        public string GetAppPkgRes(string str)
+        {
+            return RemoteExec("GetAppPkgRes", str, str);
         }
 
         /////////////////////////////////////////

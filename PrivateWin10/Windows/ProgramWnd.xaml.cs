@@ -224,8 +224,8 @@ namespace PrivateWin10.Windows
             if (item == null)
                 return;
 
-            if (item.Value == null && App.PkgMgr != null)
-                App.PkgMgr.UpdateAppCache();
+            /*if (item.Value == null)
+                ...UpdateAppCache();*/
         }
     }
 }

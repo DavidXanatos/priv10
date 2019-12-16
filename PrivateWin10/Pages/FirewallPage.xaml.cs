@@ -86,8 +86,16 @@ namespace PrivateWin10.Pages
 
         //ObservableCollection<ProgramSet> ProgramSets;
 
+        bool AllEntrySelected = false;
         //private bool showAll { get { return cmbViewMode.SelectedItem != modeNormal; } }
-        private bool showAll { get { return chkAll.IsChecked == true || btnFullScreen.IsChecked == true; } }
+        private bool showAll(bool forRules = false)
+        {
+            if (chkAll.IsChecked == true || btnFullScreen.IsChecked == true)
+                return true;
+            if (!forRules && AllEntrySelected)
+                return true;
+            return false;
+        }
 
         public FirewallPage()
         {
@@ -99,6 +107,12 @@ namespace PrivateWin10.Pages
             dnsList.firewallPage = this;
 
             #region Localization
+
+            this.btnNormalView.ToolTip = Translate.fmt("lbl_normal_view");
+            this.btnFullHeight.ToolTip = Translate.fmt("lbl_full_height");
+            this.btnFullWidth.ToolTip = Translate.fmt("lbl_full_width");
+            this.btnFullScreen.ToolTip = Translate.fmt("lbl_full_screen");
+            this.chkAll.ToolTip = Translate.fmt("lbl_show_all");
 
             this.rbbFilter.Header = Translate.fmt("lbl_view_filter");
 
@@ -191,6 +205,7 @@ namespace PrivateWin10.Pages
             this.btnCleanup.Label = Translate.fmt("btn_cleanup_list");
             this.btnCleanupEx.Header = Translate.fmt("btn_ext_cleanup");
             this.btnClearLog.Label = Translate.fmt("btn_clear_fw_log");
+            this.btnClearDns.Label = Translate.fmt("btn_clear_dns_log");
 
             this.rbbRules.Header = Translate.fmt("lbl_rules");
             this.rbbRule.Header = Translate.fmt("lbl_rules");
@@ -328,6 +343,9 @@ namespace PrivateWin10.Pages
 
         private void ProgList_SelectionChanged(object sender, EventArgs e)
         {
+            var items = GetSelectedProgramSets();
+            AllEntrySelected = items.Count == 1 && items[0].Programs.FirstOrDefault().Key.Type == ProgramID.Types.Global;
+
             ruleList.UpdateRules(true);
             consList.UpdateConnections(true);
             sockList.UpdateSockets(true);
@@ -384,7 +402,7 @@ namespace PrivateWin10.Pages
             if (args.entry.State == Program.LogEntry.States.UnRuled && args.entry.FwEvent.Action == FirewallRule.Actions.Block)
             {
                 bool? Notify = prog.config.GetNotify();
-                if (Notify == true || (App.GetConfigInt("Firewall", "NotifyBlocked", 1) != 0 && Notify != false))
+                if (Notify == true || (App.GetConfigInt("Firewall", "NotifyBlocked", 1) != 0 && App.GetConfigInt("Firewall", "Enabled", 0) != 0 && Notify != false))
                     ShowNotification(prog, args);
             }
 
@@ -417,7 +435,7 @@ namespace PrivateWin10.Pages
 
             // from here on only col log update:
 
-            if (GetSelectedItems().Contains(prog) || showAll)
+            if (GetSelectedItems().Contains(prog) || showAll())
                 consList.AddEntry(prog, program, args);
         }
 
@@ -461,9 +479,9 @@ namespace PrivateWin10.Pages
         {
             if (IsHidden)
                 return;
-            if (App.mMainWnd.WindowState == WindowState.Minimized)
+            if (App.MainWnd.WindowState == WindowState.Minimized)
                 return;
-            if (App.mMainWnd.Visibility != Visibility.Visible)
+            if (App.MainWnd.Visibility != Visibility.Visible)
                 return;
 
             if (FullUpdate)
@@ -491,7 +509,7 @@ namespace PrivateWin10.Pages
 
             UpdatesProgs.Clear();
 
-            if (GetSelectedItems().Count > 0 || showAll)
+            if (GetSelectedItems().Count > 0 || showAll())
             {
                 sockList.UpdateSockets();
                 dnsList.UpdateDnsLog(); // todo: xxx - update this liek the connection log i.e. incrementally
@@ -755,15 +773,15 @@ namespace PrivateWin10.Pages
             return false;
         }
 
-        public List<Guid> GetCurGuids(string filter = null)
+        public List<Guid> GetCurGuids(bool forRules = false)
         {
             List<Guid> guids = new List<Guid>();
-            if (!showAll)
+            if (!showAll(forRules))
             {
                 foreach (ProgramSet progSet in GetSelectedProgramSets())
                 {
-                    if (filter != null && DoFilter(filter, progSet.config.Name, progSet.Programs.Keys.ToList()))
-                        continue;
+                    /*if (filter != null && DoFilter(filter, progSet.config.Name, progSet.Programs.Keys.ToList()))
+                        continue;*/
 
                     guids.Add(progSet.guid);
                 }
@@ -1028,6 +1046,10 @@ namespace PrivateWin10.Pages
             this.consList.ClearLog();
         }
 
+        private void BtnClearDns_Click(object sender, RoutedEventArgs e)
+        {
+            this.dnsList.ClearLog();
+        }
 
         public void ShowRuleWindow(FirewallRule rule)
         {
@@ -1041,7 +1063,7 @@ namespace PrivateWin10.Pages
                         progs.Add(prog);
                 }
             }
-            if (showAll)
+            if (showAll(true))
             {
                 foreach (ProgramSet entry in App.client.GetPrograms())
                     AddIDs(entry.Programs);
@@ -1310,7 +1332,7 @@ namespace PrivateWin10.Pages
         private void SetTreeMode()
         {
             ListModes Mode = ListModes.Tree;
-            if (viewMode == ViewModes.NormalView && progsCol.Width.Value < 500.0)
+            if ((viewMode == ViewModes.NormalView || viewMode == ViewModes.FullHeight) && progsCol.Width.Value < 500.0)
                 Mode = ListModes.List;
 
             if (ListMode != Mode)
@@ -1539,6 +1561,7 @@ namespace PrivateWin10.Pages
                 rulesRow.Height = new GridLength(this.ActualHeight - (rbbBar.ActualHeight + 50 + 5), GridUnitType.Pixel);
             }
         }
+
 
     }
 }

@@ -38,15 +38,9 @@ namespace PrivateWin10
                 {
                     if (rule.Grouping != null && rule.Grouping.Length > 0)
                     {
-                        string temp = rule.Grouping;
-                        if (temp.Length > 2 && temp.Substring(0, 2) == "@{" && App.PkgMgr != null)
-                            temp = App.PkgMgr.GetAppResourceStr(temp);
-                        else if (temp.Length > 1 && temp.Substring(0, 1) == "@")
-                            temp = MiscFunc.GetResourceStr(temp);
-
+                        string temp = App.GetResourceStr(rule.Grouping);
                         if (temp.Substring(0, 1) == "@")
                             continue; // dont list unresolved names
-
                         knownGroups.Add(temp);
                     }
                 }

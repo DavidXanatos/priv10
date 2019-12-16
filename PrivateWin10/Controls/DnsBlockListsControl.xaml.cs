@@ -121,7 +121,6 @@ namespace PrivateWin10.Controls
         {
             foreach (BlocklistItem Item in new List<BlocklistItem>(listGrid.SelectedItems.Cast<BlocklistItem>()))
             {
-                BlocklistList.Remove(Item);
                 App.client.RefreshDomainBlocklist(Item.Blocklist.Url);
             }
         }

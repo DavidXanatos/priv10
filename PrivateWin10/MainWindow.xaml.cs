@@ -81,11 +81,11 @@ namespace PrivateWin10
                 switch (wParam.ToInt32())
                 {
                     case SysMenu_Setup:
-                        App.mMainWnd.ShowSetup();
+                        App.MainWnd.ShowSetup();
                         handled = true;
                         break;
                     case SysMenu_Uninstall:
-                        App.mMainWnd.RunUninstall();
+                        App.MainWnd.RunUninstall();
                         handled = true;
                         break;
                 }
@@ -132,6 +132,7 @@ namespace PrivateWin10
             mPages.Add("Privacy", new PageItem(new PrivacyPage()));
             mPages.Add("Firewall", new PageItem(HasEngine ? new FirewallPage() : null));
             mPages.Add("Dns", new PageItem(new DnsPage()));
+            //mPages.Add("Terminator", new PageItem(null));
             //mPages.Add("VPN", new PageItem(new VPNPage()));
             mPages.Add("Settings", new PageItem(new SettingsPage()));
             mPages.Add("About", new PageItem(new AboutPage()));
@@ -162,6 +163,7 @@ namespace PrivateWin10
 
                 StackPanel panel = new StackPanel();
                 item.Header = panel;
+                panel.ToolTip = Translate.fmt("lbl_" + name.ToLower());
 
                 Image image = new Image();
                 image.Width = 32;
@@ -202,7 +204,7 @@ namespace PrivateWin10
                     (page.ctrl as IUserPage).OnClose();
             }
 
-            if (App.mTray.Visible)
+            if (App.TrayIcon.Visible)
             {
                 e.Cancel = true;
                 this.Hide();

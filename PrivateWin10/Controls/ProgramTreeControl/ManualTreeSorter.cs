@@ -15,14 +15,16 @@ namespace PrivateWin10.Controls
 
         static void Swap(SharpTreeNodeCollection array, int i, int j)
         {
-            Debug.Assert(i < j);
             SwapCount++;
-
+            
+            Debug.Assert(i < j);
             SharpTreeNode temp = array[i];
             SharpTreeNode tmp = array[j];
             array.RemoveAt(j);
             array[i] = tmp;
             array.Insert(j, temp);
+            
+            //array.Swap(i, j);
         }
 
         static void BubbleSort(SharpTreeNodeCollection num, Comparison<SharpTreeNode> comparison)
@@ -157,10 +159,10 @@ namespace PrivateWin10.Controls
             if (Children.Count == 0)
                 return;
 
-            //QuickSort(Children, comparison);
+            QuickSort(Children, comparison);
             //SelectionSort(Children, comparison);
             //BubbleSort(Children, comparison);
-            ShellSort(Children, comparison);
+            //ShellSort(Children, comparison);
             //ExchangeSort(Children, comparison);
             //InsertionSort(Children, comparison);
 
@@ -199,7 +201,7 @@ namespace PrivateWin10.Controls
             var elapsedMs = watch.ElapsedMilliseconds;
 
 #if DEBUG
-            //AppLog.Debug("TreeView Sorting took: {0} ms and required {1} swaps", elapsedMs, SwapCount);
+            AppLog.Debug("TreeView Sorting took: {0} ms and required {1} swaps", elapsedMs, SwapCount);
 #endif
         }
     }

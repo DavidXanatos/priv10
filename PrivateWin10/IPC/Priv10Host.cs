@@ -101,6 +101,10 @@ namespace PrivateWin10
                 {
                     call.args = App.engine.ClearLog((bool)call.args);
                 }
+                else if (call.func == "ClearDnsLog")
+                {
+                    call.args = App.engine.ClearDnsLog();
+                }
                 else if (call.func == "CleanUpPrograms")
                 {
                     call.args = App.engine.CleanUpPrograms((bool)call.args);
@@ -124,6 +128,14 @@ namespace PrivateWin10
                 else if (call.func == "GetDomains")
                 {
                     call.args = App.engine.GetDomains((List<Guid>)call.args);
+                }
+                else if (call.func == "GetAllAppPkgs")
+                {
+                    call.args = App.engine.GetAllAppPkgs((bool)call.args);
+                }
+                else if (call.func == "GetAppPkgRes")
+                {
+                    call.args = App.engine.GetAppPkgRes((string)call.args);
                 }
 
                 /////////////////////////////////////////

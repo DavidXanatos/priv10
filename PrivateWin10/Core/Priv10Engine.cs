@@ -19,6 +19,7 @@ namespace PrivateWin10
         public FirewallManager FirewallManager;
         public FirewallMonitor FirewallMonitor;
         public FirewallGuard FirewallGuard;
+        public AppManager PkgMgr; // Windows 8 & 10 App Manager
         public ProcessMonitor ProcessMonitor;
         public NetworkMonitor NetworkMonitor;
         public DnsInspector DnsInspector;
@@ -131,7 +132,7 @@ namespace PrivateWin10
             FirewallGuard = new FirewallGuard();
             FirewallGuard.StartEventWatcher();
 
-            if (App.GetConfigInt("Firewall", "RuleGuard", 0) != 0)
+            if (App.GetConfigInt("Firewall", "RuleGuard", 0) != 0 && App.GetConfigInt("Firewall", "Enabled", 0) != 0)
             {
                 if (!FirewallGuard.HasAuditPolicy())
                 {
@@ -143,9 +144,16 @@ namespace PrivateWin10
             FirewallGuard.ChangeEvent += (object sender, PrivateWin10.RuleChangedEvent FwEvent) =>
             {
                 RunInEngineThread(() => {
-                    OnRuleChangedEvent(FwEvent);
+                    if(App.GetConfigInt("Firewall", "RuleGuard", 0) != 0)
+                        OnRuleChangedEvent(FwEvent);
                 });
             };
+
+            if (!UwpFunc.IsWindows7OrLower)
+            {
+                Console.WriteLine("Initializing app manager...");
+                PkgMgr = new AppManager();
+            }
 
             if (App.GetConfigInt("Startup", "LoadLog", 0) != 0)
                 LoadLogAsync();
@@ -303,7 +311,7 @@ namespace PrivateWin10
             if (serviceTag != null)
                 return ProgramID.NewSvcID(serviceTag, fileName);
 
-            string SID = App.PkgMgr?.GetAppPackageSidByPID(PID);
+            string SID = ProcFunc.GetAppPackageSidByPID(PID);
             if (SID != null)
                 return ProgramID.NewAppID(SID, fileName);
 
@@ -630,7 +638,7 @@ namespace PrivateWin10
             if (rules == null)
                 return false; // failed to load rules
 
-            if (FirewallGuard.HasAuditPolicy())
+            if ((App.GetConfigInt("Firewall", "RuleGuard", 0) != 0) && FirewallGuard.HasAuditPolicy())
             {
                 AppLog.Debug("Loading Known Firewall rules...");
 
@@ -937,11 +945,7 @@ namespace PrivateWin10
                                             EventID = App.EventIDs.RuleChanged; break;
             }
 
-            string RuleName = rule.Name;
-            if (RuleName.Length > 2 && RuleName.Substring(0, 2) == "@{" && App.PkgMgr != null)
-                RuleName = App.PkgMgr.GetAppResourceStr(RuleName);
-            else if (RuleName.Length > 11 && RuleName.Substring(0, 1) == "@")
-                RuleName = MiscFunc.GetResourceStr(RuleName);
+            string RuleName = App.GetResourceStr(rule.Name);            
 
             string Message; // "Firewall rule \"{0}\" for \"{1}\" was {2}."
             switch (action)
@@ -1020,7 +1024,7 @@ namespace PrivateWin10
         public bool IsFirewallGuard()
         {
             return mDispatcher.Invoke(new Func<bool>(() => {
-                return FirewallGuard.HasAuditPolicy();
+                return (App.GetConfigInt("Firewall", "RuleGuard", 0) != 0) && FirewallGuard.HasAuditPolicy();
             }));
         }
 
@@ -1336,6 +1340,14 @@ namespace PrivateWin10
             }));
         }
 
+        public bool ClearDnsLog()
+        {
+            return mDispatcher.Invoke(new Func<bool>(() => {
+                ProgramList.ClearDnsLog();
+                return true;
+            }));
+        }
+
         public int CleanUpPrograms(bool ExtendedCleanup = false)
         {
             return mDispatcher.Invoke(new Func<int>(() => {
@@ -1399,6 +1411,24 @@ namespace PrivateWin10
                 foreach (ProgramSet progSet in progs)
                     entries.Add(progSet.guid, progSet.GetDomains());
                 return entries;
+            }));
+        }
+
+        public List<UwpFunc.AppInfo> GetAllAppPkgs(bool bReload = false)
+        {
+            return mDispatcher.Invoke(new Func<List<UwpFunc.AppInfo>>(() => {
+#if FW_COM_ITF
+                return PkgMgr?.GetAllApps(); 
+#else
+                return FirewallManager.GetAllAppPkgs(bReload);
+#endif
+            }));
+        }
+
+        public string GetAppPkgRes(string str )
+        {
+            return mDispatcher.Invoke(new Func<string>(() => {
+                return PkgMgr?.GetAppResourceStr(str);
             }));
         }
 

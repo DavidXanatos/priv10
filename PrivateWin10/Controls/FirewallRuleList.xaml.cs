@@ -198,7 +198,7 @@ namespace PrivateWin10.Controls
             foreach (RuleItem oldItem in RulesList)
                 oldRules.Add(oldItem.Rule.guid, oldItem);
 
-            Dictionary<Guid, List<FirewallRuleEx>> rules = App.client.GetRules(firewallPage.GetCurGuids());
+            Dictionary<Guid, List<FirewallRuleEx>> rules = App.client.GetRules(firewallPage.GetCurGuids(true));
             foreach (var ruleSet in rules)
             {
                 foreach (FirewallRuleEx rule in ruleSet.Value)
@@ -550,18 +550,8 @@ namespace PrivateWin10.Controls
             }
 
             public ImageSource Icon { get { return ImgFunc.GetIcon(Rule.ProgID.Path, 16); } }
+            public string Name { get { return App.GetResourceStr(Rule.Name); } }
 
-            public string Name
-            {
-                get
-                {
-                    if (Rule.Name.Length > 2 && Rule.Name.Substring(0, 2) == "@{" && App.PkgMgr != null)
-                        return App.PkgMgr.GetAppResourceStr(Rule.Name);
-                    else if (Rule.Name.Length > 1 && Rule.Name.Substring(0, 1) == "@")
-                        return MiscFunc.GetResourceStr(Rule.Name);
-                    return Rule.Name;
-                }
-            }
             public string Program { get { return Rule.ProgID.FormatString(); } }
 
             public string Grouping

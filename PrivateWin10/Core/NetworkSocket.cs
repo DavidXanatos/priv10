@@ -12,7 +12,7 @@ namespace PrivateWin10
     {
         public Guid guid;
         public ProgramID ProgID;
-        public bool Assigned;
+        public Program Program = null;
         public UInt64 RemovedTimeStamp = 0;
 
         public UInt64 HashID;
@@ -66,12 +66,15 @@ namespace PrivateWin10
             }
 
             // a program may have been removed than the sockets get unasigned and has to be re asigned
-            if (Assigned == false)
+            if (Program == null)
             {
                 Program prog = ProgID == null ? null : App.engine.ProgramList.GetProgram(ProgID, true, ProgramList.FuzzyModes.Any);
-                prog?.AddSocket(this);
                 if (prog != null)
+                {
+                    Program = prog;
+                    prog.AddSocket(this);
                     Access = prog.LookupRuleAccess(this);
+                }
             }
 
             Stats.Update(Interval);

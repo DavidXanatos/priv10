@@ -207,7 +207,8 @@ namespace PrivateWin10
                 filePath = commandLine;
 
             // apparently some processes can be started without a exe name in the cmman dline WTF, anyhow:
-            if (!Path.GetFileName(filePath).Equals(imageName, StringComparison.OrdinalIgnoreCase))
+            if (!Path.GetFileName(filePath).Equals(imageName, StringComparison.OrdinalIgnoreCase) 
+            && !(Path.GetFileName(filePath) + ".exe").Equals(imageName, StringComparison.OrdinalIgnoreCase))
                 filePath = imageName;
             
             // https://reverseengineering.stackexchange.com/questions/3798/c-question-marks-in-paths
@@ -248,9 +249,12 @@ namespace PrivateWin10
             {
                 var curPath = Path.Combine(workingDir, filePath);
                 if (filePath[0] == '.')
-                    return Path.GetFullPath(curPath);
-                else if (File.Exists(curPath))
+                    curPath = Path.GetFullPath(curPath);
+
+                if (File.Exists(curPath))
                     return curPath;
+                if (File.Exists(curPath + ".exe"))
+                    return curPath + ".exe";
             }
 
             // if everythign else fails, try to find the process binary using the environment path variable

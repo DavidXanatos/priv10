@@ -109,7 +109,8 @@ namespace PrivateWin10
             {
                 if (processId == 0 || curJob.processId == processId)
                 {
-                    curJob.SetHostName(hostName, NameSources.CapturedQuery);
+                    if (hostName != null)
+                        curJob.SetHostName(hostName, source);
                     curJob.Await &= ~source; // clear the await
                 }
 
@@ -236,7 +237,8 @@ namespace PrivateWin10
     public class WithHost
     {
         public NameSources RemoteHostNameSource = NameSources.None;
-        public string RemoteHostName;
+        public string RemoteHostName = "";
+        public string RemoteHostNameAlias = "";
 
         public class ChangeEventArgs : EventArgs
         {
@@ -250,6 +252,9 @@ namespace PrivateWin10
         {
             if (source > RemoteHostNameSource) // the bigger the better
             {
+                if (RemoteHostNameSource == NameSources.CachedQuery && !RemoteHostName.Equals(name, StringComparison.OrdinalIgnoreCase))
+                    RemoteHostNameAlias = RemoteHostName;
+
                 string oldName = RemoteHostName;
 
                 RemoteHostName = name;
@@ -267,7 +272,7 @@ namespace PrivateWin10
 
         public bool Update(WithHost other)
         {
-            if (RemoteHostName != null && other.RemoteHostName != null && RemoteHostName.Equals(other.RemoteHostName))
+            if (MiscFunc.Equals(RemoteHostName, other.RemoteHostName))
                 return false;
             RemoteHostNameSource = other.RemoteHostNameSource;
             RemoteHostName = other.RemoteHostName;
@@ -281,7 +286,7 @@ namespace PrivateWin10
 
         public string GetHostName()
         {
-            return RemoteHostName;
+            return RemoteHostName + (RemoteHostNameAlias.Length > 0 ? " -> " + RemoteHostNameAlias : "");
         }
     }
 }

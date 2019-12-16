@@ -116,6 +116,7 @@ namespace PrivateWin10.Pages
                     default: cmbAudit.SelectedItem = lblAuditNone; break;
                 }
 
+                chkGuardFW.IsEnabled = chkUseFW.IsChecked == true;
                 chkGuardFW.IsChecked = App.client.IsFirewallGuard();
 
                 chkEnableDNS.IsChecked = App.GetConfigInt("DnsProxy", "Enabled", 0) != 0;
@@ -140,7 +141,7 @@ namespace PrivateWin10.Pages
             radDisable.IsChecked = fix_mode == (int)FirewallGuard.Mode.Disable;
             radAlert.IsChecked = fix_mode == (int)FirewallGuard.Mode.Alert;
 
-            radFix.IsEnabled = radDisable.IsEnabled = radAlert.IsEnabled = chkGuardFW.IsChecked != false;
+            radFix.IsEnabled = radDisable.IsEnabled = radAlert.IsEnabled = (chkGuardFW.IsChecked != false && chkGuardFW.IsEnabled);
 
 
             chkNotifyFW.IsEnabled = chkUseFW.IsChecked == true;
@@ -165,7 +166,7 @@ namespace PrivateWin10.Pages
             if (bHold) return;
 
             App.SetConfig("Startup", "Tray", chkTray.IsChecked == true);
-            App.mTray.Visible = chkTray.IsChecked == true;
+            App.TrayIcon.Visible = chkTray.IsChecked == true;
         }
 
         private void chkAutoStart_Click(object sender, RoutedEventArgs e)
@@ -212,7 +213,7 @@ namespace PrivateWin10.Pages
             }
             App.client.Connect();
 
-            App.mMainWnd.UpdateEnabled();
+            App.MainWnd.UpdateEnabled();
         }
 
         private void chkNoUAC_Click(object sender, RoutedEventArgs e)
@@ -266,16 +267,17 @@ namespace PrivateWin10.Pages
 
             if (chkUseFW.IsChecked == true)
             {
-                chkNotifyFW.IsEnabled = true;
                 cmbAudit.SelectedItem = lblAuditAll;
                 radWhitelist.IsChecked = true;
             }
             else
             {
-                chkNotifyFW.IsEnabled = false;
                 cmbAudit.SelectedItem = lblAuditNone;
                 radBlacklist.IsChecked = true;
             }
+
+            chkNotifyFW.IsEnabled = chkUseFW.IsChecked == true;
+            chkGuardFW.IsEnabled = chkUseFW.IsChecked == true;
 
             App.SetConfig("Firewall", "Enabled", chkUseFW.IsChecked == true ? 1 : 0);
         }
@@ -391,7 +393,7 @@ namespace PrivateWin10.Pages
                 chkEnableDNS.IsChecked = false;
                 bHold = false;
             }
-            App.mMainWnd.UpdateEnabled();
+            App.MainWnd.UpdateEnabled();
         }
 
         private void CheckDNS()

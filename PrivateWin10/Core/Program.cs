@@ -141,7 +141,8 @@ namespace PrivateWin10
                     break;
                 case ProgramID.Types.App:
                     Name = ID.GetPackageName();
-                    Info = App.PkgMgr?.GetAppInfoBySid(ID.GetPackageSID())?.Name;
+                    var AppPkg = App.engine.FirewallManager.GetAppPkgBySid(ID.GetPackageSID());
+                    Info = AppPkg?.Name;
                     break;
             }
 
@@ -217,7 +218,7 @@ namespace PrivateWin10
             {
                 case ProgramID.Types.Program:   return !PathMissing;
                 case ProgramID.Types.Service:   return (ServiceHelper.GetServiceState(ID.GetServiceId()) != ServiceHelper.ServiceState.NotFound) && !PathMissing;
-                case ProgramID.Types.App:       return App.PkgMgr?.GetAppInfoBySid(ID.GetPackageSID()) != null && !PathMissing;
+                case ProgramID.Types.App:       return App.engine.FirewallManager.GetAppPkgBySid(ID.GetPackageSID()) != null && !PathMissing;
                 default:        return true;
             }
         }
@@ -406,7 +407,6 @@ namespace PrivateWin10
 
         public void AddSocket(NetworkSocket socket)
         {
-            socket.Assigned = true;
             Sockets.Add(socket.guid, socket);
 
             socket.HostNameChanged += OnHostChanged;
@@ -534,7 +534,7 @@ namespace PrivateWin10
 
         public DnsEntry GetDnsEntry(string HostName, IPAddress Address)
         {
-            if (HostName == null && Address == null)
+            if (HostName == null && (Address == null || Address.Equals(IPAddress.Any) || Address.Equals(IPAddress.IPv6Any)))
                 return null;
 
             bool Unresolved = HostName == null;

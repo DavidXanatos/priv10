@@ -180,6 +180,7 @@
                     </RibbonSplitButton>
 
                     <RibbonButton Name="btnClearLog" Label="Clear Firewall Log" SmallImageSource="{StaticResource Icon_Erase}" Click="btnClearLog_Click"/>
+                    <RibbonButton Name="btnClearDns" Label="Clear DNS Inspector" SmallImageSource="{StaticResource Icon_Clear}" Click="BtnClearDns_Click"/>
                 </RibbonGroup>
             </RibbonTab>
 

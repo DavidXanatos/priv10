@@ -361,8 +361,7 @@ namespace PrivateWin10
                 {
                     SocketList.Remove(Socket.HashID, Socket);
 
-                    Program prog = Socket.ProgID == null ? null : App.engine.ProgramList.GetProgram(Socket.ProgID);
-                    prog?.RemoveSocket(Socket);
+                    Socket.Program?.RemoveSocket(Socket);
                 }
 
                 //AppLog.Debug("Removed Socket {0}:{1} {2}:{3}", CurSocket.LocalAddress, CurSocket.LocalPort, CurSocket.RemoteAddress, CurSocket.RemotePort);

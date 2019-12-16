@@ -76,6 +76,53 @@ static class ProcFunc
         return RawCreationTime;
     }
 
+    [DllImport("advapi32", CharSet = CharSet.Unicode)]
+    public static extern bool ConvertStringSidToSid([In, MarshalAs(UnmanagedType.LPWStr)] string pStringSid, ref IntPtr pSID);
+
+    [DllImport("advapi32", CharSet = CharSet.Unicode)]
+    public static extern bool ConvertSidToStringSid(IntPtr pSID, [In, Out, MarshalAs(UnmanagedType.LPWStr)] ref string pStringSid);
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct TOKEN_APPCONTAINER_INFORMATION
+    {
+        public IntPtr Sid;
+    }
+
+    [DllImport("ntdll.dll")]
+    public static extern uint NtQueryInformationToken([In] IntPtr TokenHandle, [In] uint TokenInformationClass, [In] IntPtr TokenInformation, [In] int TokenInformationLength, [Out] [Optional] out int ReturnLength);
+
+    static public string GetAppPackageSidByPID(int PID)
+    {
+        //var process = System.Diagnostics.Process.GetProcessById(PID); // throws error if pid is not found
+        var processHandle = OpenProcess(0x1000/*PROCESS_QUERY_LIMITED_INFORMATION*/, false, PID);
+        if (processHandle == IntPtr.Zero)
+            return null;
+
+        string strSID = null;
+
+        IntPtr tokenHandle = IntPtr.Zero;
+        if (OpenProcessToken(processHandle, 8, out tokenHandle))
+        {
+            int retLen;
+            NtQueryInformationToken(tokenHandle, 31 /*TokenAppContainerSid*/, IntPtr.Zero, 0, out retLen);
+
+            IntPtr buffer = Marshal.AllocHGlobal((int)retLen);
+            ulong status = NtQueryInformationToken(tokenHandle, 31 /*TokenAppContainerSid*/, buffer, retLen, out retLen);
+            if (status >= 0)
+            {
+                var appContainerInfo = (TOKEN_APPCONTAINER_INFORMATION)Marshal.PtrToStructure(buffer, typeof(TOKEN_APPCONTAINER_INFORMATION));
+
+                ConvertSidToStringSid(appContainerInfo.Sid, ref strSID);
+            }
+            Marshal.FreeHGlobal(buffer);
+
+            CloseHandle(tokenHandle);
+        }
+
+        CloseHandle(processHandle);
+
+        return strSID;
+    }
 
     /*
     [DllImport("Kernel32.dll")]

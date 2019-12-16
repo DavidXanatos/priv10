@@ -219,7 +219,7 @@ namespace PrivateWin10
                     App.engine.FirewallManager.RemoveRule(rule.guid);
 
                 foreach (NetworkSocket socket in prog.Sockets.Values)
-                    socket.Assigned = false;
+                    socket.Program = null;
             }
 
             if (progs.Programs.Count == 0)
@@ -236,6 +236,13 @@ namespace PrivateWin10
                 process.Log.Clear();
         }
 
+        public void ClearDnsLog()
+        {
+            foreach (Program process in Programs.Values)
+                process.DnsLog.Clear();
+        }
+
+        
         public int CleanUp(bool ExtendedCleanup = false)
         {
             int Count = 0;

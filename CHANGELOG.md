@@ -3,6 +3,31 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.71] - 2019-12-16
+
+### Added
+- added side bar button tooltips
+- added cleanup options for DNS inspector
+- added cname host mane display
+
+### Changed
+- when sellecting the "All processes" placeholder entry the detail tabs (except rules) shows data of all processes
+- reduced cpu usage when sorting the program tree
+- improved firewall settign handling
+- changed settings layout
+- reworked app package handling to peoperly operate as a service
+- simple list is now availabel also in "full height" view mode
+
+### Fixed
+- issue with socket associaction resulting in memory leak
+- issues with rule guard enaling/disabling
+- fixed issues when running priv 10 not as admin
+- fixed issue with DNS cache
+- fixed minor issue with process monitor commandline handling
+
+
+
+
 ## [0.70] - 2019-12-14
 
 ### Added

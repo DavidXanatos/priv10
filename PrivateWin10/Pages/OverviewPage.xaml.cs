@@ -98,7 +98,7 @@ namespace PrivateWin10.Pages
                     tipIcon = System.Windows.Forms.ToolTipIcon.Error;
                 else if (entry.entryType == EventLogEntryType.Warning)
                     tipIcon = System.Windows.Forms.ToolTipIcon.Warning;
-                App.mTray.Notify(entry.strMessage, tipIcon);
+                App.TrayIcon.Notify(entry.strMessage, tipIcon);
             }
 
             // todo: use wone window with a log

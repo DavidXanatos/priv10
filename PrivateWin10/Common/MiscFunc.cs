@@ -269,10 +269,7 @@ static class MiscFunc
 
     public static string GetResourceStr(string path, string resID)
     {
-        string resourcePath = "@{" + path + "? " + resID + "}";
-        StringBuilder buffer = new StringBuilder(4096);
-        SHLoadIndirectString(resourcePath, buffer, buffer.Capacity, IntPtr.Zero);
-        return buffer.ToString();
+        return GetResourceStr("@{" + path + "? " + resID + "}");
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

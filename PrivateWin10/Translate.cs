@@ -153,6 +153,8 @@ namespace PrivateWin10
             mStrings.Add("wnd_program", "Program parameters");
             mStrings.Add("lbl_upload", "Upload");
             mStrings.Add("lbl_download", "Download");
+            mStrings.Add("lbl_uploaded", "Uploaded");
+            mStrings.Add("lbl_downloaded", "Downloaded");
             mStrings.Add("lbl_program", "Program");
             mStrings.Add("lbl_exe", "Executable");
             mStrings.Add("lbl_svc", "Only Services");
@@ -405,8 +407,21 @@ namespace PrivateWin10
             mStrings.Add("lbl_update", "Update");
             mStrings.Add("lbl_tweak_guard", "Tweak Guard");
             mStrings.Add("lbl_con_count", "Connection Count");
-
-            
+            mStrings.Add("lbl_overview", "Overview");
+            mStrings.Add("lbl_privacy", "Privacy Tweaks");
+            mStrings.Add("lbl_firewall", "Windows Firewall");
+            mStrings.Add("lbl_dns", "Dns Proxy");
+            mStrings.Add("lbl_terminator", "Process Terminator");
+            mStrings.Add("lbl_vpn", "VPN");
+            mStrings.Add("lbl_settings", "Settings");
+            mStrings.Add("lbl_about", "About");
+            mStrings.Add("lbl_normal_view", "Normal View");
+            mStrings.Add("lbl_full_height", "Full Height");
+            mStrings.Add("lbl_full_width", "Full Width");
+            mStrings.Add("lbl_full_screen", "Full Screen");
+            mStrings.Add("lbl_show_all", "Show all");
+            mStrings.Add("btn_clear_dns_log", "Clear DNS Inspector");
+            mStrings.Add("msg_clear_dns", "Do you really want ro clear ALL Dns Inspector data?");
             //mStrings.Add("", "");
 
 

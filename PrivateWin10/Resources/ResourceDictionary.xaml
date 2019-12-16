@@ -105,6 +105,7 @@
     <BitmapImage x:Key="Icon_Redo" UriSource="icons8-redo-16.png" />
 
     <BitmapImage x:Key="Icon_Erase" UriSource="icons8-radiergummi-16.png" />
+    <BitmapImage x:Key="Icon_Clear" UriSource="icons8-löschen-16.png" />
 
     <BitmapImage x:Key="Icon_NoConf" UriSource="icons8-undefined-16.png" />
     <BitmapImage x:Key="Icon_Custom" UriSource="icons8-sortier-optionen-16.png" />

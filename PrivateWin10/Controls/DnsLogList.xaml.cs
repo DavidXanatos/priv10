@@ -74,7 +74,7 @@ namespace PrivateWin10.Controls
             foreach (DnsItem oldItem in LogList)
                 oldLog.Add(oldItem.entry.guid, oldItem);
 
-            Dictionary<Guid, List<Program.DnsEntry>> entries = App.client.GetDomains(firewallPage.GetCurGuids(textFilter));
+            Dictionary<Guid, List<Program.DnsEntry>> entries = App.client.GetDomains(firewallPage.GetCurGuids());
             foreach (var entrySet in entries)
             {
                 ProgramSet prog = firewallPage.GetProgSet(entrySet.Key);
@@ -163,6 +163,14 @@ namespace PrivateWin10.Controls
             return true;
         }
 
+        public void ClearLog()
+        {
+            if (MessageBox.Show(Translate.fmt("msg_clear_dns"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                return;
+
+            if (App.client.ClearDnsLog())
+                LogList.Clear();
+        }
 
         /////////////////////////////////
         /// DnsItem

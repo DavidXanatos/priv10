@@ -92,6 +92,13 @@ namespace PrivateWin10
             // cache domains
             //var oldCache = new HashSet<string>(dnsCache.Keys);
 
+            foreach (DnsCacheEntry cacheEntry in dnsCache.GetAllValues())
+            {
+                if (cacheEntry.ExpirationTime > CurrentTime)
+                    cacheEntry.ExpirationTime = CurrentTime;
+                // will be reset in the loop, efectivly timeouting all flushed entries imminetly
+            }
+
             for (var tablePtr = dnsCacheDataTable; tablePtr != IntPtr.Zero; )
             {
                 var entry = (DnsApi.DnsCacheEntry)Marshal.PtrToStructure(tablePtr, typeof(DnsApi.DnsCacheEntry));
@@ -116,15 +123,7 @@ namespace PrivateWin10
                 }
                 else
                     oldCache.Remove(entry.Name);*/
-                CloneableList<DnsCacheEntry> curEntries = GetEntriesFor(entry.Name);
-
-                foreach (DnsCacheEntry cacheEntry in curEntries)
-                {
-                    if (cacheEntry.ExpirationTime > CurrentTime) 
-                        cacheEntry.ExpirationTime = CurrentTime;
-                    // will be reset in the look, efectivly timeouting all flushed entries imminetly
-                }
-
+                
                 for (var recordIndexPtr = resultPtr; recordIndexPtr != IntPtr.Zero;)
                 {
                     var record = (DnsApi.DnsRecord)Marshal.PtrToStructure(recordIndexPtr, typeof(DnsApi.DnsRecord));
@@ -135,6 +134,8 @@ namespace PrivateWin10
                     string HostName = record.Name;
                     IPAddress Address = null;
                     string ResolvedString = null;
+
+                    CloneableList<DnsCacheEntry> curEntries = GetEntriesFor(HostName);
 
                     DnsCacheEntry curEntry = null;
 
@@ -317,7 +318,7 @@ namespace PrivateWin10
         {
             List<DnsCacheEntry> EntryList = new List<DnsCacheEntry>();
             CloneableList<DnsCacheEntry> NameEntries;
-            if (Level >= 4 || !cacheByStr.TryGetValue(CurEntry.HostName, out NameEntries)) // dont get trapped in an endles recusrion
+            if (Level >= 4 || !cacheByStr.TryGetValue(CurEntry.HostName, out NameEntries)) // dont get trapped in an endles recursion
                 EntryList.Add(CurEntry);
             else
                 foreach (DnsCacheEntry NameEntry in NameEntries)
@@ -333,9 +334,14 @@ namespace PrivateWin10
             {
                 foreach (DnsCacheEntry AddrEntry in AddrEntries)
                 {
-                    List<DnsCacheEntry> FinalEntries = ResolveRedir(AddrEntry);
-                    foreach(var FinalEntry in FinalEntries)
-                        List.Add(new HostNameEntry() { HostName = FinalEntry.HostName, TimeStamp = FinalEntry.TimeStamp });
+                    /*List<DnsCacheEntry> FinalEntries = ResolveRedir(AddrEntry);
+                    if (FinalEntries.Count > 1)
+                    {
+                        foreach (var FinalEntry in FinalEntries)
+                            List.Add(new HostNameEntry() { HostName = FinalEntry.HostName, TimeStamp = FinalEntry.TimeStamp });
+                    }
+                    else*/
+                        List.Add(new HostNameEntry() { HostName = AddrEntry.HostName, TimeStamp = AddrEntry.TimeStamp });
                 }
             }
             return List.Count == 0 ? null : List;

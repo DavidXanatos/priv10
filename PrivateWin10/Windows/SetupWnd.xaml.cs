@@ -45,7 +45,7 @@ namespace PrivateWin10.Windows
             if (chkAutoStart.IsChecked == true)
             {
                 App.SetConfig("Startup", "Tray", true);
-                App.mTray.Visible = true;
+                App.TrayIcon.Visible = true;
 
                 App.AutoStart(true);
                 if (chkService.IsChecked == true)

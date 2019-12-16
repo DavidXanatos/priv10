@@ -192,19 +192,10 @@ namespace PrivateWin10.Controls
             SortTree();
         }
 
+        List<object> SelectedItems = new List<object>();
+
         public List<object> GetSelectedItems()
         {
-            List<object> SelectedItems = new List<object>();
-            foreach (var item in treeView.SelectedItems)
-            {
-                var setItem = item as ProgSetTreeItem;
-                if (setItem != null)
-                    SelectedItems.Add(setItem.progSet);
-                
-                var progItem = item as ProgramTreeItem;
-                if (progItem != null)
-                    SelectedItems.Add(progItem.prog);
-            }
             return SelectedItems;
         }
 
@@ -216,8 +207,25 @@ namespace PrivateWin10.Controls
             return null;
         }
 
+        bool HoldSelection = false;
+       
         private void treeView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (HoldSelection)
+                return;
+
+            SelectedItems.Clear();
+            foreach (var item in treeView.SelectedItems)
+            {
+                var setItem = item as ProgSetTreeItem;
+                if (setItem != null)
+                    SelectedItems.Add(setItem.progSet);
+
+                var progItem = item as ProgramTreeItem;
+                if (progItem != null)
+                    SelectedItems.Add(progItem.prog);
+            }
+
             SelectionChanged?.Invoke(this, new EventArgs());
         }
 
@@ -274,14 +282,36 @@ namespace PrivateWin10.Controls
             //root.SetSortBy(Member);
             //view.SortDescriptions.Add(new SortDescription(nameof(ITreeItem.SortKey), Direction));
 
+            /*var watch = System.Diagnostics.Stopwatch.StartNew();
+
+
             // workaround for selection working properly
-            var items = treeView.SelectedItems.Cast<object>().ToList();
+            var items = treeView.SelectedItems.Cast<ITreeItem>().ToList();*/
+
+            HoldSelection = true;
 
             ManualTreeSorter.Sort(root.Children, SortMember, Direction);
 
-            treeView.SelectedItems.Clear();
-            foreach (var item in items)
-                treeView.SelectedItems.Add(item);
+            HoldSelection = false;
+
+            /*var temp = treeView.SelectedItems.Cast<ITreeItem>().ToList();
+            if (!temp.All(items.Contains))
+            {
+                AppLog.Debug("TreeView needed re-sellect");
+
+                foreach (ITreeItem item in temp)
+                    treeView.SelectedItems.Remove(item);
+
+                foreach (ITreeItem item in items)
+                    treeView.SelectedItems.Add(item);
+            }
+
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+
+#if DEBUG
+            AppLog.Debug("TreeView Sorting 2 took: {0} ms", elapsedMs);
+#endif*/
         }
 
 
