@@ -81,11 +81,11 @@ namespace PrivateWin10
                 switch (wParam.ToInt32())
                 {
                     case SysMenu_Setup:
-                        App.mMainWnd.ShowSetup();
+                        App.MainWnd.ShowSetup();
                         handled = true;
                         break;
                     case SysMenu_Uninstall:
-                        App.mMainWnd.RunUninstall();
+                        App.MainWnd.RunUninstall();
                         handled = true;
                         break;
                 }
@@ -109,10 +109,21 @@ namespace PrivateWin10
         {
             InitializeComponent();
 
-            //if (!MiscFunc.IsRunningAsUwp())
-            this.Title = string.Format("{0} v{1} by David Xanatos", App.mName, App.mVersion);
-            if (!App.lic.CommercialUse)
-                this.Title += " - Freeware for Private NOT Commercial Use";
+            this.Title = string.Format("{0} v{1} by David Xanatos", App.Title, App.Version);
+            if (App.lic.LicenseStatus != QLicense.LicenseStatus.VALID)
+            {
+                if (!App.lic.CommercialUse)
+                    this.Title += " - Freeware for Private NOT Commercial Use";
+                else if (App.IsEvaluationExpired())
+                    this.Title += " - Evaluation license EXPIRED";
+                else
+                    this.Title += " - Evaluation license for Commercial Use";
+            }
+            /*else
+            {
+                if (App.lic.CommercialUse)
+                    this.Title += " - Business Edition";
+            }*/
 
             WpfFunc.LoadWnd(this, "Main");
 
@@ -121,6 +132,7 @@ namespace PrivateWin10
             mPages.Add("Privacy", new PageItem(new PrivacyPage()));
             mPages.Add("Firewall", new PageItem(HasEngine ? new FirewallPage() : null));
             mPages.Add("Dns", new PageItem(new DnsPage()));
+            //mPages.Add("Terminator", new PageItem(null));
             //mPages.Add("VPN", new PageItem(new VPNPage()));
             mPages.Add("Settings", new PageItem(new SettingsPage()));
             mPages.Add("About", new PageItem(new AboutPage()));
@@ -151,6 +163,7 @@ namespace PrivateWin10
 
                 StackPanel panel = new StackPanel();
                 item.Header = panel;
+                panel.ToolTip = Translate.fmt("lbl_" + name.ToLower());
 
                 Image image = new Image();
                 image.Width = 32;
@@ -173,7 +186,10 @@ namespace PrivateWin10
                 image.Tag = new Tuple<DrawingImage, DrawingImage>(new DrawingImage(new GeometryDrawing(brushOn, null, geometry)), new DrawingImage(new GeometryDrawing(brushOff, null, geometry)));
             }
 
-            SwitchPage(App.GetConfig("GUI", "CurPage", "Overview"));
+            //Main.Loaded += (sender, e) =>{
+                SwitchPage(App.GetConfig("GUI", "CurPage", "Overview"));
+            //};
+            
 
             UpdateEnabled();
         }
@@ -188,7 +204,7 @@ namespace PrivateWin10
                     (page.ctrl as IUserPage).OnClose();
             }
 
-            if (App.mTray.Visible)
+            if (App.TrayIcon.Visible)
             {
                 e.Cancel = true;
                 this.Hide();
@@ -288,7 +304,7 @@ namespace PrivateWin10
         {
             UpdateSysMenu(); // Install system menu
 
-            if (AdminFunc.IsAdministrator() && App.GetConfigInt("Startup", "ShowSetup", 1) == 1 && !App.svc.IsInstalled())
+            if (AdminFunc.IsAdministrator() && App.GetConfigInt("Startup", "ShowSetup", 1) == 1 && !Priv10Service.IsInstalled())
                 ShowSetup();
         }
 
@@ -301,7 +317,7 @@ namespace PrivateWin10
 
         private void RunUninstall()
         {
-            if (MessageBox.Show(Translate.fmt("msg_uninstall_this", App.mName), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_uninstall_this", App.Title), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             var exeName = Process.GetCurrentProcess().MainModule.FileName;
@@ -310,7 +326,7 @@ namespace PrivateWin10
             startInfo.UseShellExecute = true;
             startInfo.Verb = "runas";
             Process.Start(startInfo);
-            Environment.Exit(-1);
+            Environment.Exit(0);
         }
     }
 }

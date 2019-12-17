@@ -75,7 +75,7 @@ public static class ServiceHelper
 
     #region QueryServiceStatus
     [StructLayout(LayoutKind.Sequential)]
-    private class SERVICE_STATUS
+    public class SERVICE_STATUS
     {
         public int dwServiceType = 0;
         public ServiceState dwCurrentState = 0;
@@ -92,7 +92,7 @@ public static class ServiceHelper
 
     #region QueryServiceStatusEx
     [StructLayout(LayoutKind.Sequential)]
-    internal sealed class SERVICE_STATUS_PROCESS
+    public sealed class SERVICE_STATUS_PROCESS
     {
         [MarshalAs(UnmanagedType.U4)]
         public uint dwServiceType;
@@ -147,6 +147,7 @@ public static class ServiceHelper
             try
             {
                 StopService(service);
+
                 if (!DeleteService(service))
                     throw new ApplicationException("Could not delete service " + Marshal.GetLastWin32Error());
             }
@@ -269,6 +270,18 @@ public static class ServiceHelper
         }
     }
 
+    public static ServiceConfigInfo GetServiceInfoSafe(string serviceName)
+    {
+        try
+        {
+            return GetServiceInfo(serviceName);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public static bool StartService(string serviceName)
     {
         IntPtr scm = OpenSCManager(ScmAccessRights.Connect);
@@ -343,42 +356,15 @@ public static class ServiceHelper
             throw new ApplicationException("Unable to stop service");
     }
 
-    public static ServiceState GetServiceStatus(string serviceName)
+    public static ServiceState GetServiceState(string serviceName)
     {
-        IntPtr scm = OpenSCManager(ScmAccessRights.Connect);
-
-        try
-        {
-            IntPtr service = OpenService(scm, serviceName, ServiceAccessRights.QueryStatus);
-            if (service == IntPtr.Zero)
-                return ServiceState.NotFound;
-
-            try
-            {
-                return GetServiceStatus(service);
-            }
-            catch {}
-
-            CloseServiceHandle(service);
-        }
-        catch {}
-
-        CloseServiceHandle(scm);
-
-        return ServiceState.NotFound;
+        SERVICE_STATUS_PROCESS ssp = GetServiceStatus(serviceName);
+        if(ssp == null)
+            return ServiceState.NotFound;
+        return (ServiceState)ssp.dwCurrentState;
     }
-
-    private static ServiceState GetServiceStatus(IntPtr service)
-    {
-        SERVICE_STATUS status = new SERVICE_STATUS();
-
-        if (QueryServiceStatus(service, status) == 0)
-            throw new ApplicationException("Failed to query service status.");
-
-        return status.dwCurrentState;
-    }
-
-    public static int GetServiceProcessId(string serviceName)
+    
+    public static SERVICE_STATUS_PROCESS GetServiceStatus(string serviceName)
     {
         IntPtr scm = OpenSCManager(ScmAccessRights.Connect);
         IntPtr zero = IntPtr.Zero;
@@ -399,7 +385,7 @@ public static class ServiceHelper
                 {
                     var ssp = new SERVICE_STATUS_PROCESS();
                     Marshal.PtrToStructure(zero, ssp);
-                    return (int)ssp.dwProcessId;
+                    return ssp;
                 }
                 // retry with new size info
             } while (Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER && dwBytesAlloc < dwBytesNeeded);
@@ -412,7 +398,7 @@ public static class ServiceHelper
                 CloseServiceHandle(service);
             CloseServiceHandle(scm);
         }
-        return -1;
+        return null;
     }
 
     private static bool WaitForServiceStatus(IntPtr service, ServiceState waitStatus, ServiceState desiredStatus)
@@ -552,7 +538,13 @@ public static class ServiceHelper
         {
             ServiceName = sc.ServiceName;
             DisplayName = sc.DisplayName;
-            LastKnownPID = (sc.Status == ServiceControllerStatus.Stopped) ? -1 : GetServiceProcessId(sc.ServiceName);
+            if (sc.Status == ServiceControllerStatus.Stopped)
+                LastKnownPID = -1;
+            else
+            {
+                var ssp = GetServiceStatus(sc.ServiceName);
+                LastKnownPID = ssp != null ? (int)ssp.dwProcessId : -1;
+            }
         }
         public string ServiceName;
         public string DisplayName;

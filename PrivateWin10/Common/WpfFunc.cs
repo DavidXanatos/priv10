@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -201,16 +202,16 @@ public class WpfFunc
         return null;
     }
 
-    public static MenuItem AddMenu(ContextMenu menu, string label, RoutedEventHandler handler, object icon = null)
+    public static MenuItem AddMenu(ItemsControl menu, string label, RoutedEventHandler handler, object icon = null, object Tag = null)
     {
-        var item = new MenuItem() { Header = label };
-        item.Click += handler;
+        var item = new MenuItem() { Header = label, Tag = Tag };
+        if(handler != null)
+            item.Click += handler;
         if (icon != null)
             item.Icon = new System.Windows.Controls.Image() { Source = icon as ImageSource };
         menu.Items.Add(item);
         return item;
     }
-
 
     private void DumpVisualTree(DependencyObject parent, int level)
     {
@@ -250,6 +251,36 @@ public class WpfFunc
         foreach (object child in LogicalTreeHelper.GetChildren(doParent))
         {
             DumpLogicalTree(child, level + 1);
+        }
+    }
+}
+
+public static class DependencyObjectExtensions
+{
+    private static readonly PropertyInfo InheritanceContextProp = typeof(DependencyObject).GetProperty("InheritanceContext", BindingFlags.NonPublic | BindingFlags.Instance);
+
+    public static IEnumerable<DependencyObject> GetParents(this DependencyObject child)
+    {
+        while (child != null)
+        {
+            var parent = LogicalTreeHelper.GetParent(child);
+            if (parent == null)
+            {
+                if (child is FrameworkElement)
+                {
+                    parent = VisualTreeHelper.GetParent(child);
+                }
+                if (parent == null && child is ContentElement)
+                {
+                    parent = ContentOperations.GetParent((ContentElement)child);
+                }
+                if (parent == null)
+                {
+                    parent = InheritanceContextProp.GetValue(child, null) as DependencyObject;
+                }
+            }
+            child = parent;
+            yield return parent;
         }
     }
 }

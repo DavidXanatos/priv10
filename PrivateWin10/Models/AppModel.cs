@@ -41,15 +41,20 @@ namespace PrivateWin10
         {
             Apps.Clear();
 
-            if (App.PkgMgr != null)
+            var AppPkgs = App.client.GetAllAppPkgs(true);
+            if (AppPkgs != null)
             {
-                foreach (AppManager.AppInfo app in App.PkgMgr.GetAllApps())
-                    Apps.Add(new AppPkg() {
-                        Content = app.Name + " (" + app.ID + ")",
-                        Value = app.SID,
-                        Group = Translate.fmt("lbl_known") });
+                foreach (var AppPkg in AppPkgs)
+                {
+                    Apps.Add(new AppPkg()
+                    {
+                        Content = AppPkg.Name + " (" + AppPkg.ID + ")",
+                        Value = AppPkg.SID,
+                        Group = Translate.fmt("lbl_known")
+                    });
+                }
 
-                Apps.Add(new AppPkg() { Content = Translate.fmt("app_reload"), Value = null });
+                //Apps.Add(new AppPkg() { Content = Translate.fmt("app_reload"), Value = null });
             }
 
             ListCollectionView lcv = new ListCollectionView(Apps);

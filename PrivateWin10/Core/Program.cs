@@ -18,7 +18,7 @@ namespace PrivateWin10
         public ProgramID ID;
         public string Description;
 
-        [NonSerialized()] // Note: BinaryFormatter can handle circular references
+        //[NonSerialized()] // Note: BinaryFormatter can handle circular references
         public ProgramSet ProgSet = null;
 
         [NonSerialized()]
@@ -33,14 +33,31 @@ namespace PrivateWin10
         [NonSerialized()]
         public Dictionary<string, DnsEntry> DnsLog = new Dictionary<string, DnsEntry>();
 
-        public DateTime lastAllowed = DateTime.MinValue;
-        public int countAllowed = 0;
-        public DateTime lastBlocked = DateTime.MinValue;
-        public int countBlocked = 0;
+        public int RuleCount = 0;
+        public int EnabledRules = 0;
+        public int DisabledRules = 0;
+        public int ChgedRules = 0;
+
+        public DateTime LastAllowed = DateTime.MinValue;
+        public int AllowedCount = 0;
+        public DateTime LastBlocked = DateTime.MinValue;
+        public int BlockedCount = 0;
+        public DateTime LastActivity { get { return MiscFunc.Max(LastAllowed, LastBlocked); } }
+        private bool ActivityChanged = false;
 
         public int SocketCount = 0;
+        public int SocketsWeb = 0;
+        public int SocketsTcp = 0;
+        public int SocketsSrv = 0;
+        public int SocketsUdp = 0;
+
         public UInt64 UploadRate = 0;
         public UInt64 DownloadRate = 0;
+        public UInt64 TotalUpload = 0;
+        public UInt64 TotalDownload = 0;
+        // The old values keep the last total of all closed sockets
+        internal UInt64 OldUpload = 0;
+        internal UInt64 OldDownload = 0;
 
         public void AssignSet(ProgramSet progSet)
         {
@@ -53,12 +70,43 @@ namespace PrivateWin10
             ProgSet.Programs.Add(ID, this);
         }
 
-        [OnDeserializing]
-        private void OnDeserializing(StreamingContext c)
+        [OnSerializing]
+        private void OnSerializing(StreamingContext c)
         {
-            /*Rules = new Dictionary<Guid, FirewallRule>();
-            Sockets = new Dictionary<Guid, NetworkSocket>();
-            Log = new List<LogEntry>();*/
+            RuleCount = 0;
+            EnabledRules = 0;
+            DisabledRules = 0;
+            ChgedRules = 0;            
+            foreach (FirewallRuleEx rule in Rules.Values)
+            {
+                RuleCount++;
+                if (rule.Enabled)
+                    EnabledRules++;
+                else
+                    DisabledRules++;
+                if (rule.State != FirewallRuleEx.States.Approved)
+                    ChgedRules++;
+            }
+            
+            SocketsWeb = 0;
+            SocketsTcp = 0;
+            SocketsUdp = 0;
+            SocketsSrv = 0;
+            foreach (NetworkSocket entry in Sockets.Values)
+            {
+                if ((entry.ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP)
+                {
+                    SocketsUdp++;
+                }
+                else if ((entry.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == (UInt32)IPHelper.AF_PROT.TCP)
+                {
+                    SocketsTcp++;
+                    if (entry.RemotePort == 80 || entry.RemotePort == 443)
+                        SocketsWeb++;
+                    if (entry.State == (int)IPHelper.MIB_TCP_STATE.LISTENING)
+                        SocketsSrv++;
+                }
+            }
         }
 
         public Program()
@@ -93,7 +141,8 @@ namespace PrivateWin10
                     break;
                 case ProgramID.Types.App:
                     Name = ID.GetPackageName();
-                    Info = App.PkgMgr?.GetAppInfoBySid(ID.GetPackageSID())?.Name;
+                    var AppPkg = App.engine.FirewallManager.GetAppPkgBySid(ID.GetPackageSID());
+                    Info = AppPkg?.Name;
                     break;
             }
 
@@ -107,21 +156,50 @@ namespace PrivateWin10
         {
             UInt64 uploadRate = 0;
             UInt64 downloadRate = 0;
+
+            UInt64 totalUpload = OldUpload;
+            UInt64 totalDownload = OldDownload;
+
+            foreach (DnsEntry Entry in DnsLog.Values)
+            {
+                Entry.ConCounter = Entry.OldConCounter;
+                Entry.TotalUpload = Entry.OldUpload;
+                Entry.TotalDownload = Entry.OldDownload;
+            }
+
             foreach (NetworkSocket Socket in Sockets.Values)
             {
                 uploadRate += Socket.Stats.UploadRate.ByteRate;
                 downloadRate += Socket.Stats.DownloadRate.ByteRate;
+
+                totalUpload += Socket.Stats.SentBytes;
+                totalDownload += Socket.Stats.ReceivedBytes;
+
+                DnsEntry Entry = GetDnsEntry(Socket.RemoteHostName, Socket.RemoteAddress);
+                if (Entry != null)
+                {
+                    Entry.ConCounter++;
+                    Entry.TotalUpload += Socket.Stats.SentBytes;
+                    Entry.TotalDownload += Socket.Stats.ReceivedBytes;
+                }
             }
 
-            if (UploadRate != uploadRate || DownloadRate != downloadRate || SocketCount != Sockets.Count)
+            if (UploadRate != uploadRate || DownloadRate != downloadRate 
+             || TotalUpload != totalUpload || TotalDownload != totalDownload
+             || SocketCount != Sockets.Count || ActivityChanged)
             {
                 SocketCount = Sockets.Count;
 
                 UploadRate = uploadRate;
                 DownloadRate = downloadRate;
+
+                TotalUpload = totalUpload;
+                TotalDownload = totalDownload;
+
+                ActivityChanged = false;
+
                 return true;
             }
-
             return false;
         }
 
@@ -139,8 +217,8 @@ namespace PrivateWin10
             switch (ID.Type)
             {
                 case ProgramID.Types.Program:   return !PathMissing;
-                case ProgramID.Types.Service:   return (ServiceHelper.GetServiceStatus(ID.GetServiceId()) != ServiceHelper.ServiceState.NotFound) && !PathMissing;
-                case ProgramID.Types.App:       return App.PkgMgr?.GetAppInfoBySid(ID.GetPackageSID()) != null && !PathMissing;
+                case ProgramID.Types.Service:   return (ServiceHelper.GetServiceState(ID.GetServiceId()) != ServiceHelper.ServiceState.NotFound) && !PathMissing;
+                case ProgramID.Types.App:       return App.engine.FirewallManager.GetAppPkgBySid(ID.GetPackageSID()) != null && !PathMissing;
                 default:        return true;
             }
         }
@@ -150,12 +228,12 @@ namespace PrivateWin10
             switch (logEntry.FwEvent.Action)
             {
                 case FirewallRule.Actions.Allow:
-                    countAllowed++; 
-                    lastAllowed = logEntry.FwEvent.TimeStamp;
+                    AllowedCount++; 
+                    LastAllowed = logEntry.FwEvent.TimeStamp;
                     break;
                 case FirewallRule.Actions.Block:
-                    countBlocked++;
-                    lastBlocked = logEntry.FwEvent.TimeStamp;
+                    BlockedCount++;
+                    LastBlocked = logEntry.FwEvent.TimeStamp;
                     break;
             }
 
@@ -208,9 +286,9 @@ namespace PrivateWin10
             int BlockInProfiles = 0;
 
             int Protocol = 0;
-            if ((Socket.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) != 0)
+            if ((Socket.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == (UInt32)IPHelper.AF_PROT.TCP)
                 Protocol = (int)IPHelper.AF_PROT.TCP;
-            else if ((Socket.ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) != 0)
+            else if ((Socket.ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP)
                 Protocol = (int)IPHelper.AF_PROT.UDP;
             else
                 return Tuple.Create(0, 0);
@@ -329,13 +407,50 @@ namespace PrivateWin10
 
         public void AddSocket(NetworkSocket socket)
         {
-            socket.Assigned = true;
             Sockets.Add(socket.guid, socket);
+
+            socket.HostNameChanged += OnHostChanged;
+            OnHostChanged(socket, null);
+        }
+
+        private void OnHostChanged(object sender, WithHost.ChangeEventArgs e)
+        {
+            var socket = sender as NetworkSocket;
+
+            // if we get a better host name re asign and if needed remove old entry
+            if (e != null)
+            {
+                string OldName = e.oldName ?? socket.RemoteAddress?.ToString();
+                DnsEntry OldEntry;
+                if (OldName != null && DnsLog.TryGetValue(OldName, out OldEntry))
+                {
+                    OldEntry.ConCounter--;
+                    if (OldEntry.ConCounter <= 0)
+                        DnsLog.Remove(socket.RemoteAddress.ToString());
+                }
+            }
+
+            DnsEntry Entry = GetDnsEntry(socket.RemoteHostName, socket.RemoteAddress);
+            if (Entry != null)
+            {
+                Entry.ConCounter++;
+            }
         }
 
         public void RemoveSocket(NetworkSocket socket)
         {
+            OldUpload += socket.Stats.SentBytes;
+            OldDownload += socket.Stats.ReceivedBytes;
+
             Sockets.Remove(socket.guid);
+
+            DnsEntry Entry = GetDnsEntry(socket.RemoteHostName, socket.RemoteAddress);
+            if (Entry != null)
+            {
+                Entry.OldUpload += socket.Stats.SentBytes;
+                Entry.OldDownload += socket.Stats.ReceivedBytes;
+                Entry.OldConCounter++;
+            }
         }
 
 
@@ -345,15 +460,23 @@ namespace PrivateWin10
             public Guid guid;
             public ProgramID ProgID;
             public string HostName;
+            public bool Unresolved = false;
             //public IPAddress LastSeenIP;
             public DateTime LastSeen;
-            public int SeenCounter;
+            public int SeenCounter = 0;
+
+            public int ConCounter = 0;
+            public UInt64 TotalUpload = 0;
+            public UInt64 TotalDownload = 0;
+            // The old values keep the last total of all closed sockets
+            public int OldConCounter = 0;
+            internal UInt64 OldUpload = 0;
+            internal UInt64 OldDownload = 0;
 
             public DnsEntry(ProgramID progID)
             {
                 guid = Guid.NewGuid();
                 ProgID = progID;
-                SeenCounter = 0;
             }
 
             public void Store(XmlWriter writer)
@@ -363,6 +486,10 @@ namespace PrivateWin10
                 writer.WriteElementString("HostName", HostName);
                 writer.WriteElementString("LastSeen", LastSeen.ToString());
                 writer.WriteElementString("SeenCounter", SeenCounter.ToString());
+                writer.WriteElementString("ConCounter", ConCounter.ToString());
+
+                writer.WriteElementString("ReceivedBytes", TotalDownload.ToString());
+                writer.WriteElementString("SentBytes", TotalUpload.ToString());
 
                 writer.WriteEndElement();
             }
@@ -373,10 +500,16 @@ namespace PrivateWin10
                 {
                     if (node.Name == "HostName")
                         HostName = node.InnerText;
-                    else if (node.Name == "LastSeenUTC")
+                    else if (node.Name == "LastSeen")
                         DateTime.TryParse(node.InnerText, out LastSeen);
                     else if (node.Name == "SeenCounter")
                         int.TryParse(node.InnerText, out SeenCounter);
+                    else if (node.Name == "ConCounter")
+                        int.TryParse(node.InnerText, out OldConCounter);
+                    else if (node.Name == "ReceivedBytes")
+                        UInt64.TryParse(node.InnerText, out OldDownload);
+                    else if (node.Name == "SentBytes")
+                        UInt64.TryParse(node.InnerText, out OldUpload);
                 }
                 return HostName != null;
             }
@@ -399,6 +532,27 @@ namespace PrivateWin10
             Entry.SeenCounter++;
         }
 
+        public DnsEntry GetDnsEntry(string HostName, IPAddress Address)
+        {
+            if (HostName == null && (Address == null || Address.Equals(IPAddress.Any) || Address.Equals(IPAddress.IPv6Any)))
+                return null;
+
+            bool Unresolved = HostName == null;
+            if (Unresolved)
+                HostName = Address.ToString();
+
+            DnsEntry Entry;
+            if (!DnsLog.TryGetValue(HostName, out Entry))
+            {
+                Entry = new DnsEntry(ID);
+                Entry.Unresolved = Unresolved;
+                Entry.HostName = HostName;
+                Entry.LastSeen = DateTime.Now;
+                Entry.SeenCounter++;
+                DnsLog.Add(HostName, Entry);
+            }
+            return Entry;
+        }
 
         public void Store(XmlWriter writer)
         {
@@ -408,6 +562,9 @@ namespace PrivateWin10
             ID.Store(writer);
 
             writer.WriteElementString("Description", Description);
+
+            writer.WriteElementString("ReceivedBytes", TotalDownload.ToString());
+            writer.WriteElementString("SentBytes", TotalUpload.ToString());
 
             writer.WriteStartElement("FwRules");
             foreach (FirewallRuleEx rule in Rules.Values)
@@ -434,6 +591,10 @@ namespace PrivateWin10
                 }
                 else if (node.Name == "Description")
                     Description = node.InnerText;
+                else if (node.Name == "ReceivedBytes")
+                    UInt64.TryParse(node.InnerText, out OldDownload);
+                else if (node.Name == "SentBytes")
+                    UInt64.TryParse(node.InnerText, out OldUpload);
                 else if (node.Name == "FwRules")
                 {
                     foreach (XmlNode childNode in node.ChildNodes)

@@ -18,11 +18,15 @@ public static class ImgFunc
     private static Dictionary<string, ImageSource> IconCache = new Dictionary<string, ImageSource>();
     private static ReaderWriterLockSlim IconCacheLock = new ReaderWriterLockSlim();
 
+    public static ImageSource ExeIcon16 = GetIcon(MiscFunc.NtOsKrnlPath, 16);
+
     public static ImageSource GetIcon(string path, double size)
     {
+        string key = path + "@" + size.ToString();
+
         ImageSource image = null;
         IconCacheLock.EnterReadLock();
-        bool bFound = IconCache.TryGetValue(path, out image);
+        bool bFound = IconCache.TryGetValue(key, out image);
         IconCacheLock.ExitReadLock();
         if(bFound)
             return image;
@@ -52,8 +56,8 @@ public static class ImgFunc
         }
 
         IconCacheLock.EnterWriteLock();
-        if (!IconCache.ContainsKey(path))
-            IconCache.Add(path, image);
+        if (!IconCache.ContainsKey(key))
+            IconCache.Add(key, image);
         IconCacheLock.ExitWriteLock();
         return image;
     }

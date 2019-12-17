@@ -93,6 +93,7 @@
     <Compile Include="API\MiscStats.cs" />
     <Compile Include="API\Network\DnsApi.cs" />
     <Compile Include="API\Network\IPHelper.cs" />
+    <Compile Include="API\ProcessUtilities.cs" />
     <Compile Include="API\RegistryMonitor.cs" />
     <Compile Include="API\UwpFunc.cs" />
     <Compile Include="API\ProcFunc.cs" />
@@ -124,12 +125,24 @@
     <Compile Include="Controls\FirewallRuleList.xaml.cs">
       <DependentUpon>FirewallRuleList.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\GridViewRowPresenterWithGridLines.cs" />
     <Compile Include="Controls\NetworkSocketList.xaml.cs">
       <DependentUpon>NetworkSocketList.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\ProgramControl.xaml.cs">
       <DependentUpon>ProgramControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ProgramListControl.xaml.cs">
+      <DependentUpon>ProgramListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ProgramTreeControl.xaml.cs">
+      <DependentUpon>ProgramTreeControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ProgramTreeControl\ManualTreeSorter.cs" />
+    <Compile Include="Controls\ProgramTreeControl\ProgSetTreeItem.cs" />
+    <Compile Include="Controls\ProgramTreeControl\ProgramTreeItem.cs" />
+    <Compile Include="Controls\ProgramTreeControl\AbstractTreeItem.cs" />
+    <Compile Include="Controls\ProgramTreeControl\ProgTreeRoot.cs" />
     <Compile Include="Controls\TweakControl.xaml.cs">
       <DependentUpon>TweakControl.xaml</DependentUpon>
     </Compile>
@@ -143,6 +156,7 @@
     <Compile Include="Core\DnsInspector\DnsQueryWatcher.cs" />
     <Compile Include="Core\DnsProxy\DnsBlockList.cs" />
     <Compile Include="Core\DnsInspector\HostNameResolver.cs" />
+    <Compile Include="Core\ProcessMonitor.cs" />
     <Compile Include="Core\Tweaks\TweakEngine.cs" />
     <Compile Include="Core\WindowsFirewall\FirewallRuleEx.cs" />
     <Compile Include="Core\WindowsFirewall\WinNetFwAPI.cs" />
@@ -167,11 +181,11 @@
     <Compile Include="Core\ProgramSet.cs" />
     <Compile Include="Core\ProgramID.cs" />
     <Compile Include="Common\WinConsole.cs" />
-    <Compile Include="Core\Engine.cs" />
+    <Compile Include="Core\Priv10Engine.cs" />
     <Compile Include="Core\Program.cs" />
     <Compile Include="Core\ProgramList.cs" />
     <Compile Include="Controls\MouseDownHelper.cs" />
-    <Compile Include="Core\Service.cs">
+    <Compile Include="Core\Priv10Service.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Core\Tweaks\TweakManager.cs" />
@@ -254,6 +268,14 @@
     <Page Include="Controls\ProgramControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\ProgramListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ProgramTreeControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\TweakControl.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -402,6 +424,10 @@
       <Name>Microsoft.O365.Security.Native.ETW</Name>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\ICSharpCode.TreeView\ICSharpCode.TreeView.csproj">
+      <Project>{dde2a481-8271-4eac-a330-8fa6a38d13d1}</Project>
+      <Name>ICSharpCode.TreeView</Name>
+    </ProjectReference>
     <ProjectReference Include="..\LocalPolicy\LocalPolicy.csproj">
       <Project>{52bd99e0-0865-4f2c-9a65-0d2f9d1a8982}</Project>
       <Name>LocalPolicy</Name>
@@ -485,6 +511,25 @@
   <ItemGroup>
     <Resource Include="Resources\icons8-radiergummi-16.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\icons8-checkbox-markiert-2-16.png" />
+    <Resource Include="Resources\icons8-löschen-16.png" />
+    <Resource Include="Resources\icons8-ordner-öffnen-16.png" />
+    <Resource Include="Resources\icons8-sortier-optionen-16.png" />
+    <Resource Include="Resources\icons8-stift-16.png" />
+    <Resource Include="Resources\icons8-stoppschild-16.png" />
+    <Resource Include="Resources\icons8-undefined-16.png" />
+    <Resource Include="Resources\icons8-xlarge-symbole-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\full_height.png" />
+    <Resource Include="Resources\full_width.png" />
+    <Resource Include="Resources\full_screen.png" />
+    <Resource Include="Resources\icons8-tabelle-16.png" />
+    <Resource Include="Resources\normal_view.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons8-firewall-16.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

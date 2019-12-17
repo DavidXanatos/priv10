@@ -9,9 +9,9 @@ namespace PrivateWin10
 {
     public class Priv10Host : PipeHost
     {
-        public Priv10Host(string name)
+        public Priv10Host()
         {
-            Name = name;
+            Name = App.SvcName;
         }
 
         protected override RemoteCall Process(RemoteCall call)
@@ -91,7 +91,7 @@ namespace PrivateWin10
                 }
                 else if (call.func == "SetRuleApproval")
                 {
-                    call.args = App.engine.SetRuleApproval(RemoteCall.GetArg<Engine.ApprovalMode>(call.args, 0), RemoteCall.GetArg<FirewallRule>(call.args, 1));
+                    call.args = App.engine.SetRuleApproval(RemoteCall.GetArg<Priv10Engine.ApprovalMode>(call.args, 0), RemoteCall.GetArg<FirewallRule>(call.args, 1));
                 }
                 else if (call.func == "BlockInternet")
                 {
@@ -100,6 +100,10 @@ namespace PrivateWin10
                 else if (call.func == "ClearLog")
                 {
                     call.args = App.engine.ClearLog((bool)call.args);
+                }
+                else if (call.func == "ClearDnsLog")
+                {
+                    call.args = App.engine.ClearDnsLog();
                 }
                 else if (call.func == "CleanUpPrograms")
                 {
@@ -124,6 +128,14 @@ namespace PrivateWin10
                 else if (call.func == "GetDomains")
                 {
                     call.args = App.engine.GetDomains((List<Guid>)call.args);
+                }
+                else if (call.func == "GetAllAppPkgs")
+                {
+                    call.args = App.engine.GetAllAppPkgs((bool)call.args);
+                }
+                else if (call.func == "GetAppPkgRes")
+                {
+                    call.args = App.engine.GetAppPkgRes((string)call.args);
                 }
 
                 /////////////////////////////////////////
@@ -171,7 +183,7 @@ namespace PrivateWin10
                 {
                     call.args = App.engine.RemoveDomainBlocklist((string)call.args);
                 }
-                else if (call.func == "RemoveDomainFilter")
+                else if (call.func == "RefreshDomainBlocklist")
                 {
                     call.args = App.engine.RefreshDomainBlocklist((string)call.args);
                 }
@@ -195,14 +207,14 @@ namespace PrivateWin10
                 /////////////////////////////////////////
                 // Misc
 
-                else if (call.func == "Quit")
+                /*else if (call.func == "Quit")
                 {
                     call.args = App.engine.Quit();
-                }
+                }*/
 
                 else
                 {
-                    call.args = new Exception("Unknon FunctionCall");
+                    call.args = new Exception("Unknown FunctionCall");
                 }
             }
             /*catch (Exception err)
@@ -215,7 +227,7 @@ namespace PrivateWin10
 
         public void NotifyActivity(Guid guid, Program.LogEntry entry, ProgramID progID, List<String> services = null, bool update = false)
         {
-            Engine.FwEventArgs args = new Engine.FwEventArgs()
+            Priv10Engine.FwEventArgs args = new Priv10Engine.FwEventArgs()
             {
                 guid = guid,
                 entry = entry,
@@ -226,9 +238,9 @@ namespace PrivateWin10
             SendPushNotification("ActivityNotification", args);
         }
 
-        public void NotifyChange(Guid guid, Engine.ChangeArgs.Types type)
+        public void NotifyChange(Guid guid, Priv10Engine.ChangeArgs.Types type)
         {
-            Engine.ChangeArgs args = new Engine.ChangeArgs()
+            Priv10Engine.ChangeArgs args = new Priv10Engine.ChangeArgs()
             {
                 guid = guid,
                 type = type

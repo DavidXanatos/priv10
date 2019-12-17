@@ -114,9 +114,7 @@ namespace PrivateWin10
         {
             if (Type != Types.App)
                 return null;
-            if (App.PkgMgr == null)
-                return Aux;
-            return App.PkgMgr.SidToAppPackage(Aux);
+            return App.engine.FirewallManager.GetAppPkgBySid(Aux)?.ID;
         }
 
         public string GetServiceId()

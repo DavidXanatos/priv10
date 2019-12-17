@@ -7,6 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <local:RateConverter x:Key="rateConverter"/>
         <local:SizeConverter x:Key="sizeConverter"/>
         <local:DateConverter x:Key="dateConverter"/>
     </UserControl.Resources>
@@ -121,6 +122,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}" />
+                    <!-- SortMemberPath="RawTimeStamp" -->
                     <DataGridTextColumn Header="Time Stamp" Binding="{Binding TimeStamp, Converter={StaticResource dateConverter}}" />
                     <DataGridTextColumn Header="State" Binding="{Binding State}" />
                     <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" />
@@ -129,8 +131,10 @@
                     <DataGridTextColumn Width="150" Header="Local Address" Binding="{Binding SrcAddress}" />
                     <DataGridTextColumn Width="150" Header="Local Ports" Binding="{Binding SrcPorts}" />
                     <DataGridTextColumn Width="150" Header="Access" Binding="{Binding Access}" />
-                    <DataGridTextColumn Width="150" Header="Upload" Binding="{Binding Upload, Converter={StaticResource sizeConverter}}" />
-                    <DataGridTextColumn Width="150" Header="Download" Binding="{Binding Download, Converter={StaticResource sizeConverter}}" />
+                    <DataGridTextColumn Width="150" Header="Upload" Binding="{Binding Upload, Converter={StaticResource rateConverter}}" />
+                    <DataGridTextColumn Width="150" Header="Download" Binding="{Binding Download, Converter={StaticResource rateConverter}}" />
+                    <DataGridTextColumn Width="150" Header="Uploaded" Binding="{Binding Uploaded, Converter={StaticResource sizeConverter}}" />
+                    <DataGridTextColumn Width="150" Header="Downloaded" Binding="{Binding Downloaded, Converter={StaticResource sizeConverter}}" />
                     <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
                 </DataGrid.Columns>
             </DataGrid>

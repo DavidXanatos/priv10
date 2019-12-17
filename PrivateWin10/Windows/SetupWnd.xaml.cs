@@ -23,7 +23,7 @@ namespace PrivateWin10.Windows
         {
             InitializeComponent();
 
-            this.Title = Translate.fmt("wnd_setup", App.mName);
+            this.Title = Translate.fmt("wnd_setup", App.Title);
 
             this.lblStartup.Text = Translate.fmt("lbl_startup_options");
             this.chkAutoStart.Content = Translate.fmt("chk_autorun");
@@ -34,7 +34,7 @@ namespace PrivateWin10.Windows
             this.chkUseFW.Content = Translate.fmt("chk_manage_fw");
             this.chkNotifyFW.Content = Translate.fmt("chk_show_notify");
 
-            chkNoUAC.IsChecked = AdminFunc.IsSkipUac(App.mName);
+            chkNoUAC.IsChecked = AdminFunc.IsSkipUac(App.Key);
             chkNotifyFW.IsChecked = App.GetConfigInt("Firewall", "NotifyBlocked", 1) != 0;
         }
 
@@ -45,18 +45,18 @@ namespace PrivateWin10.Windows
             if (chkAutoStart.IsChecked == true)
             {
                 App.SetConfig("Startup", "Tray", true);
-                App.mTray.Visible = true;
+                App.TrayIcon.Visible = true;
 
                 App.AutoStart(true);
                 if (chkService.IsChecked == true)
                 {
-                    App.svc.Install();
-                    App.Log.SetupEventLog(App.mAppName);
+                    Priv10Service.Install();
+                    App.Log.SetupEventLog(App.Key);
                     Restart = true;
                 }
             }
             if(chkNoUAC.IsChecked == true)
-                AdminFunc.SkipUacEnable(App.mName, true);
+                AdminFunc.SkipUacEnable(App.Key, true);
 
             if (chkUseFW.IsChecked == true)
             {

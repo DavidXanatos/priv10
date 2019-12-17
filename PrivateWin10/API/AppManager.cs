@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,10 +15,14 @@ using Windows.ApplicationModel;
 
 public class AppManager
 {
+
+    // WARNING Dont use in a Service !!! 
+    // Note: AppContainerLookupMoniker do not work properly when running under the system user !!!
+
     public AppManager()
     {
-    }
 
+    }
 
     [DllImport("kernelbase", CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern int AppContainerLookupMoniker(IntPtr Sid, [In, Out, MarshalAs(UnmanagedType.LPWStr)] ref string packageFamilyName);
@@ -41,6 +46,13 @@ public class AppManager
         int ret = AppContainerLookupMoniker(pSid, ref packageID);
 
         Marshal.FreeHGlobal(pSid);
+
+        /*if (ret != ERROR_SUCCESS)
+        {
+            var subKey = Registry.ClassesRoot.OpenSubKey(@"Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Mappings\" + sid, false);
+            if (subKey != null)
+                packageID = subKey.GetValue("Moniker").ToString();
+        }*/
         
         return packageID;
     }
@@ -96,68 +108,14 @@ public class AppManager
         return sResult;
     }
 
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct TOKEN_APPCONTAINER_INFORMATION
-    {
-        public IntPtr Sid;
-    }
-
-    [DllImport("ntdll.dll")]
-    public static extern uint NtQueryInformationToken([In] IntPtr TokenHandle, [In] uint TokenInformationClass, [In] IntPtr TokenInformation, [In] int TokenInformationLength, [Out] [Optional] out int ReturnLength);
-
-
-    public string GetAppPackageSidByPID(int PID)
-    {
-        //var process = System.Diagnostics.Process.GetProcessById(PID); // throws error if pid is not found
-        var processHandle = ProcFunc.OpenProcess(0x1000/*PROCESS_QUERY_LIMITED_INFORMATION*/, false, PID);
-        if (processHandle == IntPtr.Zero)
-            return null;
-
-        string strSID = null;
-
-        IntPtr tokenHandle = IntPtr.Zero;
-        if (ProcFunc.OpenProcessToken(processHandle, 8, out tokenHandle))
-        {
-            int retLen;
-            NtQueryInformationToken(tokenHandle, 31 /*TokenAppContainerSid*/, IntPtr.Zero, 0, out retLen);
-
-            IntPtr buffer = Marshal.AllocHGlobal((int)retLen);
-            ulong status = NtQueryInformationToken(tokenHandle, 31 /*TokenAppContainerSid*/, buffer, retLen, out retLen);
-            if (status >= 0)
-            {
-                var appContainerInfo = (TOKEN_APPCONTAINER_INFORMATION)Marshal.PtrToStructure(buffer, typeof(TOKEN_APPCONTAINER_INFORMATION));
-
-                ConvertSidToStringSid(appContainerInfo.Sid, ref strSID);
-            }
-            Marshal.FreeHGlobal(buffer);
-
-            ProcFunc.CloseHandle(tokenHandle);
-        }
-
-        ProcFunc.CloseHandle(processHandle);
-
-        return strSID;
-    }
-
-
-    [Serializable()]
-    public struct AppInfo
-    {
-        public string Name;
-        public string Logo;
-        public string ID;
-        public string SID;
-    }
-
-    private Dictionary<string, AppInfo?> AppInfosBySid = new Dictionary<string, AppInfo?>();
+    private Dictionary<string, UwpFunc.AppInfo> AppInfosBySid = new Dictionary<string, UwpFunc.AppInfo>();
     private ReaderWriterLockSlim AppInfosBySidLock = new ReaderWriterLockSlim();
 
     private Windows.Management.Deployment.PackageManager packageManager = new Windows.Management.Deployment.PackageManager();
 
-    public AppInfo? GetAppInfoBySid(string sid)
+    public UwpFunc.AppInfo GetAppInfoBySid(string sid)
     {
-        AppInfo? info = null;
+        UwpFunc.AppInfo info = null;
         AppInfosBySidLock.EnterReadLock();
         AppInfosBySid.TryGetValue(sid, out info);
         AppInfosBySidLock.ExitReadLock();
@@ -196,7 +154,7 @@ public class AppManager
     }
 
 
-    private AppInfo? GetInfo(Windows.ApplicationModel.Package package, string sid)
+    private UwpFunc.AppInfo GetInfo(Windows.ApplicationModel.Package package, string sid)
     {
         string path;
         try
@@ -290,27 +248,27 @@ public class AppManager
             AppLog.Exception(err);
         }
 
-        return new AppInfo() { Name = displayName, Logo = logoPath, ID = package.Id.FamilyName, SID = sid };
+        return new UwpFunc.AppInfo() { Name = displayName, Logo = logoPath, ID = package.Id.FamilyName, SID = sid };
     }
 
     bool FullListFetched = false;
 
     public void UpdateAppCache()
     {
-        Dictionary<string, AppInfo?> AppInfos = new Dictionary<string, AppInfo?>();
+        Dictionary<string, UwpFunc.AppInfo> AppInfos = new Dictionary<string, UwpFunc.AppInfo>();
 
         IEnumerable<Windows.ApplicationModel.Package> packages = (IEnumerable<Windows.ApplicationModel.Package>)packageManager.FindPackages();
         foreach (var package in packages)
         {
             string appSID = AppPackageToSid(package.Id.FamilyName).ToLower();
         
-            AppInfo? info = GetInfo(package, appSID);
+            UwpFunc.AppInfo info = GetInfo(package, appSID);
             if (info != null)
             {
                 if (!AppInfos.ContainsKey(appSID))
-                    AppInfos.Add(appSID, info.Value);
+                    AppInfos.Add(appSID, info);
                 /*
-                 AppInfo? old_info;
+                 UwpFunc.AppInfo old_info;
                 if (AppInfos.TryGetValue(appSID, out old_info))
                     AppLog.Debug("Warning an app with the SID: {0} is already listed", appSID);
                  */
@@ -323,47 +281,35 @@ public class AppManager
         FullListFetched = true;
     }
 
-    public List<AppInfo> GetAllApps() 
+    public List<UwpFunc.AppInfo> GetAllApps(bool bReload = false) 
     {
-        if (!FullListFetched)
+        if (!FullListFetched || bReload)
             UpdateAppCache();
 
-        List<AppInfo> Apps = new List<AppInfo>();
+        List<UwpFunc.AppInfo> Apps = new List<UwpFunc.AppInfo>();
         AppInfosBySidLock.EnterReadLock();
-        foreach (AppInfo info in AppInfosBySid.Values)
+        foreach (UwpFunc.AppInfo info in AppInfosBySid.Values)
             Apps.Add(info);
         AppInfosBySidLock.ExitReadLock();
         return Apps;
     }
 
-    private Dictionary<string, string> AppResourceStrCache = new Dictionary<string, string>();
-    private ReaderWriterLockSlim AppResourceStrLock = new ReaderWriterLockSlim();
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // App resource handling
+
 
     public string GetAppResourceStr(string resourcePath)
     {
-        string resourceStr = null;
-        AppResourceStrLock.EnterReadLock();
-        AppResourceStrCache.TryGetValue(resourcePath, out resourceStr);
-        AppResourceStrLock.ExitReadLock();
-        if (resourceStr != null)
-            return resourceStr;
+        // Note: PackageManager requirers admin privilegs
 
         var AppResource = TextHelpers.Split2(resourcePath.Substring(2, resourcePath.Length - 3), "?");
-        Windows.ApplicationModel.Package package = packageManager.FindPackage(AppResource.Item1);
+        var package = packageManager.FindPackage(AppResource.Item1);
         if (package != null)
         {
             string pathToPri = Path.Combine(package.InstalledLocation.Path, "resources.pri");
-            resourceStr = MiscFunc.GetResourceStr(pathToPri, AppResource.Item2);
+            return MiscFunc.GetResourceStr(pathToPri, AppResource.Item2);
         }
 
-        if (resourceStr != null)
-        {
-            AppResourceStrLock.EnterWriteLock();
-            if(!AppResourceStrCache.ContainsKey(resourcePath))
-                AppResourceStrCache.Add(resourcePath, resourceStr);
-            AppResourceStrLock.ExitWriteLock();
-        }
-
-        return resourceStr == null ? resourcePath : resourceStr;
+        return resourcePath;
     }
 }

@@ -17,15 +17,21 @@ namespace PrivateWin10
     public class NetworkMonitorEtw : IDisposable
     {
         Microsoft.O365.Security.ETW.KernelTrace kernelTrace;
-        Microsoft.O365.Security.ETW.Kernel.NetworkTcpipProvider networkProvider;
+        Microsoft.O365.Security.ETW.Kernel.NetworkTcpipProvider tcpProvider;
+        Microsoft.O365.Security.ETW.Kernel.NetworkUdpipProvider udpProvider;
         Thread kernelThread = null;
 
         public NetworkMonitorEtw(Microsoft.O365.Security.ETW.IEventRecordDelegate OnNetworkEvent)
         {
             kernelTrace = new Microsoft.O365.Security.ETW.KernelTrace("priv10_TcpipLogger");
-            networkProvider = new Microsoft.O365.Security.ETW.Kernel.NetworkTcpipProvider();
-            networkProvider.OnEvent += OnNetworkEvent;
-            kernelTrace.Enable(networkProvider);
+
+            tcpProvider = new Microsoft.O365.Security.ETW.Kernel.NetworkTcpipProvider();
+            tcpProvider.OnEvent += OnNetworkEvent;
+            kernelTrace.Enable(tcpProvider);
+
+            udpProvider = new Microsoft.O365.Security.ETW.Kernel.NetworkUdpipProvider();
+            udpProvider.OnEvent += OnNetworkEvent;
+            kernelTrace.Enable(udpProvider);
 
             kernelThread = new Thread(() => { kernelTrace.Start(); });
             kernelThread.Start();
@@ -58,7 +64,7 @@ namespace PrivateWin10
             }
             catch
             {
-                AppLog.Debug("Failed to initialized NetworkMonitorETW");
+                App.LogError("Failed to initialized NetworkMonitorETW");
             }
 
             regWatchers = new RegistryMonitor[] {
@@ -153,8 +159,10 @@ namespace PrivateWin10
 
             if (record.ProviderId.Equals(TcpIpGuid))
                 ProtocolType |= (UInt32)IPHelper.AF_PROT.TCP;
-            if (record.ProviderId.Equals(UdpIpGuid))
+            else if (record.ProviderId.Equals(UdpIpGuid))
                 ProtocolType |= (UInt32)IPHelper.AF_PROT.UDP;
+            else
+                return;
 
             int ProcessId = -1;
             UInt32 TransferSize = 0;
@@ -164,7 +172,7 @@ namespace PrivateWin10
             IPAddress RemoteAddress = null;
             UInt16 RemotePort = 0;
 
-            if ((ProtocolType & (UInt32)IPHelper.AF_INET.IP4) != 0)
+            if ((ProtocolType & ((UInt32)IPHelper.AF_INET.IP4 << 8)) == ((UInt32)IPHelper.AF_INET.IP4 << 8))
             {
                 TcpIpOrUdpIp_IPV4_Header data = (TcpIpOrUdpIp_IPV4_Header)Marshal.PtrToStructure(record.UserData, typeof(TcpIpOrUdpIp_IPV4_Header));
 
@@ -177,7 +185,7 @@ namespace PrivateWin10
                 RemoteAddress = new IPAddress((UInt32)data.daddr);
                 RemotePort = (UInt16)IPAddress.NetworkToHostOrder((short)data.dport);
             }
-            else if ((ProtocolType & (UInt32)IPHelper.AF_INET.IP6) != 0)
+            else if ((ProtocolType & ((UInt32)IPHelper.AF_INET.IP6 << 8)) == ((UInt32)IPHelper.AF_INET.IP6 << 8))
             {
                 TcpIpOrUdpIp_IPV6_Header data = (TcpIpOrUdpIp_IPV6_Header)Marshal.PtrToStructure(record.UserData, typeof(TcpIpOrUdpIp_IPV6_Header));
 
@@ -190,9 +198,11 @@ namespace PrivateWin10
                 RemoteAddress = new IPAddress(data.daddr);
                 RemotePort = (UInt16)IPAddress.NetworkToHostOrder((short)data.dport);
             }
+            else
+                return;
 
             // Note: Incomming UDP packets have the endpoints swaped :/
-            if ((ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) != 0 && Type == EtwNetEventType.Recv)
+            if ((ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP && Type == EtwNetEventType.Recv)
             {
                 IPAddress TempAddresss = LocalAddress;
                 UInt16 TempPort = LocalPort;
@@ -206,7 +216,7 @@ namespace PrivateWin10
             {
                 // Note: this happens in the engine thread
 
-                NetworkSocket Socket = FindSocket(SocketList, ProcessId, ProtocolType, LocalAddress, LocalPort, RemoteAddress, RemotePort, NetworkSocket.MatchMode.Fuzzy);
+                NetworkSocket Socket = FindSocket(SocketList, ProcessId, ProtocolType, LocalAddress, LocalPort, RemoteAddress, RemotePort, NetworkSocket.MatchMode.Strict);
                 if (Socket == null)
                 {
                     Socket = new NetworkSocket(ProcessId, ProtocolType, LocalAddress, LocalPort, RemoteAddress, RemotePort);
@@ -260,7 +270,7 @@ namespace PrivateWin10
             IntPtr udp4Table = IPHelper.GetUdpSockets(ref Sockets);
             IntPtr udp6Table = IPHelper.GetUdp6Sockets(ref Sockets);
 
-            MultiValueDictionary <UInt64, NetworkSocket> OldSocketList = SocketList.Clone();
+            MultiValueDictionary<UInt64, NetworkSocket> OldSocketList = SocketList.Clone();
 
             for (int i = 0; i < Sockets.Count; i++)
             {
@@ -284,11 +294,8 @@ namespace PrivateWin10
                 {
                     Socket.CreationTime = SocketRow.CreationTime;
 
-                    if (App.engine.DnsInspector != null)
-                    {
-                        if (Socket.RemoteAddress != null)
-                            App.engine.DnsInspector.GetHostName(Socket.ProcessId, Socket.RemoteAddress, Socket, NetworkSocket.HostSetter);
-                    }
+                    if (App.engine.DnsInspector != null && Socket.RemoteAddress != null)
+                        App.engine.DnsInspector.GetHostName(Socket.ProcessId, Socket.RemoteAddress, Socket, NetworkSocket.HostSetter);
 
                     var moduleInfo = SocketRow.Module;
                     if (moduleInfo == null || moduleInfo.ModulePath.Equals("System", StringComparison.OrdinalIgnoreCase))
@@ -309,19 +316,39 @@ namespace PrivateWin10
                     }
                 }
 
-                // a program may have been removed than the sockets get unasigned and has to be re asigned
-                if (Socket.Assigned == false)
-                {
-                    Program prog = Socket.ProgID == null ? null : App.engine.ProgramList.GetProgram(Socket.ProgID, true, ProgramList.FuzzyModes.Any);
-                    prog?.AddSocket(Socket);
-                    if(prog != null)
-                        Socket.Access = prog.LookupRuleAccess(Socket);
-                }
-
                 Socket.Update(SocketRow, Interval);
 
                 //IPHelper.ModuleInfo Info = SocketRow.Module;
                 //AppLog.Debug("Socket {0}:{1} {2}:{3} {4}", Socket.LocalAddress, Socket.LocalPort, Socket.RemoteAddress, Socket.RemotePort, (Info != null ? (Info.ModulePath + " (" + Info.ModuleName + ")") : "") + " [PID: " + Socket.ProcessId + "]");
+            }
+
+            foreach (NetworkSocket Socket in OldSocketList.GetAllValues())
+            {
+                bool bIsUDPPseudoCon = (Socket.ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP && Socket.RemotePort != 0;
+
+                // Note: sockets observed using ETW are not yet initialized as we are missing owner informations there
+                if (Socket.ProgID == null)
+                {
+                    Socket.CreationTime = DateTime.Now;
+
+                    if (App.engine.DnsInspector != null && Socket.RemoteAddress != null)
+                        App.engine.DnsInspector.GetHostName(Socket.ProcessId, Socket.RemoteAddress, Socket, NetworkSocket.HostSetter);
+
+                    // Note: etw captured connections does not handle services to well :/
+                    Socket.ProgID = App.engine.GetProgIDbyPID(Socket.ProcessId, null, null);
+                }
+
+                Socket.Update(null, Interval);
+
+                if (bIsUDPPseudoCon && (DateTime.Now - Socket.LastActivity).TotalMilliseconds < 5000) // 5 sec // todo: customize udp pseudo con time
+                {
+                    OldSocketList.Remove(Socket.HashID, Socket);
+
+                    if (Socket.RemovedTimeStamp != 0)
+                        Socket.RemovedTimeStamp = 0;
+                }
+                else
+                    Socket.State = (int)IPHelper.MIB_TCP_STATE.CLOSED;
             }
 
             UInt64 CurTick = MiscFunc.GetCurTick();
@@ -334,8 +361,7 @@ namespace PrivateWin10
                 {
                     SocketList.Remove(Socket.HashID, Socket);
 
-                    Program prog = Socket.ProgID == null ? null : App.engine.ProgramList.GetProgram(Socket.ProgID);
-                    prog?.RemoveSocket(Socket);
+                    Socket.Program?.RemoveSocket(Socket);
                 }
 
                 //AppLog.Debug("Removed Socket {0}:{1} {2}:{3}", CurSocket.LocalAddress, CurSocket.LocalPort, CurSocket.RemoteAddress, CurSocket.RemotePort);

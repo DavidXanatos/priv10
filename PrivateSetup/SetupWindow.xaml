@@ -1,0 +1,165 @@
+﻿<Window x:Class="PrivateSetup.SetupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PrivateSetup"
+        WindowStartupLocation="CenterScreen"
+        mc:Ignorable="d"
+        ResizeMode="NoResize"
+        Name="wndSetup"
+        Title="PrivateWin10 - Setup" Height="400" Width="600" Closing="Window_Closing">
+    <Window.Resources>
+        <Geometry x:Key="Icon_Major">
+            M 25 1 L 2 12.6875 L 2 16.625 L 25 5.125 L 48 16.625 L 48 12.6875 Z M 25 7.125 L 2 18.625 L 2 22.625 L 25 11.125 L 48 22.625 L 48 18.625 Z M 25 13.125 L 2 24.625 L 2 32.78125 L 2.53125 33.0625 C 2.835938 33.222656 10.121094 37 25 37 C 39.878906 37 47.164063 33.222656 47.46875 33.0625 L 48 32.78125 L 48 24.625 Z M 25 17.125 L 47.71875 28.46875 L 46.53125 29.125 C 46.460938 29.164063 39.3125 33 25 33 C 10.6875 33 3.539063 29.164063 3.46875 29.125 L 2.28125 28.46875 Z M 25 18.84375 L 23.0625 23.34375 L 18.1875 23.78125 L 21.875 27.03125 L 20.78125 31.8125 L 25 29.3125 L 29.21875 31.8125 L 28.125 27.03125 L 31.8125 23.78125 L 26.9375 23.34375 Z M 14.53125 23.96875 L 13.5625 26.21875 L 11.125 26.4375 L 12.96875 28.0625 L 12.4375 30.4375 L 14.53125 29.1875 L 16.625 30.4375 L 16.09375 28.0625 L 17.9375 26.4375 L 15.5 26.21875 Z M 35.46875 23.96875 L 34.5 26.21875 L 32.0625 26.4375 L 33.90625 28.0625 L 33.375 30.4375 L 35.46875 29.1875 L 37.5625 30.4375 L 37.03125 28.0625 L 38.875 26.4375 L 36.4375 26.21875 Z M 2 34.3125 L 2 38.78125 L 2.53125 39.0625 C 2.835938 39.222656 10.121094 43 25 43 C 39.878906 43 47.164063 39.222656 47.46875 39.0625 L 48 38.78125 L 48 34.3125 L 46.53125 35.125 C 46.460938 35.164063 39.3125 39 25 39 C 10.6875 39 3.539063 35.164063 3.46875 35.125 Z M 2 40.3125 L 2 44.78125 L 2.53125 45.0625 C 2.835938 45.222656 10.121094 49 25 49 C 39.878906 49 47.164063 45.222656 47.46875 45.0625 L 48 44.78125 L 48 40.3125 L 46.53125 41.125 C 46.460938 41.164063 39.3125 45 25 45 C 10.6875 45 3.539063 41.164063 3.46875 41.125 Z
+        </Geometry>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.Background>
+                <LinearGradientBrush EndPoint="1.5,0.504" StartPoint="0.03,0.504">
+                    <GradientStop Color="MidnightBlue" Offset="0.300"/>
+                    <GradientStop Color="SkyBlue" Offset="0.570"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Name="lblCaption" Grid.Column="0" Text="Private Win10 - Setup" Foreground="White" HorizontalAlignment="Left" Margin="10,10,10,10" FontSize="36" />
+
+            <Grid Grid.Column="1">
+                <Ellipse Grid.Column="1" Canvas.Left="135" Canvas.Top="25" Width="60" Height="60" Margin="0,4,4,0" HorizontalAlignment="Center" VerticalAlignment="Top" SnapsToDevicePixels="true">
+                    <Shape.Fill>
+                        <LinearGradientBrush StartPoint="0.5,1" EndPoint="0.5,0">
+                            <GradientBrush.GradientStops>
+                                <GradientStop Offset="0" Color="#00A0E0"/>
+                                <GradientStop Offset="1" Color="#003090"/>
+                            </GradientBrush.GradientStops>
+                        </LinearGradientBrush>
+                    </Shape.Fill>
+                </Ellipse>
+                <Path Grid.Column="1" Width="44" Height="44" Margin="0,10,4,0" HorizontalAlignment="Center" VerticalAlignment="Top" Data="{DynamicResource Icon_Major}" Fill="White" IsHitTestVisible="false" SnapsToDevicePixels="true" Stretch="Uniform"/>
+            </Grid>
+        </Grid>
+        <Separator VerticalAlignment="Bottom" Margin="0,0,0,0"/>
+        <Grid Grid.Row="1" Background="WhiteSmoke">
+            <Grid Name="panelType" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Margin="12,12,12,6" Grid.Row="0" TextWrapping="Wrap">
+                    Welcome to the Private Win10 Setup Wizard, it will guide you through instalaltion of version: <Run Text="{Binding ElementName=wndSetup,Path=Version}"/>
+                    <LineBreak/>
+                    <LineBreak/>
+                    Private Win10 is an advanced Privacy-Tool for Windows 7, 8.1 and 10.<LineBreak/>
+                    It provides an exhaustive list of Privacy Tweaks allowing to protect your privacy and block Telemetry, backed by an advanced windows firewall frontend.
+                    The build in Firewall allows you to control system and application access to the internet and disable/limit their ability to send private data back to their vendors.
+                    <LineBreak/>
+                    <LineBreak/>
+                    Disabling Telemetry and blocking leakage of private data is a requirement to commercially operate a computer system in accordance with the European GDPR (General Data Protection Regulation).
+                </TextBlock>
+                <StackPanel Grid.Row="1" Margin="12,6,12,0">
+                    <TextBlock Text="How do you want to use Private Win10?" FontWeight="Bold" Margin="0,0,0,6"/>
+                    <RadioButton Name="radPersonal" GroupName="radUsage"  Content="Personal / Non-commercial use" Margin="12,0,0,0" Click="RadUsage_Click"/>
+                    <RadioButton Name="radBusiness" GroupName="radUsage" Margin="12,0,0,0" Click="RadUsage_Click">
+                        <TextBlock>
+                            <Run>Business / Commercial use:</Run>
+                            <Hyperlink NavigateUri="" RequestNavigate="SelectLic_RequestNavigate">select license file</Hyperlink>
+                        </TextBlock>
+                    </RadioButton>
+                </StackPanel>
+                <TextBlock Name="txtEval" Grid.Row="2" Margin="48,-6,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Visibility="Collapsed">
+                    <Run>Without a license you can use the software commercially for </Run>
+                    <Run FontWeight="Bold">evaluation purposes</Run>
+                    <LineBreak/>
+                    <Run>for up to</Run>
+                    <Run FontWeight="Bold">30 days</Run>
+                    <Run>on up to</Run>
+                    <Run FontWeight="Bold">3 machines.</Run>
+                </TextBlock>
+                <TextBlock Name="txtLicense" Grid.Row="2" Margin="48,-6,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Visibility="Collapsed">
+                    <Run>Sellected license file:</Run>
+                    <Run Name="txtLicFile">license.lic</Run>
+                </TextBlock>
+            </Grid>
+            <Grid Name="panelEula" Visibility="Collapsed" VerticalAlignment="Stretch">
+                <TextBox Name="txtEula" TextWrapping="Wrap" Margin="-1" Padding ="4" IsReadOnly="true" VerticalScrollBarVisibility="Visible" />
+            </Grid>
+            <Grid Name="panelAction" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Margin="12,12,12,6" Grid.Row="0" TextWrapping="Wrap">
+                    Welcome to the Private Win10 Setup Wizard, for the version: <Run Text="{Binding ElementName=wndSetup,Path=Version}"/>
+                </TextBlock>
+                <StackPanel Grid.Row="1" Margin="12,6,12,0">
+                    <TextBlock Text="What do you want to do?" FontWeight="Bold" Margin="0,0,0,6"/>
+                    <RadioButton Name="radInstall" GroupName="radMode" Content="Install on this machine" Margin="12,0,0,0" Click="RadMode_Click"/>
+                    <RadioButton Name="radUpdate" GroupName="radMode" Content="Upgrade existing installation" Margin="12,0,0,0" Click="RadMode_Click"/>
+                    <RadioButton Name="radExtract" GroupName="radMode" Content="Extract to directroy (portable mode)" Margin="12,0,0,0" Click="RadMode_Click"/>
+                    <RadioButton Name="radRemove" GroupName="radMode" Content="Remove from this machine" Margin="12,0,0,0" Click="RadMode_Click"/>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Margin="12,6,12,6">
+                    <TextBlock Text="Where do you want the program to be installed?" FontWeight="Bold" Margin="0,0,0,6"/>
+                    <Grid Margin="12,0,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Name="txtInstallDir" IsReadOnly="true" Margin="0,0,0,0" Height="20" VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Name="btnBrowse" Height="20" Width="90" Content="Browse..." VerticalAlignment="Center" Click="BtnBrowse_Click"/>
+                    </Grid>
+                </StackPanel>
+                <Grid Grid.Row="3" Margin="12,6,12,6">
+                    <StackPanel Name="frameInstall" Visibility="Collapsed">
+                        <TextBlock Text="Instalaltion Options:" FontWeight="Bold" Margin="0,0,0,6"/>
+                        <CheckBox Name="chkAutoStart" Content="Add program to Autostart" Margin="12,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Name="frameUninstall" Visibility="Collapsed">
+                        <TextBlock Text="Uninstallation Options:" FontWeight="Bold" Margin="0,0,0,6"/>
+                        <CheckBox Name="chkResetFW" Content="Reset Windows Firewall to factory defaults." Margin="12,0,0,0"/>
+                        <CheckBox Name="chkClearData" Content="Remove all Private Win10 Settings." Margin="12,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+            <Grid Name="panelProgress" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Name="txtOperation" Grid.Row="0" Margin="12,12,12,6">
+                    Operation Progress:
+                </TextBlock>
+                <TextBox Name="txtProgress" Grid.Row="1" TextWrapping="Wrap" Margin="12,6,12,6" Padding ="4" IsReadOnly="true" VerticalScrollBarVisibility="Visible" />
+                <ProgressBar Name="prgress" Grid.Row="2" HorizontalAlignment="Stretch" Height="16" Margin="12,6,12,12" Value="50" />
+            </Grid>
+        </Grid>
+        <Grid Grid.Row="2" Background="MidnightBlue">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <WrapPanel Grid.Column="0" Margin="4,4">
+                <TextBlock Name="btnEula" FontSize="12" Margin="10,4,0,0" Foreground="White" VerticalAlignment="Center" Text="Show EULA (End User License Agreement)" Cursor="Hand" MouseDown="BtnEula_MouseDown"/>
+            </WrapPanel>
+            <WrapPanel Grid.Column="2" Margin="4,4">
+                <Button Name="btnBack" Content="&lt; Back" Height="25" Width="90" Click="BtnBack_Click" />
+                <Button Name="btnNext" Content="Next &gt;" Height="25" Width="90" Margin="6,0,0,0" Click="BtnNext_Click" />
+            </WrapPanel>
+        </Grid>
+        <Separator Grid.Row="2" VerticalAlignment="Top" Margin="0,0,0,0"/>
+    </Grid>
+</Window>

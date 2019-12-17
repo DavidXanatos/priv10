@@ -49,11 +49,23 @@ namespace PrivateWin10.Controls
 
         ObservableCollection<FilterListItem> FilterList;
 
-        DataGridExt filterGridExt;
+        public DataGridExt filterGridExt;
 
         public DnsFilterListControl()
         {
             InitializeComponent();
+
+            this.lblHint.Text = Translate.fmt("msg_domain_hint");
+            this.btnAdd.Content = Translate.fmt("btn_add_domain");
+            this.btnAddEx.Content = Translate.fmt("btn_add_domain_ex");
+
+            this.filterGrid.Columns[0].Header = Translate.fmt("str_domain");
+            this.filterGrid.Columns[1].Header = Translate.fmt("str_hit");
+            this.filterGrid.Columns[2].Header = Translate.fmt("str_last_hit");
+
+            this.btnEnable.Content = Translate.fmt("str_enabled");
+            this.btnDisable.Content = Translate.fmt("str_disabled");
+            this.btnRemove.Content = Translate.fmt("lbl_remove");
 
             btnAdd.IsEnabled = btnAddEx.IsEnabled = false;
             btnRemove.IsEnabled = btnEnable.IsEnabled = btnDisable.IsEnabled = false;
@@ -102,7 +114,7 @@ namespace PrivateWin10.Controls
         {
             if (RegExp ? MiscFunc.IsValidRegex(Domain) : Uri.CheckHostName(Domain.Replace("*", "asterisk")) != UriHostNameType.Dns)
             {
-                MessageBox.Show(Translate.fmt("msg_bad_dns_filter"), App.mName, MessageBoxButton.OK, MessageBoxImage.Stop);
+                MessageBox.Show(Translate.fmt("msg_bad_dns_filter"), App.Title, MessageBoxButton.OK, MessageBoxImage.Stop);
                 return;
             }
 
@@ -111,7 +123,7 @@ namespace PrivateWin10.Controls
             {
                 if (Item.Filter.Domain.Equals(Domain))
                 {
-                    MessageBox.Show(Translate.fmt("msg_dns_filter_dup"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    MessageBox.Show(Translate.fmt("msg_dns_filter_dup"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     return;
                 }
             }
@@ -130,7 +142,7 @@ namespace PrivateWin10.Controls
 
         private void BtnRemove_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_remove_items"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_remove_items"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             foreach (FilterListItem Item in new List<FilterListItem>(filterGrid.SelectedItems.Cast<FilterListItem>())) // copy
@@ -206,5 +218,12 @@ namespace PrivateWin10.Controls
             }
         }
 
+        private void FilterGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (filterGrid.SelectedItems.Count == 1)
+            {
+                txtDomain.Text = (filterGrid.SelectedItems[0] as FilterListItem).Filter.Domain;
+            }
+        }
     }
 }

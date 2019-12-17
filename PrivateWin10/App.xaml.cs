@@ -26,30 +26,26 @@ namespace PrivateWin10
         public static bool HasConsole = false;
         public static string[] args = null;
         public static string exePath = "";
-        public static string mVersion = "0.0";
-        //public static string mName = "Private WinTen";
-        public static string mName = "Private Win10";
-        public static string mAppName = "PrivateWin10";
+        public static string Version = "0.0";
+        public static string Title = "Private Win10";
+        public static string Key = "PrivateWin10";
 #if DEBUG
-        public static string mSvcName = "priv10dbg";
+        public static string SvcName = "priv10dbg";
 #else
-        public static string mSvcName = "priv10";
+        public static string SvcName = "priv10";
 #endif
         public static string appPath = "";
         public static string dataPath = "";
         public static bool isPortable = false;
-        public static int mSession = 0;
+        public static int Session = 0;
 
         public static AppLog Log = null;
 
-        public static Service svc = null;
-        public static Engine engine = null;
+        public static Priv10Engine engine = null;
         public static TweakManager tweaks = null;
 
-        public static AppManager PkgMgr = null; // Windows 8 & 10 App Manager
-
-        public static TrayIcon mTray = null;
-        public static MainWindow mMainWnd = null;
+        public static TrayIcon TrayIcon = null;
+        public static MainWindow MainWnd = null;
 
         public static Priv10Client client = null;
         public static Priv10Host host = null;
@@ -112,9 +108,7 @@ namespace PrivateWin10
             else if (TestArg("-engine"))
                 startMode = StartModes.Engine;
 
-            svc = new Service(mSvcName);
-
-            Log = new AppLog(mAppName);
+            Log = new AppLog(Key);
             AppLog.ExceptionLogID = (long)EventIDs.Exception;
             AppLog.ExceptionCategory = (short)EventFlags.DebugEvents;
 
@@ -125,19 +119,21 @@ namespace PrivateWin10
             }
             // When running as worker we need the windows event log
             else if (!Log.UsingEventLog())
-                Log.SetupEventLog(mAppName);
-
-            // execute service commands
-            if (ExecuteCommands())
-                return;
+                Log.SetupEventLog(Key);
 
             // load current version
             exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(exePath);
-            mVersion = fvi.FileMajorPart + "." + fvi.FileMinorPart;
+            Version = fvi.FileMajorPart + "." + fvi.FileMinorPart;
             if (fvi.FileBuildPart != 0)
-                mVersion += (char)('a' + (fvi.FileBuildPart - 1));
+                Version += "." + fvi.FileBuildPart;
+            if (fvi.FilePrivatePart != 0)
+                Version += (char)('a' + (fvi.FilePrivatePart - 1));
             appPath = Path.GetDirectoryName(exePath);
+
+            // execute service commands
+            if (ExecuteCommands())
+                return;
 
             Translate.Load();
 
@@ -156,7 +152,7 @@ namespace PrivateWin10
                 if (progData == null)
                     progData = @"C:\ProgramData";
 
-                dataPath = progData + "\\" + mAppName;
+                dataPath = progData + "\\" + Key;
                 if (!Directory.Exists(dataPath))
                 {
                     Directory.CreateDirectory(dataPath);
@@ -166,23 +162,20 @@ namespace PrivateWin10
                 AppLog.Debug("Config Directory: {0}", dataPath);
             }
 
-            mSession = Process.GetCurrentProcess().SessionId;
+            Session = Process.GetCurrentProcess().SessionId;
 
             // setup custom assembly resolution for x86/x64 synamic compatybility
             AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolveHandler;
 
-            if (!UwpFunc.IsWindows7OrLower)
-            {
-                Console.WriteLine("Initializing app manager...");
-                PkgMgr = new AppManager();
-            }
-
             // is the process starting as a service/worker?
             if (startMode != StartModes.Normal)
             {
-                engine = new Engine();
-                if(startMode == StartModes.Service)
-                    ServiceBase.Run(svc);
+                engine = new Priv10Engine();
+                if (startMode == StartModes.Service)
+                {
+                    using (Priv10Service svc = new Priv10Service())
+                        ServiceBase.Run(svc);
+                }
                 else
                     engine.Run();
                 return;
@@ -190,7 +183,7 @@ namespace PrivateWin10
 
             Thread.CurrentThread.Name = "Gui";
 
-            client = new Priv10Client(mSvcName);
+            client = new Priv10Client();
 
             // Encure wie have the required privilegs
             //if (!AdminFunc.IsDebugging())
@@ -202,7 +195,7 @@ namespace PrivateWin10
                     if (!AdminFunc.IsAdministrator())
                     {
                         AppLog.Debug("Trying to obtain Administrative proivilegs...");
-                        if (AdminFunc.SkipUacRun(mName, App.args))
+                        if (AdminFunc.SkipUacRun(App.Key, App.args))
                             return;
 
                         AppLog.Debug("Trying to start with 'runas'...");
@@ -223,10 +216,10 @@ namespace PrivateWin10
                             //return; // no point in cintinuing without admin rights or an already running engine
                         }
                     }
-                    else if (svc.IsInstalled())
+                    else if (Priv10Service.IsInstalled())
                     {
                         AppLog.Debug("Trying to start service...");
-                        if (svc.Startup())
+                        if (Priv10Service.Startup())
                         {
                             AppLog.Debug("Trying to connect to service...");
 
@@ -241,7 +234,7 @@ namespace PrivateWin10
                 }
                 else if (conRes == -1)
                 {
-                    MessageBox.Show(Translate.fmt("msg_dupliate_session", mName), mName);
+                    MessageBox.Show(Translate.fmt("msg_dupliate_session", Title), Title);
                     return; // no point in cintinuing without admin rights or an already running engine
                 }
             }
@@ -255,7 +248,7 @@ namespace PrivateWin10
             {
                 AppLog.Debug("Starting Engine Thread...");
 
-                engine = new Engine();
+                engine = new Priv10Engine();
 
                 engine.Start();
 
@@ -269,17 +262,17 @@ namespace PrivateWin10
 
             InitLicense();
 
-            mTray = new TrayIcon();
-            mTray.Action += TrayAction;
-            mTray.Visible = GetConfigInt("Startup", "Tray", 0) != 0;
+            TrayIcon = new TrayIcon();
+            TrayIcon.Action += TrayAction;
+            TrayIcon.Visible = (GetConfigInt("Startup", "Tray", 0) != 0) || App.TestArg("-autorun");
 
-            mMainWnd = new MainWindow();
-            if (!App.TestArg("-autorun") || !mTray.Visible)
-                mMainWnd.Show();
+            MainWnd = new MainWindow();
+            if (!App.TestArg("-autorun") || !TrayIcon.Visible)
+                MainWnd.Show();
 
             app.Run();
 
-            mTray.DestroyNotifyicon();
+            TrayIcon.DestroyNotifyicon();
 
             client.Close();
 
@@ -337,6 +330,41 @@ namespace PrivateWin10
                 e.Handled = true;
         }
 
+        static private Dictionary<string, string> AppResourceStrCache = new Dictionary<string, string>();
+        static private ReaderWriterLockSlim AppResourceStrLock = new ReaderWriterLockSlim();
+
+        static public string GetResourceStr(string resourcePath)
+        {
+            if (resourcePath == null)
+                return "";
+            if (resourcePath.Length == 0 || resourcePath[0] != '@')
+                return resourcePath;
+
+            string resourceStr = null;
+            AppResourceStrLock.EnterReadLock();
+            AppResourceStrCache.TryGetValue(resourcePath, out resourceStr);
+            AppResourceStrLock.ExitReadLock();
+            if (resourceStr != null)
+                return resourceStr;
+
+            if (resourcePath.Length > 2 && resourcePath.Substring(0, 2) == "@{")
+            {
+                if (App.engine != null)
+                    resourceStr = App.engine?.PkgMgr?.GetAppResourceStr(resourcePath) ?? resourcePath;
+                else
+                    resourceStr = App.client.GetAppPkgRes(resourcePath);
+            }
+            else
+                resourceStr = MiscFunc.GetResourceStr(resourcePath);
+
+            AppResourceStrLock.EnterWriteLock();
+            if (!AppResourceStrCache.ContainsKey(resourcePath))
+                AppResourceStrCache.Add(resourcePath, resourceStr);
+            AppResourceStrLock.ExitWriteLock();
+
+            return resourceStr;
+        }
+
         static bool ExecuteCommands()
         {
             if (TestArg("-help") || TestArg("/?"))
@@ -347,7 +375,7 @@ namespace PrivateWin10
                                     "========================================",
                                     "",
                                     "-state\t\t\tShow instalation state",
-                                    "-uninstall\t\tUninstall PrivateWinTen",
+                                    "-uninstall\t\tUninstall Private Win10",
                                     "",
                                     "-svc_install\t\tInstall priv10 service (invokes -log_install)",
                                     "-svc_remove\t\tRemove priv10 service",
@@ -373,37 +401,55 @@ namespace PrivateWin10
            
             bool bDone = false;
 
-            if (TestArg("-svc_install"))
-            {
-                AppLog.Debug("Installing Service...");
-                svc.Install(TestArg("-svc_start"));
-                bDone = true;
-            }
-
-            if (TestArg("-log_install") || TestArg("-svc_install")) // service needs the event log
-            {
-                AppLog.Debug("Setting up Event Log...");
-                Log.SetupEventLog(mAppName);
-                bDone = true;
-            }
-
             if (TestArg("-uninstall"))
             {
-                AppLog.Debug("Uninstalling PrivateWinTen");
+                AppLog.Debug("Uninstalling Private Win10");
                 bDone = true;
             }
 
-            if (TestArg("-svc_remove") || (svc.IsInstalled() && TestArg("-uninstall")))
+            if (TestArg("-svc_remove") || (Priv10Service.IsInstalled() && TestArg("-uninstall")))
             {
                 AppLog.Debug("Removing Service...");
-                svc.Uninstall();
+                Priv10Service.Uninstall();
+                bDone = true;
+            }
+
+            if (TestArg("-shutdown") || TestArg("-uninstall"))
+            {
+                AppLog.Debug("Closing instances...");
+                if(Priv10Service.IsInstalled())
+                    Priv10Service.Terminate();
+
+                Thread.Sleep(500);
+
+                foreach (var proc in Process.GetProcessesByName(App.Key))
+                {
+                    if (proc.Id == ProcFunc.CurID)
+                        continue;
+                    proc.Kill();
+                }
+
                 bDone = true;
             }
 
             if (TestArg("-log_remove") || (Log.UsingEventLog() && TestArg("-uninstall")))
             {
                 AppLog.Debug("Removing Event Log...");
-                Log.RemoveEventLog(mAppName);
+                Log.RemoveEventLog(Key);
+                bDone = true;
+            }
+            
+            if (TestArg("-svc_install"))
+            {
+                AppLog.Debug("Installing Service...");
+                Priv10Service.Install(TestArg("-svc_start"));
+                bDone = true;
+            }
+
+            if (TestArg("-log_install") || TestArg("-svc_install")) // service needs the event log
+            {
+                AppLog.Debug("Setting up Event Log...");
+                Log.SetupEventLog(Key);
                 bDone = true;
             }
 
@@ -414,10 +460,10 @@ namespace PrivateWin10
                 bDone = true;
             }
 
-            if (TestArg("-uninstall") && AdminFunc.IsSkipUac(mName))
+            if (TestArg("-uninstall") && AdminFunc.IsSkipUac(App.Key))
             {
                 AppLog.Debug("Removing UAC Bypass...");
-                AdminFunc.SkipUacEnable(mName, false);
+                AdminFunc.SkipUacEnable(App.Key, false);
                 bDone = true;
             }
 
@@ -440,9 +486,9 @@ namespace PrivateWin10
                 Console.Write("Auto Start:\t");
                 Console.WriteLine(App.IsAutoStart());
                 Console.Write("UAC Bypass:\t");
-                Console.WriteLine(AdminFunc.IsSkipUac(mName));
+                Console.WriteLine(AdminFunc.IsSkipUac(App.Key));
                 Console.Write("Service:\t");
-                Console.WriteLine(svc.IsInstalled());
+                Console.WriteLine(Priv10Service.IsInstalled());
                 Console.Write("Event Log:\t");
                 Console.WriteLine(Log.UsingEventLog());
                 Console.Write("Local DNS:\t");
@@ -470,22 +516,22 @@ namespace PrivateWin10
             {
                 case TrayIcon.Actions.ToggleWindow:
                     {
-                        if (mMainWnd.IsVisible)
-                            mMainWnd.Hide();
+                        if (MainWnd.IsVisible)
+                            MainWnd.Hide();
                         else
-                            mMainWnd.Show();
+                            MainWnd.Show();
                         break;
                     }
                 case TrayIcon.Actions.CloseApplication:
                     {
-                        if (svc.IsInstalled())
+                        if (Priv10Service.IsInstalled())
                         {
-                            MessageBoxResult res = MessageBox.Show(Translate.fmt("msg_stop_svc"), App.mName, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                            MessageBoxResult res = MessageBox.Show(Translate.fmt("msg_stop_svc"), App.Title, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
                             switch (res)
                             {
                                 case MessageBoxResult.Yes:
-                                    if(!client.Quit())
-                                        MessageBox.Show(Translate.fmt("msg_stop_svc_err"), App.mName, MessageBoxButton.OK, MessageBoxImage.Stop);
+                                    if(!Priv10Service.Terminate())
+                                        MessageBox.Show(Translate.fmt("msg_stop_svc_err"), App.Title, MessageBoxButton.OK, MessageBoxImage.Stop);
                                     break;
                                 case MessageBoxResult.Cancel:
                                     return;
@@ -553,7 +599,7 @@ namespace PrivateWin10
             IniWriteValue(Section, Key, Value);
         }
 
-        private static string GetINIPath() { return dataPath + "\\" + mAppName + ".ini"; }
+        private static string GetINIPath() { return dataPath + "\\" + Key + ".ini"; }
 
         [DllImport("kernel32")]
         private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
@@ -598,24 +644,24 @@ namespace PrivateWin10
             if (enable)
             {
                 string value = "\"" + System.Reflection.Assembly.GetExecutingAssembly().Location + "\"" + " -autorun";
-                subKey.SetValue("PrivateWin10", value);
+                subKey.SetValue(App.Key, value);
             }
             else
-                subKey.DeleteValue("PrivateWin10", false);
+                subKey.DeleteValue(App.Key, false);
         }
 
         public static bool IsAutoStart()
         {
             var subKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
-            return (subKey != null && subKey.GetValue("PrivateWin10") != null);
+            return (subKey != null && subKey.GetValue(App.Key) != null);
         }
 
         public static void Restart(bool RunAs = false, bool bService = false)
         {
-            if (bService && App.svc.IsInstalled())
+            if (bService && Priv10Service.IsInstalled())
             {
-                App.svc.Terminate();
-                App.svc.Startup();
+                Priv10Service.Terminate();
+                Priv10Service.Startup();
             }
 
             var exeName = Process.GetCurrentProcess().MainModule.FileName;
@@ -691,7 +737,7 @@ namespace PrivateWin10
             string msg = string.Empty;
             LicenseStatus status = LicenseStatus.UNDEFINED;
             if (File.Exists("license.lic"))
-                lic = (MyLicense)LicenseHandler.ParseLicenseFromBASE64String(typeof(MyLicense), File.ReadAllText("license.lic"), certPubicKeyData, out status, out msg);
+                lic = (MyLicense)LicenseHandler.ParseLicenseFromBASE64String(typeof(MyLicense), File.ReadAllText(App.appPath + @"\license.lic"), certPubicKeyData, out status, out msg);
             else
                 msg = "Your copy of this application is not activated";
             if (lic == null)
@@ -701,9 +747,34 @@ namespace PrivateWin10
                 msg = "Your license file is invalid or broken";
 
             if (status == LicenseStatus.INVALID || status == LicenseStatus.CRACKED)
-                MessageBox.Show(msg, App.mName, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(msg, App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
 
             Console.WriteLine(msg);
+
+            if (status != LicenseStatus.VALID)
+            {
+                string use = App.GetConfig("Startup", "Usage", "");
+                if (use.Equals("business", StringComparison.OrdinalIgnoreCase) || use.Equals("commertial", StringComparison.OrdinalIgnoreCase))
+                {
+                    lic.CommercialUse = true;
+
+                    if (IsEvaluationExpired())
+                    {
+                        MessageBox.Show("The commercial evaluation period of PrivateWin10 has expired, please purchase an appropriate license.", string.Empty, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+            }
+        }
+
+        public static DateTime GetInstallDate()
+        {
+            FileInfo info = new FileInfo(exePath);
+            return MiscFunc.Min(info.CreationTime, info.LastWriteTime);
+        }
+
+        public static bool IsEvaluationExpired()
+        {
+            return App.GetInstallDate().AddDays(30) < DateTime.Now;
         }
     }
 }

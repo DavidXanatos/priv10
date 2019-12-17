@@ -32,6 +32,7 @@ namespace PrivateWin10.Pages
             this.chkService.Content = Translate.fmt("chk_instal_svc");
             this.chkNoUAC.Content = Translate.fmt("chk_no_uac");
 
+            this.lblPrivacy.Text = Translate.fmt("lbl_tweak_guard");
             this.chkTweakCheck.Content = Translate.fmt("chk_tweak_check");
             this.chkTweakFix.Content = Translate.fmt("chk_tweak_fix");
 
@@ -55,12 +56,12 @@ namespace PrivateWin10.Pages
             this.lblAuditBlock.Content = Translate.fmt("lbl_audit_blocked");
             this.lblAuditNone.Content = Translate.fmt("lbl_audit_off");
 
-            // todo: xxx
-            //chkDnsInspector
-            //lblDNS
-            //chkEnableDNS
-            //chkLocalDNS
-            //lblRootDNS
+            this.chkDnsInspector.Content = Translate.fmt("lbl_use_inspector");
+            this.chkReverseDNS.Content = Translate.fmt("lbl_use_rev_dns");
+            this.lblDNS.Text = Translate.fmt("lbl_dns_proxy");
+            this.chkEnableDNS.Content = Translate.fmt("lbl_use_dns_proxy");
+            this.chkLocalDNS.Content = Translate.fmt("lbl_setup_dns");
+            this.lblRootDNS.Content = Translate.fmt("lbl_dns_root");
 
             WpfFunc.CmbAdd(this.cmbRootDNS, "Google", "8.8.8.8|8.8.4.4");
             WpfFunc.CmbAdd(this.cmbRootDNS, "OpenDNS", "208.67.222.222|208.67.220.220");
@@ -90,8 +91,8 @@ namespace PrivateWin10.Pages
 
             chkTray.IsChecked = App.GetConfigInt("Startup", "Tray") != 0;
             chkAutoStart.IsChecked = App.IsAutoStart();
-            chkService.IsChecked = App.svc.IsInstalled();
-            chkNoUAC.IsChecked = AdminFunc.IsSkipUac(App.mName);
+            chkService.IsChecked = Priv10Service.IsInstalled();
+            chkNoUAC.IsChecked = AdminFunc.IsSkipUac(App.Key);
 
             chkTweakCheck.IsChecked = App.GetConfigInt("TweakGuard", "AutoCheck", 1) != 0;
             chkTweakFix.IsEnabled = chkTweakCheck.IsChecked == true;
@@ -115,6 +116,7 @@ namespace PrivateWin10.Pages
                     default: cmbAudit.SelectedItem = lblAuditNone; break;
                 }
 
+                chkGuardFW.IsEnabled = chkUseFW.IsChecked == true;
                 chkGuardFW.IsChecked = App.client.IsFirewallGuard();
 
                 chkEnableDNS.IsChecked = App.GetConfigInt("DnsProxy", "Enabled", 0) != 0;
@@ -139,13 +141,15 @@ namespace PrivateWin10.Pages
             radDisable.IsChecked = fix_mode == (int)FirewallGuard.Mode.Disable;
             radAlert.IsChecked = fix_mode == (int)FirewallGuard.Mode.Alert;
 
-            radFix.IsEnabled = radDisable.IsEnabled = radAlert.IsEnabled = chkGuardFW.IsChecked != false;
+            radFix.IsEnabled = radDisable.IsEnabled = radAlert.IsEnabled = (chkGuardFW.IsChecked != false && chkGuardFW.IsEnabled);
 
 
             chkNotifyFW.IsEnabled = chkUseFW.IsChecked == true;
             chkNotifyFW.IsChecked = App.GetConfigInt("Firewall", "NotifyBlocked", 1) != 0;
 
             chkDnsInspector.IsChecked = App.GetConfigInt("DnsInspector", "Enabled", 0) != 0;
+
+            chkReverseDNS.IsChecked = App.GetConfigInt("DnsInspector", "UseReverseDNS", 0) != 0;
 
             // DNS
             chkLocalDNS.IsChecked = App.GetConfigInt("DnsProxy", "SetLocal", 0) != 0;
@@ -162,7 +166,7 @@ namespace PrivateWin10.Pages
             if (bHold) return;
 
             App.SetConfig("Startup", "Tray", chkTray.IsChecked == true);
-            App.mTray.Visible = chkTray.IsChecked == true;
+            App.TrayIcon.Visible = chkTray.IsChecked == true;
         }
 
         private void chkAutoStart_Click(object sender, RoutedEventArgs e)
@@ -178,7 +182,7 @@ namespace PrivateWin10.Pages
 
             if (!AdminFunc.IsAdministrator())
             {
-                if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.mName), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.Title), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     App.Restart(true);
                 return;
             }
@@ -193,23 +197,23 @@ namespace PrivateWin10.Pages
                     App.engine = null;
                 }
 
-                App.svc.Install(true);
-                App.Log.SetupEventLog(App.mAppName);
+                Priv10Service.Install(true);
+                App.Log.SetupEventLog(App.Key);
             }
             else
             {
-                App.svc.Uninstall();
+                Priv10Service.Uninstall();
 
                 if (App.engine == null)
                 {
-                    App.engine = new Engine();
+                    App.engine = new Priv10Engine();
 
                     App.engine.Start();
                 }
             }
             App.client.Connect();
 
-            App.mMainWnd.UpdateEnabled();
+            App.MainWnd.UpdateEnabled();
         }
 
         private void chkNoUAC_Click(object sender, RoutedEventArgs e)
@@ -218,12 +222,12 @@ namespace PrivateWin10.Pages
 
             if (!AdminFunc.IsAdministrator())
             {
-                if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.mName), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.Title), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     App.Restart(true);
                 return;
             }
 
-            AdminFunc.SkipUacEnable(App.mName, chkNoUAC.IsChecked == true);
+            AdminFunc.SkipUacEnable(App.Key, chkNoUAC.IsChecked == true);
         }
 
         private void radMode_Checked(object sender, RoutedEventArgs e)
@@ -263,16 +267,17 @@ namespace PrivateWin10.Pages
 
             if (chkUseFW.IsChecked == true)
             {
-                chkNotifyFW.IsEnabled = true;
                 cmbAudit.SelectedItem = lblAuditAll;
                 radWhitelist.IsChecked = true;
             }
             else
             {
-                chkNotifyFW.IsEnabled = false;
                 cmbAudit.SelectedItem = lblAuditNone;
                 radBlacklist.IsChecked = true;
             }
+
+            chkNotifyFW.IsEnabled = chkUseFW.IsChecked == true;
+            chkGuardFW.IsEnabled = chkUseFW.IsChecked == true;
 
             App.SetConfig("Firewall", "Enabled", chkUseFW.IsChecked == true ? 1 : 0);
         }
@@ -335,6 +340,14 @@ namespace PrivateWin10.Pages
             App.client.SetupDnsInspector(chkDnsInspector.IsChecked == true);
         }
 
+        private void ChkReverseDNS_Click(object sender, RoutedEventArgs e)
+        {
+            if (bHold) return;
+
+            App.SetConfig("DnsInspector", "UseReverseDNS", chkReverseDNS.IsChecked == true ? 1 : 0);
+        }
+
+        
         private void ChkEnableDNS_Click(object sender, RoutedEventArgs e)
         {
             ConfigureDNS();
@@ -373,14 +386,14 @@ namespace PrivateWin10.Pages
 
             if (!App.client.ConfigureDNSProxy(chkEnableDNS.IsChecked == true, setLocal ? chkLocalDNS.IsChecked : null, UpstreamDNS))
             {
-                MessageBox.Show(Translate.fmt("msg_dns_proxy_err", App.GetConfigInt("DNSProxy", "Port", DnsProxyServer.DEFAULT_PORT)), App.mName, MessageBoxButton.OK, MessageBoxImage.Stop);
+                MessageBox.Show(Translate.fmt("msg_dns_proxy_err", App.GetConfigInt("DNSProxy", "Port", DnsProxyServer.DEFAULT_PORT)), App.Title, MessageBoxButton.OK, MessageBoxImage.Stop);
 
                 bHold = true;
                 App.SetConfig("DnsProxy", "Enabled", 0);
                 chkEnableDNS.IsChecked = false;
                 bHold = false;
             }
-            App.mMainWnd.UpdateEnabled();
+            App.MainWnd.UpdateEnabled();
         }
 
         private void CheckDNS()

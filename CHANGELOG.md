@@ -3,6 +3,104 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.71] - 2019-12-16
+
+### Added
+- added side bar button tooltips
+- added cleanup options for DNS inspector
+- added cname host mane display
+
+### Changed
+- when sellecting the "All processes" placeholder entry the detail tabs (except rules) shows data of all processes
+- reduced cpu usage when sorting the program tree
+- improved firewall settign handling
+- changed settings layout
+- reworked app package handling to peoperly operate as a service
+- simple list is now availabel also in "full height" view mode
+
+### Fixed
+- issue with socket associaction resulting in memory leak
+- issues with rule guard enaling/disabling
+- fixed issues when running priv 10 not as admin
+- fixed issue with DNS cache
+- fixed minor issue with process monitor commandline handling
+
+
+
+
+## [0.70] - 2019-12-14
+
+### Added
+- improved the DNS Inspector
+	- added uplpad/download per domain
+	- added listing of unresolved IP's
+	- added udp endpoint logging
+- added proces monitor using ETW events to capture paths of processes that terminate quickly
+- added missing localization to all the new UI elements
+- added todal up/down-load per socket and per program columns
+
+### Changed
+- improved text filters
+
+### Fixed
+- fixed issue with reverse dns in dns inspector
+- fixed issue with etw event tracking for UDP traffic
+
+
+
+## [0.65.2] - 2019-12-13
+
+### Fixed
+- fixed crash when deleting program items
+- fixed issue with program cleanup ribbon bottons
+- fixed issues with manual blocklist update
+- fixed inconsistencies with access mode filter
+- fixed issue installer was instaling to "Program Files(x86)" instead of "Program Files", uninstall and re install to fix the path
+- fixed some translation strings
+
+
+
+## [0.65.1] - 2019-12-10
+
+### Added
+- added a propper setup
+- added setting for using reverse DNS
+
+### Changed
+- changed drive letter resolcong cache strategy
+
+### Fixed
+- fixed service not proeprly terminating
+- fixed issues with service status querying
+- fixed issue with notification window oppening unnececerly on a delayed hostname update
+
+
+## [0.65] - 2019-12-04
+
+### Added
+- added new program view mode a verbose program tree, that auto enables when the program column ist stretched wider
+- added program context menu
+- added additional program options to the ribbon toolbar
+- added view modes fill screan, full height, full screen 
+- dns query log context menu with options to whitelist and blacklist entries
+- double clicking a domain in the whitelist/blacklist view copys it to the entry edit for editing
+
+
+
+## [0.65] - 2019-12-04
+
+### Added
+- added new program view mode a verbose program tree, that auto enables when the program column ist stretched wider
+- added program context menu
+- added additional program options to the ribbon toolbar
+- added view modes fill screan, full height, full screen 
+- dns query log context menu with options to whitelist and blacklist entries
+- double clicking a domain in the whitelist/blacklist view copys it to the entry edit for editing
+
+### Changed
+
+### Fixed
+
 ## [0.60.1] - 2019-12-01
 
 ### Added

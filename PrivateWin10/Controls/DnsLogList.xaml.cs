@@ -28,7 +28,7 @@ namespace PrivateWin10.Controls
 
         public FirewallPage firewallPage = null;
 
-        string mDnsFilter = "";
+        string textFilter = "";
 
         ObservableCollection<DnsItem> LogList;
 
@@ -40,7 +40,10 @@ namespace PrivateWin10.Controls
             this.dnsGrid.Columns[2].Header = Translate.fmt("lbl_host_name");
             this.dnsGrid.Columns[3].Header = Translate.fmt("lbl_last_seen");
             this.dnsGrid.Columns[4].Header = Translate.fmt("lbl_seen_count");
-            this.dnsGrid.Columns[5].Header = Translate.fmt("lbl_program");
+            this.dnsGrid.Columns[5].Header = Translate.fmt("lbl_con_count");
+            this.dnsGrid.Columns[6].Header = Translate.fmt("lbl_uploaded");
+            this.dnsGrid.Columns[7].Header = Translate.fmt("lbl_downloaded");
+            this.dnsGrid.Columns[8].Header = Translate.fmt("lbl_program");
 
             dnsGridExt = new DataGridExt(dnsGrid);
             dnsGridExt.Restore(App.GetConfig("GUI", "dnsGrid_Columns", ""));
@@ -48,8 +51,8 @@ namespace PrivateWin10.Controls
             LogList = new ObservableCollection<DnsItem>();
             dnsGrid.ItemsSource = LogList;
 
-            mDnsFilter = App.GetConfig("GUI", "DnsFilter", "");
-            txtDnsFilter.Text = mDnsFilter;
+            textFilter = App.GetConfig("GUI", "DnsFilter", "");
+            txtDnsFilter.Text = textFilter;
 
             CheckLogEntries();
         }
@@ -71,11 +74,10 @@ namespace PrivateWin10.Controls
             foreach (DnsItem oldItem in LogList)
                 oldLog.Add(oldItem.entry.guid, oldItem);
 
-            Dictionary<Guid, List<Program.DnsEntry>> entries = App.client.GetDomains(firewallPage.GetCurGuids(mDnsFilter));
+            Dictionary<Guid, List<Program.DnsEntry>> entries = App.client.GetDomains(firewallPage.GetCurGuids());
             foreach (var entrySet in entries)
             {
-                ProgramControl item = null;
-                ProgramSet prog = firewallPage.GetProgSet(entrySet.Key, null, out item);
+                ProgramSet prog = firewallPage.GetProgSet(entrySet.Key);
                 if (prog == null)
                     continue;
 
@@ -120,14 +122,55 @@ namespace PrivateWin10.Controls
             CheckLogEntries();
         }
 
+        static int VALIDATION_DELAY = 1000;
+        System.Threading.Timer timer = null;
+
         private void txtDnsFilter_TextChanged(object sender, TextChangedEventArgs e)
         {
-            mDnsFilter = txtDnsFilter.Text;
-            App.SetConfig("GUI", "DnsFilter", mDnsFilter);
-            UpdateDnsLog(true);
+            textFilter = txtDnsFilter.Text;
+            App.SetConfig("GUI", "DnsFilter", textFilter);
+            //UpdateDnsLog(true);
+
+            DisposeTimer();
+            timer = new System.Threading.Timer(TimerElapsed, null, VALIDATION_DELAY, VALIDATION_DELAY);
+
         }
 
+        private void TimerElapsed(Object obj)
+        {
+            this.Dispatcher.Invoke(new Action(() => {
+                dnsGrid.Items.Filter = new Predicate<object>(item => LogFilter(item));
+            }));
+            
+            DisposeTimer();
+        }
 
+        private void DisposeTimer()
+        {
+            if (timer != null)
+            {
+                timer.Dispose();
+                timer = null;
+            }
+        }
+
+        private bool LogFilter(object obj)
+        {
+            var item = obj as DnsItem;
+
+            if (item.TestFilter(textFilter))
+                return false;
+            return true;
+        }
+
+        public void ClearLog()
+        {
+            if (MessageBox.Show(Translate.fmt("msg_clear_dns"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                return;
+
+            if (App.client.ClearDnsLog())
+                LogList.Clear();
+        }
 
         /////////////////////////////////
         /// DnsItem
@@ -143,12 +186,27 @@ namespace PrivateWin10.Controls
                 this.name = name != null ? name : "[unknown progream]";
             }
 
+            public bool TestFilter(string textFilter)
+            {
+                string strings = this.Name;
+                strings += " " + this.HostName;
+                strings += " " + this.LastSeen;
+                strings += " " + this.SeenCount;
+                strings += " " + this.ConnectionCount;
+                strings += " " + this.Uploaded;
+                strings += " " + this.Downloaded;
+                return FirewallPage.DoFilter(textFilter, strings, new List<ProgramID>() { this.entry.ProgID });
+            }
+
             public ImageSource Icon { get { return ImgFunc.GetIcon(entry.ProgID.Path, 16); } }
 
             public string Name { get { return name; } }
             public string HostName { get { return entry.HostName; } }
-            public string LastSeen { get { return entry.LastSeen.ToString("HH:mm:ss dd.MM.yyyy"); } }
+            public DateTime LastSeen { get { return entry.LastSeen; } }
             public int SeenCount { get { return entry.SeenCounter; } }
+            public int ConnectionCount { get { return entry.ConCounter; } }
+            public UInt64 Uploaded{ get { return entry.TotalUpload; } }
+            public UInt64 Downloaded { get { return entry.TotalDownload; } }
             public string Program { get { return entry.ProgID.FormatString(); } }
             
             void UpdateValue<T>(ref T value, T new_value, string Name)
@@ -161,8 +219,11 @@ namespace PrivateWin10.Controls
 
             internal void Update(Program.DnsEntry new_entry)
             {
-                UpdateValue(ref entry.LastSeen, new_entry.LastSeen, "LastSeen");
                 UpdateValue(ref entry.SeenCounter, new_entry.SeenCounter, "SeenCount");
+                UpdateValue(ref entry.ConCounter, new_entry.ConCounter, "ConnectionCount");
+                UpdateValue(ref entry.LastSeen, new_entry.LastSeen, "LastSeen");
+                UpdateValue(ref entry.TotalDownload, new_entry.TotalDownload, "Downloaded");
+                UpdateValue(ref entry.TotalUpload, new_entry.TotalUpload, "Uploaded");
             }
 
             #region INotifyPropertyChanged Members

@@ -29,16 +29,27 @@ namespace PrivateWin10.Pages
         public AboutPage()
         {
             InitializeComponent();
-            lblTitle.Content = App.mName;
-            lblVerNum.Content = App.mVersion;
+            lblTitle.Content = App.Title;
+            lblVerNum.Content = App.Version;
             //lblHWID.Content = App.lic.GetUID();
 
-            lblLicenseState.Content = "License Type: Freeware for private, non commercial use.";
-            lblLicenseUser.Content = "";
             if (App.lic.LicenseStatus == LicenseStatus.UNDEFINED)
             {
+                if (App.lic.CommercialUse)
+                {
+                    if (App.IsEvaluationExpired())
+                        lblLicenseState.Content = "License Type: Evaluation license EXPIRED !!!";
+                    else
+                        lblLicenseState.Content = "License Type: Evaluation license for Commercial Use";
+                }
+                else
+                {
+                    lblLicenseState.Content = "License Type: Freeware for private, non commercial use.";
+                }
+                lblLicenseUser.Content = "";
+
                 //lblUser.Content = TextHelpers.Split2(System.Security.Principal.WindowsIdentity.GetCurrent().Name, "\\").Item2;
-                //lblSupporting.Content = "why are you not supporting Private WinTen? 😢";
+                //lblSupporting.Content = "why are you not supporting Private Win10? 😢";
             }
             else if (App.lic.LicenseStatus == LicenseStatus.VALID)
             {
@@ -56,7 +67,7 @@ namespace PrivateWin10.Pages
                     lblLicenseUser.Content = "Licensed To: " + App.lic.LicenseName;
 
                     //lblUser.Content = App.lic.LicenseName;
-                    //lblSupporting.Content = "is supporting Private WinTen, great! 😀";
+                    //lblSupporting.Content = "is supporting Private Win10, great! 😀";
                 }
             }
             else

@@ -361,7 +361,7 @@ namespace PrivateWin10
             {
                 switch (Type)
                 {
-                    case TweakType.DisableService: return ServiceHelper.GetServiceStatus(Key) != ServiceHelper.ServiceState.NotFound;
+                    case TweakType.DisableService: return ServiceHelper.GetServiceState(Key) != ServiceHelper.ServiceState.NotFound;
                     case TweakType.DisableTask: return TweakEngine.IsTaskPresent(Path, Key);
                     case TweakType.BlockFile:
                     {

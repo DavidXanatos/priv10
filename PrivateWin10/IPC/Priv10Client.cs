@@ -10,9 +10,9 @@ namespace PrivateWin10
 {
     public class Priv10Client: PipeClient
     {
-        public Priv10Client(string name)
+        public Priv10Client()
         {
-            Name = name;
+            Name = App.SvcName;
         }
 
         /////////////////////////////////////////
@@ -103,7 +103,7 @@ namespace PrivateWin10
             return RemoteExec("RemoveRule", rule, false);
         }
 
-        public int SetRuleApproval(Engine.ApprovalMode Mode, FirewallRule rule)
+        public int SetRuleApproval(Priv10Engine.ApprovalMode Mode, FirewallRule rule)
         {
             return RemoteExec("SetRuleApproval", new object[2] { Mode, rule }, 0);
         }
@@ -117,7 +117,12 @@ namespace PrivateWin10
         {
             return RemoteExec("ClearLog", ClearSecLog, false);
         }
-        
+
+        public bool ClearDnsLog()
+        {
+            return RemoteExec("ClearDnsLog", null, false);
+        }
+
         public int CleanUpPrograms(bool ExtendedCleanup = false)
         {
             return RemoteExec("CleanUpPrograms", ExtendedCleanup, 0);
@@ -146,6 +151,16 @@ namespace PrivateWin10
         public Dictionary<Guid, List<Program.DnsEntry>> GetDomains(List<Guid> guids = null)
         {
             return RemoteExec<Dictionary<Guid, List<Program.DnsEntry>>>("GetDomains", guids, null);
+        }
+
+        public List<UwpFunc.AppInfo> GetAllAppPkgs(bool bReload = false)
+        {
+            return RemoteExec<List<UwpFunc.AppInfo>>("GetAllAppPkgs", bReload, null);
+        }
+
+        public string GetAppPkgRes(string str)
+        {
+            return RemoteExec("GetAppPkgRes", str, str);
         }
 
         /////////////////////////////////////////
@@ -225,14 +240,14 @@ namespace PrivateWin10
         /////////////////////////////////////////
         // Misc
 
-        public bool Quit()
+        /*public bool Quit()
         {
             return RemoteExec("Quit", null, false);
-        }
+        }*/
 
 
-        public event EventHandler<Engine.FwEventArgs> ActivityNotification;
-        public event EventHandler<Engine.ChangeArgs> ChangeNotification;
+        public event EventHandler<Priv10Engine.FwEventArgs> ActivityNotification;
+        public event EventHandler<Priv10Engine.ChangeArgs> ChangeNotification;
         
 
         public override void HandlePushNotification(string func, object args)
@@ -245,13 +260,13 @@ namespace PrivateWin10
                 if (func == "ActivityNotification")
                 {
                     Application.Current.Dispatcher.BeginInvoke(new Action(() => {
-                        ActivityNotification?.Invoke(this, (Engine.FwEventArgs)args);
+                        ActivityNotification?.Invoke(this, (Priv10Engine.FwEventArgs)args);
                     }));
                 }
                 else if (func == "ChangeNotification")
                 {
                     Application.Current.Dispatcher.BeginInvoke(new Action(() => {
-                        ChangeNotification?.Invoke(this, (Engine.ChangeArgs)args);
+                        ChangeNotification?.Invoke(this, (Priv10Engine.ChangeArgs)args);
                     }));   
                 }
                 else

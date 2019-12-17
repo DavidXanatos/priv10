@@ -57,7 +57,7 @@ namespace PrivateWin10
             }
             catch
             {
-                AppLog.Debug("Failed to initialized DnsInspectorETW");
+                App.LogError("Failed to initialized DnsInspectorETW");
             }
         }
 

@@ -328,7 +328,7 @@ namespace PrivateWin10.Pages
             if (TweakManager.HasAdministrator())
                 return true;
 
-            if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.mName), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessageBox.Show(Translate.fmt("msg_admin_prompt", App.Title), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 App.Restart(true);
             return false;
         }

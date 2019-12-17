@@ -12,7 +12,7 @@ namespace PrivateWin10
     {
         public Guid guid;
         public ProgramID ProgID;
-        public bool Assigned;
+        public Program Program = null;
         public UInt64 RemovedTimeStamp = 0;
 
         public UInt64 HashID;
@@ -30,12 +30,14 @@ namespace PrivateWin10
         public Tuple<int, int> Access = Tuple.Create(0, 0); // outbound, inbound
 
         public NetworkStats Stats;
+        public DateTime LastActivity;
 
         public NetworkSocket()
         {
             guid = Guid.NewGuid();
 
             Stats = new NetworkStats();
+            LastActivity = DateTime.Now;
         }
 
         public NetworkSocket(int processId, UInt32 protocolType, IPAddress localAddress, UInt16 localPort, IPAddress remoteAddress, UInt16 remotePort)
@@ -43,6 +45,7 @@ namespace PrivateWin10
             guid = Guid.NewGuid();
 
             Stats = new NetworkStats();
+            LastActivity = DateTime.Now;
 
             ProcessId = processId;
 
@@ -57,14 +60,29 @@ namespace PrivateWin10
 
         public void Update(IPHelper.I_SOCKET_ROW socketRow, UInt64 Interval)
         {
-            State = (int)socketRow.State;
+            if (socketRow != null)
+            {
+                State = (int)socketRow.State;
+            }
+
+            // a program may have been removed than the sockets get unasigned and has to be re asigned
+            if (Program == null)
+            {
+                Program prog = ProgID == null ? null : App.engine.ProgramList.GetProgram(ProgID, true, ProgramList.FuzzyModes.Any);
+                if (prog != null)
+                {
+                    Program = prog;
+                    prog.AddSocket(this);
+                    Access = prog.LookupRuleAccess(this);
+                }
+            }
 
             Stats.Update(Interval);
         }
 
         public static UInt64 MkHash(int processId, UInt32 protocolType, IPAddress localAddress, UInt16 localPort, IPAddress remoteAddress, UInt16 remotePort)
         {
-	        if ((protocolType & (UInt32)IPHelper.AF_PROT.UDP) != 0)
+	        if ((protocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP)
 		        remotePort = 0;
 
             UInt64 HashID = ((UInt64)localPort << 0) | ((UInt64)remotePort << 16) | ((UInt64)processId << 32);
@@ -93,7 +111,7 @@ namespace PrivateWin10
             if (ProtocolType != protocolType)
                 return false;
 
-            if ((ProtocolType & ((UInt32)IPHelper.AF_PROT.TCP | (UInt32)IPHelper.AF_PROT.UDP)) != 0)
+            if ((ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == (UInt32)IPHelper.AF_PROT.TCP || (ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP)
             {
                 if (LocalPort != localPort)
                     return false;
@@ -107,9 +125,9 @@ namespace PrivateWin10
             }
 
             // don't test the remote endpoint if this is a udp socket
-            if (mode == MatchMode.Strict || (ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) != 0)
+            if (mode == MatchMode.Strict || (ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == (UInt32)IPHelper.AF_PROT.TCP)
             {
-                if ((ProtocolType & ((UInt32)IPHelper.AF_PROT.TCP | (UInt32)IPHelper.AF_PROT.UDP)) != 0)
+                if ((ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == (UInt32)IPHelper.AF_PROT.TCP || (ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP)
                 {
                     if (RemotePort != remotePort)
                         return false;
@@ -125,11 +143,13 @@ namespace PrivateWin10
         public void CountUpload(uint transferSize)
         {
             Stats.SentBytes += transferSize;
+            LastActivity = DateTime.Now;
         }
 
         public void CountDownload(uint transferSize)
         {
             Stats.ReceivedBytes += transferSize;
+            LastActivity = DateTime.Now;
         }
 
         public string GetStateString()
@@ -137,7 +157,7 @@ namespace PrivateWin10
             if(RemovedTimeStamp != 0)
                 return Translate.fmt("str_closed");
 
-            if ((ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) != 0)
+            if ((ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP)
             {
                 if (State == (int)IPHelper.MIB_TCP_STATE.CLOSED)
                     return Translate.fmt("str_closed");

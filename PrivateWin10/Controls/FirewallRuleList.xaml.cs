@@ -198,7 +198,7 @@ namespace PrivateWin10.Controls
             foreach (RuleItem oldItem in RulesList)
                 oldRules.Add(oldItem.Rule.guid, oldItem);
 
-            Dictionary<Guid, List<FirewallRuleEx>> rules = App.client.GetRules(firewallPage.GetCurGuids());
+            Dictionary<Guid, List<FirewallRuleEx>> rules = App.client.GetRules(firewallPage.GetCurGuids(true));
             foreach (var ruleSet in rules)
             {
                 foreach (FirewallRuleEx rule in ruleSet.Value)
@@ -243,7 +243,7 @@ namespace PrivateWin10.Controls
         {
             int Count = App.client.CleanUpRules();
 
-            MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.mName, MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.Title, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void btnEditRule_Click(object sender, RoutedEventArgs e)
@@ -281,7 +281,7 @@ namespace PrivateWin10.Controls
 
         private void btnRemoveRule_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_remove_rules"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_remove_rules"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             foreach (RuleItem item in rulesGrid.SelectedItems)
@@ -308,7 +308,7 @@ namespace PrivateWin10.Controls
 
         private void btnCloneRule_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_clone_rules"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_clone_rules"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             foreach (RuleItem item in rulesGrid.SelectedItems)
@@ -322,43 +322,43 @@ namespace PrivateWin10.Controls
         private void btnApproveRule_Click(object sender, RoutedEventArgs e)
         {
             foreach (RuleItem item in rulesGrid.SelectedItems)
-                App.client.SetRuleApproval(Engine.ApprovalMode.ApproveCurrent, item.Rule);
+                App.client.SetRuleApproval(Priv10Engine.ApprovalMode.ApproveCurrent, item.Rule);
         }
 
         private void btnRestoreRule_Click(object sender, RoutedEventArgs e)
         {
             foreach (RuleItem item in rulesGrid.SelectedItems)
-                App.client.SetRuleApproval(Engine.ApprovalMode.RestoreRules, item.Rule);
+                App.client.SetRuleApproval(Priv10Engine.ApprovalMode.RestoreRules, item.Rule);
         }
 
         private void btnRedoRule_Click(object sender, RoutedEventArgs e)
         {
             foreach (RuleItem item in rulesGrid.SelectedItems)
-                App.client.SetRuleApproval(Engine.ApprovalMode.ApproveChanges, item.Rule);
+                App.client.SetRuleApproval(Priv10Engine.ApprovalMode.ApproveChanges, item.Rule);
         }
 
         private void btnApproveAllRules_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_approve_all"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_approve_all"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
-            App.client.SetRuleApproval(Engine.ApprovalMode.ApproveCurrent, null);
+            App.client.SetRuleApproval(Priv10Engine.ApprovalMode.ApproveCurrent, null);
         }
 
         private void btnRestoreAllRules_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_restore_all"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_restore_all"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
-            App.client.SetRuleApproval(Engine.ApprovalMode.RestoreRules, null);
+            App.client.SetRuleApproval(Priv10Engine.ApprovalMode.RestoreRules, null);
         }
 
         private void btnRedoAllRules_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_apply_all"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_apply_all"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
-            App.client.SetRuleApproval(Engine.ApprovalMode.ApproveChanges, null);
+            App.client.SetRuleApproval(Priv10Engine.ApprovalMode.ApproveChanges, null);
         }
 
         private void chkNoDisabled_Click(object sender, RoutedEventArgs e)
@@ -369,13 +369,36 @@ namespace PrivateWin10.Controls
             rulesGrid.Items.Filter = new Predicate<object>(item => RuleFilter(item));
         }
 
+        static int VALIDATION_DELAY = 1000;
+        System.Threading.Timer timer = null;
+
         private void txtRuleFilter_TextChanged(object sender, TextChangedEventArgs e)
         {
             textFilter = txtRuleFilter.Text;
             App.SetConfig("FwRules", "Filter", textFilter);
             //UpdateRules(true);
 
-            rulesGrid.Items.Filter = new Predicate<object>(item => RuleFilter(item));
+            DisposeTimer();
+            timer = new System.Threading.Timer(TimerElapsed, null, VALIDATION_DELAY, VALIDATION_DELAY);
+            
+        }
+       
+        private void TimerElapsed(Object obj)
+        {
+            this.Dispatcher.Invoke(new Action(() => {
+                rulesGrid.Items.Filter = new Predicate<object>(item => RuleFilter(item));
+            }));
+            
+            DisposeTimer();
+        }
+
+        private void DisposeTimer()
+        {
+            if (timer != null)
+            {
+                timer.Dispose();
+                timer = null;
+            }
         }
 
         private void CmbDirection_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -417,7 +440,7 @@ namespace PrivateWin10.Controls
             if (chkNoDisabled.IsChecked == true && item.Rule.Enabled == false)
                 return false;
 
-            if (FirewallPage.DoFilter(textFilter, item.Name, new List<ProgramID>() { item.Rule.ProgID }))
+            if (item.TestFilter(textFilter))
                 return false;
             return true;
         }
@@ -506,19 +529,29 @@ namespace PrivateWin10.Controls
                 Rule = rule;
             }
 
-            public ImageSource Icon { get { return ImgFunc.GetIcon(Rule.ProgID.Path, 16); } }
-
-            public string Name
+            public bool TestFilter(string textFilter)
             {
-                get
-                {
-                    if (Rule.Name.Length > 2 && Rule.Name.Substring(0, 2) == "@{" && App.PkgMgr != null)
-                        return App.PkgMgr.GetAppResourceStr(Rule.Name);
-                    else if (Rule.Name.Length > 1 && Rule.Name.Substring(0, 1) == "@")
-                        return MiscFunc.GetResourceStr(Rule.Name);
-                    return Rule.Name;
-                }
+                string strings = this.Name;
+                strings += " " + this.Grouping;
+                strings += " " + this.Index;
+                strings += " " + this.Enabled;
+                strings += " " + this.Profiles;
+                strings += " " + this.Action;
+                strings += " " + this.Direction;
+                strings += " " + this.Protocol;
+                strings += " " + this.DestAddress;
+                strings += " " + this.DestPorts;
+                strings += " " + this.SrcAddress;
+                strings += " " + this.SrcPorts;
+                strings += " " + this.ICMPOptions;
+                strings += " " + this.Interfaces;
+                strings += " " + this.EdgeTraversal;
+                return FirewallPage.DoFilter(textFilter, strings, new List<ProgramID>() { this.Rule.ProgID });
             }
+
+            public ImageSource Icon { get { return ImgFunc.GetIcon(Rule.ProgID.Path, 16); } }
+            public string Name { get { return App.GetResourceStr(Rule.Name); } }
+
             public string Program { get { return Rule.ProgID.FormatString(); } }
 
             public string Grouping

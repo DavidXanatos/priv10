@@ -24,11 +24,25 @@ namespace PrivateWin10.Controls
     {
         ObservableCollection<BlocklistItem> BlocklistList;
 
-        DataGridExt listGridExt;
+        public DataGridExt listGridExt;
 
         public DnsBlockListsControl()
         {
             InitializeComponent();
+
+            this.caption.Text = Translate.fmt("btn_blocklists");
+            this.lblHint.Text = Translate.fmt("btn_blocklist_hint");
+            this.btnAdd.Content = Translate.fmt("btn_add_blocklist");
+
+
+            this.listGrid.Columns[0].Header = Translate.fmt("str_list");
+            this.listGrid.Columns[1].Header = Translate.fmt("lbl_last_update");
+            this.listGrid.Columns[2].Header = Translate.fmt("lbl_entry_count");
+            this.listGrid.Columns[3].Header = Translate.fmt("lbl_status");
+
+            this.btnDefault.Content = Translate.fmt("lbl_defaults");
+            this.btnRemove.Content = Translate.fmt("lbl_remove");
+            this.btnUpdate.Content = Translate.fmt("lbl_update");
 
             btnAdd.IsEnabled = false;
             btnRemove.IsEnabled = btnUpdate.IsEnabled = false;
@@ -71,7 +85,7 @@ namespace PrivateWin10.Controls
             {
                 if (Item.Blocklist.Url.Equals(Url))
                 {
-                    MessageBox.Show(Translate.fmt("msg_dns_filter_dup"), App.mName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    MessageBox.Show(Translate.fmt("msg_dns_filter_dup"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     return;
                 }
             }
@@ -92,7 +106,7 @@ namespace PrivateWin10.Controls
 
         private void BtnRemove_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_remove_items"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_remove_items"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             foreach (BlocklistItem Item in new List<BlocklistItem>(listGrid.SelectedItems.Cast<BlocklistItem>())) // copy
@@ -107,7 +121,6 @@ namespace PrivateWin10.Controls
         {
             foreach (BlocklistItem Item in new List<BlocklistItem>(listGrid.SelectedItems.Cast<BlocklistItem>()))
             {
-                BlocklistList.Remove(Item);
                 App.client.RefreshDomainBlocklist(Item.Blocklist.Url);
             }
         }
@@ -124,7 +137,7 @@ namespace PrivateWin10.Controls
 
         private void BtnDefault_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(Translate.fmt("msg_restore_std"), App.mName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessageBox.Show(Translate.fmt("msg_restore_std"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
             foreach (var Item in BlocklistList)

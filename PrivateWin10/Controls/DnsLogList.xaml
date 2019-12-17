@@ -7,7 +7,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <local:RateConverter x:Key="rateConverter"/>
         <local:SizeConverter x:Key="sizeConverter"/>
+        <local:DateConverter x:Key="dateConverter"/>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -54,8 +56,11 @@
                     </DataGridTemplateColumn>
                     <DataGridTextColumn Width="200" Header="Name" Binding="{Binding Name}" />
                     <DataGridTextColumn Width="200" Header="Host Name" Binding="{Binding HostName}" />
-                    <DataGridTextColumn Header="Last Seen" Binding="{Binding LastSeen}" />
+                    <DataGridTextColumn Header="Last Seen" Binding="{Binding LastSeen, Converter={StaticResource dateConverter}}" />
                     <DataGridTextColumn Header="Seen Count" Binding="{Binding SeenCount}" />
+                    <DataGridTextColumn Header="Connection Count" Binding="{Binding ConnectionCount}" />
+                    <DataGridTextColumn Header="Uploaded" Binding="{Binding Uploaded, Converter={StaticResource sizeConverter}}" />
+                    <DataGridTextColumn Header="Downloaded" Binding="{Binding Downloaded, Converter={StaticResource sizeConverter}}" />
                     <DataGridTextColumn Header="Program" Binding="{Binding Program}" />
                 </DataGrid.Columns>
             </DataGrid>

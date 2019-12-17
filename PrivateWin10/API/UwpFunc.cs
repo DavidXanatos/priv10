@@ -33,27 +33,27 @@ public class UwpFunc
         }
     }
 
-/*
-+------------------------------------------------------------------------------+
-|                    |   PlatformID    |   Major version   |   Minor version   |
-+------------------------------------------------------------------------------+
-| Windows 95         |  Win32Windows   |         4         |          0        |
-| Windows 98         |  Win32Windows   |         4         |         10        |
-| Windows Me         |  Win32Windows   |         4         |         90        |
-| Windows NT 4.0     |  Win32NT        |         4         |          0        |
-| Windows 2000       |  Win32NT        |         5         |          0        |
-| Windows XP         |  Win32NT        |         5         |          1        |
-| Windows 2003       |  Win32NT        |         5         |          2        |
-| Windows Vista      |  Win32NT        |         6         |          0        |
-| Windows 2008       |  Win32NT        |         6         |          0        |
-| Windows 7          |  Win32NT        |         6         |          1        |
-| Windows 2008 R2    |  Win32NT        |         6         |          1        |
-| Windows 8          |  Win32NT        |         6         |          2        |
-| Windows 8.1        |  Win32NT        |         6         |          3        |
-+------------------------------------------------------------------------------+
-| Windows 10         |  Win32NT        |        10         |          0        |
-+------------------------------------------------------------------------------+
-*/
+    /*
+    +------------------------------------------------------------------------------+
+    |                    |   PlatformID    |   Major version   |   Minor version   |
+    +------------------------------------------------------------------------------+
+    | Windows 95         |  Win32Windows   |         4         |          0        |
+    | Windows 98         |  Win32Windows   |         4         |         10        |
+    | Windows Me         |  Win32Windows   |         4         |         90        |
+    | Windows NT 4.0     |  Win32NT        |         4         |          0        |
+    | Windows 2000       |  Win32NT        |         5         |          0        |
+    | Windows XP         |  Win32NT        |         5         |          1        |
+    | Windows 2003       |  Win32NT        |         5         |          2        |
+    | Windows Vista      |  Win32NT        |         6         |          0        |
+    | Windows 2008       |  Win32NT        |         6         |          0        |
+    | Windows 7          |  Win32NT        |         6         |          1        |
+    | Windows 2008 R2    |  Win32NT        |         6         |          1        |
+    | Windows 8          |  Win32NT        |         6         |          2        |
+    | Windows 8.1        |  Win32NT        |         6         |          3        |
+    +------------------------------------------------------------------------------+
+    | Windows 10         |  Win32NT        |        10         |          0        |
+    +------------------------------------------------------------------------------+
+    */
 
     static public bool IsWindows7OrLower
     {
@@ -75,5 +75,14 @@ public class UwpFunc
             double version = versionMajor + (double)versionMinor / 10;
             return version == 6.2 || version == 6.3;
         }
+    }
+
+    [Serializable()]
+    public class AppInfo
+    {
+        public string Name;
+        public string Logo;
+        public string ID;
+        public string SID;
     }
 }
