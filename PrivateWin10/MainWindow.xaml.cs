@@ -320,9 +320,8 @@ namespace PrivateWin10
             if (MessageBox.Show(Translate.fmt("msg_uninstall_this", App.Title), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
-            var exeName = Process.GetCurrentProcess().MainModule.FileName;
             string arguments = "-console -uninstall -wait";
-            ProcessStartInfo startInfo = new ProcessStartInfo(exeName, arguments);
+            ProcessStartInfo startInfo = new ProcessStartInfo(App.exePath, arguments);
             startInfo.UseShellExecute = true;
             startInfo.Verb = "runas";
             Process.Start(startInfo);

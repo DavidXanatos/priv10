@@ -44,6 +44,24 @@ static class MiscFunc
         return (UInt64)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0)).TotalMilliseconds;
     }
 
+    static public List<string> EnumAllFiles(string sourcePath)
+    {
+        List<string> files = new List<string>();
+
+        foreach (string fileName in Directory.GetFiles(sourcePath))
+            files.Add(fileName);
+
+        foreach (string dirName in Directory.GetDirectories(sourcePath))
+        {
+            if ((new DirectoryInfo(dirName).Attributes & FileAttributes.ReparsePoint) != 0)
+                continue; // skip junctions
+
+            files.AddRange(EnumAllFiles(dirName));
+        }
+
+        return files;
+    }
+
     public static TValue GetOrCreate<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
     where TValue : new()
     {

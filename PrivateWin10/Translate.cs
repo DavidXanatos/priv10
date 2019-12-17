@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -28,9 +28,9 @@ namespace PrivateWin10
 
                 lang = ci.TwoLetterISOLanguageName;
             }
+            
 
-
-            mStrings.Add("name_system", "Windows NT Kernel/System");
+            mStrings.Add("name_system", "Windows NT-Kernel/System");
             mStrings.Add("name_service", "{0} (service: {1})");
             mStrings.Add("name_app", "{0} (app: {1})");
             mStrings.Add("name_global", "All Processes");
@@ -422,6 +422,11 @@ namespace PrivateWin10
             mStrings.Add("lbl_show_all", "Show all");
             mStrings.Add("btn_clear_dns_log", "Clear DNS Inspector");
             mStrings.Add("msg_clear_dns", "Do you really want ro clear ALL Dns Inspector data?");
+            mStrings.Add("msg_backup_error", "Failed to backup data directory; reason: {0}");
+            mStrings.Add("msg_restore_error", "Failed to restore data directory; reason: {0}");
+            mStrings.Add("msg_backup_ok", "Data directory saved successfully to: {0}");
+            mStrings.Add("msg_restore_info", "PrivateWin10 will now restart to apply the backup");
+            mStrings.Add("msg_restore_no_ini", "The sellected archive does not look like a PrivateWin10 configuration backup!");
             //mStrings.Add("", "");
 
 
@@ -433,6 +438,10 @@ namespace PrivateWin10
                     App.IniWriteValue("en", key, mStrings[key], langINI);
                 return;
             }
+
+#if DEBUG
+            lang = "en"; // see what we did when debugging
+#endif
 
             if (lang != "en")
             {
@@ -468,5 +477,3 @@ namespace PrivateWin10
         }
     }
 }
-
-

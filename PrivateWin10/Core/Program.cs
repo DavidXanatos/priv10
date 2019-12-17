@@ -541,6 +541,9 @@ namespace PrivateWin10
             if (Unresolved)
                 HostName = Address.ToString();
 
+            if (HostName.Length == 0)
+                return null;
+
             DnsEntry Entry;
             if (!DnsLog.TryGetValue(HostName, out Entry))
             {

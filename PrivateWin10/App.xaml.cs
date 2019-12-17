@@ -6,6 +6,7 @@ using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -122,7 +123,7 @@ namespace PrivateWin10
                 Log.SetupEventLog(Key);
 
             // load current version
-            exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            exePath = Process.GetCurrentProcess().MainModule.FileName; //System.Reflection.Assembly.GetExecutingAssembly().Location;
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(exePath);
             Version = fvi.FileMajorPart + "." + fvi.FileMinorPart;
             if (fvi.FileBuildPart != 0)
@@ -131,15 +132,9 @@ namespace PrivateWin10
                 Version += (char)('a' + (fvi.FilePrivatePart - 1));
             appPath = Path.GetDirectoryName(exePath);
 
-            // execute service commands
-            if (ExecuteCommands())
-                return;
-
             Translate.Load();
 
-            App.LogInfo("PrivateWin10 Process Started, Mode {0}.", startMode.ToString());
-
-            dataPath = appPath;
+            dataPath = appPath + @"\Data";
             if (File.Exists(GetINIPath())) // if an ini exists in the app path, its considdered to be a portable run
             {
                 isPortable = true;
@@ -153,14 +148,19 @@ namespace PrivateWin10
                     progData = @"C:\ProgramData";
 
                 dataPath = progData + "\\" + Key;
-                if (!Directory.Exists(dataPath))
-                {
-                    Directory.CreateDirectory(dataPath);
-                    FileOps.SetAnyDirSec(dataPath);
-                }
-
-                AppLog.Debug("Config Directory: {0}", dataPath);
             }
+
+            AppLog.Debug("Config Directory: {0}", dataPath);
+
+            // execute commandline commands
+            if (ExecuteCommands())
+                return;
+
+            if (!Directory.Exists(dataPath))
+                Directory.CreateDirectory(dataPath);
+            FileOps.SetAnyDirSec(dataPath);
+
+            App.LogInfo("PrivateWin10 Process Started, Mode {0}.", startMode.ToString());
 
             Session = Process.GetCurrentProcess().SessionId;
 
@@ -200,9 +200,8 @@ namespace PrivateWin10
 
                         AppLog.Debug("Trying to start with 'runas'...");
                         // Restart program and run as admin
-                        var exeName = Process.GetCurrentProcess().MainModule.FileName;
                         string arguments = "\"" + string.Join("\" \"", args) + "\"";
-                        ProcessStartInfo startInfo = new ProcessStartInfo(exeName, arguments);
+                        ProcessStartInfo startInfo = new ProcessStartInfo(exePath, arguments);
                         startInfo.UseShellExecute = true;
                         startInfo.Verb = "runas";
                         try
@@ -376,6 +375,8 @@ namespace PrivateWin10
                                     "",
                                     "-state\t\t\tShow instalation state",
                                     "-uninstall\t\tUninstall Private Win10",
+                                    "-shutdown\t\tClose Private Win10 instances",
+                                    "-restart\t\tRestart Win10 and reload settings",
                                     "",
                                     "-svc_install\t\tInstall priv10 service (invokes -log_install)",
                                     "-svc_remove\t\tRemove priv10 service",
@@ -414,7 +415,7 @@ namespace PrivateWin10
                 bDone = true;
             }
 
-            if (TestArg("-shutdown") || TestArg("-uninstall"))
+            if (TestArg("-shutdown") || TestArg("-restart") || TestArg("-restore") || TestArg("-uninstall"))
             {
                 AppLog.Debug("Closing instances...");
                 if(Priv10Service.IsInstalled())
@@ -429,6 +430,86 @@ namespace PrivateWin10
                     proc.Kill();
                 }
 
+                bDone = true;
+            }
+
+            if (TestArg("-restore"))
+            {
+                string zipPath = GetArg("-restore");
+
+                try
+                {
+                    if (zipPath == null || !File.Exists(zipPath))
+                        throw new Exception("Data backup zip not specifyed or invalid path");
+
+                    Console.WriteLine("Restoring settings from {0}", zipPath);
+
+                    string extractPath = App.dataPath;
+
+                    // Normalizes the path.
+                    extractPath = Path.GetFullPath(extractPath);
+
+                    // Ensures that the last character on the extraction path
+                    // is the directory separator char. 
+                    // Without this, a malicious zip file could try to traverse outside of the expected
+                    // extraction path.
+                    if (!extractPath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+                        extractPath += Path.DirectorySeparatorChar;
+
+                    // create data directory
+                    if (!Directory.Exists(dataPath))
+                        Directory.CreateDirectory(dataPath);
+
+                    // ensure its writable by non administrators
+                    FileOps.SetAnyDirSec(dataPath);
+
+                    // Extract the backuped files
+                    using (ZipArchive archive = ZipFile.OpenRead(zipPath))
+                    {
+                        foreach (ZipArchiveEntry entry in archive.Entries)
+                        {
+                            // Gets the full path to ensure that relative segments are removed.
+                            string destinationPath = Path.GetFullPath(Path.Combine(extractPath, entry.FullName));
+
+                            // Ordinal match is safest, case-sensitive volumes can be mounted within volumes that
+                            // are case-insensitive.
+                            if (!destinationPath.StartsWith(extractPath, StringComparison.Ordinal))
+                                continue;
+
+                            Console.WriteLine("Restored file {0}", entry.FullName);
+                            if (File.Exists(destinationPath))
+                                FileOps.DeleteFile(destinationPath);
+                            else if (!Directory.Exists(Path.GetDirectoryName(destinationPath)))
+                                Directory.CreateDirectory(Path.GetDirectoryName(destinationPath));
+                            
+                            entry.ExtractToFile(destinationPath);
+                        }
+                    }
+                }
+                catch (Exception err)
+                {
+                    Console.WriteLine(err.Message);
+                    MessageBox.Show(Translate.fmt("msg_restore_error", err.Message), App.Title, MessageBoxButton.OK, MessageBoxImage.Stop);
+                }
+
+                bDone = true;
+            }
+
+            if (TestArg("-restart") || TestArg("-restore"))
+            {
+                Thread.Sleep(500);
+
+                AppLog.Debug("Starting instances...");
+                if (Priv10Service.IsInstalled())
+                    Priv10Service.Startup();
+
+                Thread.Sleep(500);
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(App.exePath);
+                startInfo.UseShellExecute = true;
+                startInfo.Verb = "runas";
+                Process.Start(startInfo);
+                
                 bDone = true;
             }
 
@@ -524,7 +605,7 @@ namespace PrivateWin10
                     }
                 case TrayIcon.Actions.CloseApplication:
                     {
-                        if (Priv10Service.IsInstalled())
+                        if (Priv10Service.IsInstalled() && AdminFunc.IsAdministrator())
                         {
                             MessageBoxResult res = MessageBox.Show(Translate.fmt("msg_stop_svc"), App.Title, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
                             switch (res)
@@ -656,17 +737,16 @@ namespace PrivateWin10
             return (subKey != null && subKey.GetValue(App.Key) != null);
         }
 
-        public static void Restart(bool RunAs = false, bool bService = false)
+        public static void Restart(bool RunAs = false/*, bool bService = false*/)
         {
-            if (bService && Priv10Service.IsInstalled())
+            /*if (bService && Priv10Service.IsInstalled())
             {
                 Priv10Service.Terminate();
                 Priv10Service.Startup();
-            }
+            }*/
 
-            var exeName = Process.GetCurrentProcess().MainModule.FileName;
             string arguments = "\"" + string.Join("\" \"", args) + "\"";
-            ProcessStartInfo startInfo = new ProcessStartInfo(exeName, arguments);
+            ProcessStartInfo startInfo = new ProcessStartInfo(exePath, arguments);
             startInfo.UseShellExecute = true;
             if (RunAs)
                 startInfo.Verb = "runas";

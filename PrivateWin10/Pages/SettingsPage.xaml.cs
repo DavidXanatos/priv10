@@ -12,6 +12,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.IO.Compression;
+using Microsoft.Win32;
+using System.IO;
+using System.Diagnostics;
 
 namespace PrivateWin10.Pages
 {
@@ -158,6 +162,8 @@ namespace PrivateWin10.Pages
                 cmbRootDNS.Text = UpstreamDNS;
             CheckDNS();
 
+            //this.btnBackup.IsEnabled = this.btnRestore.IsEnabled = !App.isPortable;
+
             bHold = false;
         }
 
@@ -273,6 +279,7 @@ namespace PrivateWin10.Pages
             else
             {
                 cmbAudit.SelectedItem = lblAuditNone;
+                chkGuardFW.IsChecked = false;
                 radBlacklist.IsChecked = true;
             }
 
@@ -404,6 +411,68 @@ namespace PrivateWin10.Pages
             chkLocalDNS.IsEnabled = chkLocalDNS.IsChecked == true || is_dns_standard && chkEnableDNS.IsChecked == true;
 
             cmbRootDNS.IsEnabled = chkEnableDNS.IsChecked == true;
+        }
+
+        private void BtnBackup_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Zip Archives|*.zip";
+            saveFileDialog.FileName = "PrivateWin10-Data.zip";
+            if (saveFileDialog.ShowDialog() != true)
+                return;
+
+            try
+            {
+                ZipFile.CreateFromDirectory(App.dataPath, saveFileDialog.FileName);
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(Translate.fmt("msg_backup_error", err.Message), App.Title, MessageBoxButton.OK, MessageBoxImage.Stop);
+                return;
+            }
+            MessageBox.Show(Translate.fmt("msg_backup_ok", saveFileDialog.FileName), App.Title, MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnRestore_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Zip Archives|*.zip";
+            openFileDialog.FileName = "PrivateWin10-Data.zip";
+            if (openFileDialog.ShowDialog() != true)
+                return;
+
+            try
+            {
+                bool bFoundIni = false;
+                using (ZipArchive archive = ZipFile.OpenRead(openFileDialog.FileName))
+                {
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    {
+                        if (entry.FullName.Equals(App.Key + ".ini"))
+                        {
+                            bFoundIni = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!bFoundIni)
+                    throw new Exception(Translate.fmt("msg_restore_no_ini"));
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(Translate.fmt("msg_restore_error", err.Message), App.Title, MessageBoxButton.OK, MessageBoxImage.Stop);
+                return;
+            }
+
+            MessageBox.Show(Translate.fmt("msg_restore_info"), App.Title, MessageBoxButton.OK, MessageBoxImage.Information);
+
+            string arguments = "-restore " + openFileDialog.FileName;
+            ProcessStartInfo startInfo = new ProcessStartInfo(App.exePath, arguments);
+            startInfo.UseShellExecute = true;
+            startInfo.Verb = "runas";
+            Process.Start(startInfo);
+            Environment.Exit(0);
         }
     }
 }

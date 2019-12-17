@@ -1031,12 +1031,12 @@ namespace PrivateWin10
         public bool SetFirewallGuard(bool guard, FirewallGuard.Mode mode)
         {
             return mDispatcher.Invoke(new Func<bool>(() => {
+                App.SetConfig("Firewall", "RuleGuard", guard == true ? 1 : 0);
                 App.SetConfig("Firewall", "GuardMode", ((int)mode).ToString());
                 if (guard == FirewallGuard.HasAuditPolicy())
                     return true; // don't do much if only the mode changed
                 if (guard)
                     ApproveRules();
-                App.SetConfig("Firewall", "RuleGuard", guard == true ? 1 : 0);
                 return FirewallGuard.SetAuditPolicy(guard);
             }));
         }

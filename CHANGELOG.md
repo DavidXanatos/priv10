@@ -3,6 +3,22 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.72] - 2019-12-17
+
+### Added
+- German Translation by uDEV2019 
+- added option to backup and restore ptiv10 settigns from/to file
+
+### Changed
+- priv 10 ui does nto logner offer to stop the serive when closing from tray but not running as admin
+- when running in portable mode data are not longer stored in the application directory directly 
+	but in the ".\data" sub directoy, when running in portable mode its needed to manyualy move theconfig files when updating
+
+### Fixed
+- fixed an issue with gul guard setting
+- some englisch spelling corrections by CHEF-KOCH
+
+
 ## [0.71] - 2019-12-16
 
 ### Added
