@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -28,9 +28,9 @@ namespace PrivateWin10
 
                 lang = ci.TwoLetterISOLanguageName;
             }
-            
 
-            mStrings.Add("name_system", "Windows NT-Kernel/System");
+
+            mStrings.Add("name_system", "Windows NT Kernel/System");
             mStrings.Add("name_service", "{0} (service: {1})");
             mStrings.Add("name_app", "{0} (app: {1})");
             mStrings.Add("name_global", "All Processes");
@@ -72,9 +72,9 @@ namespace PrivateWin10
             mStrings.Add("str_time_wait", "time wait");
             mStrings.Add("str_delete_tcb", "delete tcb");
             mStrings.Add("str_fw_blocked", "blocked");
-            mStrings.Add("msg_no_sys_merge", "System or Global entries can not be merged with other entries!");
-            mStrings.Add("msg_remove_progs", "Are you sure you want to remove the selected programs? All associated firewal rules will be removed as well.");
-            mStrings.Add("msg_remove_rules", "Are you sure you want to remove the selected rules?");
+            mStrings.Add("msg_no_sys_merge", "System or Global based entries can not be merged with other entries!");
+            mStrings.Add("msg_remove_progs", "Are you sure you want to remove selected programs? All associated firewall rules will be removed as well.");
+            mStrings.Add("msg_remove_rules", "Are you sure you want to remove selected rules?");
             mStrings.Add("cat_new", "[New Category]");
             mStrings.Add("cat_none", "Uncategorised");
             mStrings.Add("cat_cats", "Known Categories:");
@@ -83,7 +83,7 @@ namespace PrivateWin10
             mStrings.Add("msg_cat_name", "Enter new Category name:");
             mStrings.Add("msg_cat_some", "Some Category");
             mStrings.Add("msg_clean_progs", "Are you sure you want clean up the program list?");
-            mStrings.Add("msg_clean_progs_ex", "Are you sure you want to remove all program entries which do not have firewall rules or currently open sockets?");
+            mStrings.Add("msg_clean_progs_ex", "Are you sure you want to remove all program entries which do not have firewall rules or open sockets?");
             mStrings.Add("msg_clean_res", "Removed {0} entries");
             mStrings.Add("msg_no_split_all", "At least one ID must remain in the Program entry!");
             mStrings.Add("svc_all", "[All Services]");
@@ -91,19 +91,19 @@ namespace PrivateWin10
             mStrings.Add("pro_all", "[Applies to All Programm]");
             mStrings.Add("pro_title", "Browse for Programm Executable...");
             mStrings.Add("pro_sys", "[Windows NT-Kernel/System]");
-            mStrings.Add("msg_already_exist", "An entry with this Identification already exists.");
+            mStrings.Add("msg_already_exist", "A entry with this Identification already exists.");
             mStrings.Add("pro_any", "[Any Protocol]");
             mStrings.Add("pro_custom", "[Custom Protocol]");
             mStrings.Add("port_any", "[Any Port]");
             mStrings.Add("icmp_all", "[All Types]");
             mStrings.Add("addr_add", "[Add Address]");
-            mStrings.Add("msg_rule_failed", "Failed to Apply rule properties!");
+            mStrings.Add("msg_rule_failed", "Failed to apply rule properties!");
             mStrings.Add("str_lan", "Lan");
             mStrings.Add("str_ras", "RemoteAccess");
             mStrings.Add("str_wifi", "Wireless");
-            mStrings.Add("msg_admin_rights", "{0} requires administrative privileges to function properly.");
-            mStrings.Add("msg_admin_prompt", "{0} requires administrative privileges operate, restart as admin?");
-            mStrings.Add("msg_clear_log", "You are about to clear the entire connection log, do you also want to clear the security log?");
+            mStrings.Add("msg_admin_rights", "{0} requires administrative privilegs to function properly.");
+            mStrings.Add("msg_admin_prompt", "{0} requires administrative privilegs operate, restart as admin?");
+            mStrings.Add("msg_clear_log", "You are about the clear the entire connection log, do you want to clear the security log too?");
             mStrings.Add("acl_none", "Unconfigured");
             mStrings.Add("acl_silence", "Stop Notify");
             mStrings.Add("acl_allow", "Full Access");
@@ -148,7 +148,7 @@ namespace PrivateWin10
             mStrings.Add("lbl_protocol", "Protocol");
             mStrings.Add("lbl_ip_port", "Address:Port");
             mStrings.Add("lbl_remote_host", "Remote Host");
-            mStrings.Add("lbl_time_stamp", "Time Stamp");
+            mStrings.Add("lbl_time_stamp", "Timestamp");
             mStrings.Add("lbl_pid", "PID");
             mStrings.Add("wnd_program", "Program parameters");
             mStrings.Add("lbl_upload", "Upload");
@@ -168,7 +168,7 @@ namespace PrivateWin10
             mStrings.Add("lbl_itf_select", "Specific Types:");
             mStrings.Add("lbl_itf_lan", "LAN");
             mStrings.Add("lbl_itf_vpn", "VPN");
-            mStrings.Add("lbl_itf_wifi", "WiFi");
+            mStrings.Add("lbl_itf_wifi", "Wi-Fi");
             mStrings.Add("lbl_prof_all", "All Profiles");
             mStrings.Add("lbl_prof_sel", "Selected:");
             mStrings.Add("lbl_prof_pub", "Public");
@@ -185,8 +185,8 @@ namespace PrivateWin10
             mStrings.Add("btn_cleanup_list", "Cleanup List");
             mStrings.Add("chk_ignore_local", "Ignore localHost");
             mStrings.Add("chk_ignore_lan", "Ignore LAN");
-            mStrings.Add("chk_hide_local", "Hide localHost");
-            mStrings.Add("chk_hide_lan", "Hide LAN Entries");
+            mStrings.Add("chk_hide_local", "Hide Localhost entries");
+            mStrings.Add("chk_hide_lan", "Hide LAN entries");
             mStrings.Add("lbl_sort", "Sort By:");
             mStrings.Add("lbl_filter", "Filter:");
             mStrings.Add("btn_reload", "Reload Rules");
@@ -219,7 +219,7 @@ namespace PrivateWin10
             mStrings.Add("lbl_startup_options", "Startup Behaviour");
             mStrings.Add("chk_show_tray", "Show Tray Icon");
             mStrings.Add("chk_autorun", "Autostart at logon");
-            mStrings.Add("chk_instal_svc", "Install Service (priv10)");
+            mStrings.Add("chk_instal_svc", "Install priv10 Service");
             mStrings.Add("chk_no_uac", "Bypass UAC prompt");
             mStrings.Add("chk_tweak_check", "Monitor Tweaks for changes");
             mStrings.Add("chk_tweak_fix", "Reapply Tweaks that got undone");
@@ -232,24 +232,24 @@ namespace PrivateWin10
             mStrings.Add("chk_fw_guard_fix", "Undo unauthorised rule changed");
             mStrings.Add("chk_fix_rules", "Undo 3rd party rule changes");
             mStrings.Add("lbl_filter_mode", "Filtering Mode");
-            mStrings.Add("chk_fw_whitelist", "White-List Mode (recommended)");
-            mStrings.Add("chk_fw_blacklist", "Black-List Mode (default)");
+            mStrings.Add("chk_fw_whitelist", "Whitelisting Mode (recommended)");
+            mStrings.Add("chk_fw_blacklist", "Blacklisting Mode (Windows default)");
             mStrings.Add("chk_fw_disable", "Disable Windows Firewall");
-            mStrings.Add("chk_audit_policy", "Audit Policy (Should be set to All)");
+            mStrings.Add("chk_audit_policy", "Audit Policy (should be set to All)");
             mStrings.Add("lbl_audit_all", "Blocked & Allowed");
             mStrings.Add("lbl_audit_blocked", "Blocked Only");
             mStrings.Add("lbl_audit_off", "Disabled");
             mStrings.Add("wnd_setup", "{0} Initial Setup");
             mStrings.Add("mnu_exit", "E&xit");
             mStrings.Add("mnu_block", "&Block Internet");
-            mStrings.Add("msg_dupliate_session", "An other instance is already running.");
+            mStrings.Add("msg_dupliate_session", "Another priv10 instance is already running.");
             mStrings.Add("str_in", "{0} In");
             mStrings.Add("str_out", "{0} Out");
             mStrings.Add("app_reload", "[Update App List]");
             mStrings.Add("msg_pick_svc", "[Select Service]");
-            mStrings.Add("lbl_host_name", "Host Name");
-            mStrings.Add("lbl_last_seen", "Last Seen");
-            mStrings.Add("lbl_seen_count", "Seen Count");
+            mStrings.Add("lbl_host_name", "Hostname");
+            mStrings.Add("lbl_last_seen", "Last seen");
+            mStrings.Add("lbl_seen_count", "Seen count");
             mStrings.Add("txt_unknown", "Unknown");
             mStrings.Add("tweak_reg", "Registry Tweak");
             mStrings.Add("tweak_gpo", "GPO Tweak");
@@ -260,7 +260,7 @@ namespace PrivateWin10
             mStrings.Add("tweak_undone", ", undone: {0} (!)");
             mStrings.Add("lbl_programs", "Programs");
             mStrings.Add("lbl_view_options", "View Options");
-            mStrings.Add("lbl_sort_and", "Sort & Higlight");
+            mStrings.Add("lbl_sort_and", "Sort & Highlight");
             mStrings.Add("lbl_rules_and", "Rules and Details");
             mStrings.Add("lbl_view_filter", "View Filter");
             mStrings.Add("cat_uncat", "[Uncategorised]");
@@ -285,7 +285,7 @@ namespace PrivateWin10
             mStrings.Add("filter_sockets_not", "[No Filter]");
             mStrings.Add("filter_sockets_any", "Any Sockets");
             mStrings.Add("filter_sockets_all", "All Sockets");
-            mStrings.Add("filter_sockets_web", "HTTP 80,443");
+            mStrings.Add("filter_sockets_web", "HTTP 80 and 443");
             mStrings.Add("filter_sockets_tcp", "TCP Sockets");
             mStrings.Add("filter_sockets_client", "TCP Client");
             mStrings.Add("filter_sockets_server", "TCP Server");
@@ -308,7 +308,7 @@ namespace PrivateWin10
             mStrings.Add("msg_rule_added", "Added");
             mStrings.Add("msg_rule_changed", "Changed");
             mStrings.Add("msg_rule_removed", "Removed");
-            mStrings.Add("msg_rules_approved", "All currently valid Firewall Rules have been approved.");
+            mStrings.Add("msg_rules_approved", "All valid Firewall Rules have been approved.");
             mStrings.Add("lbl_log_level", "Level");
             mStrings.Add("lbl_log_type", "Category");
             mStrings.Add("lbl_log_event", "Event");
@@ -319,8 +319,8 @@ namespace PrivateWin10
             mStrings.Add("log_firewall", "Firewall");
             mStrings.Add("log_tweaks", "Tweaks");
             mStrings.Add("log_other", "Other");
-            mStrings.Add("msg_tweaks_updated", "The tweak list has been updated; the old list was backed up to {0}");
-            mStrings.Add("msg_stop_svc", "Do you want to stop the priv10 service?");
+            mStrings.Add("msg_tweaks_updated", "The tweak list has been updated, the old list was backuped to {0}");
+            mStrings.Add("msg_stop_svc", "Do you want to stop the priv10 service too?");
             mStrings.Add("msg_stop_svc_err", "Failed to stop priv10 service!\r\nTry running net stop priv10 from an elevated command prompt.");
             mStrings.Add("str_all_events", "All Events");
             mStrings.Add("str_allowed", "Allowed");
@@ -328,19 +328,19 @@ namespace PrivateWin10
             mStrings.Add("str_no_inet", "Hide Internet (WWW) Traffic");
             mStrings.Add("str_no_lan", "Hide LAN (Ethernet/WiFi) Traffic");
             mStrings.Add("str_no_multi", "Hide Multicast Packets");
-            mStrings.Add("str_no_local", "Hide Local Host Traffic");
+            mStrings.Add("str_no_local", "Hide Localhost Traffic");
             mStrings.Add("str_no_disabled", "Hide Disabled Rules");
-            mStrings.Add("btn_approve_rule", "Approve Current");
-            mStrings.Add("btn_restore_rule", "Restore Original");
-            mStrings.Add("btn_redo_rule", "Redo Changes");
-            mStrings.Add("btn_approve_all", "Approve All Current Rules");
-            mStrings.Add("btn_restore_all", "Restore All Original Rules");
-            mStrings.Add("btn_redo_all", "Redo All Rule Changes");
+            mStrings.Add("btn_approve_rule", "Approve current rules");
+            mStrings.Add("btn_restore_rule", "Restore original rules");
+            mStrings.Add("btn_redo_rule", "Redo changes");
+            mStrings.Add("btn_approve_all", "Approve all current Rules");
+            mStrings.Add("btn_restore_all", "Restore all original Rules");
+            mStrings.Add("btn_redo_all", "Redo all rule changes");
             mStrings.Add("btn_cleanup_rules", "Cleanup Rules");
-            mStrings.Add("msg_approve_all", "Do you really want to Approve All Firewall Rule Changes?");
-            mStrings.Add("msg_restore_all", "Do you really want to Restore All Changed Firewall Rules?");
-            mStrings.Add("msg_apply_all", "Do you really want to Reapply All Changes to Firewall Rule?");
-            mStrings.Add("filter_access", "Granted Access:");
+            mStrings.Add("msg_approve_all", "Do you really want to approve all Firewall rule(s) changes?");
+            mStrings.Add("msg_restore_all", "Do you really want to restore all changed Firewall Rule?");
+            mStrings.Add("msg_apply_all", "Do you really want to reapply all Firewall Rule changes?");
+            mStrings.Add("filter_access", "Access granted:");
             mStrings.Add("acl_any", "[No Filter]");
             mStrings.Add("acl_warn", "[Warning State]");
             mStrings.Add("menu_setup", "Run Setup Wizard");
@@ -468,3 +468,5 @@ namespace PrivateWin10
         }
     }
 }
+
+
