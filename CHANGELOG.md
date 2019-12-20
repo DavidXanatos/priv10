@@ -2,6 +2,23 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.73] - 2019-12-19
+
+### Added
+- dns proxy blockist is now saved every 15 minutes
+- added greatly improved search edit box, focus with ctrl+f
+- added "del" keyboard short key to remove selected item
+
+### Changed
+- reworked GPO handling to avoid write lock conflicts on slower machines
+
+### Fixed
+- fixed an issue when clicking the tray icon before the main window was fully loaded
+- fixed access color not changing in program list view
+- fixed crash bug on start as on admin
+- fixed crash bug with app package name resolution
+- fixed issue when upon a change the ribbon controls were not updated acordingly
+
 
 ## [0.72] - 2019-12-17
 

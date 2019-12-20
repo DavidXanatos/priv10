@@ -145,6 +145,7 @@
     <Compile Include="Controls\ProgramTreeControl\ProgramTreeItem.cs" />
     <Compile Include="Controls\ProgramTreeControl\AbstractTreeItem.cs" />
     <Compile Include="Controls\ProgramTreeControl\ProgTreeRoot.cs" />
+    <Compile Include="Controls\SearchTextBox.cs" />
     <Compile Include="Controls\TweakControl.xaml.cs">
       <DependentUpon>TweakControl.xaml</DependentUpon>
     </Compile>
@@ -532,6 +533,10 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\icons8-firewall-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\clear.png" />
+    <Resource Include="Resources\search.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

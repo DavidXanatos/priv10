@@ -417,7 +417,7 @@ namespace PrivateWin10.Pages
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Zip Archives|*.zip";
-            saveFileDialog.FileName = "PrivateWin10-Data.zip";
+            saveFileDialog.FileName = "PrivateWin10-Data_" + DateTime.Now.ToString("HH:mm:ss_dd.MM.yyyy") + ".zip";
             if (saveFileDialog.ShowDialog() != true)
                 return;
 

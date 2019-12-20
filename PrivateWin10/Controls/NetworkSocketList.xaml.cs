@@ -45,7 +45,7 @@ namespace PrivateWin10.Controls
             WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_udp"), FirewallPage.FilterPreset.Socket.UDP).Background = new SolidColorBrush(Colors.Violet);
             //WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_raw"), FirewallPage.FilterPreset.Socket.Raw);
 
-            this.lblFilter.Content = Translate.fmt("lbl_filter");
+            this.txtSockFilter.LabelText = Translate.fmt("lbl_text_filter");
             this.chkNoINet.ToolTip = Translate.fmt("str_no_inet");
             this.chkNoLAN.ToolTip = Translate.fmt("str_no_lan");
             //this.chkNoMulti.ToolTip = Translate.fmt("str_no_multi");
@@ -71,6 +71,9 @@ namespace PrivateWin10.Controls
 
             SocketList = new ObservableCollection<SocketItem>();
             socksGrid.ItemsSource = SocketList;
+
+            UwpFunc.AddBinding(socksGrid, new KeyGesture(Key.F, ModifierKeys.Control), (s, e) => { this.txtSockFilter.Focus(); });
+            //UwpFunc.AddBinding(socksGrid, new KeyGesture(Key.Delete), btnRemoveRule_Click);
 
             try
             {
@@ -153,36 +156,13 @@ namespace PrivateWin10.Controls
             CheckSockets();
         }
 
-        static int VALIDATION_DELAY = 1000;
-        System.Threading.Timer timer = null;
-
-        private void txtSockFilter_TextChanged(object sender, TextChangedEventArgs e)
+        private void TxtRuleFilter_Search(object sender, RoutedEventArgs e)
         {
             textFilter = txtSockFilter.Text;
             App.SetConfig("NetSocks", "Filter", textFilter);
-            //UpdateSockets(true);
+            //UpdateRules(true);
 
-            DisposeTimer();
-            timer = new System.Threading.Timer(TimerElapsed, null, VALIDATION_DELAY, VALIDATION_DELAY);
-
-        }
-
-        private void TimerElapsed(Object obj)
-        {
-            this.Dispatcher.Invoke(new Action(() => {
-                socksGrid.Items.Filter = new Predicate<object>(item => SocksFilter(item));
-            }));
-            
-            DisposeTimer();
-        }
-
-        private void DisposeTimer()
-        {
-            if (timer != null)
-            {
-                timer.Dispose();
-                timer = null;
-            }
+            socksGrid.Items.Filter = new Predicate<object>(item => SocksFilter(item));
         }
 
         private void sockType_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -268,17 +268,7 @@ namespace PrivateWin10.Pages
             btnNoConf.Tag = ProgramSet.Config.AccessLevels.Unconfigured;
             btnBlockAll.Tag = ProgramSet.Config.AccessLevels.BlockAccess;
 
-            progTree.menuAdd.Click += btnAdd_Click;
-            progTree.menuAddSub.Click += btnAddSub_Click;
-            progTree.menuRemove.Click += btnRemove_Click;
-            progTree.menuMerge.Click += btnMerge_Click;
-            progTree.menuSplit.Click += btnSplit_Click;
-            foreach (MenuItem item in progTree.menuAccess.Items)
-                item.Click += btnSetAccess_Click;
-            progTree.menuNotify.Click += ChkNotify_Click;
-            progTree.menuRename.Click += BtnRename_Click;
-            progTree.menuSetIcon.Click += BtnIcon_Click;
-            progTree.menuCategory.Click += BtnCategory_Click;
+            progTree.SetPage(this);
 
 
             mTimer.Tick += new EventHandler(OnTimerTick);
@@ -512,7 +502,7 @@ namespace PrivateWin10.Pages
             if (GetSelectedItems().Count > 0 || showAll())
             {
                 sockList.UpdateSockets();
-                dnsList.UpdateDnsLog(); // todo: xxx - update this liek the connection log i.e. incrementally
+                dnsList.UpdateDnsLog();
             }
         }
 
@@ -523,6 +513,7 @@ namespace PrivateWin10.Pages
                 progList.UpdateProgramList(progs);
             else if (ListMode == ListModes.Tree)
                 progTree.UpdateProgramList(progs);
+            CheckPrograms();
         }
 
         private void UpdateProgramItems(List<ProgramSet> progs)
@@ -531,6 +522,7 @@ namespace PrivateWin10.Pages
                 progList.UpdateProgramItems(progs);
             else  if (ListMode == ListModes.Tree)
                 progTree.UpdateProgramItems(progs);
+            CheckPrograms();
         }
 
         private void SortAndFitlerProgList()
@@ -841,7 +833,7 @@ namespace PrivateWin10.Pages
             btnCategory.IsEnabled = progTree.menuCategory.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
         }
 
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
+        public void btnAdd_Click(object sender, RoutedEventArgs e)
         {
             ProgramWnd progWnd = new ProgramWnd(null);
 
@@ -854,7 +846,7 @@ namespace PrivateWin10.Pages
             MessageBox.Show(Translate.fmt("msg_already_exist"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
 
-        private void btnAddSub_Click(object sender, RoutedEventArgs e)
+        public void btnAddSub_Click(object sender, RoutedEventArgs e)
         {
             var SelectedProgramSets = GetSelectedProgramSets();
             if (SelectedProgramSets.Count != 1)
@@ -868,7 +860,7 @@ namespace PrivateWin10.Pages
                 MessageBox.Show(Translate.fmt("msg_already_exist"), App.Title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
 
-        private void btnMerge_Click(object sender, RoutedEventArgs e)
+        public void btnMerge_Click(object sender, RoutedEventArgs e)
         {
             var SelectedProgramSets = GetSelectedProgramSets();
             if (SelectedProgramSets.Count < 2)
@@ -890,7 +882,7 @@ namespace PrivateWin10.Pages
             }
         }
 
-        private void btnSplit_Click(object sender, RoutedEventArgs e)
+        public void btnSplit_Click(object sender, RoutedEventArgs e)
         {
             Dictionary<Guid, List<Program>> Temp = new Dictionary<Guid, List<Program>>();
 
@@ -915,7 +907,7 @@ namespace PrivateWin10.Pages
             }
         }
 
-        private void btnRemove_Click(object sender, RoutedEventArgs e)
+        public void btnRemove_Click(object sender, RoutedEventArgs e)
         {
             if (MessageBox.Show(Translate.fmt("msg_remove_progs"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
@@ -946,7 +938,7 @@ namespace PrivateWin10.Pages
             }
         }
 
-        private void btnSetAccess_Click(object sender, RoutedEventArgs e)
+        public void btnSetAccess_Click(object sender, RoutedEventArgs e)
         {
             foreach (var progSet in GetSelectedProgramSets())
             {
@@ -957,12 +949,18 @@ namespace PrivateWin10.Pages
             }
         }
 
-        private void ChkNotify_Click(object sender, RoutedEventArgs e)
+        public void ChkNotify_Click(object sender, RoutedEventArgs e)
         {
-            // todo: xxx
+            foreach (var progSet in GetSelectedProgramSets())
+            {
+                var config = progSet.config.Clone();
+
+                config.Notify = config.Notify == true ? false : true;
+                App.client.UpdateProgram(progSet.guid, config);
+            }
         }
 
-        private void BtnRename_Click(object sender, RoutedEventArgs e)
+        public void BtnRename_Click(object sender, RoutedEventArgs e)
         {
             var SelectedProgramSets = GetSelectedProgramSets();
             if (SelectedProgramSets.Count != 1)
@@ -980,7 +978,7 @@ namespace PrivateWin10.Pages
             App.client.UpdateProgram(progSet.guid, config);
         }
 
-        private void BtnIcon_Click(object sender, RoutedEventArgs e)
+        public void BtnIcon_Click(object sender, RoutedEventArgs e)
         {
             var SelectedProgramSets = GetSelectedProgramSets();
             if (SelectedProgramSets.Count != 1)
@@ -998,7 +996,7 @@ namespace PrivateWin10.Pages
             App.client.UpdateProgram(progSet.guid, config);
         }
 
-        private void BtnCategory_Click(object sender, RoutedEventArgs e)
+        public void BtnCategory_Click(object sender, RoutedEventArgs e)
         {
             var SelectedProgramSets = GetSelectedProgramSets();
             if (SelectedProgramSets.Count == 0)

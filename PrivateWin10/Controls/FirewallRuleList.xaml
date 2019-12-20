@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PrivateWin10.Controls"
+             xmlns:l="clr-namespace:PrivateWin10"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
@@ -41,10 +42,11 @@
                 </ComboBox>
             </Grid>
             <Separator />
-            <WrapPanel>
+            <!--WrapPanel>
                 <Label Name="lblFilter" Content="Filter:"/>
                 <TextBox Name="txtRuleFilter" MinWidth="150" Margin="0,2" HorizontalAlignment="Stretch" Text="" TextChanged="txtRuleFilter_TextChanged"/>
-            </WrapPanel>
+            </WrapPanel-->
+            <l:SearchTextBox x:Name="txtRuleFilter" LabelText="Text Filter... (CTRL+F)" MinWidth="250" SearchMode="Instant" Margin="1,2" SearchEventTimeDelay="00:00:01" Search="TxtRuleFilter_Search"/>
             <Separator />
             <ToggleButton Name="chkNoDisabled" ToolTip="Hide Disabled Rules" Click="chkNoDisabled_Click">
                 <Image Width="16" Height="16">

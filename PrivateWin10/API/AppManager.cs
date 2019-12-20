@@ -36,7 +36,7 @@ public class AppManager
     [DllImport("advapi32", CharSet = CharSet.Unicode)]
     public static extern bool ConvertSidToStringSid(IntPtr pSID, [In, Out, MarshalAs(UnmanagedType.LPWStr)] ref string pStringSid);
 
-    public string SidToAppPackage(string sid)
+    static public string SidToAppPackage(string sid)
     {
         string packageID = "";
 
@@ -57,7 +57,7 @@ public class AppManager
         return packageID;
     }
 
-    public string AppPackageToSid(string packageID)
+    static public string AppPackageToSid(string packageID)
     {
         string strSID = "";
 

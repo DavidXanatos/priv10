@@ -78,7 +78,11 @@ namespace PrivateWin10.Controls
             if (!MiscFunc.IsEqual(old_progSet.config.Icon, progSet.config.Icon)) { cachedIcon = null; this.RaisePropertyChanged(nameof(Icon)); }
 
             if (!MiscFunc.IsEqual(old_progSet.config.Category, progSet.config.Category)) this.RaisePropertyChanged(nameof(Category));
-            if (!MiscFunc.IsEqual(old_progSet.config.NetAccess, progSet.config.NetAccess)) this.RaisePropertyChanged(nameof(Access));
+            if (!MiscFunc.IsEqual(old_progSet.config.NetAccess, progSet.config.NetAccess))
+            {
+                this.RaisePropertyChanged(nameof(Access));
+                this.RaisePropertyChanged(nameof(AccessTag));
+            }
 
             if (!MiscFunc.IsEqual(old_progs.Sum(t => t.RuleCount), progs.Sum(t => t.RuleCount))) this.RaisePropertyChanged(nameof(Rules));
             if (!MiscFunc.IsEqual(old_progs.Sum(t => t.AllowedCount), progs.Sum(t => t.AllowedCount))) this.RaisePropertyChanged(nameof(Allowed));

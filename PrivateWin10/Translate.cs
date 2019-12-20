@@ -189,6 +189,7 @@ namespace PrivateWin10
             mStrings.Add("chk_hide_lan", "Hide LAN entries");
             mStrings.Add("lbl_sort", "Sort By:");
             mStrings.Add("lbl_filter", "Filter:");
+            mStrings.Add("lbl_text_filter", "Text filter...  (CTRL+F)");
             mStrings.Add("btn_reload", "Reload Rules");
             mStrings.Add("chk_all", "Show All");
             mStrings.Add("grp_firewall", "Firewall Rules");

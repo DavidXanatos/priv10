@@ -67,7 +67,8 @@ namespace PrivateWin10.Controls
             //this.chkNoDisabled.Content = Translate.fmt("chk_hide_disabled");
             //this.lblFilterRules.Content = Translate.fmt("lbl_filter_rules");
 
-            this.lblFilter.Content = Translate.fmt("lbl_filter");
+            //this.lblFilter.Content = Translate.fmt("lbl_filter");
+            this.txtRuleFilter.LabelText = Translate.fmt("lbl_text_filter");
             this.cmbAll.Content = Translate.fmt("str_all_actions");
             this.cmbAllow.Content = Translate.fmt("str_allow");
             this.cmbBlock.Content = Translate.fmt("str_block");
@@ -120,6 +121,9 @@ namespace PrivateWin10.Controls
 
             rulesGridExt = new DataGridExt(rulesGrid);
             rulesGridExt.Restore(App.GetConfig("GUI", "rulesGrid_Columns", ""));
+
+            UwpFunc.AddBinding(rulesGrid, new KeyGesture(Key.F, ModifierKeys.Control), (s,e)=> { this.txtRuleFilter.Focus(); });
+            UwpFunc.AddBinding(rulesGrid, new KeyGesture(Key.Delete), btnRemoveRule_Click);
 
             try
             {
@@ -185,6 +189,7 @@ namespace PrivateWin10.Controls
 
             CheckRules();
         }
+        
 
         public void UpdateRules(bool clear = false)
         {
@@ -226,6 +231,8 @@ namespace PrivateWin10.Controls
 
             // update existing cels
             rulesGrid.Items.Refresh();
+
+            CheckRules();
         }
 
         private void btnCreateRule_Click(object sender, RoutedEventArgs e)
@@ -369,38 +376,16 @@ namespace PrivateWin10.Controls
             rulesGrid.Items.Filter = new Predicate<object>(item => RuleFilter(item));
         }
 
-        static int VALIDATION_DELAY = 1000;
-        System.Threading.Timer timer = null;
 
-        private void txtRuleFilter_TextChanged(object sender, TextChangedEventArgs e)
+        private void TxtRuleFilter_Search(object sender, RoutedEventArgs e)
         {
             textFilter = txtRuleFilter.Text;
             App.SetConfig("FwRules", "Filter", textFilter);
             //UpdateRules(true);
 
-            DisposeTimer();
-            timer = new System.Threading.Timer(TimerElapsed, null, VALIDATION_DELAY, VALIDATION_DELAY);
-            
+            rulesGrid.Items.Filter = new Predicate<object>(item => RuleFilter(item));
         }
-       
-        private void TimerElapsed(Object obj)
-        {
-            this.Dispatcher.Invoke(new Action(() => {
-                rulesGrid.Items.Filter = new Predicate<object>(item => RuleFilter(item));
-            }));
-            
-            DisposeTimer();
-        }
-
-        private void DisposeTimer()
-        {
-            if (timer != null)
-            {
-                timer.Dispose();
-                timer = null;
-            }
-        }
-
+        
         private void CmbDirection_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             directionFilter = (FirewallRule.Directions)cmbDirection.SelectedIndex;
@@ -689,5 +674,6 @@ namespace PrivateWin10.Controls
 
             #endregion
         }
+
     }
 }

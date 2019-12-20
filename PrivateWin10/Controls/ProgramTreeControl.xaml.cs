@@ -128,10 +128,25 @@ namespace PrivateWin10.Controls
             menuRename = WpfFunc.AddMenu(contextMenu, Translate.fmt("btn_rename_prog"), null, TryFindResource("Icon_Rename"));
             menuSetIcon = WpfFunc.AddMenu(contextMenu, Translate.fmt("btn_icon_prog"), null, TryFindResource("Icon_SetIcon"));
             menuCategory = WpfFunc.AddMenu(contextMenu, Translate.fmt("btn_cat_prog"), null, TryFindResource("Icon_Category"));
-            
-
 
             treeView.ContextMenu = contextMenu;
+        }
+
+        public void SetPage(FirewallPage page)
+        {
+            menuAdd.Click += page.btnAdd_Click;
+            menuAddSub.Click += page.btnAddSub_Click;
+            menuRemove.Click += page.btnRemove_Click;
+            menuMerge.Click += page.btnMerge_Click;
+            menuSplit.Click += page.btnSplit_Click;
+            foreach (MenuItem item in menuAccess.Items)
+                item.Click += page.btnSetAccess_Click;
+            menuNotify.Click += page.ChkNotify_Click;
+            menuRename.Click += page.BtnRename_Click;
+            menuSetIcon.Click += page.BtnIcon_Click;
+            menuCategory.Click += page.BtnCategory_Click;
+
+            UwpFunc.AddBinding(treeView, new KeyGesture(Key.Delete), page.btnRemove_Click);
         }
 
         public void OnClose()

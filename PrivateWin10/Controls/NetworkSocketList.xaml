@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PrivateWin10.Controls"
+             xmlns:l="clr-namespace:PrivateWin10"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -24,10 +25,11 @@
                 </ComboBox>
             </Grid>
             <Separator/>
-            <WrapPanel>
+            <!--WrapPanel>
                 <Label Name="lblFilter" Content="Filter:"/>
                 <TextBox Name="txtSockFilter" MinWidth="150" Margin="0,2" HorizontalAlignment="Stretch" Text="" TextChanged="txtSockFilter_TextChanged"/>
-            </WrapPanel>
+            </-->
+            <l:SearchTextBox x:Name="txtSockFilter" LabelText="Text Filter... (CTRL+F)" MinWidth="250" SearchMode="Instant" Margin="1,2" SearchEventTimeDelay="00:00:01" Search="TxtRuleFilter_Search"/>
             <Separator/>
             <ToggleButton Name="chkNoINet" Click="SocketTypeFilters_Click" ToolTip="Hide Internet (WWW) Traffic">
                 <Image Width="16" Height="16">

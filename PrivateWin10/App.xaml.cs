@@ -158,7 +158,8 @@ namespace PrivateWin10
 
             if (!Directory.Exists(dataPath))
                 Directory.CreateDirectory(dataPath);
-            FileOps.SetAnyDirSec(dataPath);
+            if(AdminFunc.IsAdministrator())
+                FileOps.SetAnyDirSec(dataPath);
 
             App.LogInfo("PrivateWin10 Process Started, Mode {0}.", startMode.ToString());
 
@@ -593,6 +594,9 @@ namespace PrivateWin10
 
         static void TrayAction(object sender, TrayIcon.TrayEventArgs args)
         {
+            if (MainWnd == null || !MainWnd.FullyLoaded)
+                return;
+
             switch (args.Action)
             {
                 case TrayIcon.Actions.ToggleWindow:

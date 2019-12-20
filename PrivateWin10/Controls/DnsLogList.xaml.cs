@@ -36,6 +36,8 @@ namespace PrivateWin10.Controls
         {
             InitializeComponent();
 
+            this.txtDnsFilter.LabelText = Translate.fmt("lbl_text_filter");
+
             this.dnsGrid.Columns[1].Header = Translate.fmt("lbl_name");
             this.dnsGrid.Columns[2].Header = Translate.fmt("lbl_host_name");
             this.dnsGrid.Columns[3].Header = Translate.fmt("lbl_last_seen");
@@ -53,6 +55,8 @@ namespace PrivateWin10.Controls
 
             textFilter = App.GetConfig("GUI", "DnsFilter", "");
             txtDnsFilter.Text = textFilter;
+
+            UwpFunc.AddBinding(dnsGrid, new KeyGesture(Key.F, ModifierKeys.Control), (s, e) => { this.txtDnsFilter.Focus(); });
 
             CheckLogEntries();
         }
@@ -122,36 +126,13 @@ namespace PrivateWin10.Controls
             CheckLogEntries();
         }
 
-        static int VALIDATION_DELAY = 1000;
-        System.Threading.Timer timer = null;
-
-        private void txtDnsFilter_TextChanged(object sender, TextChangedEventArgs e)
+        private void TxtRuleFilter_Search(object sender, RoutedEventArgs e)
         {
             textFilter = txtDnsFilter.Text;
             App.SetConfig("GUI", "DnsFilter", textFilter);
-            //UpdateDnsLog(true);
+            //UpdateRules(true);
 
-            DisposeTimer();
-            timer = new System.Threading.Timer(TimerElapsed, null, VALIDATION_DELAY, VALIDATION_DELAY);
-
-        }
-
-        private void TimerElapsed(Object obj)
-        {
-            this.Dispatcher.Invoke(new Action(() => {
-                dnsGrid.Items.Filter = new Predicate<object>(item => LogFilter(item));
-            }));
-            
-            DisposeTimer();
-        }
-
-        private void DisposeTimer()
-        {
-            if (timer != null)
-            {
-                timer.Dispose();
-                timer = null;
-            }
+            dnsGrid.Items.Filter = new Predicate<object>(item => LogFilter(item));
         }
 
         private bool LogFilter(object obj)

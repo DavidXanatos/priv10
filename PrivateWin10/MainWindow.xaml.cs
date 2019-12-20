@@ -105,6 +105,8 @@ namespace PrivateWin10
         private Dictionary<String, PageItem> mPages = new Dictionary<String, PageItem>();
         UserControl mCurPage = null;
 
+        public bool FullyLoaded = false;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -189,7 +191,8 @@ namespace PrivateWin10
             //Main.Loaded += (sender, e) =>{
                 SwitchPage(App.GetConfig("GUI", "CurPage", "Overview"));
             //};
-            
+
+            FullyLoaded = true;
 
             UpdateEnabled();
         }

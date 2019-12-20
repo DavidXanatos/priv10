@@ -114,7 +114,9 @@ namespace PrivateWin10
         {
             if (Type != Types.App)
                 return null;
-            return App.engine.FirewallManager.GetAppPkgBySid(Aux)?.ID;
+            // ToDo: xxx pull that through the core
+            //return App.engine.FirewallManager.GetAppPkgBySid(Aux)?.ID; // this only works from core but we need to work from the UI to
+            return AppManager.SidToAppPackage(Aux);
         }
 
         public string GetServiceId()

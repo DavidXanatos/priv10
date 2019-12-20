@@ -49,7 +49,7 @@ namespace PrivateWin10.Controls
             this.chkNoLAN.Content = Translate.fmt("chk_hide_lan");            
             this.lblFilterCons.Content = Translate.fmt("lbl_filter_cons");*/
 
-            this.lblFilter.Content = Translate.fmt("lbl_filter");
+            this.txtConFilter.LabelText = Translate.fmt("lbl_text_filter");
             this.cmbAll.Content = Translate.fmt("str_all_events");
             this.cmbAllow.Content = Translate.fmt("str_allowed");
             this.cmbBlock.Content = Translate.fmt("str_blocked");
@@ -75,6 +75,9 @@ namespace PrivateWin10.Controls
 
             logGridExt = new DataGridExt(logGrid);
             logGridExt.Restore(App.GetConfig("FwLog", "Columns", ""));
+
+
+            UwpFunc.AddBinding(logGrid, new KeyGesture(Key.F, ModifierKeys.Control), (s, e) => { this.txtConFilter.Focus(); });
 
             try
             {
@@ -209,37 +212,13 @@ namespace PrivateWin10.Controls
             logGrid.Items.Filter = new Predicate<object>(item => LogFilter(item));
         }
 
-        static int VALIDATION_DELAY = 1000;
-        System.Threading.Timer timer = null;
-
-
-        private void txtConFilter_TextChanged(object sender, TextChangedEventArgs e)
+        private void TxtRuleFilter_Search(object sender, RoutedEventArgs e)
         {
             textFilter = txtConFilter.Text;
             App.SetConfig("FwLog", "Filter", textFilter);
             //UpdateConnections(true);
 
-            DisposeTimer();
-            timer = new System.Threading.Timer(TimerElapsed, null, VALIDATION_DELAY, VALIDATION_DELAY);
-
-        }
-
-        private void TimerElapsed(Object obj)
-        {
-            this.Dispatcher.Invoke(new Action(() => {
-                logGrid.Items.Filter = new Predicate<object>(item => LogFilter(item));
-            }));
-            
-            DisposeTimer();
-        }
-
-        private void DisposeTimer()
-        {
-            if (timer != null)
-            {
-                timer.Dispose();
-                timer = null;
-            }
+            logGrid.Items.Filter = new Predicate<object>(item => LogFilter(item));
         }
 
         private bool LogFilter(object obj)

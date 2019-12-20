@@ -4,7 +4,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Windows.Input;
+using PrivateWin10.Controls;
 
 public class UwpFunc
 {
@@ -84,5 +85,12 @@ public class UwpFunc
         public string Logo;
         public string ID;
         public string SID;
+    }
+
+    internal static void AddBinding(System.Windows.Controls.Control ctrl, KeyGesture keyGesture, ExecutedRoutedEventHandler executed)
+    {
+        RoutedCommand cmd = new RoutedCommand();
+        cmd.InputGestures.Add(keyGesture);
+        ctrl.CommandBindings.Add(new CommandBinding(cmd, executed));
     }
 }

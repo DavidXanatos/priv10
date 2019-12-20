@@ -12,6 +12,8 @@ using Microsoft.Win32;
 using static PrivateWin10.TweakManager;
 using System.IO;
 using System.Threading;
+using System.Diagnostics;
+using System.Windows.Threading;
 
 namespace PrivateWin10
 {
@@ -155,11 +157,77 @@ namespace PrivateWin10
 
         // *** GPO ***
 
+        static ReaderWriterLockSlim gpoLocker = new ReaderWriterLockSlim();
+        static ComputerGroupPolicyObject gpoObject = null;
+        static Dispatcher dispatcher = null;
+        static Timer gpoSaveTimer = null;
+        static int GPO_SAVE_DELAY = 250;
+
+        static ComputerGroupPolicyObject GetGPO(bool Writeable = true)
+        {
+            Debug.Assert(gpoLocker.IsReadLockHeld || gpoLocker.IsWriteLockHeld);
+
+            if (gpoObject != null)
+                return gpoObject;
+
+            if (!Writeable)    
+                return new ComputerGroupPolicyObject(new GroupPolicyObjectSettings(true, true)); // read only so it does not fail without admin rights
+
+            if (gpoObject == null)
+                gpoObject = new ComputerGroupPolicyObject();
+            return gpoObject;
+        }
+
+        static private bool SaveGPO()
+        {
+            DisposeTimer();
+            dispatcher = Dispatcher.CurrentDispatcher;
+            gpoSaveTimer = new System.Threading.Timer(TimerElapsed, null, GPO_SAVE_DELAY, GPO_SAVE_DELAY);
+            return true;
+        }
+
+        static private void TimerElapsed(Object obj)
+        {
+            DisposeTimer();
+
+            dispatcher.Invoke(new Action(() => {
+                gpoLocker.EnterWriteLock();
+
+                for (int i = 1; i <= 30; i++)
+                {
+                    try
+                    {
+                        gpoObject.Save();
+                        gpoObject = null;
+                        break;
+                    }
+                    catch (FileLoadException)
+                    {
+                        AppLog.Debug("Retrying gpo.Save() ({0})", i);
+                        Thread.Sleep(100 * i);
+                    }
+                }
+
+                gpoLocker.ExitWriteLock();
+            }));
+        }
+
+        static private void DisposeTimer()
+        {
+            if (gpoSaveTimer != null)
+            {
+                gpoSaveTimer.Dispose();
+                gpoSaveTimer = null;
+            }
+        }
+
+
         static public bool TestGPOTweak(string path, string name, object value, bool usrLevel = false)
         {
+            gpoLocker.EnterReadLock();
             try
             {
-                var gpo = new ComputerGroupPolicyObject(new GroupPolicyObjectSettings(true, true)); // read only so it does not fail without admin rights
+                var gpo = GetGPO(false);
                 var key = gpo.GetRootRegistryKey(usrLevel ? GroupPolicySection.User : GroupPolicySection.Machine);
                 var subKey = key.CreateSubKey(path);
                 return CmpRegistryValue(subKey, name, value);
@@ -168,58 +236,53 @@ namespace PrivateWin10
             {
                 AppLog.Exception(err);
             }
+            finally
+            {
+                gpoLocker.ExitReadLock();
+            }
             return false;
         }
 
         static public bool SetGPOTweak(string path, string name, object value, bool usrLevel = false)
         {
+            gpoLocker.EnterWriteLock();
             try
             {
-                var gpo = new ComputerGroupPolicyObject();
+                var gpo = GetGPO();
                 var key = gpo.GetRootRegistryKey(usrLevel ? GroupPolicySection.User : GroupPolicySection.Machine);
                 var subKey = key.CreateSubKey(path);
                 SetRegistryValue(subKey, name, value);
-                return SafeGpoSave(gpo);
+                return SaveGPO();
             }
             catch (Exception err)
             {
                 AppLog.Exception(err);
+            }
+            finally
+            {
+                gpoLocker.ExitWriteLock();
             }
             return false;
         }
 
         static public bool UndoGPOTweak(string path, string name, bool usrLevel = false)
         {
+            gpoLocker.EnterWriteLock();
             try
             {
-                var gpo = new ComputerGroupPolicyObject();
+                var gpo = GetGPO();
                 var key = gpo.GetRootRegistryKey(usrLevel ? GroupPolicySection.User : GroupPolicySection.Machine);
                 var subKey = key.CreateSubKey(path);
                 subKey.DeleteValue(name, false);
-                return SafeGpoSave(gpo);
+                return SaveGPO();
             }
             catch (Exception err)
             {
                 AppLog.Exception(err);
             }
-            return false;
-        }
-
-        private static bool SafeGpoSave(ComputerGroupPolicyObject gpo)
-        {
-            // soemtimes we get an error that a file is in use, so just wait a few m and retry
-            for (int i = 1; i <= 3; i++)
+            finally
             {
-                try
-                {
-                    gpo.Save();
-                    return true;
-                }
-                catch (FileLoadException)
-                {
-                    AppLog.Debug("Retrying gpo.Save() ({0})", i);
-                    Thread.Sleep(100 * i);
-                }
+                gpoLocker.ExitWriteLock();
             }
             return false;
         }

@@ -277,7 +277,11 @@ namespace PrivateWin10
             if (LastSaveTime.AddMinutes(15) < DateTime.Now) // every 15 minutes
             {
                 LastSaveTime = DateTime.Now;
+
                 ProgramList.Store();
+
+                if (DnsProxy != null)
+                    DnsProxy.Store();
             }
 
             //if (mDoQuit)

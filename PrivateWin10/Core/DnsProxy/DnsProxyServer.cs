@@ -81,7 +81,7 @@ namespace PrivateWin10
 
         public void Dispose()
         {
-            blockList.Store();
+            Store();
 
             run = false;
 
@@ -90,6 +90,11 @@ namespace PrivateWin10
 
             if (thread != null)
                 thread.Join(); // Note: this waits for thread finish
+        }
+
+        public void Store()
+        {
+            blockList.Store();
         }
 
         public bool SetupUpstreamDNS(string UpstreamDNS = null)
