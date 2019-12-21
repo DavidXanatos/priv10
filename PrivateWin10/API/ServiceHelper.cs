@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -533,10 +534,20 @@ public static class ServiceHelper
         Critical = 0x00000003
     }
 
+    private static string GetServiceImagePath(string serviceName)
+    {
+        RegistryKey regkey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\services\" + serviceName);
+        if (regkey.GetValue("ImagePath") == null)
+            return null;
+        return regkey.GetValue("ImagePath").ToString();
+    }
+
     public class ServiceInfo{
         public ServiceInfo(ServiceController sc)
         {
             ServiceName = sc.ServiceName;
+            var ImagePath = GetServiceImagePath(sc.ServiceName);
+            ServicePath = ImagePath != null ? ProcFunc.GetPathFromCmdLine(ImagePath) : "";
             DisplayName = sc.DisplayName;
             if (sc.Status == ServiceControllerStatus.Stopped)
                 LastKnownPID = -1;
@@ -547,6 +558,7 @@ public static class ServiceHelper
             }
         }
         public string ServiceName;
+        public string ServicePath;
         public string DisplayName;
         public int LastKnownPID;
     }
@@ -583,7 +595,7 @@ public static class ServiceHelper
         else 
         {
             ServiceCacheLock.EnterReadLock();
-            doUpdate = ServiceCacheTime < DateTime.FromFileTimeUtc(ProcFunc.GetProcessCreationTime(pid));
+            doUpdate = ServiceCacheTime <= DateTime.FromFileTimeUtc(ProcFunc.GetProcessCreationTime(pid)).ToLocalTime();
             ServiceCacheLock.ExitReadLock();
         }
         if (doUpdate)

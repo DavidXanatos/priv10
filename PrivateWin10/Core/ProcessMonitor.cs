@@ -190,23 +190,9 @@ namespace PrivateWin10
             if (commandLine.Length == 0)
                 return null;
 
-            string filePath = null;
-            if (commandLine[0] == '"')
-            {
-                int pos = commandLine.IndexOf('"', 1);
-                if (pos != -1)
-                    filePath = commandLine.Substring(1, pos - 1);
-            }
-            else
-            {
-                int pos = commandLine.IndexOf(' ');
-                if (pos != -1)
-                    filePath = commandLine.Substring(0, pos);
-            }
-            if (filePath == null)
-                filePath = commandLine;
+            string filePath = ProcFunc.GetPathFromCmdLine(commandLine);
 
-            // apparently some processes can be started without a exe name in the cmman dline WTF, anyhow:
+            // apparently some processes can be started without a exe name in the command line WTF, anyhow:
             if (!Path.GetFileName(filePath).Equals(imageName, StringComparison.OrdinalIgnoreCase) 
             && !(Path.GetFileName(filePath) + ".exe").Equals(imageName, StringComparison.OrdinalIgnoreCase))
                 filePath = imageName;

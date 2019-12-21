@@ -143,4 +143,21 @@ static class ProcFunc
         }
     }
     */
+
+    static public string GetPathFromCmdLine(string commandLine)
+    {
+        if (commandLine[0] == '"')
+        {
+            int pos = commandLine.IndexOf('"', 1);
+            if (pos != -1)
+                return commandLine.Substring(1, pos - 1);
+        }
+        else
+        {
+            int pos = commandLine.IndexOf(' ');
+            if (pos != -1)
+                return commandLine.Substring(0, pos);
+        }
+        return commandLine;
+    }
 }

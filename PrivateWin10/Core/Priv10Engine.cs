@@ -313,13 +313,40 @@ namespace PrivateWin10
             }
 
             if (serviceTag != null)
-                return ProgramID.NewSvcID(serviceTag, fileName);
+                return AdjustProgID(ProgramID.NewSvcID(serviceTag, fileName));
 
             string SID = ProcFunc.GetAppPackageSidByPID(PID);
             if (SID != null)
                 return ProgramID.NewAppID(SID, fileName);
 
             return ProgramID.NewProgID(fileName);
+        }
+
+        static public ProgramID AdjustProgID(ProgramID progID)
+        {
+            /*
+                Windows Internals Edition 6 / Chapter 4 / Service Tags:
+
+                "Windows implements a service attribute called the service tag, ... The attribute is simply an 
+                index identifying the service. The service tag is stored in the SubProcessTag field of the 
+                thread environment block (TEB) of each thread (see Chapter 5, ...) and is propagated across all 
+                threads that a main service thread creates (except threads created indirectly by thread-pool APIs).
+                ... the TCP/IP stack saves the service tag of the threads that create TCP/IP end points ..."
+
+                Well isn't that "great" in the end we can not really relay on the Service Tags :/
+                A workable workaround to this issue is imho to ignore the Service Tags all together 
+                for all services which are not hosted in svchost.exe as those should have unique binaries anyways.
+             */
+
+            if (progID.Type == ProgramID.Types.Service && progID.Path.Length > 0) // if its a service
+            {
+                if (System.IO.Path.GetFileName(progID.Path).Equals("svchost.exe", StringComparison.OrdinalIgnoreCase) == false) // and NOT hosted in svchost.exe
+                {
+                    progID = ProgramID.NewProgID(progID.Path); // handle it as just a normal program
+                }
+            }
+
+            return progID;
         }
 
         struct QueuedFwEvent
@@ -366,7 +393,7 @@ namespace PrivateWin10
 
         protected void OnFirewallEvent(FirewallEvent FwEvent, NetworkMonitor.AdapterInfo NicInfo, ProgramID progID)
         {
-            Program prog = ProgramList.GetProgram(progID, true, ProgramList.FuzzyModes.Any);
+            Program prog = ProgramList.FindProgram(progID, true, ProgramList.FuzzyModes.Any);
 
             Program.LogEntry entry = new Program.LogEntry(FwEvent, progID);
             if (NicInfo.Profile == FirewallRule.Profiles.All)
@@ -434,7 +461,7 @@ namespace PrivateWin10
                     services.Add(info.ServiceName);
 
                     ProgramID progID = GetProgIDbyPID(cur.FwEvent.ProcessId, info.ServiceName, cur.FwEvent.ProcessFileName);
-                    Program prog = ProgramList.GetProgram(progID, false, ProgramList.FuzzyModes.Tag); // fuzzy match i.e. service tag match is enough
+                    Program prog = ProgramList.FindProgram(progID, false, ProgramList.FuzzyModes.Tag); // fuzzy match i.e. service tag match is enough
 
                     FirewallRule.Actions RuleAction = prog == null ? FirewallRule.Actions.Undefined : prog.LookupRuleAction(cur.FwEvent, cur.NicInfo);
 
@@ -481,7 +508,7 @@ namespace PrivateWin10
 
                         ProgramID progID = GetProgIDbyPID(cur.FwEvent.ProcessId, null, cur.FwEvent.ProcessFileName);
 
-                        Program prog = ProgramList.GetProgram(progID, true, ProgramList.FuzzyModes.No);
+                        Program prog = ProgramList.FindProgram(progID, true, ProgramList.FuzzyModes.No);
 
                         Program.LogEntry entry = new Program.LogEntry(cur.FwEvent, progID);
                         entry.State = Program.LogEntry.States.UnRuled;
@@ -605,7 +632,7 @@ namespace PrivateWin10
                 FirewallRuleEx knownRule = null; // known rule from the program
                 if (oldRules.TryGetValue(changeEvent.RuleId, out oldRule))
                 {
-                    prog = ProgramList.GetProgram(oldRule.ProgID);
+                    prog = ProgramList.FindProgram(oldRule.ProgID);
                     if (prog != null)
                         prog.Rules.TryGetValue(changeEvent.RuleId, out knownRule);
 
@@ -670,12 +697,6 @@ namespace PrivateWin10
                     {
                         OldRules.Remove(rule.guid);
 
-                        // Note: We don't save the ProgID to disk for each rule, instead we take the ProgID from the program just loaded.
-                        // The prgram ProgID never has RawPath set as depanding how the program was seen first it would or wouldn't have a RawPath.
-                        // Hence we try here to recover the RawPath information from the just loaded rule lost.
-                        if (rule.ProgID.RawPath != null && value.Item1.ProgID.RawPath == null)
-                            value.Item1.ProgID = rule.ProgID;
-
                         // update the rule index which is used only for ui sorting
                         value.Item1.Index = rule.Index; 
 
@@ -707,7 +728,7 @@ namespace PrivateWin10
                 // assign new rules
                 foreach (FirewallRule rule in rules)
                 {
-                    Program prog = ProgramList.GetProgram(rule.ProgID, true);
+                    Program prog = ProgramList.FindProgram(rule.ProgID, true);
                     FirewallRuleEx ruleEx = new FirewallRuleEx();
                     ruleEx.guid = rule.guid;
                     ruleEx.Assign(rule);
@@ -728,7 +749,7 @@ namespace PrivateWin10
 
         protected void OnRuleAdded(FirewallRule rule, bool bApproved = false)
         {
-            Program prog = ProgramList.GetProgram(rule.ProgID, true);
+            Program prog = ProgramList.FindProgram(rule.ProgID, true);
             if (prog.Rules.ContainsKey(rule.guid))
             {
                 App.LogCriticalError("rule lists are inconsistent 2");
@@ -1078,7 +1099,7 @@ namespace PrivateWin10
         public bool AddProgram(ProgramID id, Guid guid)
         {
             return mDispatcher.Invoke(new Func<bool>(() => {
-                return ProgramList.AddProgram(id, guid);
+                return ProgramList.AddProgram(AdjustProgID(id), guid);
             }));
         }
 
@@ -1147,7 +1168,7 @@ namespace PrivateWin10
         public bool UpdateRule(FirewallRule rule, UInt64 expiration = 0)
         {
             return mDispatcher.Invoke(new Func<bool>(() => {
-                Program prog = ProgramList.GetProgram(rule.ProgID, true);
+                Program prog = ProgramList.FindProgram(rule.ProgID, true);
                 if (rule.guid == null)
                 {
                     if (rule.Direction == FirewallRule.Directions.Bidirectiona)
@@ -1164,7 +1185,7 @@ namespace PrivateWin10
                 else // remove old roule from program
                 {
                     FirewallRule old_rule = FirewallManager.GetRule(rule.guid);
-                    Program old_prog = old_rule == null ? null : (old_rule.ProgID == rule.ProgID ? prog : ProgramList.GetProgram(old_rule.ProgID));
+                    Program old_prog = old_rule == null ? null : (old_rule.ProgID == rule.ProgID ? prog : ProgramList.FindProgram(old_rule.ProgID));
 
                     // if rhe rule now belongs to a different program we have to update booth
                     if (old_prog != null && old_rule.ProgID == rule.ProgID)
@@ -1199,7 +1220,7 @@ namespace PrivateWin10
                 if (!FirewallManager.RemoveRule(rule.guid))
                     return false;
                 
-                var prog = ProgramList.GetProgram(rule.ProgID);
+                var prog = ProgramList.FindProgram(rule.ProgID);
                 if (prog != null)
                 {
                     prog.Rules.Remove(rule.guid);
@@ -1271,7 +1292,7 @@ namespace PrivateWin10
                 int count = 0;
                 if (rule != null)
                 {
-                    var prog = ProgramList.GetProgram(rule.ProgID);
+                    var prog = ProgramList.FindProgram(rule.ProgID);
                     if (prog != null)
                     {
                         FirewallRuleEx ruleEx;
@@ -1306,7 +1327,7 @@ namespace PrivateWin10
             return mDispatcher.Invoke(new Func<bool>(() => {
                 bool ret = true;
                 ProgramID id = ProgramID.NewID(ProgramID.Types.Global);
-                Program prog = ProgramList.GetProgram(id, true);
+                Program prog = ProgramList.FindProgram(id, true);
                 if (bBlock)
                 {
                     FirewallRule ruleOut = new FirewallRule(prog.ID);

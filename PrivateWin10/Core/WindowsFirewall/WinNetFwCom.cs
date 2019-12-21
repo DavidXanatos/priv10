@@ -151,25 +151,31 @@ namespace PrivateWin10
             {
                 INetFwRule3 entry3 = entry as INetFwRule3;
 
-                // Note: while LocalAppPackageId and serviceName can be set at the same timea universall App can not be started as a service
+                rule.BinaryPath = entry.ApplicationName;
+                rule.ServiceTag = entry.serviceName;
+                if (entry3 != null)
+                    rule.AppSID = entry3.LocalAppPackageId;
 
+                // Note: while LocalAppPackageId and serviceName can be set at the same timea universall App can not be started as a service
+                ProgramID progID;
                 if (entry.ApplicationName != null && entry.ApplicationName.Equals("System", StringComparison.OrdinalIgnoreCase))
-                    rule.ProgID = ProgramID.NewID(ProgramID.Types.System);
+                    progID = ProgramID.NewID(ProgramID.Types.System);
                 // Win10
                 else if (entry3 != null && entry3.LocalAppPackageId != null)
                 {
                     if (entry.serviceName != null)
                         throw new ArgumentException("Firewall paremeter conflict");
-                    rule.ProgID = ProgramID.NewAppID(entry3.LocalAppPackageId, entry.ApplicationName);
+                    progID = ProgramID.NewAppID(entry3.LocalAppPackageId, entry.ApplicationName);
                 }
                 //
                 else if (entry.serviceName != null)
-                    rule.ProgID = ProgramID.NewSvcID(entry.serviceName, entry.ApplicationName);
+                    progID = ProgramID.NewSvcID(entry.serviceName, entry.ApplicationName);
                 else if (entry.ApplicationName != null)
-                    rule.ProgID = ProgramID.NewProgID(entry.ApplicationName);
+                    progID = ProgramID.NewProgID(entry.ApplicationName);
                 else // if nothing is configured than its a global roule
-                    rule.ProgID = ProgramID.NewID(ProgramID.Types.Global);
+                    progID = ProgramID.NewID(ProgramID.Types.Global);
 
+                rule.ProgID = Priv10Engine.AdjustProgID(progID);
 
                 // https://docs.microsoft.com/en-us/windows/desktop/api/netfw/nn-netfw-inetfwrule
 
@@ -272,6 +278,12 @@ namespace PrivateWin10
 
                 INetFwRule3 entry3 = entry as INetFwRule3;
 
+                entry.ApplicationName = rule.BinaryPath;
+                entry.serviceName = rule.ServiceTag;
+                if (entry3 != null)
+                    entry3.LocalAppPackageId = rule.AppSID;
+
+                /*
                 switch (rule.ProgID.Type)
                 {
                     case ProgramID.Types.Global:
@@ -295,6 +307,7 @@ namespace PrivateWin10
                     entry.serviceName = rule.ProgID.GetServiceId();
                 else
                     entry.serviceName = null;
+                */
 
                 entry.Name = rule.Name;
                 entry.Grouping = rule.Grouping;

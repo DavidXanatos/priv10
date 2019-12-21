@@ -91,6 +91,10 @@ namespace PrivateWin10.Windows
                     cmbProgram.SelectedItem = program;
             }
 
+            txtPath.Text = rule.BinaryPath ?? "";
+            txtService.Text = rule.ServiceTag ?? "";
+            txtApp.Text = rule.AppSID != null ? AppManager.SidToAppPackage(rule.AppSID) : ""; // ToDo: xxx pull that through the core
+
             cmbAction.Items.Add(new ContentControl() { Content = Translate.fmt("str_allow"), Tag = FirewallRule.Actions.Allow });
             cmbAction.Items.Add(new ContentControl() { Content = Translate.fmt("str_block"), Tag = FirewallRule.Actions.Block });
             //WpfFunc.CmbSelect(cmbAction, Rule.Action.ToString());
@@ -158,11 +162,15 @@ namespace PrivateWin10.Windows
             WpfFunc.StoreWnd(this, "Rule");
         }
 
+        private bool ProgIDChanged = false;
+
         private void cmbProgram_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ContentControl program = (cmbProgram.SelectedItem as ContentControl);
             if (program == null)
                 return;
+
+            ProgIDChanged = true;
 
             ProgramID id = (program.Tag as ProgramID);
 
@@ -345,7 +353,8 @@ namespace PrivateWin10.Windows
             Rule.Grouping = cmbGroup.Text;
             Rule.Description = txtInfo.Text;
 
-            Rule.ProgID = ((cmbProgram.SelectedItem as ContentControl).Tag as ProgramID);
+            if(ProgIDChanged)
+                Rule.SetProgID((cmbProgram.SelectedItem as ContentControl).Tag as ProgramID);
 
             Rule.Action = (FirewallRule.Actions)(cmbAction.SelectedItem as ContentControl).Tag;
 

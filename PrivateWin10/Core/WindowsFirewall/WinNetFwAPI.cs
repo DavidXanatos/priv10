@@ -388,28 +388,38 @@ namespace PrivateWin10
         public static bool LoadRule(FirewallRule rule, FW_RULE entry)
         {
             rule.guid = entry.wszRuleId;
-            rule.Name = entry.wszName;
-            rule.Description = entry.wszDescription;
-            rule.Grouping = entry.wszEmbeddedContext;
 
+            rule.BinaryPath = entry.wszLocalApplication;
+            rule.ServiceTag = entry.wszLocalService;
+            if(entry.wSchemaVersion >= (ushort)FW_BINARY_VERSION.FW_BINARY_VERSION_WIN8)
+                rule.AppSID = entry.wszPackageId;
+
+            ProgramID progID;
+            string fullPath = entry.wszLocalApplication != null ? Environment.ExpandEnvironmentVariables(entry.wszLocalApplication) : null;
             if (entry.wszLocalApplication != null && entry.wszLocalApplication.Equals("System", StringComparison.OrdinalIgnoreCase))
-                rule.ProgID = ProgramID.NewID(ProgramID.Types.System);
+                progID = ProgramID.NewID(ProgramID.Types.System);
             // Win 8+
             else if (entry.wSchemaVersion >= (ushort)FW_BINARY_VERSION.FW_BINARY_VERSION_WIN8 && entry.wszPackageId != null)
             {
                 if (entry.wszLocalService != null)
                     AppLog.Debug("Firewall paremeter conflict in rule: {0}", rule.Name);
-                rule.ProgID = ProgramID.NewAppID(entry.wszPackageId, entry.wszLocalApplication, true);
+                progID = ProgramID.NewAppID(entry.wszPackageId, fullPath);
             }
             //
             else if (entry.wszLocalService != null)
-                rule.ProgID = ProgramID.NewSvcID(entry.wszLocalService, entry.wszLocalApplication, true);
+                progID = ProgramID.NewSvcID(entry.wszLocalService, fullPath);
             else if (entry.wszLocalApplication != null)
-                rule.ProgID = ProgramID.NewProgID(entry.wszLocalApplication, true);
+                progID = ProgramID.NewProgID(fullPath);
             else // if nothing is configured than its a global roule
-                rule.ProgID = ProgramID.NewID(ProgramID.Types.Global);
+                progID = ProgramID.NewID(ProgramID.Types.Global);
+
+            rule.ProgID = Priv10Engine.AdjustProgID(progID);
 
             //AppLog.Debug("test: {0}", entry.wszLocalApplication);
+
+            rule.Name = entry.wszName;
+            rule.Description = entry.wszDescription;
+            rule.Grouping = entry.wszEmbeddedContext;
 
             rule.Enabled = GetRuleFlag(entry, FW_RULE_FLAGS.FW_RULE_FLAGS_ACTIVE);
 
@@ -518,10 +528,13 @@ namespace PrivateWin10
             entry.wSchemaVersion = fwApiVersion;
 
             entry.wszRuleId = rule.guid;
-            entry.wszName = rule.Name;
-            entry.wszDescription = rule.Description;
-            entry.wszEmbeddedContext = rule.Grouping;
 
+            entry.wszLocalApplication = rule.BinaryPath;
+            entry.wszLocalService = rule.ServiceTag;
+            if (entry.wSchemaVersion >= (ushort)FW_BINARY_VERSION.FW_BINARY_VERSION_WIN8)
+                entry.wszPackageId = rule.AppSID;
+
+            /*
             switch (rule.ProgID.Type)
             {
                 case ProgramID.Types.Global:
@@ -545,6 +558,12 @@ namespace PrivateWin10
                 entry.wszLocalService = rule.ProgID.GetServiceId();
             else
                 entry.wszLocalService = null;
+            */
+
+
+            entry.wszName = rule.Name;
+            entry.wszDescription = rule.Description;
+            entry.wszEmbeddedContext = rule.Grouping;
 
             entry.wFlags = FW_RULE_FLAGS.FW_RULE_FLAGS_NONE;
             SetRuleFlag(ref entry, FW_RULE_FLAGS.FW_RULE_FLAGS_ACTIVE, rule.Enabled);

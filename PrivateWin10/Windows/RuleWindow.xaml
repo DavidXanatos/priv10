@@ -21,7 +21,7 @@
                     <GroupBox Name="grpRule" Margin="5,5,5,5" Header="Firewall Rule" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="380">
                         <StackPanel Margin="2,2">
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Name="lblName" Text="Name" VerticalAlignment="Top" />
+                                <TextBlock Margin="0,2,0,2" Name="lblName" Text="Name" VerticalAlignment="Top" />
                                 <TextBox Margin="50,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="{Binding RuleName, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" x:Name="txtName" TextChanged="someThing_Changed" />
                             </Grid>
                             <Grid>
@@ -61,15 +61,15 @@
                                 <ComboBox x:Name="cmbProgram"  Margin="100,2,0,2" VerticalAlignment="Top" Text="" SelectionChanged="cmbProgram_SelectionChanged"/>
                             </Grid>
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Name="lblExecutable" Text="Executable"  VerticalAlignment="Top" />
+                                <TextBlock Margin="0,2,0,2" Name="lblExecutable" Text="Executable"  VerticalAlignment="Top" />
                                 <TextBox x:Name="txtPath" Margin="100,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
                             </Grid>
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Name="lblService" Text="Only Services"  VerticalAlignment="Top" />
+                                <TextBlock Margin="0,2,0,2" Name="lblService" Text="Only Services"  VerticalAlignment="Top" />
                                 <TextBox x:Name="txtService" Margin="100,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
                             </Grid>
                             <Grid>
-                                <TextBlock Margin="0,5,0,2" Name="lblApp" Text="Only App Package"  VerticalAlignment="Top" />
+                                <TextBlock Margin="0,2,0,2" Name="lblApp" Text="Only App Package"  VerticalAlignment="Top" />
                                 <TextBox x:Name="txtApp" Margin="100,2,0,2"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto" Text="" IsReadOnly="True" />
                             </Grid>
                         </StackPanel>

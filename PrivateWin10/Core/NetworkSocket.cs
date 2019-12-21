@@ -68,7 +68,7 @@ namespace PrivateWin10
             // a program may have been removed than the sockets get unasigned and has to be re asigned
             if (Program == null)
             {
-                Program prog = ProgID == null ? null : App.engine.ProgramList.GetProgram(ProgID, true, ProgramList.FuzzyModes.Any);
+                Program prog = ProgID == null ? null : App.engine.ProgramList.FindProgram(ProgID, true, ProgramList.FuzzyModes.Any);
                 if (prog != null)
                 {
                     Program = prog;

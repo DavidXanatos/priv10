@@ -90,8 +90,42 @@ namespace PrivateWin10
 
 
         public string guid = null; // Note: usually this is a guid but some default windows rules use a sting name instead
-        public ProgramID ProgID;
         public int Index = 0; // this is only used for sorting by newest rules
+
+        public string BinaryPath;
+        public string ServiceTag;
+        public string AppSID;
+        public ProgramID ProgID;
+
+        public void SetProgID(ProgramID progID)
+        {
+            ProgID = progID;
+
+            switch (progID.Type)
+            {
+                case ProgramID.Types.Global:
+                    BinaryPath = null;
+                    break;
+                case ProgramID.Types.System:
+                    BinaryPath = "System";
+                    break;
+                default:
+                    if (progID.Path != null && progID.Path.Length > 0)
+                        BinaryPath = progID.Path;
+                    break;
+            }
+
+            if (progID.Type == ProgramID.Types.App)
+                AppSID = progID.GetPackageSID();
+            else
+                AppSID = null;
+
+            if (progID.Type == ProgramID.Types.Service)
+                ServiceTag = progID.GetServiceId();
+            else
+                ServiceTag = null;
+        }
+        
 
         public string Name;
         public string Grouping;
@@ -122,20 +156,24 @@ namespace PrivateWin10
             ICMPv6 = 58,
         }
 
-        public FirewallRule(ProgramID id)
-        {
-            ProgID = id;
-        }
-
         public FirewallRule()
         {
+        }
+
+        public FirewallRule(ProgramID progID)
+        {
+            SetProgID(progID);
         }
 
         public void Assign(FirewallRule rule)
         {
             this.guid = rule.guid;
-            this.ProgID = rule.ProgID;
             this.Index = rule.Index;
+
+            this.BinaryPath = rule.BinaryPath;
+            this.ServiceTag = rule.ServiceTag;
+            this.AppSID = rule.AppSID;
+            this.ProgID = rule.ProgID;
 
             this.Name = rule.Name;
             this.Grouping = rule.Grouping;
@@ -162,7 +200,7 @@ namespace PrivateWin10
 
         public FirewallRule Duplicate()
         {
-            FirewallRule rule = new FirewallRule(ProgID);
+            FirewallRule rule = new FirewallRule();
             rule.Assign(this);
             return rule;
         }
@@ -206,7 +244,10 @@ namespace PrivateWin10
 
         public MatchResult Match(FirewallRule other)
         {
-            if (this.ProgID.CompareTo(other.ProgID) != 0) return MatchResult.TargetChanged;
+            if (!SafeEquals(this.BinaryPath, other.BinaryPath)) return MatchResult.TargetChanged;
+            if (!SafeEquals(this.ServiceTag, other.ServiceTag)) return MatchResult.TargetChanged;
+            if (!SafeEquals(this.AppSID, other.AppSID)) return MatchResult.TargetChanged;
+            //if (this.ProgID.CompareTo(other.ProgID) != 0) return MatchResult.TargetChanged;
 
             if (!SafeEquals(this.Direction, other.Direction)) return MatchResult.DataChanged;
             if (!SafeEquals(this.Profile, other.Profile)) return MatchResult.DataChanged;
@@ -290,6 +331,11 @@ namespace PrivateWin10
             if(!bRaw) writer.WriteStartElement("FwRule");
 
             writer.WriteElementString("Guid", guid);
+
+            if (BinaryPath != null) writer.WriteElementString("BinaryPath", BinaryPath);
+            if (ServiceTag != null) writer.WriteElementString("ServiceTag", ServiceTag);
+            if (AppSID != null) writer.WriteElementString("AppSID", AppSID);
+
             if (!bRaw) ProgID.Store(writer, "ProgID");
 
             if (Name != null) writer.WriteElementString("Name", Name);
@@ -322,6 +368,13 @@ namespace PrivateWin10
             {
                 if (node.Name == "Guid")
                     guid = node.InnerText;
+
+                else if (node.Name == "BinaryPath")
+                    BinaryPath = node.InnerText;
+                else if (node.Name == "ServiceTag")
+                    ServiceTag = node.InnerText;
+                else if (node.Name == "AppSID")
+                    AppSID = node.InnerText;
                 else if (node.Name == "ProgID")
                 {
                     ProgID = new ProgramID();

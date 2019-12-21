@@ -20,10 +20,9 @@ namespace PrivateWin10
             App
         }
 
-        public Types Type { get; private set; } = Types.Program;
-        public string Path { get; private set; }  = ""; // process path
-        public string RawPath { get; private set; } = null;
-        public string Aux { get; private set; } = ""; // service name or app package sid
+        public Types Type { get; protected set; } = Types.Program;
+        public string Path { get; protected set; } = ""; // process path
+        public string Aux { get; protected set; } = ""; // service name or app package sid
 
         //[NonSerialized()]
         //public string Description = "";
@@ -33,19 +32,19 @@ namespace PrivateWin10
             return new ProgramID(Type, "", "");
         }
 
-        public static ProgramID NewProgID(string Path, bool Expand = false)
+        public static ProgramID NewProgID(string Path)
         {
-            return new ProgramID(Types.Program, Path, "", Expand);
+            return new ProgramID(Types.Program, Path, "");
         }
 
-        public static ProgramID NewSvcID(string Svc, string Path = "", bool Expand = false)
+        public static ProgramID NewSvcID(string Svc, string Path = "")
         {
-            return new ProgramID(Types.Service, Path == null ? "" : Path, Svc, Expand);
+            return new ProgramID(Types.Service, Path == null ? "" : Path, Svc);
         }
 
-        public static ProgramID NewAppID(string SID, string Path = "", bool Expand = false)
+        public static ProgramID NewAppID(string SID, string Path = "")
         {
-            return new ProgramID(Types.App, Path == null ? "" : Path, SID, Expand);
+            return new ProgramID(Types.App, Path == null ? "" : Path, SID);
         }
 
         public static ProgramID New(Types type, string path, string aux)
@@ -57,18 +56,10 @@ namespace PrivateWin10
         {
         }
 
-        private ProgramID(Types type, string path, string aux, bool expand = false)
+        private ProgramID(Types type, string path, string aux)
         {
             Type = type;
-            if (expand)
-            {
-                RawPath = path;
-                Path = Environment.ExpandEnvironmentVariables(RawPath);
-                if (Path.Equals(RawPath))
-                    RawPath = null;
-            }
-            else
-                Path = path;
+            Path = path;
             Aux = aux;
         }
 
@@ -77,7 +68,7 @@ namespace PrivateWin10
             return new ProgramID(Type, Path, Aux);
         }
 
-        public int CompareTo(object obj)
+        public virtual int CompareTo(object obj)
         {
             if ((int)Type > (int)(obj as ProgramID).Type)
                 return 1;
@@ -152,7 +143,8 @@ namespace PrivateWin10
                 Path = idNode.SelectSingleNode("Path").InnerText;
                 Aux = idNode.SelectSingleNode("Aux").InnerText;
             }
-            catch {
+            catch
+            {
                 return false;
             }
             return true;
@@ -205,4 +197,32 @@ namespace PrivateWin10
             }
         }
     }
+
+    /*public class ProgIDSearch : ProgramID
+    {
+        public enum SearchMode
+        {
+            Strict = 0,
+            ForRule
+        }
+
+        SearchMode Mode = SearchMode.Strict;
+
+        public ProgIDSearch(ProgramID ID, SearchMode mode = SearchMode.Strict)
+        {
+            Type = ID.Type;
+            Path = ID.Path;
+            Aux = ID.Aux;
+            Mode = mode;
+        }
+
+        public override int CompareTo(object obj)
+        {
+            if (Mode == SearchMode.ForRule)
+            {
+            }
+            else
+                return base.CompareTo(obj);
+        }
+    }*/
 }

@@ -40,12 +40,13 @@ namespace PrivateWin10
             Services.Add(new Service() { Content = Translate.fmt("svc_all"), Value="*", Group = Translate.fmt("lbl_selec") });
 
             foreach (ServiceHelper.ServiceInfo svc in ServiceHelper.GetAllServices().OrderBy(x => x.DisplayName))
-                Services.Add(new Service() { Value = svc.ServiceName, Content = svc.DisplayName + " (" + svc.ServiceName + ")", Group = Translate.fmt("lbl_known") });
+                Services.Add(new Service() { Value = svc.ServiceName, Path = svc.ServicePath, Content = svc.DisplayName + " (" + svc.ServiceName + ")", Group = Translate.fmt("lbl_known") });
         }
 
         public class Service : ContentControl
         {
             public string Value { get; set; }
+            public string Path { get; set; }
             public string Group { get; set; }
         }
 

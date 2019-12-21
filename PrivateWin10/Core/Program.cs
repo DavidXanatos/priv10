@@ -590,7 +590,10 @@ namespace PrivateWin10
                 {
                     ProgramID id = new ProgramID();
                     if (id.Load(node))
-                        ID = id;
+                    {
+                        // COMPAT: remove service tag
+                        ID = Priv10Engine.AdjustProgID(id);
+                    }
                 }
                 else if (node.Name == "Description")
                     Description = node.InnerText;
@@ -605,7 +608,13 @@ namespace PrivateWin10
                         FirewallRuleEx rule = new FirewallRuleEx();
                         rule.ProgID = ID;
                         if (rule.Load(childNode) && !Rules.ContainsKey(rule.guid))
+                        {
+                            // COMPAT: update entry, old version did not save these data separatly
+                            if (ID.Type != ProgramID.Types.Global && (rule.BinaryPath == null && rule.ServiceTag == null && rule.AppSID == null))
+                                rule.SetProgID(ID);
+                            
                             Rules.Add(rule.guid, rule);
+                        }
                         else
                             App.LogError("Failed to load Firewall RuleEx {0} in {1}", rule.Name != null ? rule.Name : "[un named]", this.Description);
                     }

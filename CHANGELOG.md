@@ -2,6 +2,21 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+
+
+## [0.74] - 2019-12-21
+
+### Changed
+- changed service tag handling to only apply to svchost.exe hosted services
+	- all other services will only be handled as regular programs identifyed by their path
+	- the program window now by default always sets the service binary path when a service is selected
+
+### Fixed
+- when opening the program window comboboxes were not properly disabled 
+- fixed issue with updating service PID cache
+
+
 ## [0.73] - 2019-12-19
 
 ### Added

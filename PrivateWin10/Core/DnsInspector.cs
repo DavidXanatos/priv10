@@ -84,7 +84,7 @@ namespace PrivateWin10
                 App.LogWarning("Watched a DNS query for a terminated process with id {0}", Event.ProcessId);
             else
             {
-                Program prog = App.engine.ProgramList.GetProgram(ProgID, true, ProgramList.FuzzyModes.Any);
+                Program prog = App.engine.ProgramList.FindProgram(ProgID, true, ProgramList.FuzzyModes.Any);
                 prog?.LogDomain(Event.HostName, Event.TimeStamp);
             }
         }

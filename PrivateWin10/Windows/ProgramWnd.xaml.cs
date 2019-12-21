@@ -149,8 +149,8 @@ namespace PrivateWin10.Windows
             }
             else if (radService.IsChecked == true)
             {
-                ServiceModel.Service name = (cmbService.SelectedItem as ServiceModel.Service);
-                ID = ProgramID.NewSvcID(name != null ? name.Value : cmbService.Text, pathStr);
+                ServiceModel.Service svc = (cmbService.SelectedItem as ServiceModel.Service);
+                ID = ProgramID.NewSvcID(svc != null ? svc.Value : cmbService.Text, pathStr);
             }
             else if (radApp.IsChecked == true)
             {
@@ -165,9 +165,10 @@ namespace PrivateWin10.Windows
 
         private void radType_Checked(object sender, RoutedEventArgs e)
         {
-            if (SuspendChange > 0)
-                return;
+            //if (SuspendChange > 0)
+            //    return;
 
+            cmbPath.IsEnabled = radService.IsChecked != true; //radProgram.IsEnabled == true;
             cmbService.IsEnabled = radService.IsChecked == true;
             cmbApp.IsEnabled = radApp.IsChecked == true;
         }
@@ -213,6 +214,12 @@ namespace PrivateWin10.Windows
                     cmbPath.SelectedItem = path;
                 }
             }
+        }
+
+        private void CmbService_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ServiceModel.Service svc = (cmbService.SelectedItem as ServiceModel.Service);
+            cmbPath.Text = svc?.Path ?? "";
         }
 
         private void cmbApp_DropDownClosed(object sender, EventArgs e)

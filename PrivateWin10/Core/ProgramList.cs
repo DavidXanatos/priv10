@@ -74,13 +74,21 @@ namespace PrivateWin10
             return null;
         }
 
-        public Program GetProgram(ProgramID progID, bool canAdd = false, FuzzyModes fuzzyMode = FuzzyModes.No)
+        public Program FindProgram(ProgramID progID, bool canAdd = false, FuzzyModes fuzzyMode = FuzzyModes.No)
         {
             Program prog = GetProgramFuzzy(Programs, progID, fuzzyMode);
             
             if (prog == null && canAdd)
                 prog = AddProgram(progID);
 
+            return prog;
+        }
+
+        public Program GetProgram(ProgramID progID, bool canAdd = false)
+        {
+            Program prog;
+            if (!Programs.TryGetValue(progID, out prog) && canAdd)
+                prog = AddProgram(progID);
             return prog;
         }
 
@@ -292,10 +300,23 @@ namespace PrivateWin10
                         continue;
                     }
 
-                    ProgramSets.Add(entry.guid, entry);
+                    foreach (Program prog in entry.Programs.Values.ToList())
+                    {
+                        // COMPAT: merge "duplicates"
+                        Program knownProg;
+                        if (App.engine.ProgramList.Programs.TryGetValue(prog.ID, out knownProg))
+                        {
+                            foreach (var rule in prog.Rules)
+                                knownProg.Rules.Add(rule.Key, rule.Value);
 
-                    foreach (Program prog in entry.Programs.Values)
-                        Programs.Add(prog.ID, prog);
+                            entry.Programs.Remove(prog.ID);
+                        }
+                        else
+                            Programs.Add(prog.ID, prog);
+                    }
+
+                    if(entry.Programs.Count > 0)
+                        ProgramSets.Add(entry.guid, entry);
                 }
 
                 if (ErrorCount != 0)

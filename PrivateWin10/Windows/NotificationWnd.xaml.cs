@@ -261,7 +261,7 @@ namespace PrivateWin10.Windows
         private bool MakeCustom(Program prog, UInt64 expiration, ConEntry entry = null)
         {
             FirewallRule rule = new FirewallRule() { guid = null, Profile = (int)FirewallRule.Profiles.All, Interface = (int)FirewallRule.Interfaces.All, Enabled = true };
-            rule.ProgID = prog.ID;
+            rule.SetProgID(prog.ID);
             rule.Name = FirewallManager.MakeRuleName(FirewallManager.CustomName, expiration != 0, prog.Description);
             rule.Grouping = FirewallManager.RuleGroup;
 

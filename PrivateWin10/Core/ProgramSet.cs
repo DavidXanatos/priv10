@@ -271,7 +271,17 @@ namespace PrivateWin10
                 {
                     Program prog = new Program();
                     if (prog.Load(node))
-                        prog.AssignSet(this);
+                    {
+                        // COMPAT: merge "duplicates"
+                        Program knownProg;
+                        if (Programs.TryGetValue(prog.ID, out knownProg))
+                        {
+                            foreach (var rule in prog.Rules)
+                                knownProg.Rules.Add(rule.Key, rule.Value);
+                        }
+                        else
+                            prog.AssignSet(this);
+                    }
                 }
                 else if (node.Name == "Name")
                     config.Name = node.InnerText;
@@ -286,6 +296,7 @@ namespace PrivateWin10
                 else
                     AppLog.Debug("Unknown Program Value, '{0}':{1}", node.Name, node.InnerText);
             }
+
             return Programs.Count > 0 && config.Name != null;
         }
     }

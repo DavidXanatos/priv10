@@ -47,12 +47,14 @@ public class AppManager
 
         Marshal.FreeHGlobal(pSid);
 
-        /*if (ret != ERROR_SUCCESS)
+        if (ret != ERROR_SUCCESS)
         {
-            var subKey = Registry.ClassesRoot.OpenSubKey(@"Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Mappings\" + sid, false);
+            return sid;
+
+            /*var subKey = Registry.ClassesRoot.OpenSubKey(@"Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Mappings\" + sid, false);
             if (subKey != null)
-                packageID = subKey.GetValue("Moniker").ToString();
-        }*/
+                packageID = subKey.GetValue("Moniker").ToString();*/
+        }
         
         return packageID;
     }

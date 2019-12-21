@@ -1081,7 +1081,7 @@ namespace PrivateWin10.Pages
 
                 rule.Name = Translate.fmt("custom_rule", progs.Count != 0 ? progs[0].Description : "");
                 if (progs.Count == 1)
-                    rule.ProgID = progs[0].ID;
+                    rule.SetProgID(progs[0].ID);
             }
 
             for (; ; )

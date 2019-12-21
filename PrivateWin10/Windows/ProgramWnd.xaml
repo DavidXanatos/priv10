@@ -44,7 +44,7 @@
                                   IsEditable="True" 
                                   IsReadOnly="True" 
                                   Height="25"
-                                  VerticalAlignment="Top" Text="" >
+                                  VerticalAlignment="Top" Text="" SelectionChanged="CmbService_SelectionChanged"  >
                         <ComboBox.GroupStyle>
                             <GroupStyle>
                                 <GroupStyle.HeaderTemplate>
