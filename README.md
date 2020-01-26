@@ -8,7 +8,7 @@ To solve privacy issues with other software the tool includes a powerful custom 
 
 
 # Licensing 
-This tool is open source, however the license is a more restrictive than a typical open source license. If you want to publically distribute your self-compiled binaries review the LICENSE file for details.
+This tool is open source, however the license is more restrictive than a typical open source license. If you want to publically distribute your self-compiled binaries review the LICENSE file for details.
 
 
 # Donations
