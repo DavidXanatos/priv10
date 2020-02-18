@@ -3,83 +3,46 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:draw="clr-namespace:System.Drawing;assembly=System.Drawing"
         xmlns:local="clr-namespace:PrivateWin10.Windows"
         xmlns:controls="clr-namespace:PrivateWin10.Controls"
         mc:Ignorable="d"
-        Title="Connection Notification Window" 
+        Title="Notification Window" 
         ShowActivated="false" WindowStyle="ToolWindow"
         Height="400" Width="300" MinHeight="300" MinWidth="300" ShowInTaskbar="false" Closing="Window_Closing">
-    <Window.Resources>
 
+    <Window.Resources>
+        <controls:IconToImageSourceConverter x:Key="IconToImageSourceConverter"/>
     </Window.Resources>
     <Grid>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Button x:Name="btnPrev" Grid.Column="0" Content="Previouse" HorizontalAlignment="Left" Margin="2,2,2,2" VerticalAlignment="Stretch" Width="75" Click="btnPrev_Click"/>
-                <TextBlock x:Name="lblIndex" Text="0/0" Grid.Column="1" HorizontalAlignment="Center" Margin="2,2,2,2" VerticalAlignment="Center"/>
-                <Button x:Name="btnNext" Grid.Column="2" Content="Next" HorizontalAlignment="Right" Margin="2,2,2,2" VerticalAlignment="Stretch" Width="75" Click="btnNext_Click"/>
-            </Grid>
-
-            <GroupBox x:Name="grpBox" Grid.Row="1" Header="Name" Margin="2,6,2,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
-                <Grid Margin="2,0,2,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <Grid Grid.Row="0">
-                        <!--TextBlock Name="lblName" Text="Name" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,2,38,2" VerticalAlignment="Top"/-->
-                        <Image Name="imgIcon" Grid.Column="0" HorizontalAlignment="Right" Height="48" Margin="2,2,2,2" VerticalAlignment="Top" Width="48"/>
-                        <TextBlock Name="lblPID" Text="PID:1234" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,2,52,2" VerticalAlignment="Top" />
-                        <TextBlock Name="lblSubName" Text="Sub Name" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,18,52,2" VerticalAlignment="Top" TextWrapping="Wrap"/>
-                        <ComboBox x:Name="cmbService" Grid.Column="1" Text="" IsEditable="true" IsReadOnly="true" Margin="2,18,52,2" VerticalAlignment="Top" Visibility="Collapsed" SelectionChanged="cmbAccess_SelectionChanged"/>
-                        <TextBlock Name="lblPath" Text="Path" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,38,52,2" VerticalAlignment="Top" TextWrapping="Wrap"  Cursor="Hand" TextDecorations="Underline" MouseDown="LblPath_MouseDown"/>
-                    </Grid>
-                    <Grid Grid.Row="1">
-                        <DataGrid x:Name="consGrid" AutoGenerateColumns="False" IsReadOnly="true" HorizontalScrollBarVisibility="Visible" GridLinesVisibility="All" MouseDoubleClick="consGrid_MouseDoubleClick">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" />
-                                <DataGridTextColumn Header="Address:Port" Binding="{Binding Address}" />
-                                <DataGridTextColumn Header="Remote Host" Binding="{Binding RemoteHost}" />
-                                <DataGridTextColumn Header="Time Stamp" Binding="{Binding TimeStamp}" />
-                                <DataGridTextColumn Header="Process ID" Binding="{Binding ProcessID}" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>                    
-                </Grid>
-            </GroupBox>
-
-            <Grid Grid.Row="2">
-                <Label x:Name ="lblRemember" Content="Remember:" HorizontalAlignment="Left" Margin="2,2,2,2" VerticalAlignment="Center"/>
-                <ComboBox x:Name="cmbRemember"  Margin="100,2,2,2" VerticalAlignment="Center" Text=""/>
-            </Grid>
-            <Grid Grid.Row="3">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Button x:Name="btnIgnore" Grid.Column="0" Content="Ignore" HorizontalAlignment="Left" Margin="2,2,2,2" VerticalAlignment="Stretch" Width="75" Click="btnIgnore_Click"/>
-                <ComboBox x:Name="cmbAccess" Margin="2,2,2,2" Grid.Column="1" VerticalAlignment="Top" SelectionChanged="cmbAccess_SelectionChanged" />
-                <Button x:Name="btnApply" Grid.Column="2" Content="Apply" HorizontalAlignment="Right" Margin="2,2,2,2" VerticalAlignment="Stretch" Width="75" Click="btnApply_Click"/>
-                <!--Controls:SplitButton Name="btnApply" Grid.Column="2" Margin="2,2,2,2" Width="75" HorizontalAlignment="Center" VerticalAlignment="Stretch" HorizontalContentAlignment="Left" DisplayMemberPath="Content">
-                    <Controls:SplitButton.Icon>
-                        <iconPacks:PackIconModern Margin="6" Kind="Alert" />
-                    </Controls:SplitButton.Icon>
-                </Controls:SplitButton-->
-            </Grid>
-
-        </Grid>
+        <TabControl Name="tabs" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectedIndex="0" SelectionChanged="Tabs_SelectionChanged">
+            <TabItem Name="conTab" Visibility="Visible">
+                <TabItem.Header>
+                    <WrapPanel>
+                        <TextBlock Text="Connections"/>
+                        <Image Name="imgCon" Margin="2,0,0,0" Height="16" Width="16" Source="{Binding Source={x:Static draw:SystemIcons.Warning}, Converter={StaticResource IconToImageSourceConverter}, Mode=OneWay}" Visibility="Hidden"/>
+                    </WrapPanel>
+                </TabItem.Header>
+                <controls:ConnectionNotify x:Name="ConNotify"/>
+            </TabItem>
+            <TabItem Name="ruleTab" Visibility="Visible">
+                <TabItem.Header>
+                    <WrapPanel>
+                        <TextBlock Text="Rules"/>
+                        <Image Name="imgRule" Margin="2,0,0,0" Height="16" Width="16" Source="{Binding Source={x:Static draw:SystemIcons.Warning}, Converter={StaticResource IconToImageSourceConverter}, Mode=OneWay}" Visibility="Hidden"/>
+                    </WrapPanel>
+                </TabItem.Header>
+                <controls:RuleNotify x:Name="RuleNotify"/>
+            </TabItem>
+            <!--TabItem Name="tweakTab" Visibility="Visible">
+                <TabItem.Header>
+                    <WrapPanel>
+                        <TextBlock Text="Twekas"/>
+                        <Image Name="imgTweak" Margin="2,0,0,0" Height="16" Width="16" Source="{Binding Source={x:Static draw:SystemIcons.Warning}, Converter={StaticResource IconToImageSourceConverter}, Mode=OneWay}" Visibility="Hidden"/>
+                    </WrapPanel>
+                </TabItem.Header>
+                <controls:TweakNotify x:Name="TweakNotify"/>
+            </-->
+        </TabControl>
     </Grid>
 </Window>

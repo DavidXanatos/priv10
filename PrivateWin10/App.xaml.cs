@@ -262,11 +262,12 @@ namespace PrivateWin10
 
             InitLicense();
 
+            MainWnd = new MainWindow();
+
             TrayIcon = new TrayIcon();
             TrayIcon.Action += TrayAction;
             TrayIcon.Visible = (GetConfigInt("Startup", "Tray", 0) != 0) || App.TestArg("-autorun");
 
-            MainWnd = new MainWindow();
             if (!App.TestArg("-autorun") || !TrayIcon.Visible)
                 MainWnd.Show();
 
@@ -605,6 +606,14 @@ namespace PrivateWin10
                             MainWnd.Hide();
                         else
                             MainWnd.Show();
+                        break;
+                    }
+                case TrayIcon.Actions.ToggleNotify:
+                    {
+                        if (MainWnd.notificationWnd.IsVisible)
+                            MainWnd.notificationWnd.HideWnd();
+                        else if (!MainWnd.notificationWnd.IsEmpty())
+                            MainWnd.notificationWnd.ShowWnd();
                         break;
                     }
                 case TrayIcon.Actions.CloseApplication:

@@ -244,12 +244,12 @@ namespace PrivateWin10.Controls
             SelectionChanged?.Invoke(this, new EventArgs());
         }
 
-        private async void treeView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void treeView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
 
         }
 
-        private async void hdrSort_ClickAsync(object sender, RoutedEventArgs e)
+        private void hdrSort_ClickAsync(object sender, RoutedEventArgs e)
         {
             var header = sender as GridViewColumnHeader;
             var Member = header.Tag?.ToString();

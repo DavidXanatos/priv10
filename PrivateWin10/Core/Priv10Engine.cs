@@ -49,7 +49,7 @@ namespace PrivateWin10
         }
 
         [Serializable()]
-        public class ChangeArgs : EventArgs
+        public class UpdateArgs : EventArgs
         {
             public Guid guid;
             public enum Types
@@ -58,6 +58,15 @@ namespace PrivateWin10
                 Rules
             }
             public Types type;
+        }
+
+        [Serializable()]
+        public class ChangeArgs : EventArgs
+        {
+            public Program prog;
+            public FirewallRuleEx rule;
+            public Priv10Engine.RuleEventType type;
+            public Priv10Engine.RuleFixAction action;
         }
 
         public void RunInEngineThread(FX fx)
@@ -195,7 +204,7 @@ namespace PrivateWin10
 
             ProgramList.Changed += (object sender, ProgramList.ListEvent e) =>
             {
-                NotifyProgramChange(e.guid);
+                NotifyProgramUpdate(e.guid);
             };
 
             AppLog.Debug("Starting engine timer...");
@@ -216,7 +225,7 @@ namespace PrivateWin10
 
             // queue a refresh push
             RunInEngineThread(() => {
-                NotifyProgramChange(Guid.Empty);
+                NotifyProgramUpdate(Guid.Empty);
             });
 
             Dispatcher.Run(); // run
@@ -546,19 +555,19 @@ namespace PrivateWin10
             }).Start();
         }
 
-        public void NotifyProgramChange(Guid guid)
+        public void NotifyProgramUpdate(Guid guid)
         {
             if (App.host != null)
-            App.host.NotifyChange(guid, ChangeArgs.Types.ProgSet);
+                App.host.NotifyUpdate(guid, UpdateArgs.Types.ProgSet);
         }
 
-        public void NotifyRulesChange(Guid guid)
+        public void NotifyRulesUpdte(Guid guid)
         {
             if (App.host != null)
-                App.host.NotifyChange(guid, ChangeArgs.Types.Rules);
+                App.host.NotifyUpdate(guid, UpdateArgs.Types.Rules);
         }
 
-        public void OnRulesChanged(ProgramSet progSet)
+        public void OnRulesUpdated(ProgramSet progSet)
         {
             foreach (Program prog in progSet.Programs.Values)
             {
@@ -566,15 +575,15 @@ namespace PrivateWin10
                     Socket.Access = prog.LookupRuleAccess(Socket);
             }
 
-            NotifyRulesChange(progSet.guid);
+            NotifyRulesUpdte(progSet.guid);
         }
 
-        public void OnRulesChanged(Program prog)
+        public void OnRulesUpdated(Program prog)
         {
             foreach (NetworkSocket Socket in prog.Sockets.Values)
                 Socket.Access = prog.LookupRuleAccess(Socket);
 
-            NotifyRulesChange(prog.ProgSet.guid);
+            NotifyRulesUpdte(prog.ProgSet.guid);
         }
 
 #if FW_COM_ITF
@@ -925,7 +934,7 @@ namespace PrivateWin10
             LogRuleEvent(prog, knownRule, RuleEventType.Removed, actionTaken);
         }
 
-        enum RuleEventType
+        public enum RuleEventType
         {
             Changed = 0,
             Added,
@@ -933,7 +942,7 @@ namespace PrivateWin10
             UnChanged, // role was changed to again match the aproved configuration
         }
 
-        enum RuleFixAction
+        public enum RuleFixAction
         {
             None = 0,
             Restored,
@@ -944,7 +953,10 @@ namespace PrivateWin10
 
         private void LogRuleEvent(Program prog, FirewallRuleEx rule, RuleEventType type, RuleFixAction action)
         {
-            OnRulesChanged(prog);
+            OnRulesUpdated(prog);
+
+            if (App.host != null)
+                App.host.NotifyChange(prog, rule, type, action);
 
             // Logg the event
             Dictionary<string, string> Params = new Dictionary<string, string>();
@@ -981,9 +993,11 @@ namespace PrivateWin10
             }
 
             if (type == RuleEventType.UnChanged || action == RuleFixAction.Restored)
-                App.LogInfo(EventID, Params, App.EventFlags.Notifications, Message);
+                App.LogInfo(EventID, Params, App.EventFlags.AppLogEntries, Message);
             else
-                App.LogWarning(EventID, Params, App.EventFlags.Notifications, Message);
+                App.LogWarning(EventID, Params, App.EventFlags.AppLogEntries, Message);
+
+
         }
 
         public void ApproveRules()
@@ -1022,7 +1036,7 @@ namespace PrivateWin10
                 }
 
                 if(bRemoved)
-                    OnRulesChanged(prog);
+                    OnRulesUpdated(prog);
             }
             return Count;
         }
@@ -1192,7 +1206,7 @@ namespace PrivateWin10
                     {
                         old_prog?.Rules.Remove(old_rule.guid);
 
-                        OnRulesChanged(prog);
+                        OnRulesUpdated(prog);
                     }
                 }
 
@@ -1200,18 +1214,18 @@ namespace PrivateWin10
                 if (!FirewallManager.ApplyRule(prog, rule, expiration)) // if the rule is new this will set the guid
                     return false;
 
-                OnRulesChangedEx(prog);
+                OnRulesUpdatedEx(prog);
 
                 return true;
             }));
         }
 
-        private void OnRulesChangedEx(Program prog)
+        private void OnRulesUpdatedEx(Program prog)
         {
-            OnRulesChanged(prog);
+            OnRulesUpdated(prog);
 
             App.engine.FirewallManager.EvaluateRules(prog.ProgSet);
-            NotifyProgramChange(prog.ProgSet.guid);
+            NotifyProgramUpdate(prog.ProgSet.guid);
         }
 
         public bool RemoveRule(FirewallRule rule)
@@ -1225,7 +1239,7 @@ namespace PrivateWin10
                 {
                     prog.Rules.Remove(rule.guid);
 
-                    OnRulesChanged(prog);
+                    OnRulesUpdated(prog);
                 }
                 return true;
             }));
@@ -1257,7 +1271,7 @@ namespace PrivateWin10
                 }
             }
 
-            OnRulesChangedEx(prog);
+            OnRulesUpdatedEx(prog);
             return true;
         }
 
@@ -1275,7 +1289,7 @@ namespace PrivateWin10
             }
             ruleEx.Backup = null;
 
-            OnRulesChangedEx(prog);
+            OnRulesUpdatedEx(prog);
             return true;
         }
 

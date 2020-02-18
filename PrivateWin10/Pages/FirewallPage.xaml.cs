@@ -270,7 +270,6 @@ namespace PrivateWin10.Pages
 
             progTree.SetPage(this);
 
-
             mTimer.Tick += new EventHandler(OnTimerTick);
             mTimer.Interval = new TimeSpan(0, 0, 0, 0, 250); // 4 times a second
             mTimer.Start();
@@ -278,6 +277,7 @@ namespace PrivateWin10.Pages
 
             App.client.ActivityNotification += OnActivity;
             App.client.ChangeNotification += OnChange;
+            App.client.UpdateNotification += OnUpdate;
 
 
             //ProgramSets = new ObservableCollection<ProgramSet>();
@@ -326,9 +326,6 @@ namespace PrivateWin10.Pages
             consList.OnClose();
             sockList.OnClose();
             dnsList.OnClose();
-
-            if (notificationWnd != null)
-                notificationWnd.Close();
         }
 
         private void ProgList_SelectionChanged(object sender, EventArgs e)
@@ -429,37 +426,28 @@ namespace PrivateWin10.Pages
                 consList.AddEntry(prog, program, args);
         }
 
-
-        private NotificationWnd notificationWnd = null;
+        void OnChange(object sender, Priv10Engine.ChangeArgs args)
+        {
+            App.MainWnd.notificationWnd.NotifyRule(args);
+        }
 
         private void ShowNotification(ProgramSet prog, Priv10Engine.FwEventArgs args)
         {
-            if (notificationWnd == null)
-            {
-                if (args.update) // dont show on update events
-                    return;
+            if (args.update && !App.MainWnd.notificationWnd.IsVisible) // dont show on update events
+                return;
 
-                notificationWnd = new NotificationWnd();
-                notificationWnd.Closing += NotificationClosing;
-            }
-            if(notificationWnd.Add(prog, args))
-                notificationWnd.Show();
-        }
-
-        void NotificationClosing(object sender, CancelEventArgs e)
-        {
-            notificationWnd = null;
+            App.MainWnd.notificationWnd.AddCon(prog, args);
         }
 
         HashSet<Guid> UpdatesProgs = new HashSet<Guid>();
         bool FullUpdate = false;
         bool RuleUpdate = false;
 
-        void OnChange(object sender, Priv10Engine.ChangeArgs args)
+        void OnUpdate(object sender, Priv10Engine.UpdateArgs args)
         {
             if (args.guid == Guid.Empty)
                 FullUpdate = true;
-            else if (args.type == Priv10Engine.ChangeArgs.Types.ProgSet)
+            else if (args.type == Priv10Engine.UpdateArgs.Types.ProgSet)
                 UpdatesProgs.Add(args.guid);
             else
                 RuleUpdate = true;

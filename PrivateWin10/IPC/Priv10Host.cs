@@ -238,14 +238,26 @@ namespace PrivateWin10
             SendPushNotification("ActivityNotification", args);
         }
 
-        public void NotifyChange(Guid guid, Priv10Engine.ChangeArgs.Types type)
+        public void NotifyChange(Program prog, FirewallRuleEx rule, Priv10Engine.RuleEventType type, Priv10Engine.RuleFixAction action)
         {
             Priv10Engine.ChangeArgs args = new Priv10Engine.ChangeArgs()
+            {
+                prog = prog,
+                rule = rule,
+                type = type,
+                action = action
+            };
+            SendPushNotification("ChangeNotification", args);
+        }
+
+        public void NotifyUpdate(Guid guid, Priv10Engine.UpdateArgs.Types type)
+        {
+            Priv10Engine.UpdateArgs args = new Priv10Engine.UpdateArgs()
             {
                 guid = guid,
                 type = type
             };
-            SendPushNotification("ChangeNotification", args);
+            SendPushNotification("UpdateNotification", args);
         }
     }
 }

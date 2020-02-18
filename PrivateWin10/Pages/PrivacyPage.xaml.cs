@@ -32,6 +32,13 @@ namespace PrivateWin10.Pages
         public PrivacyPage()
         {
             InitializeComponent();
+
+            App.tweaks.TweakChanged += OnChange;
+        }
+
+        public void OnChange(object sender, TweakManager.TweakEventArgs args)
+        {
+            App.MainWnd.notificationWnd.NotifyTweak(args);
         }
 
         public void OnShow()

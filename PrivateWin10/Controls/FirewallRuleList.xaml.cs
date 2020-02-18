@@ -508,10 +508,12 @@ namespace PrivateWin10.Controls
         public class RuleItem : INotifyPropertyChanged
         {
             public FirewallRuleEx Rule;
+            public Program Prog;
 
-            public RuleItem(FirewallRuleEx rule)
+            public RuleItem(FirewallRuleEx rule, Program prog = null)
             {
                 Rule = rule;
+                Prog = prog;
             }
 
             public bool TestFilter(string textFilter)

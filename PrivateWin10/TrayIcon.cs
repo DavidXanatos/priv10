@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.ComponentModel;
+using System.Windows.Threading;
 
 namespace PrivateWin10
 {
@@ -17,9 +18,12 @@ namespace PrivateWin10
         private MenuItem menuExit;
         private IContainer components;
 
+        DispatcherTimer mTimer = new DispatcherTimer();
+
         public enum Actions
         {
             ToggleWindow,
+            ToggleNotify,
             CloseApplication,
         }
 
@@ -80,6 +84,22 @@ namespace PrivateWin10
             // Handle the DoubleClick event to activate the form.
             notifyIcon.DoubleClick += new System.EventHandler(this.notifyIcon1_DoubleClick);
             notifyIcon.Click += new System.EventHandler(this.notifyIcon1_Click);
+
+            mTimer.Tick += new EventHandler(OnTimerTick);
+            mTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
+            mTimer.Start();
+        }
+
+        private void OnTimerTick(object sender, EventArgs e)
+        {
+            if (clicked)
+            {
+                clicked = false;
+
+                TrayEventArgs args = new TrayEventArgs();
+                args.Action = Actions.ToggleNotify;
+                Action(this, args);
+            }
         }
 
         public bool Visible { get { return notifyIcon.Visible; } set { notifyIcon.Visible = value; } }
@@ -95,9 +115,14 @@ namespace PrivateWin10
             notifyIcon.ShowBalloonTip(5000, App.Title, Message, Icon);
         }
 
+        bool clicked = false;
+
         private void notifyIcon1_Click(object Sender, EventArgs e)
         {
-            //MessageBox.Show("clicked");
+            if ((e as MouseEventArgs).Button != MouseButtons.Left)
+                return;
+
+            clicked = true;
         }
 
         private void notifyIcon1_DoubleClick(object Sender, EventArgs e)
@@ -105,6 +130,7 @@ namespace PrivateWin10
             if ((e as MouseEventArgs).Button != MouseButtons.Left)
                 return;
 
+            clicked = false;
             TrayEventArgs args = new TrayEventArgs();
             args.Action = Actions.ToggleWindow;
             Action(this, args);
