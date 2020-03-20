@@ -134,7 +134,7 @@ namespace PrivateWin10
             bool HasEngine = App.client.IsConnected();
 
             notificationWnd = new NotificationWnd(HasEngine);
-            //notificationWnd.Closed += NotificationClosed;
+            notificationWnd.Closed += NotificationClosed;
 
             mPages.Add("Overview", new PageItem(new OverviewPage()));
             mPages.Add("Privacy", new PageItem(new PrivacyPage()));
@@ -213,14 +213,15 @@ namespace PrivateWin10
                     (page.ctrl as IUserPage).OnClose();
             }
 
-            if (notificationWnd != null)
-                notificationWnd.CloseWnd();
-
             if (App.TrayIcon.Visible)
             {
                 e.Cancel = true;
                 this.Hide();
+                return;
             }
+
+            if (notificationWnd != null)
+                notificationWnd.CloseWnd();
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -228,10 +229,10 @@ namespace PrivateWin10
 
         }
 
-        /*void NotificationClosed(object sender, EventArgs e)
+        void NotificationClosed(object sender, EventArgs e)
         {
-            notificationWnd = null;
-        }*/
+            //notificationWnd = null;
+        }
 
         public void UpdateEnabled()
         {

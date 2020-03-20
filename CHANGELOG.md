@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.75b] - 2020-03-20
+### Fixed
+- crash issue with notification window
 
 ## [0.75] - 2020-02-18
 

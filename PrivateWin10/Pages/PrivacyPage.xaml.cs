@@ -38,7 +38,8 @@ namespace PrivateWin10.Pages
 
         public void OnChange(object sender, TweakManager.TweakEventArgs args)
         {
-            App.MainWnd.notificationWnd.NotifyTweak(args);
+            if(App.MainWnd != null)
+                App.MainWnd.notificationWnd.NotifyTweak(args);
         }
 
         public void OnShow()

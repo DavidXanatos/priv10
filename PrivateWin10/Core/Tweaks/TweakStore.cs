@@ -167,6 +167,11 @@ namespace PrivateWin10
                 Value = 0,
                 Hint = Tweak.Hints.Optional
             });
+            telemetry.Add(new Tweak("Device Census", TweakType.DisableTask, WinVer.Win7)
+            {
+                Path = @"\Microsoft\Windows\Device Information",
+                Key = "Device"
+            });
             //Disable file Diagtrack-Listener.etl
             //(Disable file diagtrack.dll)
             //(Disable file BthTelemetry.dll)
@@ -437,7 +442,8 @@ namespace PrivateWin10
             {
                 Path= @"SYSTEM\CurrentControlSet\Services\SecurityHealthService",
                 Key = "Start",
-                Value = 4
+                Value = 4,
+                Hint = Tweak.Hints.Optional
             });
 
 
