@@ -107,6 +107,8 @@ namespace PrivateWin10
 
         public bool FullyLoaded = false;
 
+        public NotificationWnd notificationWnd = null;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -130,6 +132,10 @@ namespace PrivateWin10
             WpfFunc.LoadWnd(this, "Main");
 
             bool HasEngine = App.client.IsConnected();
+
+            notificationWnd = new NotificationWnd(HasEngine);
+            notificationWnd.Closed += NotificationClosed;
+
             mPages.Add("Overview", new PageItem(new OverviewPage()));
             mPages.Add("Privacy", new PageItem(new PrivacyPage()));
             mPages.Add("Firewall", new PageItem(HasEngine ? new FirewallPage() : null));
@@ -211,12 +217,21 @@ namespace PrivateWin10
             {
                 e.Cancel = true;
                 this.Hide();
+                return;
             }
+
+            if (notificationWnd != null)
+                notificationWnd.CloseWnd();
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
 
+        }
+
+        void NotificationClosed(object sender, EventArgs e)
+        {
+            //notificationWnd = null;
         }
 
         public void UpdateEnabled()

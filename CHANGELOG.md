@@ -2,7 +2,20 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.75b] - 2020-03-20
+### Fixed
+- crash issue with notification window
 
+## [0.75] - 2020-02-18
+
+### Added
+- when a firewall rule gets changed a new notification pupup gets displayed
+- notification window has now tabs
+-- added tab with rule changed notifications
+- notification window can now be opened/closed by single clicking on the tray icon, without discarding contents
+
+### Fixed
+- settings backups names dont longer contian ':'
 
 
 ## [0.74] - 2019-12-21

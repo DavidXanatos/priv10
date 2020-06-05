@@ -248,6 +248,7 @@ namespace PrivateWin10
 
         public event EventHandler<Priv10Engine.FwEventArgs> ActivityNotification;
         public event EventHandler<Priv10Engine.ChangeArgs> ChangeNotification;
+        public event EventHandler<Priv10Engine.UpdateArgs> UpdateNotification;
         
 
         public override void HandlePushNotification(string func, object args)
@@ -267,6 +268,12 @@ namespace PrivateWin10
                 {
                     Application.Current.Dispatcher.BeginInvoke(new Action(() => {
                         ChangeNotification?.Invoke(this, (Priv10Engine.ChangeArgs)args);
+                    }));
+                }
+                else if (func == "UpdateNotification")
+                {
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+                        UpdateNotification?.Invoke(this, (Priv10Engine.UpdateArgs)args);
                     }));   
                 }
                 else

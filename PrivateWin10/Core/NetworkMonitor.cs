@@ -298,6 +298,10 @@ namespace PrivateWin10
                         App.engine.DnsInspector.GetHostName(Socket.ProcessId, Socket.RemoteAddress, Socket, NetworkSocket.HostSetter);
 
                     var moduleInfo = SocketRow.Module;
+
+                    /*if (moduleInfo != null)
+                        Console.WriteLine("Module {0} ({1})", moduleInfo.ModuleName,  moduleInfo.ModulePath);*/
+
                     if (moduleInfo == null || moduleInfo.ModulePath.Equals("System", StringComparison.OrdinalIgnoreCase))
                         Socket.ProgID = ProgramID.NewID(ProgramID.Types.System);
                     else

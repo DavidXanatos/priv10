@@ -217,7 +217,7 @@ namespace PrivateWin10
 
             progSet.config.CurAccess = progSet.config.NetAccess;
 
-            App.engine.OnRulesChanged(progSet);
+            App.engine.OnRulesUpdated(progSet);
         }
 
         public bool ApplyRule(Program prog, FirewallRule rule, UInt64 expiration = 0)

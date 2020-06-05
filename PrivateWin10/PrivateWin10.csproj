@@ -108,6 +108,9 @@
     <Compile Include="Controls\AddressControl.xaml.cs">
       <DependentUpon>AddressControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ConnectionNotify.xaml.cs">
+      <DependentUpon>ConnectionNotify.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Converters.cs" />
     <Compile Include="Controls\DnsBlockListsControl.xaml.cs">
       <DependentUpon>DnsBlockListsControl.xaml</DependentUpon>
@@ -145,12 +148,21 @@
     <Compile Include="Controls\ProgramTreeControl\ProgramTreeItem.cs" />
     <Compile Include="Controls\ProgramTreeControl\AbstractTreeItem.cs" />
     <Compile Include="Controls\ProgramTreeControl\ProgTreeRoot.cs" />
+    <Compile Include="Controls\RuleNotify.xaml.cs">
+      <DependentUpon>RuleNotify.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\SearchTextBox.cs" />
+    <Compile Include="Controls\SplitButton.xaml.cs">
+      <DependentUpon>SplitButton.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TweakControl.xaml.cs">
       <DependentUpon>TweakControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\TweakGroup.xaml.cs">
       <DependentUpon>TweakGroup.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TweakNotify.xaml.cs">
+      <DependentUpon>TweakNotify.xaml</DependentUpon>
     </Compile>
     <Compile Include="Core\DnsInspector\DnsCacheMonitor.cs" />
     <Compile Include="Core\DnsInspector.cs" />
@@ -240,6 +252,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Controls\ConnectionNotify.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\DnsBlockListsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -280,6 +296,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\RuleNotify.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SplitButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\TweakControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -287,6 +311,10 @@
     <Page Include="Controls\TweakGroup.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\TweakNotify.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\AboutPage.xaml">
       <Generator>MSBuild:Compile</Generator>

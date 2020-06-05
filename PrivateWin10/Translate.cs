@@ -34,8 +34,6 @@ namespace PrivateWin10
             mStrings.Add("name_service", "{0} (service: {1})");
             mStrings.Add("name_app", "{0} (app: {1})");
             mStrings.Add("name_global", "All Processes");
-            mStrings.Add("prefix_service", "Service: ");
-            mStrings.Add("prefix_programm", "Program: ");
             mStrings.Add("prefix_app", "App: ");
             mStrings.Add("sort_no", "Unsorted");
             mStrings.Add("sort_name", "Name");
@@ -138,14 +136,21 @@ namespace PrivateWin10
             mStrings.Add("lbl_name", "Name");
             mStrings.Add("lbl_group", "Group");
             mStrings.Add("lbl_index", "Index");
-            mStrings.Add("wnd_notify", "Connection Notification Window");
+            mStrings.Add("wnd_notify", "PrivateWin10 Notifications");
             mStrings.Add("lbl_prev", "Previous");
             mStrings.Add("lbl_next", "Next");
             mStrings.Add("lbl_remember", "Remember:");
             mStrings.Add("lbl_ignore", "Ignore");
+            mStrings.Add("lbl_ignore_all", "Ignore All");
+            mStrings.Add("lbl_approve", "Approve");
+            mStrings.Add("lbl_approve_all", "Approve All");
+            mStrings.Add("lbl_reject", "Reject");
+            mStrings.Add("lbl_reject_all", "Reject All");
             mStrings.Add("lbl_apply", "Apply");
             mStrings.Add("lbl_direction", "Direction");
             mStrings.Add("lbl_protocol", "Protocol");
+            mStrings.Add("lbl_protocol_", "Protocol:");
+            mStrings.Add("lbl_program_", "Program:");
             mStrings.Add("lbl_ip_port", "Address:Port");
             mStrings.Add("lbl_remote_host", "Remote Host");
             mStrings.Add("lbl_time_stamp", "Timestamp");
@@ -177,6 +182,8 @@ namespace PrivateWin10
             mStrings.Add("grp_network", "Network Properties");
             mStrings.Add("lbl_local_ip", "Local Address");
             mStrings.Add("lbl_remote_ip", "Remote Address");
+            mStrings.Add("lbl_local", "Local:");
+            mStrings.Add("lbl_remote", "Remote:");
             mStrings.Add("btn_add_prog", "Add Program");
             mStrings.Add("btn_add_to_set", "Add Program to set");
             mStrings.Add("btn_merge_progs", "Merge Programs");
@@ -428,6 +435,12 @@ namespace PrivateWin10
             mStrings.Add("msg_backup_ok", "Data directory saved successfully to: {0}");
             mStrings.Add("msg_restore_info", "PrivateWin10 will now restart to apply the backup");
             mStrings.Add("msg_restore_no_ini", "The selected archive does not look like a PrivateWin10 configuration backup!");
+            mStrings.Add("lbl_rule_guide", "Some Firewall rules have been changed by a 3rd party application, please review the changed rules and approve or reject the changes.");
+            mStrings.Add("lbl_rule_details", "Rule details");
+            mStrings.Add("lbl_con_notify", "New Connections");
+            mStrings.Add("lbl_rule_notify", "Changed Rules");
+            mStrings.Add("lbl_tweak_notify", "Changed Tweaks");
+
             //mStrings.Add("", "");
 
 

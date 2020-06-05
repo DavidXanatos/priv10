@@ -147,12 +147,14 @@ namespace PrivateSetup
                     progData = @"C:\ProgramData";
 
                 IniPath = progData + "\\" + SetupData.AppKey;
-                if (!Directory.Exists(IniPath))
-                    Directory.CreateDirectory(IniPath);
-                MiscFunc.SetAnyDirSec(IniPath); // ensure access for non admins
             }
             else // Note: when the ini file ins inside the application directory the app starts in portable mode
-                IniPath = Data.InstallationPath;
+                IniPath = Data.InstallationPath + @"\Data";
+
+            if (!Directory.Exists(IniPath))
+                Directory.CreateDirectory(IniPath);
+            MiscFunc.SetAnyDirSec(IniPath); // ensure access for non admins
+
             IniPath += @"\" + SetupData.AppKey + ".ini";
 
             App.IniWriteValue(IniPath, "Startup", "Usage", Data.Use.ToString());

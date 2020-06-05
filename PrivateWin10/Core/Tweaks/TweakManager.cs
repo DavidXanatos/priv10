@@ -39,6 +39,22 @@ namespace PrivateWin10
         UInt64 NextTweakCheck = 0;
         UInt64 LastSaveTime = MiscFunc.GetTickCount64();
 
+        [Serializable()]
+        public class TweakEventArgs : EventArgs
+        {
+            public enum State
+            {
+                eNone,
+                eChanged,
+                eRestored
+            };
+
+            public State state;
+            public Tweak tweak;
+        }
+
+        public event EventHandler<TweakEventArgs> TweakChanged;
+
         public TweakManager()
         {
             TweakStore.InitTweaks(Categorys);
@@ -174,6 +190,8 @@ namespace PrivateWin10
 
                 if (tweak.Status == false && tweak.State != Tweak.States.Unsellected)
                 {
+                    TweakEventArgs.State state = TweakEventArgs.State.eChanged;
+
                     if (fixChanged == true && tweak.FixFailed == false)
                     {
                         ApplyTweak(tweak);
@@ -185,6 +203,7 @@ namespace PrivateWin10
                         }
                         else
                         {
+                            state = TweakEventArgs.State.eRestored;
                             tweak.FixedCount++;
                             App.LogInfo(App.EventIDs.TweakFixed, Params, App.EventFlags.Notifications, Translate.fmt("msg_tweak_fixed", tweak.Name, tweak.Group));
                         }
@@ -193,6 +212,8 @@ namespace PrivateWin10
                     {
                         App.LogWarning(App.EventIDs.TweakChanged, Params, App.EventFlags.Notifications, Translate.fmt("msg_tweak_un_done", tweak.Name, tweak.Group));
                     }
+
+                    TweakChanged?.Invoke(this, new TweakEventArgs() { tweak = tweak, state = state });
                 }
             }
             return status;

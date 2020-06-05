@@ -597,7 +597,9 @@ namespace PrivateWin10
             else if (SubNet.Equals(FirewallRule.AddrKeywordRmtIntrAnet, StringComparison.OrdinalIgnoreCase)
                   || SubNet.Equals(FirewallRule.AddrKeywordPly2Renders, StringComparison.OrdinalIgnoreCase)
                   || SubNet.Equals(FirewallRule.AddrKeywordCaptivePortal, StringComparison.OrdinalIgnoreCase))
+            {
                 ; // todo:
+            }
             else
                 return null;
             return string.Join(",", IpRanges.ToArray());
