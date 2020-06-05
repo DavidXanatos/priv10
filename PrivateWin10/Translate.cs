@@ -307,7 +307,7 @@ namespace PrivateWin10
             mStrings.Add("filter_rules_disabled", "with Disabled");
             mStrings.Add("filter_rules_none", "Without");
             mStrings.Add("lbl_last_preset", "Last Preset");
-            mStrings.Add("msg_tweak_un_done", "Tweak {0} from {1} is not applied!");
+            mStrings.Add("msg_tweak_un_done", "Tweak {0} from {1} was not applied!");
             mStrings.Add("msg_tweak_stuck", "Failed to reapply Tweak {0} from {1}.");
             mStrings.Add("msg_tweak_fixed", "Successfully reapplied Tweak {0} from {1}.");
             mStrings.Add("msg_rule_event", "Firewall rule \"{0}\" for \"{1}\" was {2}.");
@@ -434,7 +434,7 @@ namespace PrivateWin10
             mStrings.Add("msg_restore_error", "Failed to restore data directory; reason: {0}");
             mStrings.Add("msg_backup_ok", "Data directory saved successfully to: {0}");
             mStrings.Add("msg_restore_info", "PrivateWin10 will now restart to apply the backup");
-            mStrings.Add("msg_restore_no_ini", "The sellected archive does not look like a PrivateWin10 configuration backup!");
+            mStrings.Add("msg_restore_no_ini", "The selected archive does not look like a PrivateWin10 configuration backup!");
             mStrings.Add("lbl_rule_guide", "Some Firewall rules have been changed by a 3rd party application, please review the changed rules and approve or reject the changes.");
             mStrings.Add("lbl_rule_details", "Rule details");
             mStrings.Add("lbl_con_notify", "New Connections");
