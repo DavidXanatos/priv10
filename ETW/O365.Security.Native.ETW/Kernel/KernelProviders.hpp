@@ -80,6 +80,12 @@ namespace Microsoft { namespace O365 { namespace Security { namespace ETW { name
         EVENT_TRACE_FLAG_NETWORK_TCPIP,
         FromGuid(krabs::guids::tcp_ip));
 
+    /// <summary>A provider that enables network udp/ip events.</summary>
+    CREATE_CONVENIENCE_KERNEL_PROVIDER(
+        NetworkUdpipProvider,
+        EVENT_TRACE_FLAG_NETWORK_TCPIP,
+        FromGuid(krabs::guids::udp_ip));
+
     /// <summary>A provider that enables process events.</summary>
     CREATE_CONVENIENCE_KERNEL_PROVIDER(
         ProcessProvider,
