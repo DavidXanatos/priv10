@@ -235,6 +235,7 @@ namespace PrivateWin10
                 else if (conRes == -1)
                 {
                     MessageBox.Show(Translate.fmt("msg_dupliate_session", Title), Title);
+                    client.Close();
                     return; // no point in cintinuing without admin rights or an already running engine
                 }
             }
