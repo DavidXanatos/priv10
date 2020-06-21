@@ -806,7 +806,7 @@ namespace PrivateWin10
                 {
                     ushort begin;
                     ushort end;
-                    if (ushort.TryParse(portStr, out begin) && ushort.TryParse(portStr, out end))
+                    if (ushort.TryParse(portRange[0], out begin) && ushort.TryParse(portRange[1], out end))
                     {
                         portRanges.Add(new PortRange()
                         {
@@ -838,7 +838,7 @@ namespace PrivateWin10
                     portRangeArray[i].uEnd = portRanges[i].End;
                 }
 
-                ports.Ports.dwNumEntries = (ushort)portList.Count;
+                ports.Ports.dwNumEntries = (ushort)portRanges.Count;
                 handles.Add(GCHandle.Alloc(portRangeArray, GCHandleType.Pinned));
                 ports.Ports.pPorts = Marshal.UnsafeAddrOfPinnedArrayElement(portRangeArray, 0);
             }
