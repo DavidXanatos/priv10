@@ -451,7 +451,7 @@ namespace PrivateWin10
                 {
                     UInt16 beginPort = 0;
                     UInt16 endPort = 0;
-                    if (UInt16.TryParse(strTemp[0], out beginPort) && UInt16.TryParse(strTemp[0], out endPort))
+                    if (UInt16.TryParse(strTemp[0], out beginPort) && UInt16.TryParse(strTemp[1], out endPort))
                     {
                         if (beginPort <= numPort && numPort <= endPort)
                             return true;
