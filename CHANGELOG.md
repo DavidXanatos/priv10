@@ -8,8 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - added a few more tweaks
-	Disable Device Census
-	Disable Kernel Crash Dump creation
+- added new preset control mechanism
 
 ### Changed
 - All microsoft binaries under System32 are now classifyed as system components (not only services and kernel)
