@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.ComponentModel;
 using System.Windows.Threading;
+using System.Windows;
+using MessageBox = System.Windows.MessageBox;
+using Application = System.Windows.Application;
+using MiscHelpers;
 
 namespace PrivateWin10
 {
@@ -15,24 +15,11 @@ namespace PrivateWin10
         private NotifyIcon notifyIcon;
         private ContextMenu contextMenu;
         private MenuItem menuBlock;
+        private MenuItem menuPresets;
         private MenuItem menuExit;
         private IContainer components;
 
         DispatcherTimer mTimer = new DispatcherTimer();
-
-        public enum Actions
-        {
-            ToggleWindow,
-            ToggleNotify,
-            CloseApplication,
-        }
-
-        public class TrayEventArgs : EventArgs
-        {
-            public TrayIcon.Actions Action { get; set; }
-        }
-
-        public event EventHandler<TrayEventArgs> Action;
 
         public TrayIcon()
         {
@@ -40,38 +27,35 @@ namespace PrivateWin10
             this.contextMenu = new ContextMenu();
 
             // Initialize menuItem1
-            this.menuBlock = new MenuItem();
-            this.menuBlock.Index = 0;
-            this.menuBlock.Text = Translate.fmt("mnu_block");
+            this.menuBlock = new MenuItem() { Text = Translate.fmt("mnu_block") };
 
             ProgramID id = ProgramID.NewID(ProgramID.Types.Global);
             ProgramSet prog = App.client.GetProgram(id, true);
-
             if (prog == null)
                 this.menuBlock.Enabled = false;
             else
                 this.menuBlock.Checked = (prog.config.CurAccess == ProgramSet.Config.AccessLevels.BlockAccess);
-
             this.menuBlock.Click += new System.EventHandler(this.menuBlock_Click);
 
+            this.menuPresets = new MenuItem() { Text = Translate.fmt("mnu_presets") };
+
+            UpdatePresets();
+
+            App.presets.PresetChange += OnPresetChanged;
+
             // Initialize menuItem1
-            this.menuExit = new MenuItem();
-            this.menuExit.Index = 0;
-            this.menuExit.Text = Translate.fmt("mnu_exit");
+            this.menuExit = new MenuItem() { Text = Translate.fmt("mnu_exit") };
             this.menuExit.Click += new System.EventHandler(this.menuExit_Click);
 
             // Initialize contextMenu1
-            this.contextMenu.MenuItems.AddRange(new MenuItem[] { this.menuBlock, new MenuItem("-"), this.menuExit });
+            this.contextMenu.MenuItems.AddRange(new MenuItem[] { this.menuBlock, this.menuPresets, new MenuItem("-"), this.menuExit });
 
             // Create the NotifyIcon.
             this.notifyIcon = new NotifyIcon(this.components);
 
-            string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-
             // The Icon property sets the icon that will appear
             // in the systray for this application.
-            //notifyIcon1.Icon = new Icon("wu.ico");
-            notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(exePath);
+            notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(App.exePath);
 
             // The ContextMenu property sets the menu that will
             // appear when the systray icon is right clicked.
@@ -79,7 +63,7 @@ namespace PrivateWin10
 
             // The Text property sets the text that will be displayed,
             // in a tooltip, when the mouse hovers over the systray icon.
-            notifyIcon.Text = FileVersionInfo.GetVersionInfo(exePath).FileDescription;
+            notifyIcon.Text = FileVersionInfo.GetVersionInfo(App.exePath).FileDescription;
 
             // Handle the DoubleClick event to activate the form.
             notifyIcon.DoubleClick += new System.EventHandler(this.notifyIcon1_DoubleClick);
@@ -90,15 +74,61 @@ namespace PrivateWin10
             mTimer.Start();
         }
 
+        private void UpdatePresets(PresetManager.PresetChangeArgs args)
+        {
+        }
+
+        private void OnPresetChanged(object sender, PresetManager.PresetChangeArgs args)
+        {
+            if (args.preset == null)
+            {
+                UpdatePresets();
+                return;
+            }
+
+            foreach (MenuItem item in menuPresets.MenuItems)
+            {
+                if (args.preset.guid.Equals((Guid)item.Tag))
+                {
+                    item.Name = args.preset.Name;
+                    item.Checked = args.preset.State;
+                    break;
+                }
+            }
+        }
+
+        private void UpdatePresets()
+        {
+            this.menuPresets.MenuItems.Clear();
+
+            foreach (var preset in App.presets.Presets.Values)
+            {
+                var menuItem = new MenuItem() { Text = preset.Name };
+                menuItem.Click += new System.EventHandler(this.menuPreset_Click);
+                menuItem.Tag = preset.guid;
+                menuItem.Checked = preset.State;
+                menuPresets.MenuItems.Add(menuItem);
+            }
+        }
+
+        private void menuPreset_Click(object Sender, EventArgs e)
+        {
+            App.presets.SetPreset((Guid)((MenuItem)Sender).Tag, !((MenuItem)Sender).Checked);
+        }
+
         private void OnTimerTick(object sender, EventArgs e)
         {
             if (clicked)
             {
                 clicked = false;
 
-                TrayEventArgs args = new TrayEventArgs();
-                args.Action = Actions.ToggleNotify;
-                Action(this, args);
+                if (App.MainWnd == null || !App.MainWnd.FullyLoaded)
+                    return;
+
+                if (App.MainWnd.notificationWnd.IsVisible)
+                    App.MainWnd.notificationWnd.HideWnd();
+                else if (!App.MainWnd.notificationWnd.IsEmpty())
+                    App.MainWnd.notificationWnd.ShowWnd();
             }
         }
 
@@ -130,10 +160,13 @@ namespace PrivateWin10
             if ((e as MouseEventArgs).Button != MouseButtons.Left)
                 return;
 
-            clicked = false;
-            TrayEventArgs args = new TrayEventArgs();
-            args.Action = Actions.ToggleWindow;
-            Action(this, args);
+            if (App.MainWnd == null || !App.MainWnd.FullyLoaded)
+                return;
+
+            if (App.MainWnd.IsVisible)
+                App.MainWnd.Hide();
+            else
+                App.MainWnd.Show();
         }
 
         private void menuBlock_Click(object Sender, EventArgs e)
@@ -150,9 +183,20 @@ namespace PrivateWin10
             // Close the form, which closes the application.
             //Application.Exit();
 
-            TrayEventArgs args = new TrayEventArgs();
-            args.Action = Actions.CloseApplication;
-            Action(this, args);
+            if (Priv10Service.IsInstalled() && AdminFunc.IsAdministrator())
+            {
+                MessageBoxResult res = MessageBox.Show(Translate.fmt("msg_stop_svc"), App.Title, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                switch (res)
+                {
+                    case MessageBoxResult.Yes:
+                        if(!Priv10Service.Terminate())
+                            MessageBox.Show(Translate.fmt("msg_stop_svc_err"), App.Title, MessageBoxButton.OK, MessageBoxImage.Stop);
+                        break;
+                    case MessageBoxResult.Cancel:
+                        return;
+                }
+            }
+            Application.Current.Shutdown();
         }
     }
 }

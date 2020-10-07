@@ -1,4 +1,5 @@
-﻿using PrivateWin10.Windows;
+﻿using MiscHelpers;
+using PrivateWin10.Windows;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -152,6 +153,8 @@ namespace PrivateWin10.Pages
             WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_any"), ProgramSet.Config.AccessLevels.AnyValue);
             WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_none"), ProgramSet.Config.AccessLevels.Unconfigured);
             WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_allow"), ProgramSet.Config.AccessLevels.FullAccess);
+            //WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_outbound"), ProgramSet.Config.AccessLevels.OutBoundAccess);
+            //WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_inbound"), ProgramSet.Config.AccessLevels.InBoundAccess);
             WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_edit"), ProgramSet.Config.AccessLevels.CustomConfig);
             WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_lan"), ProgramSet.Config.AccessLevels.LocalOnly);
             WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_block"), ProgramSet.Config.AccessLevels.BlockAccess);
@@ -191,6 +194,8 @@ namespace PrivateWin10.Pages
 
             this.btnAllowAll.Label = Translate.fmt("acl_allow");
             this.btnCustomCfg.Label = Translate.fmt("acl_edit");
+            //this.btnInOnly.Header = Translate.fmt("acl_inbound");
+            //this.btnOutOnly.Header = Translate.fmt("acl_outbound");
             this.btnLanOnly.Header = Translate.fmt("acl_lan");
             this.btnNoConf.Header = Translate.fmt("acl_none");
             this.chkNotify.Label = Translate.fmt("acl_silence");
@@ -220,6 +225,8 @@ namespace PrivateWin10.Pages
 
             #endregion
 
+            this.catGalery.ContextMenu = new ContextMenu();
+
             rbbBar.SelectedIndex = 0;
 
             SuspendChange++;
@@ -237,12 +244,8 @@ namespace PrivateWin10.Pages
             if (rulesRowHeight > 0.0)
                 rulesRow.Height = new GridLength(rulesRowHeight, GridUnitType.Pixel);
 
-            ViewModes viewMode;
             if(!Enum.TryParse(App.GetConfig("GUI", "FirewallViewMode", ""), out viewMode))
                 viewMode = ViewModes.NormalView;
-            SetViewMode(viewMode);
-            SetTreeMode();
-
 
             if (UwpFunc.IsWindows7OrLower)
                 chkApps.IsEnabled = false;
@@ -264,6 +267,8 @@ namespace PrivateWin10.Pages
 
             btnAllowAll.Tag = ProgramSet.Config.AccessLevels.FullAccess;
             btnCustomCfg.Tag = ProgramSet.Config.AccessLevels.CustomConfig;
+            //btnInOnly.Tag = ProgramSet.Config.AccessLevels.InBoundAccess;
+            //btnOutOnly.Tag = ProgramSet.Config.AccessLevels.OutBoundAccess;
             btnLanOnly.Tag = ProgramSet.Config.AccessLevels.LocalOnly;
             btnNoConf.Tag = ProgramSet.Config.AccessLevels.Unconfigured;
             btnBlockAll.Tag = ProgramSet.Config.AccessLevels.BlockAccess;
@@ -275,9 +280,9 @@ namespace PrivateWin10.Pages
             mTimer.Start();
             OnTimerTick(null, null);
 
-            App.client.ActivityNotification += OnActivity;
-            App.client.ChangeNotification += OnChange;
-            App.client.UpdateNotification += OnUpdate;
+            App.client.ActivityNotification += OnNetActivity;
+            App.client.ChangeNotification += OnRuleChange;
+            App.client.UpdateNotification += OnProgUpdate;
 
 
             //ProgramSets = new ObservableCollection<ProgramSet>();
@@ -305,6 +310,14 @@ namespace PrivateWin10.Pages
             //consList.chkBlocked.IsEnabled = (pol & FirewallMonitor.Auditing.Blocked) != 0;
 
             inspectorTab.IsEnabled = App.GetConfigInt("DnsInspector", "Enabled", 0) != 0;
+
+            Task.Delay(1000).ContinueWith(t => {
+                this.Dispatcher.Invoke(()=> {
+                    SetViewMode(viewMode);
+                    SetTreeMode();
+                });
+            });
+            
 
             UpdateProgramList();
         }
@@ -342,7 +355,10 @@ namespace PrivateWin10.Pages
 
         private void Categorys_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            SuspendChange++;
             LoadCategorys();
+            ApplyCatFilter();
+            SuspendChange--;
         }
 
         private void AddCatItem(string cat, object tag)
@@ -377,7 +393,7 @@ namespace PrivateWin10.Pages
             SuspendChange--;
         }
 
-        void OnActivity(object sender, Priv10Engine.FwEventArgs args)
+        void OnNetActivity(object sender, Priv10Engine.FwEventArgs args)
         {
             ProgramSet prog = GetProgSet(args.guid, args.progID);
             if (prog == null)
@@ -426,7 +442,7 @@ namespace PrivateWin10.Pages
                 consList.AddEntry(prog, program, args);
         }
 
-        void OnChange(object sender, Priv10Engine.ChangeArgs args)
+        void OnRuleChange(object sender, Priv10Engine.ChangeArgs args)
         {
             App.MainWnd.notificationWnd.NotifyRule(args);
         }
@@ -443,7 +459,7 @@ namespace PrivateWin10.Pages
         bool FullUpdate = false;
         bool RuleUpdate = false;
 
-        void OnUpdate(object sender, Priv10Engine.UpdateArgs args)
+        void OnProgUpdate(object sender, Priv10Engine.UpdateArgs args)
         {
             if (args.guid == Guid.Empty)
                 FullUpdate = true;
@@ -453,8 +469,48 @@ namespace PrivateWin10.Pages
                 RuleUpdate = true;
         }
 
+        bool FirstTick = true;
+
         private void OnTimerTick(object sender, EventArgs e)
         {
+            if (FirstTick && sender != null)
+            {
+                FirstTick = false;
+
+                if (App.GetConfigInt("Firewall", "RuleGuard", 0) != 0)
+                {
+                    Dictionary<Guid, List<FirewallRuleEx>> rules = App.client.GetRules();
+                    foreach (var ruleEntry in rules)
+                    {
+                        foreach (FirewallRuleEx rule in ruleEntry.Value)
+                        {
+                            if (rule.State != FirewallRuleEx.States.Approved)
+                            {
+                                Program prog;
+                                ProgramSet progSet = App.client.GetProgram(rule.ProgID);
+                                if (!progSet.Programs.TryGetValue(rule.ProgID, out prog))
+                                    continue;
+
+                                Priv10Engine.RuleEventType type = Priv10Engine.RuleEventType.UnChanged;
+                                switch (rule.State) {
+                                    case FirewallRuleEx.States.Unknown: type = Priv10Engine.RuleEventType.Added; break;
+                                    case FirewallRuleEx.States.Changed: type = Priv10Engine.RuleEventType.Changed; break;
+                                    case FirewallRuleEx.States.Deleted: type = Priv10Engine.RuleEventType.Removed; break;
+                                }
+                                
+                                App.MainWnd.notificationWnd.NotifyRule(new Priv10Engine.ChangeArgs()
+                                {
+                                    prog = prog,
+                                    rule = rule,
+                                    type = type,
+                                    action = Priv10Engine.RuleFixAction.None
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
             if (IsHidden)
                 return;
             if (App.MainWnd.WindowState == WindowState.Minimized)
@@ -729,11 +785,11 @@ namespace PrivateWin10.Pages
             //Types
             if (MultiFilter(Filter.Types, (string Type) => {
                 if (Type == "Programs")
-                    return prog.Programs.Keys.FirstOrDefault(id => id.Type == ProgramID.Types.Program) != null;
+                    return prog.Programs.Keys.FirstOrDefault(id => id.IsProgram()) != null;
                 else if (Type == "System")
-                    return prog.Programs.Keys.FirstOrDefault(id => (id.Type == ProgramID.Types.System || id.Type == ProgramID.Types.Global || id.Type == ProgramID.Types.Service)) != null;
+                    return prog.Programs.Keys.FirstOrDefault(id => id.IsSystem()) != null;
                 else if (Type == "Apps")
-                    return prog.Programs.Keys.FirstOrDefault(id => id.Type == ProgramID.Types.App) != null;
+                    return prog.Programs.Keys.FirstOrDefault(id => id.IsApp()) != null;
                 return false;
             }))
                 return true;
@@ -809,6 +865,8 @@ namespace PrivateWin10.Pages
             progTree.menuAccess.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
             btnAllowAll.IsEnabled = progTree.menuAccessAllow.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
             btnCustomCfg.IsEnabled = progTree.menuAccessCustom.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
+            //btnInOnly.IsEnabled = progTree.menuAccessIn.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
+            //btnOutOnly.IsEnabled = progTree.menuAccessOut.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
             btnLanOnly.IsEnabled = progTree.menuAccessLan.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
             btnNoConf.IsEnabled = progTree.menuAccessNone.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
             btnBlockAll.IsEnabled = progTree.menuAccessBlock.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
@@ -818,7 +876,7 @@ namespace PrivateWin10.Pages
 
             btnRename.IsEnabled = progTree.menuRename.IsEnabled = (SetCount == 1 && ProgCount == 0 && !GlobalSelected);
             btnIcon.IsEnabled = progTree.menuSetIcon.IsEnabled = (SetCount == 1 && ProgCount == 0 && !GlobalSelected);
-            btnCategory.IsEnabled = progTree.menuCategory.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
+            btnCategory.IsEnabled = progTree.menuCategory.IsEnabled = (SetCount >= 1 && ProgCount == 0);
         }
 
         public void btnAdd_Click(object sender, RoutedEventArgs e)
@@ -998,8 +1056,19 @@ namespace PrivateWin10.Pages
             }
 
             InputWnd wnd = new InputWnd(Translate.fmt("btn_cat_prog"), Categories, SelectedProgramSets[0].config.Category, true, App.Title);
-            if (wnd.ShowDialog() != true || wnd.Value.Length == 0)
+            if (wnd.ShowDialog() != true)
                 return;
+
+            bool found = false;
+            foreach (CategoryModel.Category curCat in CatModel.Categorys)
+            {
+                if (wnd.Value.Equals((curCat.Content as String), StringComparison.OrdinalIgnoreCase))
+                    found = true;
+            }
+            if (!found)
+            {
+                CatModel.Categorys.Insert(0, new CategoryModel.Category() { Content = wnd.Value, Group = Translate.fmt("cat_cats") });
+            }
 
             foreach (var progSet in SelectedProgramSets)
             {
@@ -1106,6 +1175,22 @@ namespace PrivateWin10.Pages
             btnNoFilter.IsEnabled = false;
         }
 
+        private void ApplyCatFilter()
+        {
+            foreach (var item in this.catFilter.Items)
+            {
+                CheckBox box = item as CheckBox;
+                string cat = box.Tag as string;
+
+                if (CurFilter.Categories.FirstOrDefault(cur => cur.Equals(cat)) != null)
+                    box.IsChecked = true;
+                else if (CurFilter.Categories.FirstOrDefault(cur => cur.Equals("-" + cat)) != null)
+                    box.IsChecked = null;
+                else
+                    box.IsChecked = false;
+            }
+        }
+
         private void ApplyPreset(FilterPreset Filter)
         {
             CurFilter = Filter;
@@ -1130,18 +1215,7 @@ namespace PrivateWin10.Pages
             chkSys.IsChecked = CurFilter.Types.FirstOrDefault(cur => cur.Equals("System")) != null ? true : false;
 
             //Categories
-            foreach (var item in this.catFilter.Items)
-            {
-                CheckBox box = item as CheckBox;
-                string cat = box.Tag as string;
-
-                if (CurFilter.Categories.FirstOrDefault(cur => cur.Equals(cat)) != null)
-                    box.IsChecked = true;
-                else if (CurFilter.Categories.FirstOrDefault(cur => cur.Equals("-" + cat)) != null)
-                    box.IsChecked = null;
-                else
-                    box.IsChecked = false;
-            }
+            ApplyCatFilter();
 
             // Filter
             this.txtFilter.Text = CurFilter.Filter;
@@ -1318,7 +1392,7 @@ namespace PrivateWin10.Pages
         private void SetTreeMode()
         {
             ListModes Mode = ListModes.Tree;
-            if ((viewMode == ViewModes.NormalView || viewMode == ViewModes.FullHeight) && progsCol.Width.Value < 500.0)
+            if ((viewMode == ViewModes.NormalView || viewMode == ViewModes.FullHeight) && progsCol.ActualWidth < 600.0)
                 Mode = ListModes.List;
 
             if (ListMode != Mode)

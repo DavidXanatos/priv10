@@ -16,6 +16,10 @@ using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using MiscHelpers;
+using System.Drawing;
+using TweakEngine;
+using PrivateAPI;
 
 namespace PrivateWin10
 {
@@ -38,57 +42,18 @@ namespace PrivateWin10
         public static string appPath = "";
         public static string dataPath = "";
         public static bool isPortable = false;
-        public static int Session = 0;
 
         public static AppLog Log = null;
 
-        public static Priv10Engine engine = null;
+        public static PresetManager presets = null;
         public static TweakManager tweaks = null;
 
         public static TrayIcon TrayIcon = null;
         public static MainWindow MainWnd = null;
 
         public static Priv10Client client = null;
-        public static Priv10Host host = null;
 
-        enum StartModes
-        {
-            Normal = 0,
-            Service,
-            Engine
-        }
-
-        public enum EventIDs : long
-        {
-            Undefined = 0x0000,
-
-            // generic
-            Exception,
-            AppError,
-            AppWarning,
-            AppInfo,
-
-            TweakBegin = 0x0100,
-            TweakChanged,
-            TweakFixed,
-            TweakError,
-            TweakEnd = 0x01FF,
-
-            FirewallBegin = 0x0200,
-            RuleChanged,
-            RuleDeleted,
-            RuleAdded,
-            //FirewallNewProg
-            FirewallEnd = 0x02FF,
-        }
-
-        public enum EventFlags : short
-        {
-            DebugEvents = 0x0100,
-            AppLogEntries = 0x0200,
-            Notifications = 0x0400, // Show a Notification
-            PopUpMessages = 0x0800, // Show a PopUp Message
-        }
+        public static Process EngineProc = null;
 
         [STAThread]
         public static void Main(string[] args)
@@ -103,24 +68,12 @@ namespace PrivateWin10
             if (TestArg("-dbg_log"))
                 AppDomain.CurrentDomain.FirstChanceException += FirstChanceExceptionHandler;
 
-            StartModes startMode = StartModes.Normal; // Normal GUI Mode
-            if (TestArg("-svc"))
-                startMode = StartModes.Service;
-            else if (TestArg("-engine"))
-                startMode = StartModes.Engine;
-
             Log = new AppLog(Key);
-            AppLog.ExceptionLogID = (long)EventIDs.Exception;
-            AppLog.ExceptionCategory = (short)EventFlags.DebugEvents;
+            AppLog.ExceptionLogID = (long)Priv10Logger.EventIDs.Exception;
+            AppLog.ExceptionCategory = (short)Priv10Logger.EventFlags.DebugEvents;
 
-            if (startMode == StartModes.Normal)
-            {
-                Log.EnableLogging();
-                Log.LoadLog(); 
-            }
-            // When running as worker we need the windows event log
-            else if (!Log.UsingEventLog())
-                Log.SetupEventLog(Key);
+            Log.EnableLogging();
+            Log.LoadLog(); 
 
             // load current version
             exePath = Process.GetCurrentProcess().MainModule.FileName; //System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -161,101 +114,60 @@ namespace PrivateWin10
             if(AdminFunc.IsAdministrator())
                 FileOps.SetAnyDirSec(dataPath);
 
-            App.LogInfo("PrivateWin10 Process Started, Mode {0}.", startMode.ToString());
-
-            Session = Process.GetCurrentProcess().SessionId;
-
             // setup custom assembly resolution for x86/x64 synamic compatybility
-            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolveHandler;
-
-            // is the process starting as a service/worker?
-            if (startMode != StartModes.Normal)
-            {
-                engine = new Priv10Engine();
-                if (startMode == StartModes.Service)
-                {
-                    using (Priv10Service svc = new Priv10Service())
-                        ServiceBase.Run(svc);
-                }
-                else
-                    engine.Run();
-                return;
-            }
+            //AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolveHandler;
 
             Thread.CurrentThread.Name = "Gui";
 
             client = new Priv10Client();
 
-            // Encure wie have the required privilegs
-            //if (!AdminFunc.IsDebugging())
+            if (!AdminFunc.IsAdministrator())
             {
-                AppLog.Debug("Trying to connect to Engine...");
-                int conRes = client.Connect(1000);
-                if (conRes == 0)
+                if (AdminFunc.SkipUacRun(App.Key, App.args))
+                    return;
+
+                if (App.GetConfigInt("Startup", "ShowSetup", 1) == 1)
+                {
+                    AppLog.Debug("Trying to restart as admin...");
+                    if (Restart(true))
+                        return;
+                }
+            }
+
+            AppLog.Debug("Trying to connect to Engine...");
+            int conRes = client.Connect(1000);
+            if (conRes == 0)
+            {
+                if (Priv10Service.IsInstalled())
                 {
                     if (!AdminFunc.IsAdministrator())
                     {
-                        AppLog.Debug("Trying to obtain Administrative proivilegs...");
-                        if (AdminFunc.SkipUacRun(App.Key, App.args))
-                            return;
-
-                        AppLog.Debug("Trying to start with 'runas'...");
-                        // Restart program and run as admin
-                        string arguments = "\"" + string.Join("\" \"", args) + "\"";
-                        ProcessStartInfo startInfo = new ProcessStartInfo(exePath, arguments);
-                        startInfo.UseShellExecute = true;
-                        startInfo.Verb = "runas";
-                        try
-                        {
-                            Process.Start(startInfo);
-                            return; // we restarted as admin
-                        }
-                        catch
-                        {
-                            //MessageBox.Show(Translate.fmt("msg_admin_rights", mName), mName);
-                            //return; // no point in cintinuing without admin rights or an already running engine
-                        }
+                        MessageBox.Show(Translate.fmt("msg_admin_rights_svc", Title, SvcName), Title);
+                        Restart(true);
+                        return;
                     }
-                    else if (Priv10Service.IsInstalled())
-                    {
-                        AppLog.Debug("Trying to start service...");
-                        if (Priv10Service.Startup())
-                        {
-                            AppLog.Debug("Trying to connect to service...");
 
-                            if (client.Connect() != 0)
-                                AppLog.Debug("Connected to service...");
-                            else
-                                AppLog.Debug("Failed to connect to service...");
-                        }
-                        else
-                            AppLog.Debug("Failed to start service...");
-                    }
+                    AppLog.Debug("Trying to start service...");
+                    if (!Priv10Service.Startup())
+                        AppLog.Debug("Failed to start service...");
+                    
                 }
-                else if (conRes == -1)
+                else if (App.GetConfigInt("Firewall", "Enabled", 0) != 0)
                 {
-                    MessageBox.Show(Translate.fmt("msg_dupliate_session", Title), Title);
-                    return; // no point in cintinuing without admin rights or an already running engine
+                    AppLog.Debug("Trying to start engine process...");
+                    StartEngine();  
                 }
-            }
 
-            //
+                
+                AppLog.Debug("Trying to connect to service...");
+                if (client.Connect() != 0)
+                    AppLog.Debug("Connected to service...");
+                else
+                    AppLog.Debug("Failed to connect to service...");
+            }
 
             tweaks = new TweakManager();
-
-            // if we couldn't connect to the engine start it and connect
-            if (!client.IsConnected() && AdminFunc.IsAdministrator())
-            {
-                AppLog.Debug("Starting Engine Thread...");
-
-                engine = new Priv10Engine();
-
-                engine.Start();
-
-                AppLog.Debug("... engine started.");
-
-                client.Connect();
-            }
+            presets = new PresetManager();
 
             var app = new App();
             app.InitializeComponent();
@@ -265,7 +177,6 @@ namespace PrivateWin10
             MainWnd = new MainWindow();
 
             TrayIcon = new TrayIcon();
-            TrayIcon.Action += TrayAction;
             TrayIcon.Visible = (GetConfigInt("Startup", "Tray", 0) != 0) || App.TestArg("-autorun");
 
             if (!App.TestArg("-autorun") || !TrayIcon.Visible)
@@ -275,15 +186,47 @@ namespace PrivateWin10
 
             TrayIcon.DestroyNotifyicon();
 
-            client.Close();
-
+            presets.Store();
             tweaks.Store();
 
-            if (engine != null)
-                engine.Stop();
+            if (EngineProc != null)
+                StopEngine();
+            else
+                client.Close();
         }
 
-        static private Assembly AssemblyResolveHandler(object sender, ResolveEventArgs args)
+        public static bool StartEngine()
+        {
+            AppLog.Debug("Starting Engine...");
+
+            //ProcessStartInfo startInfo = new ProcessStartInfo(exePath, "-engine");
+            ProcessStartInfo startInfo = new ProcessStartInfo(appPath + "\\PrivateService.exe", "-engine");
+            startInfo.UseShellExecute = true;
+            startInfo.Verb = "runas";
+            try
+            {
+                EngineProc = Process.Start(startInfo);
+
+                AppLog.Debug("... engine started.");
+                return true;
+            }
+            catch
+            {
+                MessageBox.Show(Translate.fmt("msg_engine_fail"), Title);
+                return false;
+            }
+        }
+
+        public static void StopEngine()
+        {
+            client.Quit();
+            client.Close();
+            if (!EngineProc.WaitForExit(30000))
+                EngineProc.Kill();
+            EngineProc = null;
+        }
+
+        /*static private Assembly AssemblyResolveHandler(object sender, ResolveEventArgs args)
         {
             //This handler is called only when the common language runtime tries to bind to the assembly and fails.
 
@@ -315,7 +258,7 @@ namespace PrivateWin10
 
             //Return the loaded assembly.
             return MyAssembly;
-        }
+        }*/
 
         static private void FirstChanceExceptionHandler(object source, FirstChanceExceptionEventArgs e)
         {
@@ -350,9 +293,9 @@ namespace PrivateWin10
 
             if (resourcePath.Length > 2 && resourcePath.Substring(0, 2) == "@{")
             {
-                if (App.engine != null)
-                    resourceStr = App.engine?.PkgMgr?.GetAppResourceStr(resourcePath) ?? resourcePath;
-                else
+                //if (App.engine != null)
+                //    resourceStr = App.engine?.PkgMgr?.GetAppResourceStr(resourcePath) ?? resourcePath;
+                //else // xxxxx
                     resourceStr = App.client.GetAppPkgRes(resourcePath);
             }
             else
@@ -368,6 +311,8 @@ namespace PrivateWin10
 
         static bool ExecuteCommands()
         {
+            bool bDone = false;
+            
             if (TestArg("-help") || TestArg("/?"))
             {
                 string Message = "Available command line options\r\n";
@@ -401,8 +346,6 @@ namespace PrivateWin10
                 return true;
             }
 
-           
-            bool bDone = false;
 
             if (TestArg("-uninstall"))
             {
@@ -589,52 +532,8 @@ namespace PrivateWin10
                     Thread.Sleep(1000);
                 }
             }
-
+            
             return bDone;
-        }
-
-        static void TrayAction(object sender, TrayIcon.TrayEventArgs args)
-        {
-            if (MainWnd == null || !MainWnd.FullyLoaded)
-                return;
-
-            switch (args.Action)
-            {
-                case TrayIcon.Actions.ToggleWindow:
-                    {
-                        if (MainWnd.IsVisible)
-                            MainWnd.Hide();
-                        else
-                            MainWnd.Show();
-                        break;
-                    }
-                case TrayIcon.Actions.ToggleNotify:
-                    {
-                        if (MainWnd.notificationWnd.IsVisible)
-                            MainWnd.notificationWnd.HideWnd();
-                        else if (!MainWnd.notificationWnd.IsEmpty())
-                            MainWnd.notificationWnd.ShowWnd();
-                        break;
-                    }
-                case TrayIcon.Actions.CloseApplication:
-                    {
-                        if (Priv10Service.IsInstalled() && AdminFunc.IsAdministrator())
-                        {
-                            MessageBoxResult res = MessageBox.Show(Translate.fmt("msg_stop_svc"), App.Title, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-                            switch (res)
-                            {
-                                case MessageBoxResult.Yes:
-                                    if(!Priv10Service.Terminate())
-                                        MessageBox.Show(Translate.fmt("msg_stop_svc_err"), App.Title, MessageBoxButton.OK, MessageBoxImage.Stop);
-                                    break;
-                                case MessageBoxResult.Cancel:
-                                    return;
-                            }
-                        }
-                        Application.Current.Shutdown();
-                        break;
-                    }
-            }
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -729,6 +628,49 @@ namespace PrivateWin10
             return TextHelpers.SplitStr(new String(chars, 0, size), "\0");
         }
 
+
+        public static void StoreWnd(Window wnd, string name)
+        {
+            App.SetConfig("GUI", name + "WndPos", wnd.Left + ":" + wnd.Top);
+            App.SetConfig("GUI", name + "WndSize", wnd.Width + ":" + wnd.Height);
+        }
+
+        public static bool LoadWnd(Window wnd, string name)
+        {
+            Rectangle rect = new Rectangle();
+
+            string wndPos = App.GetConfig("GUI", name + "WndPos", null);
+            if (wndPos == null || wndPos.Length == 0)
+                return false;
+
+            var LT = TextHelpers.Split2(wndPos, ":");
+            rect.X = MiscFunc.parseInt(LT.Item1);
+            rect.Y = MiscFunc.parseInt(LT.Item2);
+
+            string wndSize = App.GetConfig("GUI", name + "WndSize", null);
+            if (wndSize != null || wndSize.Length == 0)
+            {
+                var WH = TextHelpers.Split2(wndSize, ":");
+                rect.Width = MiscFunc.parseInt(WH.Item1);
+                rect.Height = MiscFunc.parseInt(WH.Item2);
+            }
+            else
+            {
+                rect.Width = (int)wnd.Width;
+                rect.Height = (int)wnd.Height;
+            }
+
+            if (!MiscFunc.IsOnScreen(rect))
+                return false;
+
+            wnd.Left = rect.Left;
+            wnd.Top = rect.Top;
+            wnd.Width = rect.Width;
+            wnd.Height = rect.Height;
+
+            return true;
+        }
+
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Start & Restart
 
@@ -750,7 +692,7 @@ namespace PrivateWin10
             return (subKey != null && subKey.GetValue(App.Key) != null);
         }
 
-        public static void Restart(bool RunAs = false/*, bool bService = false*/)
+        public static bool Restart(bool RunAs = false/*, bool bService = false*/)
         {
             /*if (bService && Priv10Service.IsInstalled())
             {
@@ -767,53 +709,14 @@ namespace PrivateWin10
             {
                 Process.Start(startInfo);
                 Environment.Exit(-1);
+                return true;
             }
             catch
             {
                 //MessageBox.Show(Translate.fmt("msg_admin_req", mName), mName);
-                App.LogWarning("Failed to restart Application");
+                Priv10Logger.LogWarning("Failed to restart Application");
+                return false;
             }
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // Event Logging
-
-        static public void LogCriticalError(string message, params object[] args)
-        {
-#if DEBUG
-            Debugger.Break();
-#endif
-            LogError("Critical Error: " + message, args);
-        }
-
-        static public void LogError(string message, params object[] args)
-        {
-            AppLog.Add(EventLogEntryType.Error, (long)EventIDs.AppError, (short)EventFlags.AppLogEntries, args.Length == 0 ? message : string.Format(message, args));
-        }
-
-        static public void LogError(App.EventIDs eventID, Dictionary<string, string> Params, App.EventFlags flags, string message, params object[] args)
-        {
-            AppLog.Add(EventLogEntryType.Error, (long)eventID, (short)flags, args.Length == 0 ? message : string.Format(message, args), Params);
-        }
-
-        static public void LogWarning(string message, params object[] args)
-        {
-            AppLog.Add(EventLogEntryType.Warning, (long)EventIDs.AppWarning, (short)EventFlags.AppLogEntries, args.Length == 0 ? message : string.Format(message, args));
-        }
-
-        static public void LogWarning(App.EventIDs eventID, Dictionary<string, string> Params, App.EventFlags flags, string message, params object[] args)
-        {
-            AppLog.Add(EventLogEntryType.Warning, (long)eventID, (short)flags, args.Length == 0 ? message : string.Format(message, args), Params);
-        }
-
-        static public void LogInfo(string message, params object[] args)
-        {
-            AppLog.Add(EventLogEntryType.Information, (long)EventIDs.AppInfo, (short)EventFlags.AppLogEntries, args.Length == 0 ? message : string.Format(message, args));
-        }
-
-        static public void LogInfo(App.EventIDs eventID, Dictionary<string, string> Params, App.EventFlags flags, string message, params object[] args)
-        {
-            AppLog.Add(EventLogEntryType.Information, (long)eventID, (short)flags, args.Length == 0 ? message : string.Format(message, args), Params);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////

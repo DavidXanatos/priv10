@@ -35,7 +35,7 @@
                         <Label Name="lblVerNum" Grid.Column="0" Margin="-3,0,0,0" VerticalAlignment="Top" Content="0.Xa" Cursor="Hand" FontSize="16"/>
                     </StackPanel>
                     <Label Name="lblAuthor" Grid.Column="0" Margin="0,67,0,0" VerticalAlignment="Top" Content="Author: David Xanatos" FontSize="16"/>
-                    <Label x:Name="lblCopyright" Grid.Column="0" Margin="0,97,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Copyright © 2018-2019 David Xanatos" FontSize="16"/>
+                    <Label x:Name="lblCopyright" Grid.Column="0" Margin="0,97,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Copyright © 2018-2020 David Xanatos" FontSize="16"/>
 
                 </Grid>
                 <StackPanel Orientation="Vertical" Grid.Row="1">

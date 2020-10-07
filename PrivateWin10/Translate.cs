@@ -100,11 +100,14 @@ namespace PrivateWin10
             mStrings.Add("str_ras", "RemoteAccess");
             mStrings.Add("str_wifi", "Wireless");
             mStrings.Add("msg_admin_rights", "{0} requires administrative privilegs to function properly.");
+            mStrings.Add("msg_admin_rights_svc", "{0} requires administrative privilegs to start the {1} service");
             mStrings.Add("msg_admin_prompt", "{0} requires administrative privilegs operate, restart as admin?");
             mStrings.Add("msg_clear_log", "You are about the clear the entire connection log, do you want to clear the security log too?");
             mStrings.Add("acl_none", "Unconfigured");
             mStrings.Add("acl_silence", "Stop Notify");
             mStrings.Add("acl_allow", "Full Access");
+            mStrings.Add("acl_inbound", "Inbound Access");
+            mStrings.Add("acl_outbound", "Outbound Access");
             mStrings.Add("acl_edit", "Custom Config");
             mStrings.Add("acl_lan", "Lan Only");
             mStrings.Add("acl_block", "Block Access");
@@ -440,6 +443,25 @@ namespace PrivateWin10
             mStrings.Add("lbl_con_notify", "New Connections");
             mStrings.Add("lbl_rule_notify", "Changed Rules");
             mStrings.Add("lbl_tweak_notify", "Changed Tweaks");
+            mStrings.Add("msg_engine_fail", "Failed to start engine process");
+            mStrings.Add("mnu_presets", "Control presets");
+            mStrings.Add("keep_tweak", "Don't Change");
+            mStrings.Add("enable_tweak", "Enable Tweak");
+            mStrings.Add("disable_tweak", "Disable Tweak");
+            mStrings.Add("preset_keep", "Don't Change");
+            mStrings.Add("preset_enable", "Always Enable");
+            mStrings.Add("preset_set_enable", "Enable when Set");
+            mStrings.Add("preset_set_disable", "Disable when Set");
+            mStrings.Add("preset_disable", "Alway Disable");
+            mStrings.Add("msg_preset_name", "Enter new Preset name:");
+            mStrings.Add("msg_preset_some", "Some Preset");
+            mStrings.Add("msg_preset_item", "Sellect new Preset Item Type:");
+            mStrings.Add("msg_preset_item_name", "Enter new Preset Item Name:");
+            mStrings.Add("msg_preset_progset", "Sellect Program Set to be added:");
+            mStrings.Add("msg_preset_tweak", "Sellect Tweak Groupe to be added:");
+            mStrings.Add("msg_preset_item_failed", "Failed to add preset item!");
+            mStrings.Add("lbl_undo", "Undo Preset {0}");
+            mStrings.Add("lbl_undo_never", "Don't undo Preset");
 
             //mStrings.Add("", "");
 

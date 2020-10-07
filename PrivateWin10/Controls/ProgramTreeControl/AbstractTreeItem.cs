@@ -7,6 +7,7 @@ using System.Windows.Media;
 using ICSharpCode.TreeView;
 using System.IO;
 using System.Windows;
+using MiscHelpers;
 
 namespace PrivateWin10.Controls
 {

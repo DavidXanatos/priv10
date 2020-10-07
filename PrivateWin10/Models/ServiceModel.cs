@@ -1,4 +1,5 @@
-﻿using PrivateWin10.Controls;
+﻿using MiscHelpers;
+using PrivateWin10.Controls;
 using System;
 using System.Collections;
 using System.Collections.Generic;

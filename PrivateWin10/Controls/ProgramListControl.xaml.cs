@@ -1,4 +1,5 @@
-﻿using PrivateWin10.Pages;
+﻿using MiscHelpers;
+using PrivateWin10.Pages;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -42,28 +43,30 @@ namespace PrivateWin10.Controls
 
         FirewallPage.FilterPreset CurFilter = null;
 
-        SortedDictionary<Guid, ProgramControl> Programs = new SortedDictionary<Guid, ProgramControl>();
+        ControlList<ProgramControl, ProgramSet> ProgramList;
 
-        List<ProgramControl> SelectedPrograms;
-
-        /*protected ObservableCollection<ProgramSet> ProgramSets = null;
-        public ObservableCollection<ProgramSet> ItemsSource { get { return ProgramSets; } set {
-                if(ProgramSets != null)
-                    ProgramSets.CollectionChanged -= ProgramSets_CollectionChanged;
-                ProgramSets = value;
-                ProgramSets.CollectionChanged += ProgramSets_CollectionChanged;
-            } }
-
-        private void ProgramSets_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        int DoSort(ProgramControl l, ProgramControl r)
         {
+            switch (SortBy)
+            {
+                case Sorts.Name: return l.progSet.config.Name.CompareTo(r.progSet.config.Name);
+                case Sorts.NameRev: return r.progSet.config.Name.CompareTo(l.progSet.config.Name);
+                case Sorts.LastActivity: return r.progSet.GetLastActivity().CompareTo(l.progSet.GetLastActivity());
+                case Sorts.DataRate: return r.progSet.GetDataRate().CompareTo(l.progSet.GetDataRate());
+                case Sorts.SocketCount: return r.progSet.GetSocketCount().CompareTo(l.progSet.GetSocketCount());
+                case Sorts.ModuleCount: return r.progSet.Programs.Count.CompareTo(l.progSet.Programs.Count);
+            }
+            return 0;
         }
-        */
 
         public ProgramListControl()
         {
             InitializeComponent();
 
-            SelectedPrograms = new List<ProgramControl>();
+            ProgramList = new ControlList<ProgramControl, ProgramSet>(this.processScroll, (prog) => { return new ProgramControl(prog, CatModel); }, (prog)=>prog.guid.ToString(),
+                (list)=> { list.Sort(DoSort); }, (item)=> { return (CurFilter != null && FirewallPage.DoFilter(CurFilter, item.progSet)); });
+
+            ProgramList.SelectionChanged += (s, e) => { SelectionChanged?.Invoke(this, e); };
 
             SuspendChange++;
 
@@ -85,174 +88,33 @@ namespace PrivateWin10.Controls
             this.chkNoLan.IsChecked = App.GetConfigInt("GUI", "ActNoLan", 0) == 1;
 
             SuspendChange--;
-
-            this.processScroll.PreviewKeyDown += process_KeyEventHandler;
         }
 
         public void UpdateProgramList(List<ProgramSet> progs)
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            Dictionary<Guid, ProgramControl> OldProcesses = new Dictionary<Guid, ProgramControl>(Programs);
-
-            foreach (ProgramSet prog in progs)
-            {
-                ProgramControl item;
-                if (Programs.TryGetValue(prog.guid, out item))
-                {
-                    item.progSet = prog;
-                    item.DoUpdate();
-                    OldProcesses.Remove(prog.guid);
-                }
-                else
-                    item = AddProgramItem(prog);
-            }
-
-            foreach (Guid guid in OldProcesses.Keys)
-            {
-                Programs.Remove(guid);
-                ProgramControl item;
-                if (OldProcesses.TryGetValue(guid, out item))
-                    this.processGrid.Children.Remove(item);
-            }
+            ProgramList.UpdateItems(progs);
 
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
 
             AppLog.Debug("UpdateProgramList took: " + elapsedMs + "ms");
 
-            SortAndFitlerProgList();
-        }
-
-        ProgramControl AddProgramItem(ProgramSet prog)
-        {
-            ProgramControl item = new ProgramControl(prog, CatModel);
-            Programs.Add(prog.guid, item);
-            //item.Tag = process;
-            item.VerticalAlignment = VerticalAlignment.Top;
-            item.HorizontalAlignment = HorizontalAlignment.Stretch;
-            item.Margin = new Thickness(1, 1, 1, 1);
-            //item.MouseDown += new MouseButtonEventHandler(process_Click);
-            item.Click += new RoutedEventHandler(process_Click);
-
-            this.processGrid.Children.Add(item);
-
-            return item;
+            ProgramList.SortAndFitlerList();
         }
 
         public void UpdateProgramItems(List<ProgramSet> progs)
         {
             foreach (ProgramSet prog in progs)
-            {
-                ProgramControl item;
-                if (Programs.TryGetValue(prog.guid, out item))
-                {
-                    item.progSet = prog;
-                    item.DoUpdate();
-                }
-                else
-                    item = AddProgramItem(prog);
-            }
+                ProgramList.UpdateItem(prog);
         }
 
         public void SortAndFitlerProgList(FirewallPage.FilterPreset Filter)
         {
             CurFilter = Filter;
 
-            SortAndFitlerProgList();
-        }
-
-        private void SortAndFitlerProgList()
-        {
-            List<ProgramControl> OrderList = Programs.Values.ToList();
-
-            int DoSort(ProgramControl l, ProgramControl r)
-            {
-                switch (SortBy)
-                {
-                    case Sorts.Name: return l.progSet.config.Name.CompareTo(r.progSet.config.Name);
-                    case Sorts.NameRev: return r.progSet.config.Name.CompareTo(l.progSet.config.Name);
-                    case Sorts.LastActivity: return r.progSet.GetLastActivity().CompareTo(l.progSet.GetLastActivity());
-                    case Sorts.DataRate: return r.progSet.GetDataRate().CompareTo(l.progSet.GetDataRate());
-                    case Sorts.SocketCount: return r.progSet.GetSocketCount().CompareTo(l.progSet.GetSocketCount());
-                    case Sorts.ModuleCount: return r.progSet.Programs.Count.CompareTo(l.progSet.Programs.Count);
-                }
-                return 0;
-            }
-
-            if (SortBy != Sorts.Unsorted)
-                OrderList.Sort(DoSort);
-
-            for (int i = 0; i < OrderList.Count; i++)
-            {
-                if (i >= this.processGrid.RowDefinitions.Count)
-                    this.processGrid.RowDefinitions.Add(new RowDefinition());
-                RowDefinition row = this.processGrid.RowDefinitions[i];
-                //ProcessControl item = tmp.Item2;
-                ProgramControl item = OrderList[i];
-                if (row.Height.Value != item.Height)
-                    row.Height = GridLength.Auto; //new GridLength(item.Height + 2);
-                Grid.SetRow(item, i);
-
-                item.Visibility = (CurFilter != null && FirewallPage.DoFilter(CurFilter, item.progSet)) ? Visibility.Collapsed : Visibility.Visible;
-            }
-
-            while (OrderList.Count < this.processGrid.RowDefinitions.Count)
-                this.processGrid.RowDefinitions.RemoveAt(OrderList.Count);
-        }
-
-        void process_KeyEventHandler(object sender, KeyEventArgs e)
-        {
-            if ((e.Key == Key.Up || e.Key == Key.Down) /*&& !((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)*/)
-            {
-                ProgramControl curProcess = null;
-                if (SelectedPrograms.Count > 0)
-                {
-                    foreach (ProgramControl curProg in SelectedPrograms)
-                        curProg.SetFocus(false);
-                    curProcess = SelectedPrograms[SelectedPrograms.Count - 1];
-                    SelectedPrograms.Clear();
-                }
-
-                e.Handled = true;
-                int curRow = Grid.GetRow(curProcess);
-                if (e.Key == Key.Up)
-                {
-                    while (curRow > 0)
-                    {
-                        curRow--;
-                        ProgramControl curProg = this.processGrid.Children.Cast<ProgramControl>().First((c) => Grid.GetRow(c) == curRow);
-                        if (curProg.Visibility == Visibility.Visible)
-                        {
-                            curProcess = curProg;
-                            this.processScroll.ScrollToVerticalOffset(this.processScroll.VerticalOffset - (curProcess.ActualHeight + 2));
-                            break;
-                        }
-                    }
-                }
-                else if (e.Key == Key.Down)
-                {
-                    while (curRow < this.processGrid.Children.Count - 1)
-                    {
-                        curRow++;
-                        ProgramControl curProg = this.processGrid.Children.Cast<ProgramControl>().First((c) => Grid.GetRow(c) == curRow);
-                        if (curProg.Visibility == Visibility.Visible)
-                        {
-                            curProcess = curProg;
-                            this.processScroll.ScrollToVerticalOffset(this.processScroll.VerticalOffset + (curProcess.ActualHeight + 2));
-                            break;
-                        }
-                    }
-                }
-
-                if (curProcess == null)
-                    return;
-
-                curProcess.SetFocus(true);
-                SelectedPrograms.Add(curProcess);
-
-                SelectionChanged?.Invoke(this, new EventArgs());
-            }
+            ProgramList.SortAndFitlerList();
         }
 
 
@@ -265,7 +127,7 @@ namespace PrivateWin10.Controls
                 return;
             App.SetConfig("GUI", "SortList", (int)SortBy);
 
-            SortAndFitlerProgList();
+            ProgramList.SortAndFitlerList();
         }
 
         private void ChkNoLocal_Click(object sender, RoutedEventArgs e)
@@ -277,40 +139,12 @@ namespace PrivateWin10.Controls
         {
             App.SetConfig("GUI", "ActNoLan", this.chkNoLan.IsChecked == true ? 1 : 0);
         }
-
-        void process_Click(object sender, RoutedEventArgs e)
-        {
-            ProgramControl curProcess = sender as ProgramControl;
-
-            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-            {
-                if (SelectedPrograms.Contains(curProcess))
-                {
-                    curProcess.SetFocus(false);
-                    SelectedPrograms.Remove(curProcess);
-                }
-                else
-                {
-                    curProcess.SetFocus(true);
-                    SelectedPrograms.Add(curProcess);
-                }
-            }
-            else
-            {
-                foreach (ProgramControl curProg in SelectedPrograms)
-                    curProg.SetFocus(false);
-                SelectedPrograms.Clear();
-                SelectedPrograms.Add(curProcess);
-                curProcess.SetFocus(true);
-            }
-
-            SelectionChanged?.Invoke(this, new EventArgs());
-        }
+        
 
         public List<object> GetSelectedItems()
         {
             List<object> progSets = new List<object>();
-            foreach (var item in SelectedPrograms)
+            foreach (var item in ProgramList.SelectedItems)
                 progSets.Add(item.progSet);
             return progSets;
         }
@@ -318,7 +152,7 @@ namespace PrivateWin10.Controls
         public ProgramSet GetProgSet(Guid guid)
         {
             ProgramControl item;
-            if (Programs.TryGetValue(guid, out item))
+            if (ProgramList.Items.TryGetValue(guid.ToString(), out item))
                 return item.progSet;
             return null;
         }
@@ -326,12 +160,12 @@ namespace PrivateWin10.Controls
         public bool OnActivity(ProgramSet prog, Program program, Priv10Engine.FwEventArgs args)
         {
             ProgramControl item = null; 
-            if (!Programs.TryGetValue(args.guid, out item))
+            if (!ProgramList.Items.TryGetValue(args.guid.ToString(), out item))
             {
                 if (FirewallPage.DoFilter(CurFilter, prog))
                     return false;
 
-                item = AddProgramItem(prog);
+                item = ProgramList.AddItem(prog);
 
                 args.update = false;
             }
@@ -353,7 +187,7 @@ namespace PrivateWin10.Controls
                 }
             }
 
-            item.DoUpdate();
+            item.DoUpdate(prog);
 
             return SortBy == Sorts.LastActivity;
         }

@@ -1,4 +1,5 @@
-﻿using PrivateWin10.Controls;
+﻿using MiscHelpers;
+using PrivateWin10.Controls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using TweakEngine;
 
 namespace PrivateWin10.Windows
 {
@@ -78,6 +80,9 @@ namespace PrivateWin10.Windows
                 this.conTab.Visibility = Visibility.Collapsed;
                 this.ruleTab.Visibility = Visibility.Collapsed;
             }
+
+            this.tabs.SelectedItem = null;
+
 
             mTimer.Tick += new EventHandler(OnTimerTick);
             mTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
@@ -180,7 +185,7 @@ namespace PrivateWin10.Windows
 
         public void ShowWnd()
         {
-            if (!WpfFunc.LoadWnd(this, "Notify"))
+            if (!App.LoadWnd(this, "Notify"))
             {
                 this.Left = SystemParameters.WorkArea.Width - this.Width - 4.0;
                 this.Top = SystemParameters.WorkArea.Height - this.Height - 4.0;
@@ -191,7 +196,7 @@ namespace PrivateWin10.Windows
 
         public void HideWnd()
         {
-            WpfFunc.StoreWnd(this, "Notify");
+            App.StoreWnd(this, "Notify");
 
             Hide();
         }

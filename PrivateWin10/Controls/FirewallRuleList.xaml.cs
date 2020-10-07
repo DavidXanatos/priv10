@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using PrivateWin10.Pages;
 using PrivateWin10.Windows;
+using MiscHelpers;
 
 namespace PrivateWin10.Controls
 {

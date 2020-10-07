@@ -33,7 +33,6 @@ namespace PrivateWin10
 
             Categorys.Add(new Category() { SpecialCat = Category.Special.SetNone, Content = Translate.fmt("cat_none"), Tag = "", Group = Translate.fmt("cat_other") });
             Categorys.Add(new Category() { SpecialCat = Category.Special.AddNew, Content = Translate.fmt("cat_new"), Tag = true, Group = Translate.fmt("cat_other") });
-
         }
 
         public class Category : ContentControl

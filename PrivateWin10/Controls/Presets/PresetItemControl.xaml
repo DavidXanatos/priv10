@@ -1,0 +1,90 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:controls="clr-namespace:PrivateWin10.Controls" 
+             x:Class="PrivateWin10.PresetItemControl">
+
+    <Grid x:Name="grid" Background="White">
+        <Rectangle x:Name="rect" Fill="#00000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="64"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Image x:Name="icon" Grid.Column="0" HorizontalAlignment="Left" Height="48" Margin="2,2,0,0" VerticalAlignment="Top" Width="48"
+                   MouseLeftButtonDown="icon_MouseLeftButtonDown"
+                   />
+                <TextBox x:Name="name" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,5,3,0" VerticalAlignment="Top" Height="Auto"
+                     BorderBrush="Transparent" MinWidth="100"
+                     IsReadOnly="True" LostFocus="name_LostFocus" MouseDoubleClick="name_MouseDoubleClick" KeyDown="name_KeyDown"
+                     />
+                <!--
+                <ToggleButton x:Name="toggle"  Grid.Column="2" Content="" HorizontalAlignment="Right" Margin="0,2,5,0" VerticalAlignment="Top" Width="78" Style="{DynamicResource ToggleSwitchTopStyle}" IsChecked="False" />
+                <TextBlock  Grid.Column="2" Margin="0 6 8 0" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Sergio UI" FontSize="16">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="Off" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=toggle, Path=IsChecked}" Value="True">
+                                    <Setter Property="Text" Value="On" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=toggle, Path=IsChecked}" Value="{x:Null}">
+                                    <Setter Property="Text" Value="(On)" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=toggle, Path=IsEnabled}" Value="false">
+                                    <Setter Property="Opacity" Value="0.2" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                -->
+                
+                <!--ComboBox x:Name="category" Grid.Column="2" HorizontalAlignment="Right" Margin="2,3,3,0" VerticalAlignment="Top" MinWidth ="150" Width="Auto" 
+                    IsReadOnly="True"
+                    IsEditable="True"
+                    Height="25"
+                    SelectionChanged="category_SelectionChanged">
+                    <ComboBox.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ComboBox.GroupStyle>
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Content}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </-->
+            </Grid>
+
+            <Grid Margin="52,28,2,0" HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" x:Name="info"  HorizontalAlignment="Left" Margin="0,0,0,0"  TextWrapping="Wrap"  Text="" VerticalAlignment="Top" />
+
+                <!--WrapPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,0" HorizontalAlignment="Right" Background="Transparent" VerticalAlignment="Center">
+                    <CheckBox x:Name="chkNotify" Content="Notify" Margin="2,0,2,0" VerticalAlignment="Center" IsThreeState="True" Click="chkNotify_Click"/>
+                    <ComboBox x:Name="cmbAccess" Grid.Column="2" Margin="2,0,0,0" VerticalAlignment="Center" MinWidth ="125" Width="Auto" 
+                      SelectionChanged="cmbAccess_SelectionChanged"/>
+                    <-Button x:Name="btnCustimize" Height="20" Width="70" Content="Customize" Margin="2,2,2,2" Padding="0,0,0,0" VerticalAlignment="Center" Click="btnCustimize_Click" mah:ControlsHelper.ContentCharacterCasing="Upper"/->
+                </-->
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,45 @@
+﻿<UserControl x:Class="PrivateWin10.Controls.RuleItemControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PrivateWin10.Controls"
+             mc:Ignorable="d" >
+    
+    <UserControl.Resources>
+
+        <DrawingBrush Stretch="Fill" ViewportUnits="RelativeToBoundingBox" Viewport="0,0,1,1" x:Key="OffOn">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Brush="LightPink" Geometry="M 1,1 L 0,1 0,0 1,0 1,1"/>
+                        <GeometryDrawing Brush="LightGreen" Geometry="M 0.5,0 L 0.75,1 1,1 1,0"/>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <DrawingBrush Stretch="Fill" ViewportUnits="RelativeToBoundingBox" Viewport="0,0,1,1" x:Key="OnOff">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Brush="LightGreen" Geometry="M 1,1 L 0,1 0,0 1,0 1,1"/>
+                        <GeometryDrawing Brush="LightPink" Geometry="M 0.5,0 L 0.75,1 1,1 1,0"/>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+    </UserControl.Resources>
+    
+    <Grid x:Name="grid" Background="White">
+        <Rectangle x:Name="rect" Fill="#00000000" HorizontalAlignment="Stretch" Height="100" VerticalAlignment="Top"/>
+        <ComboBox x:Name="cmbPreset" HorizontalAlignment="Right" Margin="0,5,5,0" VerticalAlignment="Top" MinWidth ="125" Width="Auto"
+                  
+                  Background="{StaticResource OnOff}"
+                  SelectionChanged="CmbPreset_SelectionChanged"/>
+        <!--Wpf:ToggleSwitch x:Name="toggle" Content="" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Top" Width="78"/-->
+        <Label x:Name="label" Content="" HorizontalAlignment="Left" Margin="10,0,140,0" VerticalAlignment="Top" MouseDoubleClick="Label_MouseDoubleClick" />
+        <TextBox x:Name="info" HorizontalAlignment="Stretch" Margin="2,30,2,2" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" IsReadOnly="True"/>
+    </Grid>
+</UserControl>

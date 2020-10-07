@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using MiscHelpers;
 
 namespace PrivateWin10.Windows
 {
@@ -83,12 +84,21 @@ namespace PrivateWin10.Windows
                 cmbGroup.Text = Rule.Grouping;
             txtInfo.Text = Rule.Description;
 
-            foreach (Program prog in progs)
+            if (progs != null)
             {
-                ContentControl program = new ContentControl() { Content = prog.Description, Tag = prog.ID };
+                foreach (Program prog in progs)
+                {
+                    ContentControl program = new ContentControl() { Content = prog.Description, Tag = prog.ID };
+                    cmbProgram.Items.Add(program);
+                    if (Rule.ProgID != null && prog.ID.CompareTo(Rule.ProgID) == 0)
+                        cmbProgram.SelectedItem = program;
+                }
+            }
+            else
+            {
+                ContentControl program = new ContentControl() { Content = Rule.ProgID.FormatString(), Tag = Rule.ProgID };
                 cmbProgram.Items.Add(program);
-                if (Rule.ProgID != null && prog.ID.CompareTo(Rule.ProgID) == 0)
-                    cmbProgram.SelectedItem = program;
+                cmbProgram.SelectedItem = program;
             }
 
             txtPath.Text = rule.BinaryPath ?? "";
@@ -154,12 +164,12 @@ namespace PrivateWin10.Windows
             addrDest.Address = Rule.RemoteAddresses;
             addrSrc.Address = Rule.LocalAddresses;
 
-            WpfFunc.LoadWnd(this, "Rule");
+            App.LoadWnd(this, "Rule");
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            WpfFunc.StoreWnd(this, "Rule");
+            App.StoreWnd(this, "Rule");
         }
 
         private bool ProgIDChanged = false;

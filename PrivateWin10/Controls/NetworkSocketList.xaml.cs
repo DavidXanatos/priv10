@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MiscHelpers;
 
 namespace PrivateWin10.Controls
 {
@@ -329,13 +330,13 @@ namespace PrivateWin10.Controls
                     return string.Join(",", profiles.ToArray().Reverse());
                 } }
 
-            public UInt64 Upload { get { return sock.Stats.UploadRate.ByteRate; } }
+            public UInt64 Upload { get { return sock.UploadRate; } }
             
-            public UInt64 Download { get { return sock.Stats.UploadRate.ByteRate; } }
+            public UInt64 Download { get { return sock.DownloadRate; } }
 
-            public UInt64 Uploaded { get { return sock.Stats.SentBytes; } }
+            public UInt64 Uploaded { get { return sock.SentBytes; } }
 
-            public UInt64 Downloaded { get { return sock.Stats.ReceivedBytes; } }
+            public UInt64 Downloaded { get { return sock.ReceivedBytes; } }
 
             void UpdateValue<T>(ref T value, T new_value, string Name)
             {
@@ -357,15 +358,10 @@ namespace PrivateWin10.Controls
                 if(sock.Update(new_sock))
                     NotifyPropertyChanged("DestAddress");
 
-                if (!sock.Stats.Equals(new_sock.Stats))
-                {
-                    sock.Stats = new_sock.Stats;
-                    NotifyPropertyChanged("Upload");
-                    NotifyPropertyChanged("Download");
-                    NotifyPropertyChanged("Uploaded");
-                    NotifyPropertyChanged("Downloaded");
-                    // todo: other
-                }
+                UpdateValue(ref sock.UploadRate, new_sock.UploadRate, "Upload");
+                UpdateValue(ref sock.DownloadRate, new_sock.DownloadRate, "Download");
+                UpdateValue(ref sock.SentBytes, new_sock.SentBytes, "Uploaded");
+                UpdateValue(ref sock.ReceivedBytes, new_sock.ReceivedBytes, "Downloaded");
             }
 
             #region INotifyPropertyChanged Members

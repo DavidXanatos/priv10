@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PrivateAPI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -71,6 +72,12 @@ namespace PrivateWin10.Windows
                 App.client.SetAuditPolicy(audit);
 
                 App.SetConfig("Firewall", "NotifyBlocked", chkNotifyFW.IsChecked == true ? 1 : 0);
+
+                if (!App.client.IsConnected())
+                {
+                    App.StartEngine();
+                    App.client.Connect();
+                }
             }
 
             App.SetConfig("Startup", "ShowSetup", 0);

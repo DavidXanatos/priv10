@@ -15,6 +15,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MiscHelpers;
+using PrivateAPI;
 
 namespace PrivateWin10.Pages
 {
@@ -91,7 +93,7 @@ namespace PrivateWin10.Pages
             if (App.GetConfigInt("GUI", "ShowNotifications", 1) == 0)
                 return;
 
-            if ((entry.categoryID & (short)App.EventFlags.Notifications) != 0)
+            if ((entry.categoryID & (short)Priv10Logger.EventFlags.Notifications) != 0)
             {
                 System.Windows.Forms.ToolTipIcon tipIcon = System.Windows.Forms.ToolTipIcon.Info;
                 if(entry.entryType == EventLogEntryType.Error)
@@ -152,13 +154,13 @@ namespace PrivateWin10.Pages
                 } }
             public DateTime TimeStamp { get { return args.timeGenerated; } }
             public string Category { get {
-                    if (args.eventID >= (int)App.EventIDs.FirewallBegin && args.eventID <= (int)App.EventIDs.FirewallEnd)
+                    if (args.eventID >= (int)Priv10Logger.EventIDs.FirewallBegin && args.eventID <= (int)Priv10Logger.EventIDs.FirewallEnd)
                         return Translate.fmt("log_firewall");
-                    if (args.eventID >= (int)App.EventIDs.TweakBegin && args.eventID <= (int)App.EventIDs.TweakEnd)
+                    if (args.eventID >= (int)Priv10Logger.EventIDs.TweakBegin && args.eventID <= (int)Priv10Logger.EventIDs.TweakEnd)
                         return Translate.fmt("log_tweaks");
                     return Translate.fmt("log_other");
                 } }
-            public string Event { get { return ((App.EventIDs)args.eventID).ToString(); } } // Todo
+            public string Event { get { return ((Priv10Logger.EventIDs)args.eventID).ToString(); } } // Todo
             public string Message { get { return args.strMessage; } }
 
 #region INotifyPropertyChanged Members

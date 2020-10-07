@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Windows.Media;
 using System.Windows;
 using System.ComponentModel;
+using MiscHelpers;
 
 namespace PrivateWin10.Controls
 {
@@ -26,6 +27,8 @@ namespace PrivateWin10.Controls
             switch (progSet.config.GetAccess())
             {
                 case ProgramSet.Config.AccessLevels.FullAccess:     return Translate.fmt("acl_allow");
+                //case ProgramSet.Config.AccessLevels.OutBoundAccess: return Translate.fmt("acl_outbound");
+                //case ProgramSet.Config.AccessLevels.InBoundAccess:  return Translate.fmt("acl_inbound");
                 case ProgramSet.Config.AccessLevels.CustomConfig:   return Translate.fmt("acl_edit");
                 case ProgramSet.Config.AccessLevels.LocalOnly:      return Translate.fmt("acl_lan");
                 case ProgramSet.Config.AccessLevels.BlockAccess:    return Translate.fmt("acl_block");

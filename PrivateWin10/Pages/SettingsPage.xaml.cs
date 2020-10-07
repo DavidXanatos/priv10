@@ -16,6 +16,7 @@ using System.IO.Compression;
 using Microsoft.Win32;
 using System.IO;
 using System.Diagnostics;
+using MiscHelpers;
 
 namespace PrivateWin10.Pages
 {
@@ -192,32 +193,30 @@ namespace PrivateWin10.Pages
                     App.Restart(true);
                 return;
             }
-
-            App.client.Close();
+            
             if (chkService.IsChecked == true)
             {
-                if (App.engine != null)
-                {
-                    App.engine.Stop();
-
-                    App.engine = null;
-                }
+                if (App.EngineProc != null)
+                    App.StopEngine();
 
                 Priv10Service.Install(true);
                 App.Log.SetupEventLog(App.Key);
+                App.client.Connect();
             }
             else
             {
+                App.client.Close();
+
+                Priv10Service.Terminate();
                 Priv10Service.Uninstall();
 
-                if (App.engine == null)
+                if (App.EngineProc == null && App.GetConfigInt("Firewall", "Enabled", 0) != 0)
                 {
-                    App.engine = new Priv10Engine();
-
-                    App.engine.Start();
+                    App.StartEngine();
+                    App.client.Connect();
                 }
             }
-            App.client.Connect();
+            
 
             App.MainWnd.UpdateEnabled();
         }

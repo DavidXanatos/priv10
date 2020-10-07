@@ -36,7 +36,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -46,7 +46,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -89,39 +89,25 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API\AppManager.cs" />
-    <Compile Include="API\EtwLogger.cs" />
-    <Compile Include="API\FileOps.cs" />
-    <Compile Include="API\MiscStats.cs" />
-    <Compile Include="API\Network\DnsApi.cs" />
-    <Compile Include="API\Network\IPHelper.cs" />
-    <Compile Include="API\ProcessUtilities.cs" />
-    <Compile Include="API\RegistryMonitor.cs" />
-    <Compile Include="API\UwpFunc.cs" />
-    <Compile Include="API\ProcFunc.cs" />
-    <Compile Include="API\WindowsFirewall.cs" />
-    <Compile Include="Common\DataGridExt.cs" />
-    <Compile Include="Common\HttpTask.cs" />
-    <Compile Include="Common\IconExtractor.cs" />
-    <Compile Include="Common\ImgFunc.cs" />
     <Compile Include="Common\MyLicense.cs" />
     <Compile Include="Controls\AddressControl.xaml.cs">
       <DependentUpon>AddressControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ConnectionNotify.xaml.cs">
+    <Compile Include="Controls\Notify\ConnectionNotify.xaml.cs">
       <DependentUpon>ConnectionNotify.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ControlList.cs" />
     <Compile Include="Controls\Converters.cs" />
-    <Compile Include="Controls\DnsBlockListsControl.xaml.cs">
+    <Compile Include="Controls\Dns\DnsBlockListsControl.xaml.cs">
       <DependentUpon>DnsBlockListsControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\DnsFilterListControl.xaml.cs">
+    <Compile Include="Controls\Dns\DnsFilterListControl.xaml.cs">
       <DependentUpon>DnsFilterListControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\DnsLogList.xaml.cs">
+    <Compile Include="Controls\Dns\DnsLogList.xaml.cs">
       <DependentUpon>DnsLogList.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\DnsQueryLogControl.xaml.cs">
+    <Compile Include="Controls\Dns\DnsQueryLogControl.xaml.cs">
       <DependentUpon>DnsQueryLogControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\FirewallLogList.xaml.cs">
@@ -133,6 +119,21 @@
     <Compile Include="Controls\GridViewRowPresenterWithGridLines.cs" />
     <Compile Include="Controls\NetworkSocketList.xaml.cs">
       <DependentUpon>NetworkSocketList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Presets\PresetControl.xaml.cs">
+      <DependentUpon>PresetControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Presets\PresetCustom.xaml.cs">
+      <DependentUpon>PresetCustom.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Presets\PresetItemControl.xaml.cs">
+      <DependentUpon>PresetItemControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Presets\PresetFirewall.xaml.cs">
+      <DependentUpon>PresetFirewall.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Presets\PresetTweaks.xaml.cs">
+      <DependentUpon>PresetTweaks.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\ProgramControl.xaml.cs">
       <DependentUpon>ProgramControl.xaml</DependentUpon>
@@ -148,68 +149,55 @@
     <Compile Include="Controls\ProgramTreeControl\ProgramTreeItem.cs" />
     <Compile Include="Controls\ProgramTreeControl\AbstractTreeItem.cs" />
     <Compile Include="Controls\ProgramTreeControl\ProgTreeRoot.cs" />
-    <Compile Include="Controls\RuleNotify.xaml.cs">
+    <Compile Include="Controls\Presets\RuleItemControl.xaml.cs">
+      <DependentUpon>RuleItemControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Notify\RuleNotify.xaml.cs">
       <DependentUpon>RuleNotify.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\SearchTextBox.cs" />
     <Compile Include="Controls\SplitButton.xaml.cs">
       <DependentUpon>SplitButton.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\TweakControl.xaml.cs">
+    <Compile Include="Controls\Tweaks\TweakControl.xaml.cs">
       <DependentUpon>TweakControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\TweakGroup.xaml.cs">
+    <Compile Include="Controls\Tweaks\TweakGroup.xaml.cs">
       <DependentUpon>TweakGroup.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\TweakNotify.xaml.cs">
+    <Compile Include="Controls\Presets\TweakItemControl.xaml.cs">
+      <DependentUpon>TweakItemControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Notify\TweakNotify.xaml.cs">
       <DependentUpon>TweakNotify.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Core\DnsInspector\DnsCacheMonitor.cs" />
-    <Compile Include="Core\DnsInspector.cs" />
-    <Compile Include="Core\DnsProxy\DnsConfigurator.cs" />
-    <Compile Include="Core\DnsProxy\DnsProxyServer.cs" />
-    <Compile Include="Core\DnsInspector\DnsQueryWatcher.cs" />
-    <Compile Include="Core\DnsProxy\DnsBlockList.cs" />
-    <Compile Include="Core\DnsInspector\HostNameResolver.cs" />
-    <Compile Include="Core\ProcessMonitor.cs" />
-    <Compile Include="Core\Tweaks\TweakEngine.cs" />
-    <Compile Include="Core\WindowsFirewall\FirewallRuleEx.cs" />
-    <Compile Include="Core\WindowsFirewall\WinNetFwAPI.cs" />
-    <Compile Include="Core\WindowsFirewall\FirewallManager.cs" />
-    <Compile Include="Core\WindowsFirewall\FirewallGuard.cs" />
+    <Compile Include="Core\Presets\CustomPreset.cs" />
+    <Compile Include="Core\Presets\FirewallPreset.cs" />
+    <Compile Include="Core\Presets\PresetGroup.cs" />
+    <Compile Include="Core\Presets\PresetItem.cs" />
+    <Compile Include="Core\Presets\PresetManager.cs" />
+    <Compile Include="Core\Presets\TweakPreset.cs" />
+    <Compile Include="Core\Priv10Service.cs" />
+    <Compile Include="Core\TweakManager.cs" />
+    <Compile Include="IPC\FirewallRule.cs" />
+    <Compile Include="IPC\FirewallRuleEx.cs" />
+    <Compile Include="IPC\MiscObjects.cs" />
+    <Compile Include="IPC\NetworkSocket.cs" />
     <Compile Include="IPC\Priv10Client.cs" />
-    <Compile Include="IPC\Priv10Host.cs" />
+    <Compile Include="IPC\Program.cs" />
+    <Compile Include="IPC\ProgramID.cs" />
+    <Compile Include="IPC\ProgramSet.cs" />
     <Compile Include="Models\AppModel.cs" />
     <Compile Include="Models\CategoryModel.cs" />
     <Compile Include="Models\GroupModel.cs" />
     <Compile Include="Models\ServiceModel.cs" />
-    <Compile Include="API\WinVer.cs" />
     <Compile Include="Common\AdminFunc.cs" />
-    <Compile Include="Common\TextHelpers.cs" />
-    <Compile Include="Common\WpfFunc.cs" />
-    <Compile Include="Core\NetworkMonitor.cs" />
-    <Compile Include="Core\NetworkSocket.cs" />
-    <Compile Include="API\ServiceHelper.cs" />
-    <Compile Include="Common\ClonableDictionary.cs" />
-    <Compile Include="Common\ClonableList.cs" />
-    <Compile Include="Common\MultiValueDictionary.cs" />
-    <Compile Include="Core\ProgramSet.cs" />
-    <Compile Include="Core\ProgramID.cs" />
-    <Compile Include="Common\WinConsole.cs" />
-    <Compile Include="Core\Priv10Engine.cs" />
-    <Compile Include="Core\Program.cs" />
-    <Compile Include="Core\ProgramList.cs" />
     <Compile Include="Controls\MouseDownHelper.cs" />
-    <Compile Include="Core\Priv10Service.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Core\Tweaks\TweakManager.cs" />
-    <Compile Include="Core\Tweaks\TweakStore.cs" />
-    <Compile Include="Common\PipeIPC\PipeClient.cs" />
-    <Compile Include="Common\PipeIPC\PipeHost.cs" />
-    <Compile Include="Common\PipeIPC\PipeIPC.cs" />
     <Compile Include="Pages\AboutPage.xaml.cs">
       <DependentUpon>AboutPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\ControlPage.xaml.cs">
+      <DependentUpon>ControlPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\DnsPage.xaml.cs">
       <DependentUpon>DnsPage.xaml</DependentUpon>
@@ -252,23 +240,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\ConnectionNotify.xaml">
+    <Page Include="Controls\Notify\ConnectionNotify.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\DnsBlockListsControl.xaml">
+    <Page Include="Controls\Dns\DnsBlockListsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\DnsFilterListControl.xaml">
+    <Page Include="Controls\Dns\DnsFilterListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\DnsLogList.xaml">
+    <Page Include="Controls\Dns\DnsLogList.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\DnsQueryLogControl.xaml">
+    <Page Include="Controls\Dns\DnsQueryLogControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -284,6 +272,26 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\Presets\PresetControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Presets\PresetCustom.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Presets\PresetItemControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Presets\PresetFirewall.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Presets\PresetTweaks.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\ProgramControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -296,7 +304,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\RuleNotify.xaml">
+    <Page Include="Controls\Presets\RuleItemControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Notify\RuleNotify.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -304,15 +316,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\TweakControl.xaml">
+    <Page Include="Controls\Tweaks\TweakControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\TweakGroup.xaml">
+    <Page Include="Controls\Tweaks\TweakGroup.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\TweakNotify.xaml">
+    <Page Include="Controls\Presets\TweakItemControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Notify\TweakNotify.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -324,22 +340,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="Core\WindowsFirewall\WinNetFwCom.cs" />
-    <Compile Include="Core\WindowsFirewall\FirewallRule.cs" />
-    <Compile Include="API\TokenManipulator.cs" />
-    <Compile Include="Common\AppLog.cs" />
-    <Compile Include="API\AuditPolicy.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Core\WindowsFirewall\FirewallMonitor.cs" />
-    <Compile Include="Common\MiscFunc.cs" />
-    <Compile Include="API\Network\NetFunc.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Pages\ControlPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\DnsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -450,11 +462,6 @@
       <Project>{ebcb8f53-c56a-4245-893f-ce67d69d0087}</Project>
       <Name>DNS</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ETW\O365.Security.Native.ETW\O365.Security.Native.ETW.vcxproj">
-      <Project>{ed4e6027-541f-440a-a5ee-15dbb7b89423}</Project>
-      <Name>Microsoft.O365.Security.Native.ETW</Name>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\ICSharpCode.TreeView\ICSharpCode.TreeView.csproj">
       <Project>{dde2a481-8271-4eac-a330-8fa6a38d13d1}</Project>
       <Name>ICSharpCode.TreeView</Name>
@@ -463,9 +470,21 @@
       <Project>{52bd99e0-0865-4f2c-9a65-0d2f9d1a8982}</Project>
       <Name>LocalPolicy</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MiscHelpers\MiscHelpers.csproj">
+      <Project>{694c85c2-bb43-4525-a953-709050002631}</Project>
+      <Name>MiscHelpers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PrivateAPI\PrivateAPI.csproj">
+      <Project>{2370ee89-9321-408d-9806-90720b6ddea4}</Project>
+      <Name>PrivateAPI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\QLicense\Core\QLicense\QLicense.csproj">
       <Project>{1980E43F-C5E4-4A2B-95A6-1AEBDC7EE2B7}</Project>
       <Name>QLicense</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TweakEngine\TweakEngine.csproj">
+      <Project>{35fb284f-77e2-4336-b60d-2cd39522b014}</Project>
+      <Name>TweakEngine</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -565,6 +584,13 @@
   <ItemGroup>
     <Resource Include="Resources\clear.png" />
     <Resource Include="Resources\search.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons8-in-16.png" />
+    <Resource Include="Resources\icons8-out-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Themes\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

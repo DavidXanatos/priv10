@@ -1,4 +1,5 @@
-﻿using PrivateWin10.Pages;
+﻿using MiscHelpers;
+using PrivateWin10.Pages;
 using PrivateWin10.Windows;
 using System;
 using System.Collections.Generic;
@@ -129,7 +130,7 @@ namespace PrivateWin10
                     this.Title += " - Business Edition";
             }*/
 
-            WpfFunc.LoadWnd(this, "Main");
+            App.LoadWnd(this, "Main");
 
             bool HasEngine = App.client.IsConnected();
 
@@ -140,6 +141,7 @@ namespace PrivateWin10
             mPages.Add("Privacy", new PageItem(new PrivacyPage()));
             mPages.Add("Firewall", new PageItem(HasEngine ? new FirewallPage() : null));
             mPages.Add("Dns", new PageItem(new DnsPage()));
+            mPages.Add("Control", new PageItem(new ControlPage()));
             //mPages.Add("Terminator", new PageItem(null));
             //mPages.Add("VPN", new PageItem(new VPNPage()));
             mPages.Add("Settings", new PageItem(new SettingsPage()));
@@ -205,7 +207,7 @@ namespace PrivateWin10
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            WpfFunc.StoreWnd(this, "Main");
+            App.StoreWnd(this, "Main");
 
             foreach (var page in mPages.Values)
             {

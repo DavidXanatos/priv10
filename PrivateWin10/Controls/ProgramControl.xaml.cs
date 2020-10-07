@@ -1,4 +1,5 @@
-﻿using PrivateWin10.Windows;
+﻿using MiscHelpers;
+using PrivateWin10.Windows;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,7 +22,7 @@ namespace PrivateWin10
     /// <summary>
     /// Interaction logic for ProcessControl.xaml
     /// </summary>
-    public partial class ProgramControl : UserControl
+    public partial class ProgramControl : UserControl, IControlItem<ProgramSet>
     {
         public event RoutedEventHandler Click;
 
@@ -36,12 +37,27 @@ namespace PrivateWin10
             switch (NetAccess)
             {
                 case ProgramSet.Config.AccessLevels.FullAccess: return new SolidColorBrush(Colors.LightGreen);
+                //case ProgramSet.Config.AccessLevels.OutBoundAccess: return new SolidColorBrush(Colors.YellowGreen);
+                //case ProgramSet.Config.AccessLevels.InBoundAccess: return new SolidColorBrush(Colors.Goldenrod);
                 case ProgramSet.Config.AccessLevels.CustomConfig: return new SolidColorBrush(Colors.Gold);
                 case ProgramSet.Config.AccessLevels.LocalOnly: return new SolidColorBrush(Colors.LightSkyBlue);
                 case ProgramSet.Config.AccessLevels.BlockAccess: return new SolidColorBrush(Colors.LightPink);
                 case ProgramSet.Config.AccessLevels.WarningState: return new SolidColorBrush(Colors.Yellow);
                 default: return new SolidColorBrush(Colors.White);
             }
+        }
+
+        public static void PrepAccessCmb(ComboBox cmbAccess)
+        {
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_none"), Tag = ProgramSet.Config.AccessLevels.Unconfigured });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_allow"), Tag = ProgramSet.Config.AccessLevels.FullAccess });
+            //cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_outbound"), Tag = ProgramSet.Config.AccessLevels.OutBoundAccess });
+            //cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_inbound"), Tag = ProgramSet.Config.AccessLevels.InBoundAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_edit"), Tag = ProgramSet.Config.AccessLevels.CustomConfig });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_lan"), Tag = ProgramSet.Config.AccessLevels.LocalOnly });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_block"), Tag = ProgramSet.Config.AccessLevels.BlockAccess });
+            foreach (ComboBoxItem item in cmbAccess.Items)
+                item.Background = GetAccessColor((ProgramSet.Config.AccessLevels)item.Tag);
         }
 
         public ProgramControl(ProgramSet prog, CategoryModel Categories)
@@ -67,19 +83,11 @@ namespace PrivateWin10
             //mBorderBrush = name.BorderBrush;
             //name.BorderBrush = Brushes.Transparent;
 
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_none"), Tag = ProgramSet.Config.AccessLevels.Unconfigured });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_allow"), Tag = ProgramSet.Config.AccessLevels.FullAccess });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_edit"), Tag = ProgramSet.Config.AccessLevels.CustomConfig });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_lan"), Tag = ProgramSet.Config.AccessLevels.LocalOnly });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_block"), Tag = ProgramSet.Config.AccessLevels.BlockAccess });
-            foreach (ComboBoxItem item in cmbAccess.Items)
-                item.Background = GetAccessColor((ProgramSet.Config.AccessLevels)item.Tag);
+            PrepAccessCmb(cmbAccess);
 
             SuspendChange--;
 
-            progSet = prog;
-
-            DoUpdate();
+            DoUpdate(prog);
 
             ProgramID id = prog.Programs.First().Key;
             if (id.Type == ProgramID.Types.Global || id.Type == ProgramID.Types.System)
@@ -107,8 +115,10 @@ namespace PrivateWin10
 
         int SuspendChange = 0;
 
-        public void DoUpdate()
+        public void DoUpdate(ProgramSet progSet)
         {
+            this.progSet = progSet;
+
             SuspendChange++;
 
             ImgFunc.GetIconAsync(progSet.GetIcon(), icon.Width, (ImageSource src) => {
@@ -299,7 +309,7 @@ namespace PrivateWin10
 
             if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2) // double click
             {
-                string iconFile = OpenIconPicker(progSet.GetIcon());
+                string iconFile = ProgramControl.OpenIconPicker(progSet.GetIcon());
                 if (iconFile != null)
                 {
                     progSet.config.Icon = iconFile;

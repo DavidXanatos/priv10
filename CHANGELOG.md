@@ -2,9 +2,37 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.75b] - 2020-03-20
+
+
+## [0.80] - 2020-10-07
+
+### Added
+- added a few more tweaks
+	Disable Device Census
+	Disable Kernel Crash Dump creation
+
+### Changed
+- All microsoft binaries under System32 are now classifyed as system components (not only services and kernel)
+- moved shared code to a helper library
+- splited the project in separated UI and service components
+- reingeniered the IPC mechanism for better performance
+- notification window now displays all changed rules also those that changed when the client wasn't running
+- reworked client start
+
 ### Fixed
-- crash issue with notification window
+- list sometimes opening in the wron mode
+- fixed issue with program and program set description resolvationo
+- fixed some crash issues
+
+
+
+
+
+## [0.75b] - 2020-03-20
+
+### Fixed
+- This release fixes a crash issue with the notification window.
+
 
 ## [0.75] - 2020-02-18
 
@@ -165,6 +193,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.60.1] - 2019-12-01
 
 ### Added
+- added process monitor, using ETW events to aid resolving PID to program, when the prgram in question already exited.
 - added upstream dns diplay to the dns proxy page
 
 ### Changed

@@ -1,4 +1,5 @@
 ﻿using ICSharpCode.TreeView;
+using MiscHelpers;
 using PrivateWin10.Pages;
 using System;
 using System.Collections.Generic;
@@ -47,6 +48,8 @@ namespace PrivateWin10.Controls
         public MenuItem menuAccessNone;
         public MenuItem menuAccessAllow;
         public MenuItem menuAccessCustom;
+        public MenuItem menuAccessIn;
+        public MenuItem menuAccessOut;
         public MenuItem menuAccessLan;
         public MenuItem menuAccessBlock;
         public MenuItem menuNotify;
@@ -113,6 +116,8 @@ namespace PrivateWin10.Controls
             menuAccessNone = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_none"), null, null, ProgramSet.Config.AccessLevels.Unconfigured);
             menuAccessAllow = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_allow"), null, null, ProgramSet.Config.AccessLevels.FullAccess);
             menuAccessCustom = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_edit"), null, null, ProgramSet.Config.AccessLevels.CustomConfig);
+            //menuAccessIn = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_inbound"), null, null, ProgramSet.Config.AccessLevels.InBoundAccess);
+            //menuAccessOut = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_outbound"), null, null, ProgramSet.Config.AccessLevels.OutBoundAccess);
             menuAccessLan = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_lan"), null, null, ProgramSet.Config.AccessLevels.LocalOnly);
             menuAccessBlock = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_block"), null, null, ProgramSet.Config.AccessLevels.BlockAccess);
             foreach (MenuItem item in menuAccess.Items)

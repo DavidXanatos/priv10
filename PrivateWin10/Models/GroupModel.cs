@@ -32,9 +32,9 @@ namespace PrivateWin10
 
             HashSet<string> knownGroups = new HashSet<string>();
             Dictionary<Guid, List<FirewallRuleEx>> rules = App.client.GetRules();
-            foreach (var ruleSet in rules)
+            foreach (var ruleEntry in rules)
             {
-                foreach (FirewallRule rule in ruleSet.Value)
+                foreach (FirewallRule rule in ruleEntry.Value)
                 {
                     if (rule.Grouping != null && rule.Grouping.Length > 0)
                     {
