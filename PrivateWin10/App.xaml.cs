@@ -134,11 +134,11 @@ namespace PrivateWin10
                 }
             }
 
-            AppLog.Debug("Trying to connect to Engine...");
+            AppLog.Debug("Trying to connect to engine...");
             int conRes = client.Connect(1000);
             if (conRes == 0)
             {
-                if (Priv10Service.IsInstalled())
+                if (Priv10Service.IsProperlyInstalled())
                 {
                     if (!AdminFunc.IsAdministrator())
                     {
@@ -159,11 +159,11 @@ namespace PrivateWin10
                 }
 
                 
-                AppLog.Debug("Trying to connect to service...");
+                AppLog.Debug("Trying to connect to engine...");
                 if (client.Connect() != 0)
-                    AppLog.Debug("Connected to service...");
+                    AppLog.Debug("Connected to engine...");
                 else
-                    AppLog.Debug("Failed to connect to service...");
+                    AppLog.Debug("Failed to connect to engine...");
             }
 
             tweaks = new TweakManager();
@@ -467,8 +467,25 @@ namespace PrivateWin10
             
             if (TestArg("-svc_install"))
             {
-                AppLog.Debug("Installing Service...");
                 Priv10Service.Install(TestArg("-svc_start"));
+                bDone = true;
+            }
+
+            if (TestArg("-svc_update"))
+            {
+                AppLog.Debug("Updating Service...");
+                if (Priv10Service.IsInstalled())
+                {
+                    if (!Priv10Service.IsProperlyInstalled())
+                    {
+                        Priv10Service.Uninstall();
+                        Thread.Sleep(1000);
+                        Priv10Service.Install(TestArg("-svc_start"));
+                    }
+                }
+                else
+                    AppLog.Debug("Service not installed...");
+
                 bDone = true;
             }
 

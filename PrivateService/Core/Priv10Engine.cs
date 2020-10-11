@@ -35,6 +35,7 @@ namespace PrivateWin10
         DispatcherTimer mTimer;
         volatile bool mDoQuit = false;
         DateTime LastSaveTime = DateTime.Now;
+        bool SettingsChanged = false;
 
 #if DEBUG
         //List<EtwAbstractLogger> EtwLoggers = new List<EtwAbstractLogger>();
@@ -271,6 +272,12 @@ namespace PrivateWin10
 
                 if (DnsProxy != null)
                     DnsProxy.Store();
+            }
+
+            if (SettingsChanged)
+            {
+                SettingsChanged = false;
+                App.host.NotifySettingsChanged();
             }
 
             if (mDoQuit)
@@ -538,13 +545,13 @@ namespace PrivateWin10
         public void NotifyProgramUpdate(Guid guid)
         {
             if (App.host != null)
-                App.host.NotifyUpdate(guid, UpdateTypes.ProgSet);
+                App.host.NotifyProgUpdate(guid, UpdateTypes.ProgSet);
         }
 
         public void NotifyRulesUpdte(Guid guid)
         {
             if (App.host != null)
-                App.host.NotifyUpdate(guid, UpdateTypes.Rules);
+                App.host.NotifyProgUpdate(guid, UpdateTypes.Rules);
         }
 
         public void OnRulesUpdated(ProgramSet progSet)
@@ -937,7 +944,7 @@ namespace PrivateWin10
             OnRulesUpdated(prog);
 
             if (App.host != null)
-                App.host.NotifyChange(prog, rule, type, action);
+                App.host.NotifyRuleChange(prog, rule, type, action);
 
             // Logg the event
             Dictionary<string, string> Params = new Dictionary<string, string>();
@@ -1042,6 +1049,9 @@ namespace PrivateWin10
         public bool SetFilteringMode(FirewallManager.FilteringModes Mode)
         {
             return mDispatcher.Invoke(new Func<bool>(() => {
+                
+                SettingsChanged = true;
+
                 return FirewallManager.SetFilteringMode(Mode);
             }));
         }
@@ -1056,6 +1066,9 @@ namespace PrivateWin10
         public bool SetFirewallGuard(bool guard, FirewallGuard.Mode mode)
         {
             return mDispatcher.Invoke(new Func<bool>(() => {
+                
+                SettingsChanged = true;
+
                 App.SetConfig("Firewall", "RuleGuard", guard == true ? 1 : 0);
                 App.SetConfig("Firewall", "GuardMode", ((int)mode).ToString());
                 if (guard == FirewallGuard.HasAuditPolicy())
@@ -1076,6 +1089,9 @@ namespace PrivateWin10
         public bool SetAuditPolicy(FirewallMonitor.Auditing audit)
         {
             return mDispatcher.Invoke(new Func<bool>(() => {
+                
+                SettingsChanged = true;
+
                 App.SetConfig("Firewall", "AuditPolicy", audit.ToString());
                 return FirewallMonitor.SetAuditPolicy(audit);
             }));
@@ -1412,6 +1428,9 @@ namespace PrivateWin10
         public bool SetupDnsInspector(bool Enable)
         {
             return mDispatcher.Invoke(new Func<bool>(() => {
+
+                SettingsChanged = true;
+                
                 App.SetConfig("DnsInspector", "Enabled", Enable ? 1 : 0);
 
                 if (DnsInspector != null && !Enable)
@@ -1463,6 +1482,8 @@ namespace PrivateWin10
         public bool ConfigureDNSProxy(bool Enable, bool? setLocal = null, string UpstreamDNS = null)
         {
             return mDispatcher.Invoke(new Func<bool>(() => {
+
+                SettingsChanged = true;
 
                 App.SetConfig("DnsProxy", "Enabled", Enable == true ? 1 : 0);
                 if (setLocal != null)

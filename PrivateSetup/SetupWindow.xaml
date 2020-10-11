@@ -123,7 +123,7 @@
                 </StackPanel>
                 <Grid Grid.Row="3" Margin="12,6,12,6">
                     <StackPanel Name="frameInstall" Visibility="Collapsed">
-                        <TextBlock Text="Instalaltion Options:" FontWeight="Bold" Margin="0,0,0,6"/>
+                        <TextBlock Text="Installation options:" FontWeight="Bold" Margin="0,0,0,6"/>
                         <CheckBox Name="chkAutoStart" Content="Add program to Autostart" Margin="12,0,0,0"/>
                     </StackPanel>
                     <StackPanel Name="frameUninstall" Visibility="Collapsed">

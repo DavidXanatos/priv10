@@ -281,8 +281,8 @@ namespace PrivateWin10.Pages
             OnTimerTick(null, null);
 
             App.client.ActivityNotification += OnNetActivity;
-            App.client.ChangeNotification += OnRuleChange;
-            App.client.UpdateNotification += OnProgUpdate;
+            App.client.RuleChangeNotification += OnRuleChange;
+            App.client.ProgUpdateNotification += OnProgUpdate;
 
 
             //ProgramSets = new ObservableCollection<ProgramSet>();
@@ -402,10 +402,13 @@ namespace PrivateWin10.Pages
             Program program = null;
             prog.Programs.TryGetValue(args.progID, out program);
 
-            if (args.entry.State == Program.LogEntry.States.UnRuled && args.entry.FwEvent.Action == FirewallRule.Actions.Block)
+            if (args.entry.State == Program.LogEntry.States.UnRuled 
+                //&& args.entry.FwEvent.Action == FirewallRule.Actions.Block
+                && !NetFunc.IsLocalHost(args.entry.FwEvent.RemoteAddress)
+              )
             {
                 bool? Notify = prog.config.GetNotify();
-                if (Notify == true || (App.GetConfigInt("Firewall", "NotifyBlocked", 1) != 0 && App.GetConfigInt("Firewall", "Enabled", 0) != 0 && Notify != false))
+                if (Notify == true || (App.GetConfigInt("Firewall", "NotifyConnections", 1) != 0 && App.GetConfigInt("Firewall", "Enabled", 0) != 0 && Notify != false))
                     ShowNotification(prog, args);
             }
 
@@ -526,7 +529,8 @@ namespace PrivateWin10.Pages
             else if (UpdatesProgs.Count > 0)
             {
                 List<ProgramSet> progs = App.client.GetPrograms(UpdatesProgs.ToList());
-                UpdateProgramItems(progs);
+                if(progs != null)
+                    UpdateProgramItems(progs);
             }
 
             if (RuleUpdate)
@@ -707,6 +711,9 @@ namespace PrivateWin10.Pages
 
         static public bool DoFilter(FilterPreset Filter, ProgramSet prog)
         {
+            if (Filter == null)
+                return false;
+
             //Activity
             if (Filter.Recently != FilterPreset.Recent.Not)
             {
@@ -872,7 +879,7 @@ namespace PrivateWin10.Pages
             btnBlockAll.IsEnabled = progTree.menuAccessBlock.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
 
             chkNotify.IsEnabled = progTree.menuNotify.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
-            chkNotify.IsChecked = progTree.menuNotify.IsChecked = (Notify == true || (App.GetConfigInt("Firewall", "NotifyBlocked", 1) != 0 && Notify != false));
+            chkNotify.IsChecked = progTree.menuNotify.IsChecked = (Notify == true || (App.GetConfigInt("Firewall", "NotifyConnections", 1) != 0 && Notify != false));
 
             btnRename.IsEnabled = progTree.menuRename.IsEnabled = (SetCount == 1 && ProgCount == 0 && !GlobalSelected);
             btnIcon.IsEnabled = progTree.menuSetIcon.IsEnabled = (SetCount == 1 && ProgCount == 0 && !GlobalSelected);
@@ -1591,9 +1598,13 @@ namespace PrivateWin10.Pages
         private void BtnViewMode_Click(object sender, RoutedEventArgs e)
         {
             if (sender == btnNormalView) SetViewMode(ViewModes.NormalView);
-            if (sender == btnFullWidth) SetViewMode(ViewModes.FullWidth);
-            if (sender == btnFullHeight) SetViewMode(ViewModes.FullHeight);
-            if (sender == btnFullScreen) SetViewMode(ViewModes.FullScreen);
+            else if (sender == btnFullWidth) SetViewMode(ViewModes.FullWidth);
+            else if (sender == btnFullHeight) SetViewMode(ViewModes.FullHeight);
+            else if (sender == btnFullScreen)
+            {
+                SetViewMode(ViewModes.FullScreen);
+                ruleList.UpdateRules(true);
+            }
         }
 
         /*private void BtnFull_Click(object sender, RoutedEventArgs e)

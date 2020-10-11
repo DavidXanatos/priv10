@@ -47,7 +47,7 @@
                             </Style>
                         </-->
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Enabled" Binding="{Binding Enabled}" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" />
                         <DataGridTextColumn Header="Action" Binding="{Binding Action}">
                             <DataGridTextColumn.CellStyle>
                                 <Style TargetType="{x:Type DataGridCell}">

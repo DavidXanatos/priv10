@@ -219,7 +219,7 @@ namespace PrivateWin10
                 }
                 else if (func == "SetFirewallGuard")
                 {
-                    ret.Add(PutBool(App.engine.SetFirewallGuard(BitConverter.ToBoolean(args[0], 0), GetEnum<FirewallGuard.Mode>(args[0]))));
+                    ret.Add(PutBool(App.engine.SetFirewallGuard(BitConverter.ToBoolean(args[0], 0), GetEnum<FirewallGuard.Mode>(args[1]))));
                 }
                 else if (func == "GetAuditPolicy")
                 {
@@ -235,7 +235,7 @@ namespace PrivateWin10
                 }
                 else if (func == "GetProgram")
                 {
-                    ret.Add(PutProgSet(App.engine.GetProgram(GetProgID(args[0]), GetBool(args[0]))));
+                    ret.Add(PutProgSet(App.engine.GetProgram(GetProgID(args[0]), GetBool(args[1]))));
                 }
                 else if (func == "AddProgram")
                 {
@@ -251,11 +251,11 @@ namespace PrivateWin10
                 }
                 else if (func == "SplitPrograms")
                 {
-                    ret.Add(PutBool(App.engine.SplitPrograms(GetGuid(args[0]), GetProgID(args[0]))));
+                    ret.Add(PutBool(App.engine.SplitPrograms(GetGuid(args[0]), GetProgID(args[1]))));
                 }
                 else if (func == "RemoveProgram")
                 {
-                    ret.Add(PutBool(App.engine.RemoveProgram(GetGuid(args[0]), GetProgID(args[0]))));
+                    ret.Add(PutBool(App.engine.RemoveProgram(GetGuid(args[0]), GetProgID(args[1]))));
                 }
                 else if (func == "LoadRules")
                 {
@@ -420,22 +420,28 @@ namespace PrivateWin10
             SendPushNotification("ActivityNotification", args);
         }
 
-        public void NotifyChange(Program prog, FirewallRuleEx rule, Priv10Engine.RuleEventType type, Priv10Engine.RuleFixAction action)
+        public void NotifyRuleChange(Program prog, FirewallRuleEx rule, Priv10Engine.RuleEventType type, Priv10Engine.RuleFixAction action)
         {
             List<byte[]> args = new List<byte[]>();
             args.Add(PutProg(prog));
             args.Add(PutRule(rule));
             args.Add(PutStr(type));
             args.Add(PutStr(action));
-            SendPushNotification("ChangeNotification", args);
+            SendPushNotification("RuleChangeNotification", args);
         }
 
-        public void NotifyUpdate(Guid guid, Priv10Engine.UpdateTypes type)
+        public void NotifyProgUpdate(Guid guid, Priv10Engine.UpdateTypes type)
         {
             List<byte[]> args = new List<byte[]>();
             args.Add(PutGuid(guid));
             args.Add(PutStr(type));
-            SendPushNotification("UpdateNotification", args);
+            SendPushNotification("ProgUpdateNotification", args);
+        }
+
+        public void NotifySettingsChanged()
+        {
+            List<byte[]> args = new List<byte[]>();
+            SendPushNotification("SettingsChangedNotification", args);
         }
     }
 }

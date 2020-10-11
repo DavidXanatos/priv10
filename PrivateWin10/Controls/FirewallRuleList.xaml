@@ -105,7 +105,7 @@
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="Grouping" Binding="{Binding Grouping}" />
                     <DataGridTextColumn Header="Index" Binding="{Binding Index}" />
-                    <DataGridTextColumn Header="Enabled" Binding="{Binding Enabled}" />
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" />
                     <DataGridTextColumn Header="Profiles" Binding="{Binding Profiles}" />
                     <DataGridTextColumn Header="Action" Binding="{Binding Action}">
                         <DataGridTextColumn.CellStyle>

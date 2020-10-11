@@ -7,6 +7,7 @@ using System.Windows;
 using MessageBox = System.Windows.MessageBox;
 using Application = System.Windows.Application;
 using MiscHelpers;
+using System.Drawing;
 
 namespace PrivateWin10
 {
@@ -14,9 +15,16 @@ namespace PrivateWin10
     {
         private NotifyIcon notifyIcon;
         private ContextMenu contextMenu;
+        
         private MenuItem menuBlock;
+        private MenuItem menuWhitelist;
+        private MenuItem menuBlacklist;
+        private MenuItem menuFwDisabled;
+
         private MenuItem menuPresets;
+
         private MenuItem menuExit;
+
         private IContainer components;
 
         DispatcherTimer mTimer = new DispatcherTimer();
@@ -26,18 +34,23 @@ namespace PrivateWin10
             this.components = new Container();
             this.contextMenu = new ContextMenu();
 
-            // Initialize menuItem1
             this.menuBlock = new MenuItem() { Text = Translate.fmt("mnu_block") };
+            this.menuBlock.Click += new System.EventHandler(menuBlock_Click);
 
-            ProgramID id = ProgramID.NewID(ProgramID.Types.Global);
-            ProgramSet prog = App.client.GetProgram(id, true);
-            if (prog == null)
-                this.menuBlock.Enabled = false;
-            else
-                this.menuBlock.Checked = (prog.config.CurAccess == ProgramSet.Config.AccessLevels.BlockAccess);
-            this.menuBlock.Click += new System.EventHandler(this.menuBlock_Click);
+            this.menuWhitelist = new MenuItem() { Text = Translate.fmt("mnu_whitelist") };
+            this.menuWhitelist.Click += new System.EventHandler(menuMode_Click);
+
+            this.menuBlacklist = new MenuItem() { Text = Translate.fmt("mnu_blacklist") };
+            this.menuBlacklist.Click += new System.EventHandler(menuMode_Click);
+
+            this.menuFwDisabled = new MenuItem() { Text = Translate.fmt("mnu_open_fw") };
+            this.menuFwDisabled.Click += new System.EventHandler(menuMode_Click);
+
+            UpdateFwMode();
 
             this.menuPresets = new MenuItem() { Text = Translate.fmt("mnu_presets") };
+
+            App.client.SettingsChangedNotification += Client_SettingsChangedNotification;
 
             UpdatePresets();
 
@@ -48,7 +61,17 @@ namespace PrivateWin10
             this.menuExit.Click += new System.EventHandler(this.menuExit_Click);
 
             // Initialize contextMenu1
-            this.contextMenu.MenuItems.AddRange(new MenuItem[] { this.menuBlock, this.menuPresets, new MenuItem("-"), this.menuExit });
+            this.contextMenu.MenuItems.AddRange(new MenuItem[] { 
+                this.menuBlock, 
+                new MenuItem("-"), 
+                this.menuWhitelist, 
+                this.menuBlacklist, 
+                this.menuFwDisabled, 
+                new MenuItem("-"),  
+                this.menuPresets, 
+                new MenuItem("-"), 
+                this.menuExit 
+            });
 
             // Create the NotifyIcon.
             this.notifyIcon = new NotifyIcon(this.components);
@@ -56,6 +79,10 @@ namespace PrivateWin10
             // The Icon property sets the icon that will appear
             // in the systray for this application.
             notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(App.exePath);
+            /*System.IO.Stream iconStream = Application.GetResourceStream( new Uri( "pack://application:,,,/PrivateWin10;component/Resources/major_red.png" )).Stream;
+            var bitmap = new Bitmap(iconStream);
+            var iconHandle = bitmap.GetHicon();
+            notifyIcon.Icon = Icon.FromHandle(iconHandle);*/
 
             // The ContextMenu property sets the menu that will
             // appear when the systray icon is right clicked.
@@ -66,16 +93,59 @@ namespace PrivateWin10
             notifyIcon.Text = FileVersionInfo.GetVersionInfo(App.exePath).FileDescription;
 
             // Handle the DoubleClick event to activate the form.
-            notifyIcon.DoubleClick += new System.EventHandler(this.notifyIcon1_DoubleClick);
-            notifyIcon.Click += new System.EventHandler(this.notifyIcon1_Click);
+            notifyIcon.DoubleClick += new System.EventHandler(this.notifyIcon_DoubleClick);
+            notifyIcon.Click += new System.EventHandler(this.notifyIcon_Click);
 
             mTimer.Tick += new EventHandler(OnTimerTick);
             mTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
             mTimer.Start();
         }
 
-        private void UpdatePresets(PresetManager.PresetChangeArgs args)
+        private void Client_SettingsChangedNotification(object sender, EventArgs e)
         {
+            // todo: fix-me somehow notice also rule removel from block internet mode
+            UpdateMode();
+        }
+
+        private void UpdateFwMode()
+        {
+            ProgramID id = ProgramID.NewID(ProgramID.Types.Global);
+            ProgramSet prog = App.client.GetProgram(id, true);
+            if (prog == null)
+                this.menuBlock.Enabled = false;
+            else
+                this.menuBlock.Checked = prog.config.CurAccess == ProgramSet.Config.AccessLevels.BlockAccess;
+
+
+            UpdateMode();
+        }
+
+        private void UpdateMode()
+        {
+            var mode = App.client.GetFilteringMode();
+
+            this.menuWhitelist.Checked = mode == FirewallManager.FilteringModes.WhiteList;
+            this.menuBlacklist.Checked = mode == FirewallManager.FilteringModes.BlackList;
+            this.menuFwDisabled.Checked = mode == FirewallManager.FilteringModes.NoFiltering;
+        }
+        private void menuBlock_Click(object Sender, EventArgs e)
+        {
+            this.menuBlock.Checked = !this.menuBlock.Checked;
+
+            App.client.BlockInternet(this.menuBlock.Checked);
+        }
+
+        private void menuMode_Click(object Sender, EventArgs e)
+        {
+            var mode = FirewallManager.FilteringModes.Unknown;
+            if (Sender == this.menuWhitelist) mode = FirewallManager.FilteringModes.WhiteList;
+            else if (Sender == this.menuBlacklist) mode = FirewallManager.FilteringModes.BlackList;
+            else if (Sender == this.menuFwDisabled) mode = FirewallManager.FilteringModes.NoFiltering;
+            else
+                return;
+
+            App.client.SetFilteringMode(mode);
+            UpdateMode();
         }
 
         private void OnPresetChanged(object sender, PresetManager.PresetChangeArgs args)
@@ -147,7 +217,7 @@ namespace PrivateWin10
 
         bool clicked = false;
 
-        private void notifyIcon1_Click(object Sender, EventArgs e)
+        private void notifyIcon_Click(object Sender, EventArgs e)
         {
             if ((e as MouseEventArgs).Button != MouseButtons.Left)
                 return;
@@ -155,7 +225,7 @@ namespace PrivateWin10
             clicked = true;
         }
 
-        private void notifyIcon1_DoubleClick(object Sender, EventArgs e)
+        private void notifyIcon_DoubleClick(object Sender, EventArgs e)
         {
             if ((e as MouseEventArgs).Button != MouseButtons.Left)
                 return;
@@ -167,13 +237,6 @@ namespace PrivateWin10
                 App.MainWnd.Hide();
             else
                 App.MainWnd.Show();
-        }
-
-        private void menuBlock_Click(object Sender, EventArgs e)
-        {
-            this.menuBlock.Checked = !this.menuBlock.Checked;
-
-            App.client.BlockInternet(this.menuBlock.Checked);
         }
 
         private void menuExit_Click(object Sender, EventArgs e)

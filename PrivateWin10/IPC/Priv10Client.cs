@@ -570,8 +570,9 @@ namespace PrivateWin10
 
 
         public event EventHandler<Priv10Engine.FwEventArgs> ActivityNotification;
-        public event EventHandler<Priv10Engine.ChangeArgs> ChangeNotification;
-        public event EventHandler<Priv10Engine.UpdateArgs> UpdateNotification;
+        public event EventHandler<Priv10Engine.ChangeArgs> RuleChangeNotification;
+        public event EventHandler<Priv10Engine.UpdateArgs> ProgUpdateNotification;
+        public event EventHandler<EventArgs> SettingsChangedNotification;
         
         
         public override void HandlePushNotification(string func, List<byte[]> args)
@@ -595,11 +596,11 @@ namespace PrivateWin10
                         });
                     }));
                 }
-                else if (func == "ChangeNotification")
+                else if (func == "RuleChangeNotification")
                 {
                     Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        ChangeNotification?.Invoke(this, new Priv10Engine.ChangeArgs()
+                        RuleChangeNotification?.Invoke(this, new Priv10Engine.ChangeArgs()
                         {
                             prog = GetProg(args[0]),
                             rule = GetRule(args[1]),
@@ -608,15 +609,22 @@ namespace PrivateWin10
                         });
                     }));
                 }
-                else if (func == "UpdateNotification")
+                else if (func == "ProgUpdateNotification")
                 {
                     Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        UpdateNotification?.Invoke(this, new Priv10Engine.UpdateArgs()
+                        ProgUpdateNotification?.Invoke(this, new Priv10Engine.UpdateArgs()
                         {
                             guid = GetGuid(args[0]),
                             type = GetEnum<Priv10Engine.UpdateArgs.Types>(args[1])
                         });
+                    }));
+                }
+                else if (func == "SettingsChangedNotification")
+                {
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        SettingsChangedNotification?.Invoke(this, new EventArgs());
                     }));
                 }
                 else

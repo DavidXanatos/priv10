@@ -139,6 +139,7 @@ namespace PrivateWin10
             mStrings.Add("lbl_name", "Name");
             mStrings.Add("lbl_group", "Group");
             mStrings.Add("lbl_index", "Index");
+            mStrings.Add("lbl_status", "Status");
             mStrings.Add("wnd_notify", "PrivateWin10 Notifications");
             mStrings.Add("lbl_prev", "Previous");
             mStrings.Add("lbl_next", "Next");
@@ -236,7 +237,7 @@ namespace PrivateWin10
             mStrings.Add("chk_tweak_fix", "Reapply Tweaks that got undone");
             mStrings.Add("lbl_firewall_options", "Windows Firewall Option");
             mStrings.Add("chk_manage_fw", "Manage Windows Firewall");
-            mStrings.Add("chk_show_notify", "Show blocked connection attempts");
+            mStrings.Add("chk_show_notify", "Show new connections Notification");
             mStrings.Add("chk_fw_guard", "Guard Firewall Rules");
             mStrings.Add("chk_fw_guard_alert", "Notify about rule changes");
             mStrings.Add("chk_fw_guard_disable", "Disable not authorized rules");
@@ -252,7 +253,10 @@ namespace PrivateWin10
             mStrings.Add("lbl_audit_off", "Disabled");
             mStrings.Add("wnd_setup", "{0} Initial Setup");
             mStrings.Add("mnu_exit", "E&xit");
-            mStrings.Add("mnu_block", "&Block Internet");
+            mStrings.Add("mnu_block", "Blo&ck Internet");
+            mStrings.Add("mnu_whitelist", "&White-List Mode");
+            mStrings.Add("mnu_blacklist", "&Black-List Mode");
+            mStrings.Add("mnu_open_fw", "&Disable Firewall");
             mStrings.Add("msg_dupliate_session", "Another priv10 instance is already running.");
             mStrings.Add("str_in", "{0} In");
             mStrings.Add("str_out", "{0} Out");
@@ -413,7 +417,6 @@ namespace PrivateWin10
             mStrings.Add("str_list", "List");
             mStrings.Add("lbl_last_update", "Last Update");
             mStrings.Add("lbl_entry_count", "Entry Count");
-            mStrings.Add("lbl_status", "Status");
             mStrings.Add("lbl_defaults", "Restore Defaults");
             mStrings.Add("lbl_update", "Update");
             mStrings.Add("lbl_tweak_guard", "Tweak Guard");
@@ -462,6 +465,9 @@ namespace PrivateWin10
             mStrings.Add("msg_preset_item_failed", "Failed to add preset item!");
             mStrings.Add("lbl_undo", "Undo Preset {0}");
             mStrings.Add("lbl_undo_never", "Don't undo Preset");
+            mStrings.Add("str_changed", "changed");
+            mStrings.Add("str_added", "added");
+            mStrings.Add("str_removed", "removed");
 
             //mStrings.Add("", "");
 

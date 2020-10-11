@@ -236,6 +236,21 @@ namespace PrivateSetup
             }
         }
 
+        private bool UpdateSvc()
+        {
+            try
+            {
+                // This updates the service
+                Process proc = Process.Start(Data.InstallationPath + @"\" + SetupData.AppBinary, "-svc_update");
+                proc.WaitForExit();
+                return proc.ExitCode == 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private bool CreateLinks()
         {
             try
@@ -297,6 +312,11 @@ namespace PrivateSetup
                 RestartService();
             }
             catch { }*/
+
+            Progress?.Invoke(this, new ProgressArgs() { Progress = 85, Message = "Updating priv10 Service..." });
+            if (!UpdateSvc())
+                Progress?.Invoke(this, new ProgressArgs() { Progress = -1, Message = "Failed to update Service", Show = true });
+            Thread.Sleep(100);
 
             Progress?.Invoke(this, new ProgressArgs() { Progress = 100, Message = "Update completed." });
             Thread.Sleep(100);

@@ -38,6 +38,7 @@ namespace MiscHelpers
         static public WinVer WinXP          { get { return new WinVer() { minVer = verXP }; } }
         static public WinVer WinXPonly      { get { return new WinVer() { minVer = verXP, maxVer = verXP }; } }
         static public WinVer WinXPto7       { get { return new WinVer() { minVer = verXP, maxVer = ver7 }; } }
+        static public WinVer WinXPto10       { get { return new WinVer() { minVer = verXP, maxVer = ver10 }; } }
         static public WinVer Win6           { get { return new WinVer() { minVer = ver6 }; } }
         static public WinVer Win6to7        { get { return new WinVer() { minVer = ver6, maxVer = ver7 }; } }
         static public WinVer Win7           { get { return new WinVer() { minVer = ver7 }; } }

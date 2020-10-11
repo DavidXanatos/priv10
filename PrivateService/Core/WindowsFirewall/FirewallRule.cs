@@ -332,6 +332,7 @@ namespace PrivateWin10
             if(!bRaw) writer.WriteStartElement("FwRule");
 
             if (guid != null) writer.WriteElementString("Guid", guid);
+            writer.WriteElementString("Index", Index.ToString());
 
             if (BinaryPath != null) writer.WriteElementString("BinaryPath", BinaryPath);
             if (ServiceTag != null) writer.WriteElementString("ServiceTag", ServiceTag);
@@ -369,6 +370,8 @@ namespace PrivateWin10
             {
                 if (node.Name == "Guid")
                     guid = node.InnerText;
+                else if (node.Name == "Index")
+                    int.TryParse(node.InnerText, out Index);
 
                 else if (node.Name == "BinaryPath")
                     BinaryPath = node.InnerText;

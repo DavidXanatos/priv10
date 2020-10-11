@@ -3,6 +3,23 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.81] - 2020-10-11
+
+### Added
+- added a few for windows update
+- added tray options to change filterming mode
+- added rule status column
+
+### Changed
+- when adding a rule from the notify window the rule window is also topmost
+- notify window now also shows allowed connection attempts when in blacklist mode
+
+### Fixed
+- added service update to installer
+- fixed rule list not being updated in fulscreen mode
+- fixed some new issues with the IPC mechanism
+
+
 
 ## [0.80] - 2020-10-07
 
@@ -22,8 +39,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - list sometimes opening in the wron mode
 - fixed issue with program and program set description resolvationo
 - fixed some crash issues
-
-
 
 
 

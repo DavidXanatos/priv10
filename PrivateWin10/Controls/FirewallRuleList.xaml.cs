@@ -81,7 +81,7 @@ namespace PrivateWin10.Controls
             this.rulesGrid.Columns[1].Header = Translate.fmt("lbl_name");
             this.rulesGrid.Columns[2].Header = Translate.fmt("lbl_group");
             this.rulesGrid.Columns[3].Header = Translate.fmt("lbl_index");
-            this.rulesGrid.Columns[4].Header = Translate.fmt("lbl_enabled");
+            this.rulesGrid.Columns[4].Header = Translate.fmt("lbl_status");
             this.rulesGrid.Columns[5].Header = Translate.fmt("lbl_profiles");
             this.rulesGrid.Columns[6].Header = Translate.fmt("lbl_action");
             this.rulesGrid.Columns[7].Header = Translate.fmt("lbl_direction");
@@ -522,7 +522,7 @@ namespace PrivateWin10.Controls
                 string strings = this.Name;
                 strings += " " + this.Grouping;
                 strings += " " + this.Index;
-                strings += " " + this.Enabled;
+                strings += " " + this.Status;
                 strings += " " + this.Profiles;
                 strings += " " + this.Action;
                 strings += " " + this.Direction;
@@ -554,9 +554,25 @@ namespace PrivateWin10.Controls
 
             public int Index { get { return Rule.Index; } }
 
-            public string Enabled { get { return Translate.fmt(Rule.Enabled ? "str_enabled" : "str_disabled"); } }
+            public string Status
+            {
+                get
+                {
+                    string strStatus = Translate.fmt(Rule.Enabled ? "str_enabled" : "str_disabled");
+                    switch (Rule.State)
+                    {
+                        case FirewallRuleEx.States.Changed: strStatus += " - " +  Translate.fmt("str_changed"); break;
+                        case FirewallRuleEx.States.Unknown: strStatus += " - " +  Translate.fmt("str_added"); break;
+                        case FirewallRuleEx.States.Deleted: strStatus += " - " +  Translate.fmt("str_removed"); break;
+                    }
+                    return strStatus;
+                }
+            }
 
-            public string NameColor { get {
+            public string NameColor
+            {
+                get
+                {
                     switch (Rule.State)
                     {
                         case FirewallRuleEx.States.Changed: return "changed";
@@ -564,7 +580,8 @@ namespace PrivateWin10.Controls
                         case FirewallRuleEx.States.Deleted: return "removed";
                     }
                     return "";
-                } }
+                }
+            }
 
             public string DisabledColor { get { return Rule.Enabled ? "" : "gray"; } }
 

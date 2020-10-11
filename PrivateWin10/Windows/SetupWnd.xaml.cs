@@ -36,7 +36,7 @@ namespace PrivateWin10.Windows
             this.chkNotifyFW.Content = Translate.fmt("chk_show_notify");
 
             chkNoUAC.IsChecked = AdminFunc.IsSkipUac(App.Key);
-            chkNotifyFW.IsChecked = App.GetConfigInt("Firewall", "NotifyBlocked", 1) != 0;
+            chkNotifyFW.IsChecked = App.GetConfigInt("Firewall", "NotifyConnections", 1) != 0;
         }
 
         private void BtnOK_Click(object sender, RoutedEventArgs e)
@@ -71,7 +71,7 @@ namespace PrivateWin10.Windows
                 App.SetConfig("Firewall", "AuditPol", audit.ToString());
                 App.client.SetAuditPolicy(audit);
 
-                App.SetConfig("Firewall", "NotifyBlocked", chkNotifyFW.IsChecked == true ? 1 : 0);
+                App.SetConfig("Firewall", "NotifyConnections", chkNotifyFW.IsChecked == true ? 1 : 0);
 
                 if (!App.client.IsConnected())
                 {

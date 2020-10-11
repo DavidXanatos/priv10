@@ -295,6 +295,7 @@ namespace PrivateWin10.Controls
             }
 
             RuleWindow ruleWnd = new RuleWindow(new List<Program>() { prog }, rule);
+            ruleWnd.Topmost = true;
             if (ruleWnd.ShowDialog() != true)
                 return false;
 

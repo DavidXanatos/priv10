@@ -75,6 +75,13 @@ namespace PrivateWin10.Pages
             WpfFunc.CmbAdd(this.cmbRootDNS, "Cloudflare", "1.1.1.1|1.0.0.1");
 
             Refresh();
+
+            App.client.SettingsChangedNotification += Client_SettingsChangedNotification; ;
+        }
+
+        private void Client_SettingsChangedNotification(object sender, EventArgs e)
+        {
+            Refresh();
         }
 
         public void OnShow()
@@ -150,7 +157,7 @@ namespace PrivateWin10.Pages
 
 
             chkNotifyFW.IsEnabled = chkUseFW.IsChecked == true;
-            chkNotifyFW.IsChecked = App.GetConfigInt("Firewall", "NotifyBlocked", 1) != 0;
+            chkNotifyFW.IsChecked = App.GetConfigInt("Firewall", "NotifyConnections", 1) != 0;
 
             chkDnsInspector.IsChecked = App.GetConfigInt("DnsInspector", "Enabled", 0) != 0;
 
@@ -292,7 +299,7 @@ namespace PrivateWin10.Pages
         {
             if (bHold) return;
 
-            App.SetConfig("Firewall", "NotifyBlocked", chkNotifyFW.IsChecked == true ? 1 : 0);
+            App.SetConfig("Firewall", "NotifyConnections", chkNotifyFW.IsChecked == true ? 1 : 0);
         }
 
         private void ChkTweakCheck_Click(object sender, RoutedEventArgs e)

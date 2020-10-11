@@ -565,6 +565,102 @@ namespace TweakEngine
             });
 
 
+            /*  
+            *  #########################################
+            *              Windows Update
+            *  #########################################
+            */
+            
+            Category updateCat = new Category("Windows Update"); //, "windows_update" );
+            Categories.Add(updateCat.Name, updateCat);
+
+
+            // *** Disable Automatic Windows Update ***
+
+            Group noAutoUpdates = new Group("Disable Automatic Windows Update");
+            updateCat.Add(noAutoUpdates);
+            noAutoUpdates.Add(new Tweak("Disable Automatic Windows Update", TweakType.SetGPO, WinVer.WinXPto10)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU",
+                Key = "NoAutoUpdate",
+                Value = 1
+            });
+            noAutoUpdates.Add(new Tweak("Disable Automatic Windows Update", TweakType.SetGPO, WinVer.Win10EE) // since 10 this tweak only works on enterprise and alike
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU",
+                Key = "NoAutoUpdate",
+                Value = 1
+            });
+
+            // *** Disable Driver Update ***
+
+            Group drv = new Group("Disable Driver Update");
+            updateCat.Add(drv);
+            drv.Add(new Tweak("Don't Update Drivers With", TweakType.SetGPO, WinVer.Win10)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate",
+                Key = "ExcludeWUDriversInQualityUpdate",
+                Value = 1
+            });
+            drv.Add(new Tweak("Don't get Device Info from Web", TweakType.SetGPO, WinVer.Win7)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\Windows\Device Metadata",
+                Key = "PreventDeviceMetadataFromNetwork",
+                Value = 1
+            });
+
+            // *** Disable Windows Update ***
+
+            Group noUpdates = new Group("Disable Windows Update Services");
+            updateCat.Add(noUpdates);
+            noUpdates.Add(new Tweak("Disable Windows Update Service", TweakType.DisableService, WinVer.WinXP)
+            {
+                Key = "wuauserv"
+            });
+            noUpdates.Add(new Tweak("Windows Update Medic Service", TweakType.DisableService, WinVer.Win1803)
+            {
+                Key = "WaaSMedicSvc"
+            });
+            noUpdates.Add(new Tweak("Update Orchestrator Service", TweakType.DisableService, WinVer.Win10)
+            {
+                Key = "UsoSvc"
+            });
+
+            // *** Disable Driver Update ***
+
+            Group blockWU = new Group("Disable Access to Update Servers");
+            updateCat.Add(blockWU);
+            blockWU.Add(new Tweak("DoNotConnectToWindowsUpdateInternetLocations", TweakType.SetGPO, WinVer.Win10)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate",
+                Key = "DoNotConnectToWindowsUpdateInternetLocations",
+                Value = 1
+            });
+            blockWU.Add(new Tweak("WUServer", TweakType.SetGPO, WinVer.Win10)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate",
+                Key = "WUServer",
+                Value = "\" \""
+            });
+            blockWU.Add(new Tweak("WUStatusServer", TweakType.SetGPO, WinVer.Win10)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate",
+                Key = "WUStatusServer",
+                Value = "\" \""
+            });
+            blockWU.Add(new Tweak("UpdateServiceUrlAlternate", TweakType.SetGPO, WinVer.Win10)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate",
+                Key = "UpdateServiceUrlAlternate",
+                Value = "\" \""
+            });
+            blockWU.Add(new Tweak("UpdateServiceUrlAlternate", TweakType.SetGPO, WinVer.Win10)
+            {
+                Path = @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU",
+                Key = "UseWUServer",
+                Value = 1
+            });
+
 
             /*  
             *  #########################################
@@ -1271,24 +1367,6 @@ namespace TweakEngine
 
             Category miscCat = new Category("Various Others"); //, "windows_misc");
             Categories.Add(miscCat.Name, miscCat);
-
-
-            // *** Disable Driver Update ***
-
-            Group drv = new Group("Disable Driver Update");
-            miscCat.Add(drv);
-            drv.Add(new Tweak("Don't Update Drivers With", TweakType.SetGPO, WinVer.Win10)
-            {
-                Path = @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate",
-                Key = "ExcludeWUDriversInQualityUpdate",
-                Value = 1
-            });
-            drv.Add(new Tweak("Don't get Device Info from Web", TweakType.SetGPO, WinVer.Win7)
-            {
-                Path = @"SOFTWARE\Policies\Microsoft\Windows\Device Metadata",
-                Key = "PreventDeviceMetadataFromNetwork",
-                Value = 1
-            });
 
 
             // *** No Explorer AutoComplete ***

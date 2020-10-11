@@ -10,11 +10,13 @@ namespace PrivateWin10
     static class Priv10Service
     {
 
+        static string SvcBinary = "PrivateService.exe";
+
         static public bool Install(bool start = false)
         {
             try
             {
-                string binPathName = "\"" + App.appPath + "\\PrivateService.exe\" -svc";
+                string binPathName = "\"" + App.appPath + "\\" + SvcBinary + "\" -svc";
 
                 var svcConfigInfo = ServiceHelper.GetServiceInfoSafe(App.SvcName);
                 if (svcConfigInfo != null)
@@ -67,6 +69,23 @@ namespace PrivateWin10
         static public bool IsInstalled()
         {
             return ServiceHelper.ServiceIsInstalled(App.SvcName);
+        }
+
+        static public bool IsProperlyInstalled()
+        {
+            try
+            {
+                string binPathName = "\"" + App.appPath + "\\" + SvcBinary + "\" -svc";
+
+                var svcConfigInfo = ServiceHelper.GetServiceInfoSafe(App.SvcName);
+
+                return svcConfigInfo != null && svcConfigInfo.BinaryPathName.Equals(binPathName);
+            }
+            catch (Exception err)
+            {
+                AppLog.Exception(err);
+            }
+            return false;
         }
 
         static public bool Startup()
