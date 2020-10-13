@@ -6,31 +6,62 @@
     mc:Ignorable="d"
     Height="100">
 
+
     <Grid x:Name="grid">
         <Rectangle x:Name="rect" Fill="#00000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-        <Grid>
-            <ToggleButton x:Name="toggle" Content="" HorizontalAlignment="Right" Margin="0,5,5,0" VerticalAlignment="Top" Width="78" Style="{DynamicResource ToggleSwitchTopStyle}" IsChecked="False" />
-            <TextBlock Margin="0 8 8 0" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Sergio UI" FontSize="16">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Text" Value="Off" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=toggle, Path=IsChecked}" Value="True">
-                                <Setter Property="Text" Value="On" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ElementName=toggle, Path=IsChecked}" Value="{x:Null}">
-                                <Setter Property="Text" Value="(On)" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ElementName=toggle, Path=IsEnabled}" Value="false">
-                                <Setter Property="Opacity" Value="0.2" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
+
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Label x:Name="label" Content="" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+
+            <ToggleButton Grid.Column="1" Name="chkPin" ToolTip="Pin to Presets" Click="ChkPin_Click" IsChecked="false" Margin="2,6,3,0" VerticalAlignment="Top" Background="Transparent" BorderThickness="0">
+                <Image Width="20" Height="20" Stretch="None">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=chkPin, Path=IsChecked}" Value="true">
+                                    <Setter Property="Source" Value="{StaticResource Icon_Pinned}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=chkPin, Path=IsChecked}" Value="false">
+                                    <Setter Property="Source" Value="{StaticResource Icon_Pin}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </ToggleButton>
+
+            <Label Grid.Column="2" Content="" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+            
+            <Grid Grid.Column="3">
+                <ToggleButton x:Name="toggle" Content="" HorizontalAlignment="Right" Margin="0,5,5,0" VerticalAlignment="Top" Width="78" Style="{DynamicResource ToggleSwitchTopStyle}" IsChecked="False" />
+                <TextBlock Margin="0 8 8 0" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Sergio UI" FontSize="16">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="Off" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=toggle, Path=IsChecked}" Value="True">
+                                    <Setter Property="Text" Value="On" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=toggle, Path=IsChecked}" Value="{x:Null}">
+                                    <Setter Property="Text" Value="(On)" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=toggle, Path=IsEnabled}" Value="false">
+                                    <Setter Property="Opacity" Value="0.2" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
         </Grid>
-        <!--Wpf:ToggleSwitch x:Name="toggle" Content="" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Top" Width="78" IndeterminateText="( ! )"/-->
-        <Label x:Name="label" Content="" HorizontalAlignment="Left" Margin="0,0,70,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        
         <Grid x:Name="checks" Margin="0, 30, 0, 0">
         </Grid>
     </Grid>

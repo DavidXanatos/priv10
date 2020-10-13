@@ -279,5 +279,18 @@ namespace PrivateWin10.Pages
                 OnPresetItemChanged(null, null);
             }
         }
+
+        public static string SelectTweakName()
+        { 
+            List<string> PresetNames = new List<string>();
+            foreach (var preset in App.presets.Presets.Values)
+                PresetNames.Add(preset.Name);
+
+            InputWnd wnd = new InputWnd(Translate.fmt("msg_preset_select"), PresetNames, "", true, App.Title);
+            if (wnd.ShowDialog() != true || wnd.Value.Length == 0)
+                return null;
+
+            return wnd.Value;
+        }
     }
 }

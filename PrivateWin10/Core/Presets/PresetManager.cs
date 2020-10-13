@@ -161,5 +161,127 @@ namespace PrivateWin10
 
             writer.Dispose();
         }
+
+        public PresetGroup FindPreset(string name, bool orMake = true)
+        {
+            foreach (PresetGroup preset in Presets.Values)
+            {
+                if (preset.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                    return preset;
+            }
+
+            if(!orMake)
+                return null;
+            
+            var newPreset = new PresetGroup();
+            newPreset.Name = name;
+            return newPreset;
+        }
+
+        public List<string> GetProgPins(Guid ProgSetId)
+        {
+            List<string> list = new List<string>();
+            foreach (PresetGroup preset in Presets.Values)
+            {
+                foreach (var item in preset.Items.Values)
+                {
+                    var fwItem = item as FirewallPreset;
+                    if (fwItem == null)
+                        continue;
+
+                    if (fwItem.ProgSetId.Equals(ProgSetId))
+                    {
+                        list.Add(preset.Name);
+                        break;
+                    }
+                }
+            }
+            return list;
+        }
+
+        public void PinProg(Guid ProgSetId, string name)
+        {
+            PresetGroup preset = FindPreset(name);
+
+            FirewallPreset item = new FirewallPreset();   
+            item.ProgSetId = ProgSetId;
+
+            item.Sync(); // gets the name and so on
+
+            preset.Items.Add(item.guid, item);
+
+            UpdatePreset(preset);
+        }
+
+        public void UnPinProg(Guid ProgSetId)
+        {
+            foreach (PresetGroup preset in Presets.Values)
+            {
+                foreach (var item in new Dictionary<Guid, PresetItem>(preset.Items))
+                {
+                    var progItem = item.Value as FirewallPreset;
+                    if (progItem == null)
+                        continue;
+
+                    if (progItem.ProgSetId.Equals(ProgSetId))
+                    {
+                        preset.Items.Remove(item.Key);
+                    }
+                }
+            }
+        }
+
+        public List<string> GetTweakPins(string TweakGroup)
+        {
+            List<string> list = new List<string>();
+            foreach (PresetGroup preset in Presets.Values)
+            {
+                foreach (var item in preset.Items.Values)
+                {
+                    var tweakItem = item as TweakPreset;
+                    if (tweakItem == null)
+                        continue;
+
+                    if (tweakItem.TweakGroup.Equals(TweakGroup, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        list.Add(preset.Name);
+                        break;
+                    }
+                }
+            }
+            return list;
+        }
+
+        public void PinTweak(string TweakGroup, string name)
+        {
+            PresetGroup preset = FindPreset(name);
+
+            TweakPreset item = new TweakPreset();
+            item.TweakGroup = TweakGroup;
+
+            item.Sync(); // gets the name and so on
+
+            preset.Items.Add(item.guid, item);
+
+            UpdatePreset(preset);
+        }
+
+        public void UnPinTweak(string TweakGroup)
+        {
+            foreach (PresetGroup preset in Presets.Values)
+            {
+                foreach (var item in new Dictionary<Guid, PresetItem>(preset.Items))
+                {
+                    var tweakItem = item.Value as TweakPreset;
+                    if (tweakItem == null)
+                        continue;
+
+                    if (tweakItem.TweakGroup.Equals(TweakGroup, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        preset.Items.Remove(item.Key);
+                    }
+                }
+            }
+        }
     }
 }

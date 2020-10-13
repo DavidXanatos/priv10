@@ -198,7 +198,7 @@ namespace PrivateWin10.Pages
             //this.btnOutOnly.Header = Translate.fmt("acl_outbound");
             this.btnLanOnly.Header = Translate.fmt("acl_lan");
             this.btnNoConf.Header = Translate.fmt("acl_none");
-            this.chkNotify.Label = Translate.fmt("acl_silence");
+            //this.chkNotify.Label = Translate.fmt("acl_silence");
             this.btnBlockAll.Label = Translate.fmt("acl_block");
 
             this.btnRename.Label = Translate.fmt("btn_rename_prog");
@@ -838,12 +838,14 @@ namespace PrivateWin10.Pages
             int SetCount = 0;
             int ProgCount = 0;
             bool? Notify = null;
+            ProgramSet progSet = null;
+            Program prog = null;
 
             foreach (var item in GetSelectedItems())
             {
-                var progSet = item as ProgramSet;
-                if (progSet != null)
+                if (item as ProgramSet != null)
                 {
+                    progSet = item as ProgramSet;
                     if (progSet.Programs.First().Key.Type == ProgramID.Types.Global || progSet.Programs.First().Key.Type == ProgramID.Types.System)
                         GlobalSelected = true;
                     else
@@ -855,7 +857,7 @@ namespace PrivateWin10.Pages
                 }
                 else
                 {
-                    var prog = item as Program;
+                    prog = item as Program;
                     if (prog != null)
                     {
                         ProgCount++;
@@ -878,8 +880,12 @@ namespace PrivateWin10.Pages
             btnNoConf.IsEnabled = progTree.menuAccessNone.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
             btnBlockAll.IsEnabled = progTree.menuAccessBlock.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
 
-            chkNotify.IsEnabled = progTree.menuNotify.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
-            chkNotify.IsChecked = progTree.menuNotify.IsChecked = (Notify == true || (App.GetConfigInt("Firewall", "NotifyConnections", 1) != 0 && Notify != false));
+            /*chkNotify.IsEnabled =*/ progTree.menuNotify.IsEnabled = (SetCount >= 1 && ProgCount == 0 && !GlobalSelected);
+            /*chkNotify.IsChecked =*/ progTree.menuNotify.IsChecked = (Notify == true || (App.GetConfigInt("Firewall", "NotifyConnections", 1) != 0 && Notify != false));
+
+            progTree.menuPin.IsEnabled = SetCount == 1 && ProgCount == 0;
+            if (progTree.menuPin.IsEnabled)
+                progTree.menuPin.IsChecked = App.presets.GetProgPins(progSet.guid).Count > 0;
 
             btnRename.IsEnabled = progTree.menuRename.IsEnabled = (SetCount == 1 && ProgCount == 0 && !GlobalSelected);
             btnIcon.IsEnabled = progTree.menuSetIcon.IsEnabled = (SetCount == 1 && ProgCount == 0 && !GlobalSelected);
@@ -1011,6 +1017,21 @@ namespace PrivateWin10.Pages
                 config.Notify = config.Notify == true ? false : true;
                 App.client.UpdateProgram(progSet.guid, config);
             }
+        }
+
+        public void ChkPin_Click(object sender, RoutedEventArgs e)
+        {
+            var SelectedProgramSets = GetSelectedProgramSets();
+            if (SelectedProgramSets.Count != 1)
+                return;
+
+            var progSet = SelectedProgramSets[0];
+
+            var Name = ControlPage.SelectTweakName(); 
+            if (Name == null)
+                return;
+
+            App.presets.PinProg(progSet.guid, Name);
         }
 
         public void BtnRename_Click(object sender, RoutedEventArgs e)

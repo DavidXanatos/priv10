@@ -3,6 +3,22 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+
+## [0.82] - 2020-10-13
+
+### Added
+- added option to quickly add (pin) firewall prog sets to presets
+- added option to quickly add (pin) tweak groups to presets
+- added flasching exclamation mark to tray icon to indicate there are pending notifications
+- added tweaks to disable app auto installation
+
+### Fixed
+- fixed issue with port ranges in firewall rules thanks@ SnikoLoft
+- fixed issue with saving preset items
+- fixed issue with notification window position being reset sometimes
+
+
+
 ## [0.81] - 2020-10-11
 
 ### Added

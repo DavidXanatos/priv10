@@ -21,6 +21,10 @@ namespace PrivateWin10
 
         public Dictionary<string, SingleTweak> Tweaks = new Dictionary<string, SingleTweak>();
 
+        public TweakPreset()
+        {
+            Type = PresetType.Tweak;
+        }
         public override PresetItem Clone()
         {
             TweakPreset item = new TweakPreset();

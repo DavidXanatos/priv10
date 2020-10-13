@@ -12,6 +12,11 @@ namespace PrivateWin10
         public string OnCommand;
         public string OffCommand;
 
+        public CustomPreset()
+        {
+            Type = PresetType.Custom;
+        }
+
         public override PresetItem Clone()
         {
             CustomPreset item = new CustomPreset();

@@ -9,18 +9,18 @@
         Title="Private Win10 Initial Setup" Width="500" Height="250">
 
     <FrameworkElement.Resources>
-        <DrawingImage x:Key="Icon_Start">
+        <DrawingImage x:Key="Icon_StartSvg">
             <DrawingImage.Drawing>
                 <DrawingGroup>
-                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Start}"/>
+                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_StartSvg}"/>
                 </DrawingGroup>
             </DrawingImage.Drawing>
         </DrawingImage>
 
-        <DrawingImage x:Key="Icon_Firewall">
+        <DrawingImage x:Key="Icon_FirewallSvg">
             <DrawingImage.Drawing>
                 <DrawingGroup>
-                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Firewall}"/>
+                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_FirewallSvg}"/>
                 </DrawingGroup>
             </DrawingImage.Drawing>
         </DrawingImage>
@@ -36,7 +36,7 @@
         <WrapPanel Grid.Row="0" Orientation="Vertical">
             <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
                 <Grid Margin="0,5,0,5">
-                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Start}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_StartSvg}" VerticalAlignment="Top" HorizontalAlignment="Left" />
                     <TextBlock Name="lblStartup"  HorizontalAlignment="Left" Margin="40,25,0,0"  TextWrapping="Wrap" Text="Startup Behavioure" VerticalAlignment="Top" FontWeight="Bold"/>
                     <StackPanel Orientation="Vertical" Margin="35,45,0,0">
                         <CheckBox Name="chkAutoStart"  Content="Autostart at logon" HorizontalAlignment="Left" Margin="0,5,0,0" VerticalAlignment="Top" IsChecked="True" Click="ChkAutoStart_Click"/>
@@ -48,7 +48,7 @@
 
             <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="15,0,0,0">
                 <Grid Margin="0,5,0,5">
-                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_Firewall}" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <Image Width="32" Height="32" Margin="5,10,0,0" Source="{StaticResource Icon_FirewallSvg}" VerticalAlignment="Top" HorizontalAlignment="Left" />
                     <TextBlock Name="lblFirewall" HorizontalAlignment="Left" Margin="45,25,0,0"  TextWrapping="Wrap" Text="Windows Firewall Option" VerticalAlignment="Top" FontWeight="Bold"/>
 
                     <StackPanel Orientation="Vertical" Margin="35,45,0,0">

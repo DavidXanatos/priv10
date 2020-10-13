@@ -133,6 +133,7 @@ namespace PrivateWin10
             mStrings.Add("lbl_any_ip", "Any Address");
             mStrings.Add("lbl_selected_ip", "Selected Addresses:");
             mStrings.Add("lbl_notify", "Notify");
+            mStrings.Add("lbl_pin", "Pin as Preset");
             mStrings.Add("lbl_add", "Add");
             mStrings.Add("lbl_split", "Split");
             mStrings.Add("lbl_remove", "Remove");
@@ -468,6 +469,7 @@ namespace PrivateWin10
             mStrings.Add("str_changed", "changed");
             mStrings.Add("str_added", "added");
             mStrings.Add("str_removed", "removed");
+            mStrings.Add("msg_preset_select", "Sellect Preset or enter a new Name:");
 
             //mStrings.Add("", "");
 

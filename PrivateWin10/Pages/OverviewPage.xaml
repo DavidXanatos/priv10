@@ -10,30 +10,6 @@
     
     <FrameworkElement.Resources>
         <controls:DateConverter x:Key="dateConverter"/>
-        
-        <DrawingImage x:Key="Icon_Start">
-            <DrawingImage.Drawing>
-                <DrawingGroup>
-                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Start}"/>
-                </DrawingGroup>
-            </DrawingImage.Drawing>
-        </DrawingImage>
-
-        <DrawingImage x:Key="Icon_Privacy">
-            <DrawingImage.Drawing>
-                <DrawingGroup>
-                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Privacy}"/>
-                </DrawingGroup>
-            </DrawingImage.Drawing>
-        </DrawingImage>
-        
-        <DrawingImage x:Key="Icon_Firewall">
-            <DrawingImage.Drawing>
-                <DrawingGroup>
-                    <GeometryDrawing Brush="#5050ff" Geometry="{StaticResource Icon_Firewall}"/>
-                </DrawingGroup>
-            </DrawingImage.Drawing>
-        </DrawingImage>
     </FrameworkElement.Resources>
 
     <Grid Margin="48,0,0,0">

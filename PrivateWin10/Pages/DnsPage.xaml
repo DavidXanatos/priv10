@@ -157,34 +157,34 @@
             </Setter>
         </Style>
 
-        <DrawingImage x:Key="Icon_QueryLog">
+        <DrawingImage x:Key="Icon_QueryLogSvg">
             <DrawingImage.Drawing>
                 <DrawingGroup>
-                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_QueryLog}"/>
+                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_QueryLogSvg}"/>
                 </DrawingGroup>
             </DrawingImage.Drawing>
         </DrawingImage>
 
-        <DrawingImage x:Key="Icon_Whitelist">
+        <DrawingImage x:Key="Icon_WhitelistSvg">
             <DrawingImage.Drawing>
                 <DrawingGroup>
-                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_Whitelist}"/>
+                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_WhitelistSvg}"/>
                 </DrawingGroup>
             </DrawingImage.Drawing>
         </DrawingImage>
 
-        <DrawingImage x:Key="Icon_Blacklist">
+        <DrawingImage x:Key="Icon_BlacklistSvg">
             <DrawingImage.Drawing>
                 <DrawingGroup>
-                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_Blacklist}"/>
+                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_BlacklistSvg}"/>
                 </DrawingGroup>
             </DrawingImage.Drawing>
         </DrawingImage>
     
-        <DrawingImage x:Key="Icon_Blocklists">
+        <DrawingImage x:Key="Icon_BlocklistsSvg">
             <DrawingImage.Drawing>
                 <DrawingGroup>
-                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_Blocklists}"/>
+                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_BlocklistsSvg}"/>
                 </DrawingGroup>
             </DrawingImage.Drawing>
         </DrawingImage>
@@ -195,22 +195,22 @@
 
 
         <TabControl Name="tabs" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <TabItem Name="tabQueryLog" Header="Query Log" Tag="{StaticResource Icon_QueryLog}" FontSize="16" >
+            <TabItem Name="tabQueryLog" Header="Query Log" Tag="{StaticResource Icon_QueryLogSvg}" FontSize="16" >
                 <Grid Background="#FFE5E5F5">
                     <controls:DnsQueryLogControl x:Name="queryLog" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
                 </Grid>
             </TabItem>
-            <TabItem Name="tabWhitelist" Header="Whitelist" Tag="{StaticResource Icon_Whitelist}" FontSize="16" >
+            <TabItem Name="tabWhitelist" Header="Whitelist" Tag="{StaticResource Icon_WhitelistSvg}" FontSize="16" >
                 <Grid Background="#FFEBF5E5">
                     <controls:DnsFilterListControl x:Name="whiteList" Caption="WhiteList" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
                 </Grid>
             </TabItem>
-            <TabItem Name="tabBlacklist" Header="Blacklist" Tag="{StaticResource Icon_Blacklist}" FontSize="16" >
+            <TabItem Name="tabBlacklist" Header="Blacklist" Tag="{StaticResource Icon_BlacklistSvg}" FontSize="16" >
                 <Grid Background="#FFF5E5E5">
                     <controls:DnsFilterListControl x:Name="blackList" Caption="Blacklist" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
                 </Grid>
             </TabItem>
-            <TabItem Name="tabBlocklists" Header="Blocklists" Tag="{StaticResource Icon_Blocklists}" FontSize="16" >
+            <TabItem Name="tabBlocklists" Header="Blocklists" Tag="{StaticResource Icon_BlocklistsSvg}" FontSize="16" >
                 <Grid Background="#FFF5F5E5">
                     <controls:DnsBlockListsControl x:Name="blockLists" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
                 </Grid>

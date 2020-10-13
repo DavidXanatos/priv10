@@ -592,5 +592,9 @@
   <ItemGroup>
     <Folder Include="Themes\" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons8-major.png" />
+    <Resource Include="Resources\icons8-major_ex_red.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

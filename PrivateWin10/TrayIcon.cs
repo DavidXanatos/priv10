@@ -79,10 +79,6 @@ namespace PrivateWin10
             // The Icon property sets the icon that will appear
             // in the systray for this application.
             notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(App.exePath);
-            /*System.IO.Stream iconStream = Application.GetResourceStream( new Uri( "pack://application:,,,/PrivateWin10;component/Resources/major_red.png" )).Stream;
-            var bitmap = new Bitmap(iconStream);
-            var iconHandle = bitmap.GetHicon();
-            notifyIcon.Icon = Icon.FromHandle(iconHandle);*/
 
             // The ContextMenu property sets the menu that will
             // appear when the systray icon is right clicked.
@@ -186,6 +182,8 @@ namespace PrivateWin10
             App.presets.SetPreset((Guid)((MenuItem)Sender).Tag, !((MenuItem)Sender).Checked);
         }
 
+        int TickTock = 0;
+
         private void OnTimerTick(object sender, EventArgs e)
         {
             if (clicked)
@@ -199,6 +197,25 @@ namespace PrivateWin10
                     App.MainWnd.notificationWnd.HideWnd();
                 else if (!App.MainWnd.notificationWnd.IsEmpty())
                     App.MainWnd.notificationWnd.ShowWnd();
+            }
+
+            if (TickTock != 0)
+            {
+                TickTock = 0;
+
+                System.IO.Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/PrivateWin10;component/Resources/icons8-major.png")).Stream;
+                var bitmap = new Bitmap(iconStream);
+                var iconHandle = bitmap.GetHicon();
+                notifyIcon.Icon = Icon.FromHandle(iconHandle);
+            }
+            else if(!App.MainWnd.notificationWnd.IsEmpty())
+            {
+                TickTock = 1;
+
+                System.IO.Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/PrivateWin10;component/Resources/icons8-major_ex_red.png")).Stream;                
+                var bitmap = new Bitmap(iconStream);
+                var iconHandle = bitmap.GetHicon();
+                notifyIcon.Icon = Icon.FromHandle(iconHandle);
             }
         }
 

@@ -52,6 +52,7 @@ namespace PrivateWin10.Controls
         public MenuItem menuAccessOut;
         public MenuItem menuAccessLan;
         public MenuItem menuAccessBlock;
+        public MenuItem menuPin;
         public MenuItem menuNotify;
         public MenuItem menuRename;
         public MenuItem menuSetIcon;
@@ -129,6 +130,9 @@ namespace PrivateWin10.Controls
             menuNotify = WpfFunc.AddMenu(contextMenu, Translate.fmt("lbl_notify"), null);
             menuNotify.IsCheckable = true;
 
+            menuPin = WpfFunc.AddMenu(contextMenu, Translate.fmt("lbl_pin"), null);
+            menuPin.IsCheckable = true;
+
             contextMenu.Items.Add(new Separator());
             menuRename = WpfFunc.AddMenu(contextMenu, Translate.fmt("btn_rename_prog"), null, TryFindResource("Icon_Rename"));
             menuSetIcon = WpfFunc.AddMenu(contextMenu, Translate.fmt("btn_icon_prog"), null, TryFindResource("Icon_SetIcon"));
@@ -147,6 +151,7 @@ namespace PrivateWin10.Controls
             foreach (MenuItem item in menuAccess.Items)
                 item.Click += page.btnSetAccess_Click;
             menuNotify.Click += page.ChkNotify_Click;
+            menuPin.Click += page.ChkPin_Click;
             menuRename.Click += page.BtnRename_Click;
             menuSetIcon.Click += page.BtnIcon_Click;
             menuCategory.Click += page.BtnCategory_Click;

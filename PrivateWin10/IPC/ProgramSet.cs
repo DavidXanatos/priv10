@@ -94,6 +94,8 @@ namespace PrivateWin10
         {
             if (config.Icon != null && config.Icon.Length > 0)
                 return config.Icon;
+            if (Programs.Count == 0)
+                return MiscFunc.Shell32Path;
             return Programs.First().Key.Path;
         }
 

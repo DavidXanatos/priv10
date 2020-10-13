@@ -9,6 +9,8 @@
         mc:Ignorable="d"
         Title="Notification Window" 
         ShowActivated="false" WindowStyle="ToolWindow"
+        LocationChanged="Window_LocationChanged"
+        SizeChanged="Window_LocationChanged"
         Height="400" Width="300" MinHeight="300" MinWidth="300" ShowInTaskbar="false" Closing="Window_Closing">
 
     <Window.Resources>

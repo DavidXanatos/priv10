@@ -28,7 +28,7 @@
                             </LinearGradientBrush>
                         </Shape.Fill>
                     </Ellipse>
-                    <Path Grid.Column="1" Width="88" Height="88" Margin="0,16,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Data="{StaticResource Icon_Major}" Fill="White" IsHitTestVisible="false" SnapsToDevicePixels="true" Stretch="Uniform"/>
+                    <Path Grid.Column="1" Width="88" Height="88" Margin="0,16,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Data="{StaticResource Icon_MajorSvg}" Fill="White" IsHitTestVisible="false" SnapsToDevicePixels="true" Stretch="Uniform"/>
                     <Label Name="lblTitle" Grid.Column="0" Height="37" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Private Win10" FontSize="24" FontWeight="SemiBold"/>
                     <StackPanel Margin="0,37,0,0" VerticalAlignment="Top" Orientation="Horizontal">
                         <Label Name="lblVersion" Grid.Column="0" VerticalAlignment="Top" HorizontalContentAlignment="Left" Content="Version:" FontSize="16"/>

@@ -6,6 +6,7 @@
              xmlns:controls="clr-namespace:PrivateWin10.Controls" 
              x:Class="PrivateWin10.ProgramControl">
 
+
     <UserControl.Resources>
 
 
@@ -61,6 +62,7 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Image x:Name="icon" Grid.Column="0" HorizontalAlignment="Left" Height="48" Margin="2,2,0,0" VerticalAlignment="Top" Width="48"
                    MouseLeftButtonDown="icon_MouseLeftButtonDown"
@@ -69,7 +71,23 @@
                      BorderBrush="Transparent"
                      IsReadOnly="True" LostFocus="name_LostFocus" MouseDoubleClick="name_MouseDoubleClick" KeyDown="name_KeyDown"
                      />
-                <ComboBox x:Name="category" Grid.Column="2" HorizontalAlignment="Right" Margin="2,3,3,0" VerticalAlignment="Top" MinWidth ="150" Width="Auto" 
+                <ToggleButton  Grid.Column="2" Name="chkPin" Click="ChkPin_Click" ToolTip="Pin to Presets" IsChecked="false" Margin="2,4,3,0" VerticalAlignment="Top" Background="Transparent" BorderThickness="0">
+                    <Image Width="20" Height="20" Stretch="None">
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=chkPin, Path=IsChecked}" Value="true">
+                                        <Setter Property="Source" Value="{StaticResource Icon_Pinned}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ElementName=chkPin, Path=IsChecked}" Value="false">
+                                        <Setter Property="Source" Value="{StaticResource Icon_Pin}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                </ToggleButton>
+                <ComboBox x:Name="category" Grid.Column="3" HorizontalAlignment="Right" Margin="2,3,3,0" VerticalAlignment="Top" MinWidth ="150" Width="Auto" 
                     IsReadOnly="True"
                     IsEditable="True"
                     Height="25"

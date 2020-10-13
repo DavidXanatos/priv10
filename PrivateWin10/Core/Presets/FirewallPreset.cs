@@ -21,6 +21,11 @@ namespace PrivateWin10
             public bool? OffState;
         }
 
+        public FirewallPreset()
+        {
+            Type = PresetType.Firewall;
+        }
+
         public Dictionary<string, SingleRule> Rules = new Dictionary<string, SingleRule>();
 
         public override PresetItem Clone()
@@ -152,6 +157,8 @@ namespace PrivateWin10
             ProgramSet progSet = progs[0];
 
             Name = progSet.config.Name;
+            if (Icon.Length == 0)
+                Icon = progSet.GetIcon();
 
             return true;
         }

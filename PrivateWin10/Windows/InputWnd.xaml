@@ -7,10 +7,10 @@
         ContentRendered="Window_ContentRendered">
 
     <FrameworkElement.Resources>
-        <DrawingImage x:Key="Icon_Input">
+        <DrawingImage x:Key="Icon_InputSvg">
             <DrawingImage.Drawing>
                 <DrawingGroup>
-                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_Input}"/>
+                    <GeometryDrawing Brush="#000000" Geometry="{StaticResource Icon_InputSvg}"/>
                 </DrawingGroup>
             </DrawingImage.Drawing>
         </DrawingImage>
@@ -27,7 +27,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Image Source="{StaticResource Icon_Input}" Width="32" Height="32" Grid.RowSpan="2" Margin="20,0" />
+        <Image Source="{StaticResource Icon_InputSvg}" Width="32" Height="32" Grid.RowSpan="2" Margin="20,0" />
 
         <Label Name="lblPrompt" Grid.Column="1">Input Value:</Label>
         

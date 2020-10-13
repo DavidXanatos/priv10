@@ -1,4 +1,5 @@
 ﻿using MiscHelpers;
+using PrivateWin10.Pages;
 using PrivateWin10.Windows;
 using System;
 using System.Collections.Generic;
@@ -134,6 +135,10 @@ namespace PrivateWin10
 
             //name.Content = process.Name;
             name.Text = progSet.config.Name;
+
+            var Presets = App.presets.GetProgPins(progSet.guid);
+            chkPin.IsChecked = Presets.Count > 0;
+            chkPin.ToolTip = string.Join("\r\n", Presets);
 
             int blockedConnections = 0;
             int allowedConnections = 0;
@@ -439,6 +444,27 @@ namespace PrivateWin10
 
             progSet.config.NetAccess = (ProgramSet.Config.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
             App.client.UpdateProgram(progSet.guid, progSet.config);
+        }
+
+        private void ChkPin_Click(object sender, RoutedEventArgs e)
+        {
+            if (chkPin.IsChecked == true)
+            {
+                var Name = ControlPage.SelectTweakName();
+                if (Name == null)
+                {
+                    chkPin.IsChecked = false;
+                    return;
+                }
+
+                chkPin.ToolTip = Name;
+
+                App.presets.PinProg(progSet.guid, Name);
+            }
+            else
+            {
+                App.presets.UnPinProg(progSet.guid);
+            }
         }
 
         /*private void btnCustimize_Click(object sender, RoutedEventArgs e)

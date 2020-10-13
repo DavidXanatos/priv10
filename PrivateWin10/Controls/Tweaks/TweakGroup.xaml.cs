@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PrivateWin10.Pages;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -172,6 +173,10 @@ namespace PrivateWin10
                 toggle.IsChecked = true;
             oldValue = toggle.IsChecked;
 
+            var Presets = App.presets.GetTweakPins(myGroup.Name);
+            chkPin.IsChecked = Presets.Count > 0;
+            chkPin.ToolTip = string.Join("\r\n", Presets);
+
             foreach (TweakList.TweakType type in stats.Keys)
             {
                 TweakStat stat = stats[type];
@@ -240,6 +245,27 @@ namespace PrivateWin10
                     //case TweakType.UseFirewall:     return Translate.fmt("tweak_fw");
             }
             return "Unknown"; // Translate.fmt("txt_unknown");
+        }
+
+        private void ChkPin_Click(object sender, RoutedEventArgs e)
+        {
+            if (chkPin.IsChecked == true)
+            {
+                var Name = ControlPage.SelectTweakName();
+                if (Name == null)
+                {
+                    chkPin.IsChecked = false;
+                    return;
+                }
+
+                chkPin.ToolTip = Name;
+
+                App.presets.PinTweak(myGroup.Name, Name);
+            }
+            else
+            {
+                App.presets.UnPinTweak(myGroup.Name);
+            }
         }
     }
 }

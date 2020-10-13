@@ -192,7 +192,7 @@ namespace PrivateWin10
                 pin.Data = new RectangleGeometry(new Rect(new Point(0, 0), new Point(4, 24)));
                 panel.Children.Add(pin);
 
-                Geometry geometry = (TryFindResource("Icon_" + name) as Geometry);
+                Geometry geometry = (TryFindResource("Icon_" + name + "Svg") as Geometry);
                 image.Tag = new Tuple<DrawingImage, DrawingImage>(new DrawingImage(new GeometryDrawing(brushOn, null, geometry)), new DrawingImage(new GeometryDrawing(brushOff, null, geometry)));
             }
 

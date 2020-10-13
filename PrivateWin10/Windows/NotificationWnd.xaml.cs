@@ -111,6 +111,9 @@ namespace PrivateWin10.Windows
                         break;
                 }
             }
+
+            if(SavePosChange)
+                App.StoreWnd(this, "Notify");
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -183,8 +186,13 @@ namespace PrivateWin10.Windows
                 tabItems[item].state = STab.EState.eFilled;
         }
 
+        int SuspendPosChange = 0;
+        bool SavePosChange = false;
+
         public void ShowWnd()
         {
+            SuspendPosChange++;
+
             if (!App.LoadWnd(this, "Notify"))
             {
                 this.Left = SystemParameters.WorkArea.Width - this.Width - 4.0;
@@ -192,11 +200,13 @@ namespace PrivateWin10.Windows
             }
 
             Show();
+
+            SuspendPosChange--;
         }
 
         public void HideWnd()
         {
-            App.StoreWnd(this, "Notify");
+            //App.StoreWnd(this, "Notify");
 
             Hide();
         }
@@ -211,6 +221,13 @@ namespace PrivateWin10.Windows
         public bool IsEmpty()
         {
             return tabs.SelectedItem == null;
+        }
+
+        private void Window_LocationChanged(object sender, EventArgs e)
+        {
+            if (SuspendPosChange != 0)
+                return;
+            SavePosChange = true;
         }
     }
 }

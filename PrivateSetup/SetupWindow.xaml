@@ -10,7 +10,7 @@
         Name="wndSetup"
         Title="PrivateWin10 - Setup" Height="400" Width="600" Closing="Window_Closing">
     <Window.Resources>
-        <Geometry x:Key="Icon_Major">
+        <Geometry x:Key="Icon_MajorSvg">
             M 25 1 L 2 12.6875 L 2 16.625 L 25 5.125 L 48 16.625 L 48 12.6875 Z M 25 7.125 L 2 18.625 L 2 22.625 L 25 11.125 L 48 22.625 L 48 18.625 Z M 25 13.125 L 2 24.625 L 2 32.78125 L 2.53125 33.0625 C 2.835938 33.222656 10.121094 37 25 37 C 39.878906 37 47.164063 33.222656 47.46875 33.0625 L 48 32.78125 L 48 24.625 Z M 25 17.125 L 47.71875 28.46875 L 46.53125 29.125 C 46.460938 29.164063 39.3125 33 25 33 C 10.6875 33 3.539063 29.164063 3.46875 29.125 L 2.28125 28.46875 Z M 25 18.84375 L 23.0625 23.34375 L 18.1875 23.78125 L 21.875 27.03125 L 20.78125 31.8125 L 25 29.3125 L 29.21875 31.8125 L 28.125 27.03125 L 31.8125 23.78125 L 26.9375 23.34375 Z M 14.53125 23.96875 L 13.5625 26.21875 L 11.125 26.4375 L 12.96875 28.0625 L 12.4375 30.4375 L 14.53125 29.1875 L 16.625 30.4375 L 16.09375 28.0625 L 17.9375 26.4375 L 15.5 26.21875 Z M 35.46875 23.96875 L 34.5 26.21875 L 32.0625 26.4375 L 33.90625 28.0625 L 33.375 30.4375 L 35.46875 29.1875 L 37.5625 30.4375 L 37.03125 28.0625 L 38.875 26.4375 L 36.4375 26.21875 Z M 2 34.3125 L 2 38.78125 L 2.53125 39.0625 C 2.835938 39.222656 10.121094 43 25 43 C 39.878906 43 47.164063 39.222656 47.46875 39.0625 L 48 38.78125 L 48 34.3125 L 46.53125 35.125 C 46.460938 35.164063 39.3125 39 25 39 C 10.6875 39 3.539063 35.164063 3.46875 35.125 Z M 2 40.3125 L 2 44.78125 L 2.53125 45.0625 C 2.835938 45.222656 10.121094 49 25 49 C 39.878906 49 47.164063 45.222656 47.46875 45.0625 L 48 44.78125 L 48 40.3125 L 46.53125 41.125 C 46.460938 41.164063 39.3125 45 25 45 C 10.6875 45 3.539063 41.164063 3.46875 41.125 Z
         </Geometry>
     </Window.Resources>
@@ -44,7 +44,7 @@
                         </LinearGradientBrush>
                     </Shape.Fill>
                 </Ellipse>
-                <Path Grid.Column="1" Width="44" Height="44" Margin="0,10,4,0" HorizontalAlignment="Center" VerticalAlignment="Top" Data="{DynamicResource Icon_Major}" Fill="White" IsHitTestVisible="false" SnapsToDevicePixels="true" Stretch="Uniform"/>
+                <Path Grid.Column="1" Width="44" Height="44" Margin="0,10,4,0" HorizontalAlignment="Center" VerticalAlignment="Top" Data="{DynamicResource Icon_MajorSvg}" Fill="White" IsHitTestVisible="false" SnapsToDevicePixels="true" Stretch="Uniform"/>
             </Grid>
         </Grid>
         <Separator VerticalAlignment="Bottom" Margin="0,0,0,0"/>
