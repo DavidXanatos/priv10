@@ -101,7 +101,7 @@ namespace PrivateWin10.Pages
         {
             bHold = true;
 
-            chkTray.IsChecked = App.GetConfigInt("Startup", "Tray") != 0;
+            chkTray.IsChecked = App.GetConfigInt("Startup", "Tray", 1) != 0;
             chkAutoStart.IsChecked = App.IsAutoStart();
             chkService.IsChecked = Priv10Service.IsInstalled();
             chkNoUAC.IsChecked = AdminFunc.IsSkipUac(App.Key);

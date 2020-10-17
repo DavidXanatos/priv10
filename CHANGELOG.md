@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.82b] - 2020-10-17
+
+### Changed
+- tray icon is now on by default 
+
+### Fixed
+- fied resource lea when flashign tray icon
+
+
+
 
 ## [0.82] - 2020-10-13
 

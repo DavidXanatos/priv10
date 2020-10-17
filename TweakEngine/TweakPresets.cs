@@ -722,6 +722,59 @@ namespace TweakEngine
                 Value = 1
             });
 
+            // *** Disable Unsolicited App Installation ***
+
+            Group delivery = new Group("Disable Unsolicited App Installation", true);
+            privacyCat.Add(delivery);
+            delivery.Add(new Tweak("ContentDeliveryAllowed (user)", TweakType.SetRegistry, WinVer.Win1607)
+            {
+                usrLevel = true,
+                Path = @"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
+                Key = "ContentDeliveryAllowed",
+                Value = 0
+            });
+            delivery.Add(new Tweak("OemPreInstalledAppsEnabled (user)", TweakType.SetRegistry, WinVer.Win1607)
+            {
+                usrLevel = true,
+                Path = @"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
+                Key = "OemPreInstalledAppsEnabled",
+                Value = 0
+            });
+            delivery.Add(new Tweak("PreInstalledAppsEnabled (user)", TweakType.SetRegistry, WinVer.Win1607)
+            {
+                usrLevel = true,
+                Path = @"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
+                Key = "PreInstalledAppsEnabled",
+                Value = 0
+            });
+            /*delivery.Add(new Tweak("PreInstalledAppsEverEnabled (user)", TweakType.SetRegistry, WinVer.Win1607)
+            {
+                usrLevel = true,
+                Path = @"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
+                Key = "PreInstalledAppsEverEnabled",
+                Value = 0
+            });*/
+            delivery.Add(new Tweak("SilentInstalledAppsEnabled (user)", TweakType.SetRegistry, WinVer.Win1607)
+            {
+                usrLevel = true,
+                Path = @"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
+                Key = "SilentInstalledAppsEnabled",
+                Value = 0
+            });
+            delivery.Add(new Tweak("SoftLandingEnabled (user)", TweakType.SetRegistry, WinVer.Win1607)
+            {
+                usrLevel = true,
+                Path = @"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
+                Key = "SoftLandingEnabled",
+                Value = 0
+            });
+            /*delivery.Add(new Tweak("SubscribedContentEnabled (user)", TweakType.SetRegistry, WinVer.Win1607)
+            {
+                usrLevel = true,
+                Path = @"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
+                Key = "SubscribedContentEnabled",
+                Value = 0
+            });*/
 
             // *** No Lock Screen ***
 

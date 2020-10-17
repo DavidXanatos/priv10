@@ -29,6 +29,9 @@ namespace PrivateWin10
 
         DispatcherTimer mTimer = new DispatcherTimer();
 
+        Icon icon;
+        Icon icon_ex;
+
         public TrayIcon()
         {
             this.components = new Container();
@@ -92,10 +95,26 @@ namespace PrivateWin10
             notifyIcon.DoubleClick += new System.EventHandler(this.notifyIcon_DoubleClick);
             notifyIcon.Click += new System.EventHandler(this.notifyIcon_Click);
 
+            System.IO.Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/PrivateWin10;component/Resources/icons8-major.png")).Stream;
+            using (var bitmap = new Bitmap(iconStream))
+            {
+                var iconHandle = bitmap.GetHicon();
+                icon = Icon.FromHandle(iconHandle);
+            }
+
+            System.IO.Stream iconStream_ex = Application.GetResourceStream(new Uri("pack://application:,,,/PrivateWin10;component/Resources/icons8-major_ex_red.png")).Stream;
+            using (var bitmap_ex = new Bitmap(iconStream_ex))
+            {
+                var iconHandle_ex = bitmap_ex.GetHicon();
+                icon_ex = Icon.FromHandle(iconHandle_ex);
+            }
+
             mTimer.Tick += new EventHandler(OnTimerTick);
             mTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
             mTimer.Start();
         }
+
+        // todo dispose and DestroyIcon(newIcon.Handle); 
 
         private void Client_SettingsChangedNotification(object sender, EventArgs e)
         {
@@ -202,20 +221,12 @@ namespace PrivateWin10
             if (TickTock != 0)
             {
                 TickTock = 0;
-
-                System.IO.Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/PrivateWin10;component/Resources/icons8-major.png")).Stream;
-                var bitmap = new Bitmap(iconStream);
-                var iconHandle = bitmap.GetHicon();
-                notifyIcon.Icon = Icon.FromHandle(iconHandle);
+                notifyIcon.Icon = icon;
             }
             else if(!App.MainWnd.notificationWnd.IsEmpty())
             {
                 TickTock = 1;
-
-                System.IO.Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/PrivateWin10;component/Resources/icons8-major_ex_red.png")).Stream;                
-                var bitmap = new Bitmap(iconStream);
-                var iconHandle = bitmap.GetHicon();
-                notifyIcon.Icon = Icon.FromHandle(iconHandle);
+                notifyIcon.Icon = icon_ex;
             }
         }
 

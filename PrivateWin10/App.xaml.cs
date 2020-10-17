@@ -177,7 +177,7 @@ namespace PrivateWin10
             MainWnd = new MainWindow();
 
             TrayIcon = new TrayIcon();
-            TrayIcon.Visible = (GetConfigInt("Startup", "Tray", 0) != 0) || App.TestArg("-autorun");
+            TrayIcon.Visible = (GetConfigInt("Startup", "Tray", 1) != 0) || App.TestArg("-autorun");
 
             if (!App.TestArg("-autorun") || !TrayIcon.Visible)
                 MainWnd.Show();

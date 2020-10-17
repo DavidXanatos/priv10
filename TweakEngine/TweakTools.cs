@@ -108,7 +108,7 @@ namespace TweakEngine
 
                 SetRegistryValue(subKey, name, value);
 
-                subKey.DeleteValue("Old" + name);
+                subKey.DeleteValue("Old" + name, false);
                 return true;
             }
             catch (Exception err)
