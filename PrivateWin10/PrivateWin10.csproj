@@ -179,13 +179,10 @@
     <Compile Include="Core\Presets\TweakPreset.cs" />
     <Compile Include="Core\Priv10Service.cs" />
     <Compile Include="Core\TweakManager.cs" />
-    <Compile Include="IPC\FirewallRule.cs" />
-    <Compile Include="IPC\FirewallRuleEx.cs" />
     <Compile Include="IPC\MiscObjects.cs" />
     <Compile Include="IPC\NetworkSocket.cs" />
     <Compile Include="IPC\Priv10Client.cs" />
     <Compile Include="IPC\Program.cs" />
-    <Compile Include="IPC\ProgramID.cs" />
     <Compile Include="IPC\ProgramSet.cs" />
     <Compile Include="Models\AppModel.cs" />
     <Compile Include="Models\CategoryModel.cs" />
@@ -429,15 +426,6 @@
     <Resource Include="Resources\icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <COMReference Include="NetFwTypeLib">
-      <Guid>{58FBCF7C-E7A9-467C-80B3-FC65E8FCCA08}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
     <COMReference Include="NETWORKLIST">
       <Guid>{DCB00D01-570F-4A9B-8D69-199FDBA5723B}</Guid>
       <VersionMajor>1</VersionMajor>
@@ -485,6 +473,10 @@
     <ProjectReference Include="..\TweakEngine\TweakEngine.csproj">
       <Project>{35fb284f-77e2-4336-b60d-2cd39522b014}</Project>
       <Name>TweakEngine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WinFirewallAPI\WinFirewallAPI.csproj">
+      <Project>{3a5cbf66-2e66-4ce1-aa89-7af50d9db29b}</Project>
+      <Name>WinFirewallAPI</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -594,7 +586,17 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\icons8-major.png" />
-    <Resource Include="Resources\icons8-major_ex_red.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icon_red_ex.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icon_green_dot.png" />
+    <Resource Include="Resources\icon_red_dot.png" />
+    <Resource Include="Resources\icon_yellow_dot.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icon_red_x.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

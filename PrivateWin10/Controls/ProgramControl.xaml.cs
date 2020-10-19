@@ -17,6 +17,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using PrivateAPI;
 
 namespace PrivateWin10
 {
@@ -33,32 +34,32 @@ namespace PrivateWin10
 
         //private Brush mBorderBrush;
 
-        public static SolidColorBrush GetAccessColor(ProgramSet.Config.AccessLevels NetAccess)
+        public static SolidColorBrush GetAccessColor(ProgramConfig.AccessLevels NetAccess)
         {
             switch (NetAccess)
             {
-                case ProgramSet.Config.AccessLevels.FullAccess: return new SolidColorBrush(Colors.LightGreen);
-                //case ProgramSet.Config.AccessLevels.OutBoundAccess: return new SolidColorBrush(Colors.YellowGreen);
-                //case ProgramSet.Config.AccessLevels.InBoundAccess: return new SolidColorBrush(Colors.Goldenrod);
-                case ProgramSet.Config.AccessLevels.CustomConfig: return new SolidColorBrush(Colors.Gold);
-                case ProgramSet.Config.AccessLevels.LocalOnly: return new SolidColorBrush(Colors.LightSkyBlue);
-                case ProgramSet.Config.AccessLevels.BlockAccess: return new SolidColorBrush(Colors.LightPink);
-                case ProgramSet.Config.AccessLevels.WarningState: return new SolidColorBrush(Colors.Yellow);
+                case ProgramConfig.AccessLevels.FullAccess: return new SolidColorBrush(Colors.LightGreen);
+                case ProgramConfig.AccessLevels.OutBoundAccess: return new SolidColorBrush(Colors.YellowGreen);
+                case ProgramConfig.AccessLevels.InBoundAccess: return new SolidColorBrush(Colors.Goldenrod);
+                case ProgramConfig.AccessLevels.CustomConfig: return new SolidColorBrush(Colors.Gold);
+                case ProgramConfig.AccessLevels.LocalOnly: return new SolidColorBrush(Colors.LightSkyBlue);
+                case ProgramConfig.AccessLevels.BlockAccess: return new SolidColorBrush(Colors.LightPink);
+                case ProgramConfig.AccessLevels.WarningState: return new SolidColorBrush(Colors.Yellow);
                 default: return new SolidColorBrush(Colors.White);
             }
         }
 
         public static void PrepAccessCmb(ComboBox cmbAccess)
         {
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_none"), Tag = ProgramSet.Config.AccessLevels.Unconfigured });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_allow"), Tag = ProgramSet.Config.AccessLevels.FullAccess });
-            //cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_outbound"), Tag = ProgramSet.Config.AccessLevels.OutBoundAccess });
-            //cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_inbound"), Tag = ProgramSet.Config.AccessLevels.InBoundAccess });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_edit"), Tag = ProgramSet.Config.AccessLevels.CustomConfig });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_lan"), Tag = ProgramSet.Config.AccessLevels.LocalOnly });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_block"), Tag = ProgramSet.Config.AccessLevels.BlockAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_none"), Tag = ProgramConfig.AccessLevels.Unconfigured });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_allow"), Tag = ProgramConfig.AccessLevels.FullAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_outbound"), Tag = ProgramConfig.AccessLevels.OutBoundAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_inbound"), Tag = ProgramConfig.AccessLevels.InBoundAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_edit"), Tag = ProgramConfig.AccessLevels.CustomConfig });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_lan"), Tag = ProgramConfig.AccessLevels.LocalOnly });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_block"), Tag = ProgramConfig.AccessLevels.BlockAccess });
             foreach (ComboBoxItem item in cmbAccess.Items)
-                item.Background = GetAccessColor((ProgramSet.Config.AccessLevels)item.Tag);
+                item.Background = GetAccessColor((ProgramConfig.AccessLevels)item.Tag);
         }
 
         public ProgramControl(ProgramSet prog, CategoryModel Categories)
@@ -134,7 +135,8 @@ namespace PrivateWin10
             });
 
             //name.Content = process.Name;
-            name.Text = progSet.config.Name;
+            if(name.IsReadOnly)
+                name.Text = progSet.config.Name;
 
             var Presets = App.presets.GetProgPins(progSet.guid);
             chkPin.IsChecked = Presets.Count > 0;
@@ -161,7 +163,7 @@ namespace PrivateWin10
             WpfFunc.CmbSelect(category, progSet.config.Category == null ? "" : progSet.config.Category);
 
             WpfFunc.CmbSelect(cmbAccess, progSet.config.GetAccess().ToString());
-            if (progSet.config.NetAccess != ProgramSet.Config.AccessLevels.Unconfigured && progSet.config.NetAccess != progSet.config.CurAccess)
+            if (progSet.config.NetAccess != ProgramConfig.AccessLevels.Unconfigured && progSet.config.NetAccess != progSet.config.CurAccess)
                 cmbAccess.Background /*grid.Background*/ = FindResource("Stripes") as DrawingBrush;
             else
                 cmbAccess.Background = GetAccessColor(progSet.config.GetAccess());
@@ -341,6 +343,39 @@ namespace PrivateWin10
             return picker.FileName + "|" + picker.IconIndex;
         }
 
+        public static string FormatProgID(ProgramID ProgID)
+        {
+            string Name = "";
+            string Path = ProgID.Path;
+            switch (ProgID.Type)
+            {
+                case ProgramID.Types.System: 
+                    Path = MiscFunc.NtOsKrnlPath; 
+                    break;
+                case ProgramID.Types.Program: 
+                    break;
+                case ProgramID.Types.Service: 
+                    Name = ProgID.GetServiceId(); 
+                    if (Name != null && Name.Length > 0)
+                        Name = Translate.fmt("name_service") + " " + Name;
+                    break;
+                case ProgramID.Types.App: 
+                    Name = ProgID.GetPackageName();
+                    if (Name != null && Name.Length > 0)
+                        Name = Translate.fmt("name_app") + " " + Name;
+                    break;
+                default:
+                case ProgramID.Types.Global: 
+                    Name = Translate.fmt("name_global"); 
+                    break;
+            }
+            if (Name == null || Name.Length == 0)
+                Name = Path;
+            else if (Path != null && Path.Length > 0)
+                Name += " (" + Path + ")";
+            return Name ?? "";
+        }
+
         public class ProgEntry : INotifyPropertyChanged
         {
             public Program Prog;
@@ -354,7 +389,7 @@ namespace PrivateWin10
 
             public string Name { get { return Prog.Description; } }
 
-            public string Program { get { return Prog.ID.FormatString(); } } 
+            public string Program { get { return ProgramControl.FormatProgID(Prog.ID); } } 
 
             #region INotifyPropertyChanged Members
 
@@ -442,7 +477,7 @@ namespace PrivateWin10
             if (SuspendChange > 0)
                 return;
 
-            progSet.config.NetAccess = (ProgramSet.Config.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
+            progSet.config.NetAccess = (ProgramConfig.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
             App.client.UpdateProgram(progSet.guid, progSet.config);
         }
 

@@ -16,6 +16,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MiscHelpers;
+using PrivateAPI;
+using WinFirewallAPI;
 
 namespace PrivateWin10.Controls
 {
@@ -35,8 +37,16 @@ namespace PrivateWin10.Controls
             this.btnPrev.Content = Translate.fmt("lbl_prev");
             this.btnNext.Content = Translate.fmt("lbl_next");
             this.lblRemember.Content = Translate.fmt("lbl_remember");
-            this.btnIgnore.Content = Translate.fmt("lbl_ignore");
+
+            
+            var Ignore = this.IgnoreSB.Content as TextBlock;
+
+            Ignore.Text = Translate.fmt("lbl_ignore");
+            (this.IgnoreSB.MenuItemsSource[0] as MenuItem).Header = Translate.fmt("lbl_ignore_all");
+
+            //this.btnIgnore.Content = Translate.fmt("lbl_ignore");
             this.btnApply.Content = Translate.fmt("lbl_apply");
+
             this.consGrid.Columns[0].Header = Translate.fmt("lbl_protocol");
             this.consGrid.Columns[1].Header = Translate.fmt("lbl_ip_port");
             this.consGrid.Columns[2].Header = Translate.fmt("lbl_remote_host");
@@ -47,16 +57,16 @@ namespace PrivateWin10.Controls
             consGridExt.Restore(App.GetConfig("GUI", "consGrid_Columns", ""));
 
 
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_none"), Tag = ProgramSet.Config.AccessLevels.Unconfigured });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_silence"), Tag = ProgramSet.Config.AccessLevels.StopNotify });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_allow"), Tag = ProgramSet.Config.AccessLevels.FullAccess });
-            //cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_outbound"), Tag = ProgramSet.Config.AccessLevels.OutBoundAccess });
-            //cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_inbound"), Tag = ProgramSet.Config.AccessLevels.InBoundAccess });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_edit"), Tag = ProgramSet.Config.AccessLevels.CustomConfig });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_lan"), Tag = ProgramSet.Config.AccessLevels.LocalOnly });
-            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_block"), Tag = ProgramSet.Config.AccessLevels.BlockAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_none"), Tag = ProgramConfig.AccessLevels.Unconfigured });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_silence"), Tag = ProgramConfig.AccessLevels.StopNotify });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_allow"), Tag = ProgramConfig.AccessLevels.FullAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_outbound"), Tag = ProgramConfig.AccessLevels.OutBoundAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_inbound"), Tag = ProgramConfig.AccessLevels.InBoundAccess });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_edit"), Tag = ProgramConfig.AccessLevels.CustomConfig });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_lan"), Tag = ProgramConfig.AccessLevels.LocalOnly });
+            cmbAccess.Items.Add(new ComboBoxItem() { Content = Translate.fmt("acl_block"), Tag = ProgramConfig.AccessLevels.BlockAccess });
             foreach (ComboBoxItem item in cmbAccess.Items)
-                item.Background = ProgramControl.GetAccessColor((ProgramSet.Config.AccessLevels)item.Tag);
+                item.Background = ProgramControl.GetAccessColor((ProgramConfig.AccessLevels)item.Tag);
 
 #if DEBUG
             cmbRemember.Items.Add(new ComboBoxItem() { Content = Translate.fmt("lbl_temp", "1 min"), Tag = 60 });
@@ -146,7 +156,7 @@ namespace PrivateWin10.Controls
         {
             if (!bUpdate)
             {
-                ProgramSet.Config.AccessLevels NetAccess = ProgramSet.Config.AccessLevels.Unconfigured;
+                ProgramConfig.AccessLevels NetAccess = ProgramConfig.AccessLevels.Unconfigured;
 
                 cmbAccess.Background = ProgramControl.GetAccessColor(NetAccess);
                 WpfFunc.CmbSelect(cmbAccess, NetAccess.ToString());
@@ -168,7 +178,8 @@ namespace PrivateWin10.Controls
 
             List<string> services = new List<string>();
 
-            btnIgnore.IsEnabled = true;
+            //btnIgnore.IsEnabled = true;
+            IgnoreSB.IsEnabled = true;
             consGrid.Items.Clear();
             foreach (Priv10Engine.FwEventArgs args in list.Item2)
             {
@@ -199,8 +210,13 @@ namespace PrivateWin10.Controls
                 switch (id.Type)
                 {
                     //case ProgramList.Types.Program: lblSubName.Text = ""; break;
-                    case ProgramID.Types.Service: lblSubName.Text = id.GetServiceId(); break;
-                    case ProgramID.Types.App: lblSubName.Text = id.GetPackageName(); break;
+                    case ProgramID.Types.Service: 
+                        lblSubName.Text = id.GetServiceId(); 
+                        break;
+                    case ProgramID.Types.App: 
+                        string SID = id.GetPackageSID();
+                        lblSubName.Text = SID != null ? AppModel.GetInstance().GetAppPkgBySid(SID)?.ID ?? SID : "";
+                        break;
                     default: lblSubName.Text = ""; break;
                 }
             }
@@ -225,6 +241,8 @@ namespace PrivateWin10.Controls
 
         private void PopEntry()
         {
+            if (curIndex == -1)
+                return;
             ProgramID id = mEventList.ElementAt(curIndex);
 
             mEventList.RemoveAt(curIndex);
@@ -234,7 +252,8 @@ namespace PrivateWin10.Controls
                 curIndex = mEventList.Count - 1;
             if (curIndex < 0)
             {
-                btnIgnore.IsEnabled = false;
+                //btnIgnore.IsEnabled = false;
+                IgnoreSB.IsEnabled = false;
                 consGrid.Items.Clear();
                 curIndex = -1;
                 Emptied?.Invoke(this, new EventArgs());
@@ -245,9 +264,20 @@ namespace PrivateWin10.Controls
             LoadCurrent();
         }
 
-        private void btnIgnore_Click(object sender, RoutedEventArgs e)
+        private void BtnIgnore_Click(object sender, MouseButtonEventArgs e)
         {
             PopEntry();
+        }
+
+        private void BtnIgnoreAll_Click(object sender, RoutedEventArgs e)
+        {
+            mEventList.Clear();
+            mEvents.Clear();
+
+            IgnoreSB.IsEnabled = false;
+            consGrid.Items.Clear();
+            curIndex = -1;
+            Emptied?.Invoke(this, new EventArgs());
         }
 
         private void cmbAccess_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -258,14 +288,14 @@ namespace PrivateWin10.Controls
                 return;
             }
 
-            ProgramSet.Config.AccessLevels NetAccess = (ProgramSet.Config.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
+            ProgramConfig.AccessLevels NetAccess = (ProgramConfig.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
             cmbAccess.Background = ProgramControl.GetAccessColor(NetAccess);
-            btnApply.IsEnabled = NetAccess != ProgramSet.Config.AccessLevels.Unconfigured;
+            btnApply.IsEnabled = NetAccess != ProgramConfig.AccessLevels.Unconfigured;
         }
 
         private bool MakeCustom(Program prog, UInt64 expiration, ConEntry entry = null)
         {
-            FirewallRule rule = new FirewallRule() { guid = null, Profile = (int)FirewallRule.Profiles.All, Interface = (int)FirewallRule.Interfaces.All, Enabled = true };
+            FirewallRuleEx rule = new FirewallRuleEx() { guid = null, Profile = (int)FirewallRule.Profiles.All, Interface = (int)FirewallRule.Interfaces.All, Enabled = true };
             rule.SetProgID(prog.ID);
             rule.Name = FirewallManager.MakeRuleName(FirewallManager.CustomName, expiration != 0, prog.Description);
             rule.Grouping = FirewallManager.RuleGroup;
@@ -323,9 +353,9 @@ namespace PrivateWin10.Controls
 
             UInt64 expiration = GetExpiration();
 
-            ProgramSet.Config.AccessLevels NetAccess = (ProgramSet.Config.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
+            ProgramConfig.AccessLevels NetAccess = (ProgramConfig.AccessLevels)(cmbAccess.SelectedItem as ComboBoxItem).Tag;
 
-            if (NetAccess == ProgramSet.Config.AccessLevels.CustomConfig)
+            if (NetAccess == ProgramConfig.AccessLevels.CustomConfig)
             {
                 if (!MakeCustom(list.Item1, expiration))
                     return;
@@ -334,7 +364,7 @@ namespace PrivateWin10.Controls
             {
                 ProgramSet prog = App.client.GetProgram(id);
 
-                if (NetAccess == ProgramSet.Config.AccessLevels.StopNotify)
+                if (NetAccess == ProgramConfig.AccessLevels.StopNotify)
                 {
                     if (expiration != 0)
                         prog.config.SilenceUntill = expiration;

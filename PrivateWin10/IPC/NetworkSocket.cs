@@ -6,6 +6,7 @@ using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using PrivateAPI;
 
 namespace PrivateWin10
 {
@@ -67,7 +68,7 @@ namespace PrivateWin10
             if(RemovedTimeStamp != 0)
                 return Translate.fmt("str_closed");
 
-            if ((ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP)
+            if ((ProtocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.UDP)
             {
                 if (State == (int)IPHelper.MIB_TCP_STATE.CLOSED)
                     return Translate.fmt("str_closed");

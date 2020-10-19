@@ -17,6 +17,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MiscHelpers;
+using PrivateAPI;
+using WinFirewallAPI;
 
 namespace PrivateWin10.Controls
 {
@@ -32,6 +34,7 @@ namespace PrivateWin10.Controls
         public FirewallPage firewallPage = null;
 
         FirewallRule.Actions evetnFilter = FirewallRule.Actions.Undefined;
+        FirewallPage.FilterPreset.Socket socketFilter = FirewallPage.FilterPreset.Socket.Any;
         string textFilter = "";
         int logLimit = 1000;
 
@@ -59,17 +62,25 @@ namespace PrivateWin10.Controls
             this.chkNoMulti.ToolTip = Translate.fmt("str_no_multi");
             this.chkNoLocal.ToolTip = Translate.fmt("str_no_local");
 
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_protocols_any"), FirewallPage.FilterPreset.Socket.Any);
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_web"), FirewallPage.FilterPreset.Socket.Web).Background = new SolidColorBrush(Colors.DodgerBlue);
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_tcp"), FirewallPage.FilterPreset.Socket.TCP).Background = new SolidColorBrush(Colors.Turquoise);
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_client"), FirewallPage.FilterPreset.Socket.Client).Background = new SolidColorBrush(Colors.Gold);
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_server"), FirewallPage.FilterPreset.Socket.Server).Background = new SolidColorBrush(Colors.DarkOrange);
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_udp"), FirewallPage.FilterPreset.Socket.UDP).Background = new SolidColorBrush(Colors.Violet);
+            WpfFunc.CmbAdd(sockType, Translate.fmt("filter_protocols_other"), FirewallPage.FilterPreset.Socket.Other).Background = new SolidColorBrush(Colors.LightGray);
 
-            this.logGrid.Columns[1].Header = Translate.fmt("lbl_name");
-            this.logGrid.Columns[2].Header = Translate.fmt("lbl_time_stamp");
-            this.logGrid.Columns[3].Header = Translate.fmt("lbl_action");
-            this.logGrid.Columns[4].Header = Translate.fmt("lbl_direction");
-            this.logGrid.Columns[5].Header = Translate.fmt("lbl_protocol");
-            this.logGrid.Columns[6].Header = Translate.fmt("lbl_remote_ip");
-            this.logGrid.Columns[7].Header = Translate.fmt("lbl_remote_port");
-            this.logGrid.Columns[8].Header = Translate.fmt("lbl_local_ip");
-            this.logGrid.Columns[9].Header = Translate.fmt("lbl_local_port");
-            this.logGrid.Columns[10].Header = Translate.fmt("lbl_program");
+            int i = 0;
+            this.logGrid.Columns[++i].Header = Translate.fmt("lbl_name");
+            this.logGrid.Columns[++i].Header = Translate.fmt("lbl_time_stamp");
+            this.logGrid.Columns[++i].Header = Translate.fmt("lbl_action");
+            this.logGrid.Columns[++i].Header = Translate.fmt("lbl_direction");
+            this.logGrid.Columns[++i].Header = Translate.fmt("lbl_protocol");
+            this.logGrid.Columns[++i].Header = Translate.fmt("lbl_remote_ip");
+            this.logGrid.Columns[++i].Header = Translate.fmt("lbl_remote_port");
+            this.logGrid.Columns[++i].Header = Translate.fmt("lbl_local_ip");
+            this.logGrid.Columns[++i].Header = Translate.fmt("lbl_local_port");
+            this.logGrid.Columns[++i].Header = Translate.fmt("lbl_program");
 
             LogList = new ObservableCollection<LogItem>();
             logGrid.ItemsSource = LogList;
@@ -85,6 +96,9 @@ namespace PrivateWin10.Controls
                 textFilter = App.GetConfig("FwLog", "Filter", "");
                 txtConFilter.Text = textFilter;
                 cmbConTypes.SelectedIndex = App.GetConfigInt("FwLog", "Events", 0);
+
+                WpfFunc.CmbSelect(sockType, ((FirewallPage.FilterPreset.Socket)App.GetConfigInt("FwLog", "Types", 0)).ToString());
+
                 //this.chkAllowed.IsChecked = App.GetConfigInt("FwLog", "ShowAllowed", 1) == 1;
                 //this.chkBlocked.IsChecked = App.GetConfigInt("FwLog", "ShowBlocked", 1) == 1;
                 this.chkNoLocal.IsChecked = App.GetConfigInt("FwLog", "NoLocal", 0) == 1;
@@ -133,7 +147,7 @@ namespace PrivateWin10.Controls
                     //if (!oldLog.TryGetValue(entry.guid, out Item))
                     if (!oldLog.Remove(entry.guid))
                     {
-                        Program program = ProgramList.GetProgramFuzzy(prog.Programs, entry.ProgID, ProgramList.FuzzyModes.Any);
+                        Program program = ProgramID.GetProgramFuzzy(prog.Programs, entry.ProgID, ProgramID.FuzzyModes.Any);
 
                         LogList.Insert(0, new LogItem(entry, program != null ? program.Description : prog.config.Name));
                     }
@@ -198,9 +212,20 @@ namespace PrivateWin10.Controls
             cmbConTypes.Background = (cmbConTypes.SelectedItem as ComboBoxItem).Background;
             App.SetConfig("FwLog", "Events", (int)evetnFilter);
             //UpdateConnections(true);
+
             logGrid.Items.Filter = new Predicate<object>(item => LogFilter(item));
         }
 		
+        private void sockType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            socketFilter = (FirewallPage.FilterPreset.Socket)(sockType.SelectedItem as ComboBoxItem).Tag;
+            sockType.Background = (sockType.SelectedItem as ComboBoxItem).Background;
+            App.SetConfig("FwLog", "Types", (int)socketFilter);
+            //UpdateRules(true);
+
+            logGrid.Items.Filter = new Predicate<object>(item => LogFilter(item));
+        }
+
         private void LogTypeFilters_Click(object sender, RoutedEventArgs e)
         {
             //App.SetConfig("FwLog", "ShowAllowed", this.chkAllowed.IsChecked == true ? 1 : 0);
@@ -232,17 +257,48 @@ namespace PrivateWin10.Controls
                 case FirewallRule.Actions.Block: if (item.entry.FwEvent.Action != FirewallRule.Actions.Block) return false; break;
             }
 
-            if (item.IsLocal)
+            if (socketFilter != FirewallPage.FilterPreset.Socket.Any)
+            {
+                switch (socketFilter)
+                {
+                    case FirewallPage.FilterPreset.Socket.TCP:
+                        if (item.entry.FwEvent.Protocol != (UInt32)IPHelper.AF_PROT.TCP)
+                            return false;
+                        break;
+                    case FirewallPage.FilterPreset.Socket.Client:
+                        if (item.entry.FwEvent.Protocol != (UInt32)IPHelper.AF_PROT.TCP || item.entry.FwEvent.Direction == FirewallRule.Directions.Inbound)
+                            return false;
+                        break;
+                    case FirewallPage.FilterPreset.Socket.Server:
+                        if (item.entry.FwEvent.Protocol != (UInt32)IPHelper.AF_PROT.TCP || item.entry.FwEvent.Direction == FirewallRule.Directions.Outbound)
+                            return false;
+                        break;
+                    case FirewallPage.FilterPreset.Socket.UDP:
+                        if (item.entry.FwEvent.Protocol != (UInt32)IPHelper.AF_PROT.UDP)
+                            return false;
+                        break;
+                    case FirewallPage.FilterPreset.Socket.Web:
+                        if (item.entry.FwEvent.Protocol != (UInt32)IPHelper.AF_PROT.TCP || !(item.entry.FwEvent.RemotePort == 80 || item.entry.FwEvent.RemotePort == 443))
+                            return false;
+                        break;
+                    case FirewallPage.FilterPreset.Socket.Other:
+                        if (item.entry.FwEvent.Protocol == (UInt32)IPHelper.AF_PROT.TCP || item.entry.FwEvent.Protocol == (UInt32)IPHelper.AF_PROT.UDP)
+                            return false;
+                        break;
+                }
+            }
+
+            if (item.entry.Realm == Program.LogEntry.Realms.LocalHost)
             {
                 if (chkNoLocal.IsChecked == true)
                     return false;
             }
-            else if (item.IsMulti)
+            else if (item.entry.Realm == Program.LogEntry.Realms.MultiCast)
             {
                 if (chkNoMulti.IsChecked == true)
                     return false;
             }
-            else if (item.IsLan)
+            else if (item.entry.Realm == Program.LogEntry.Realms.LocalArea)
             {
                 if (chkNoLAN.IsChecked == true)
                     return false;
@@ -331,18 +387,11 @@ namespace PrivateWin10.Controls
         {
             public Program.LogEntry entry;
             public string name;
-            public bool IsLocal;
-            public bool IsMulti;
-            public bool IsLan;
 
             public LogItem(Program.LogEntry entry, string name)
             {
                 this.entry = entry;
                 this.name = name != null ? name : "[unknown progream]";
-
-                this.IsLocal = NetFunc.IsLocalHost(entry.FwEvent.RemoteAddress);
-                this.IsMulti = NetFunc.IsMultiCast(entry.FwEvent.RemoteAddress);
-                this.IsLan = FirewallRule.MatchAddress(entry.FwEvent.RemoteAddress, FirewallRule.AddrKeywordLocalSubnet);
             }
 
             public bool TestFilter(string textFilter)
@@ -362,7 +411,7 @@ namespace PrivateWin10.Controls
             public ImageSource Icon { get { return ImgFunc.GetIcon(entry.ProgID.Path, 16); } }
 
             public string Name { get { return name; } }
-            public string Program { get { return entry.ProgID.FormatString(); } }
+            public string Program { get { return ProgramControl.FormatProgID(entry.ProgID); } }
             public DateTime TimeStamp { get { return entry.FwEvent.TimeStamp; } }
             public string Action
             {
@@ -384,7 +433,7 @@ namespace PrivateWin10.Controls
                     switch (entry.FwEvent.Direction)
                     {
                         case FirewallRule.Directions.Inbound: return Translate.fmt("str_inbound");
-                        case FirewallRule.Directions.Outboun: return Translate.fmt("str_outbound");
+                        case FirewallRule.Directions.Outbound: return Translate.fmt("str_outbound");
                         default: return Translate.fmt("str_undefined");
                     }
                 }
@@ -411,16 +460,16 @@ namespace PrivateWin10.Controls
                     switch (entry.FwEvent.Action)
                     {
                         case FirewallRule.Actions.Allow:
-                            if (IsMulti)
+                            if (entry.Realm == PrivateWin10.Program.LogEntry.Realms.MultiCast)
                                 return "blue2";
-                            else if (IsLan)
+                            else if (entry.Realm == PrivateWin10.Program.LogEntry.Realms.LocalHost)
                                 return "blue";
                             else
                                 return "green";
                         case FirewallRule.Actions.Block:
-                            if (IsMulti)
+                            if (entry.Realm == PrivateWin10.Program.LogEntry.Realms.MultiCast)
                                 return "yellow2";
-                            else if (IsLan)
+                            else if (entry.Realm == PrivateWin10.Program.LogEntry.Realms.LocalHost)
                                 return "yellow";
                             else
                                 return "red";

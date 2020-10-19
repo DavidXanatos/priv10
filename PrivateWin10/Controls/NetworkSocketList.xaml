@@ -31,7 +31,7 @@
             </-->
             <l:SearchTextBox x:Name="txtSockFilter" LabelText="Text Filter... (CTRL+F)" MinWidth="250" SearchMode="Instant" Margin="1,2" SearchEventTimeDelay="00:00:01" Search="TxtRuleFilter_Search"/>
             <Separator/>
-            <ToggleButton Name="chkNoINet" Click="SocketTypeFilters_Click" ToolTip="Hide Internet (WWW) Traffic">
+            <!--ToggleButton Name="chkNoINet" Click="SocketTypeFilters_Click" ToolTip="Hide Internet (WWW) Traffic">
                 <Image Width="16" Height="16">
                     <Image.Style>
                         <Style TargetType="{x:Type Image}">
@@ -46,7 +46,7 @@
                         </Style>
                     </Image.Style>
                 </Image>
-            </ToggleButton>
+            </>
 
             <ToggleButton Name="chkNoLAN" Click="SocketTypeFilters_Click" ToolTip="Hide LAN (Ethernet/WiFi) Traffic">
                 <Image Width="16" Height="16">
@@ -65,7 +65,7 @@
                 </Image>
             </ToggleButton>
 
-            <!--ToggleButton Name="chkNoMulti" Click="SocketTypeFilters_Click" ToolTip="Hide Multicast Packets" IsChecked="true">
+            <!-ToggleButton Name="chkNoMulti" Click="SocketTypeFilters_Click" ToolTip="Hide Multicast Packets" IsChecked="true">
                 <Image Width="16" Height="16">
                     <Image.Style>
                         <Style TargetType="{x:Type Image}">
@@ -80,7 +80,7 @@
                         </Style>
                     </Image.Style>
                 </Image>
-            </-->
+            </->
 
             <ToggleButton Name="chkNoLocal" Click="SocketTypeFilters_Click" ToolTip="Hide Local Host Traffic" IsChecked="true">
                 <Image Width="16" Height="16">
@@ -97,7 +97,7 @@
                         </Style>
                     </Image.Style>
                 </Image>
-            </ToggleButton>
+            </ToggleButton-->
         </ToolBar>
         
         <Grid Grid.Row="1">

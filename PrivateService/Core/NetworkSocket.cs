@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MiscHelpers;
 using PrivateService;
+using PrivateAPI;
 
 namespace PrivateWin10
 {
@@ -91,7 +92,7 @@ namespace PrivateWin10
             // a program may have been removed than the sockets get unasigned and has to be re asigned
             if (Program == null)
             {
-                Program prog = ProgID == null ? null : App.engine.ProgramList.FindProgram(ProgID, true, ProgramList.FuzzyModes.Any);
+                Program prog = ProgID == null ? null : App.engine.ProgramList.FindProgram(ProgID, true, ProgramID.FuzzyModes.Any);
                 if (prog != null)
                 {
                     Program = prog;
@@ -105,7 +106,7 @@ namespace PrivateWin10
 
         public static UInt64 MkHash(int processId, UInt32 protocolType, IPAddress localAddress, UInt16 localPort, IPAddress remoteAddress, UInt16 remotePort)
         {
-	        if ((protocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP)
+	        if ((protocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.UDP)
 		        remotePort = 0;
 
             UInt64 HashID = ((UInt64)localPort << 0) | ((UInt64)remotePort << 16) | ((UInt64)processId << 32);
@@ -134,7 +135,7 @@ namespace PrivateWin10
             if (ProtocolType != protocolType)
                 return false;
 
-            if ((ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == (UInt32)IPHelper.AF_PROT.TCP || (ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP)
+            if ((ProtocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.TCP || (ProtocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.UDP)
             {
                 if (LocalPort != localPort)
                     return false;
@@ -148,9 +149,9 @@ namespace PrivateWin10
             }
 
             // don't test the remote endpoint if this is a udp socket
-            if (mode == MatchMode.Strict || (ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == (UInt32)IPHelper.AF_PROT.TCP)
+            if (mode == MatchMode.Strict || (ProtocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.TCP)
             {
-                if ((ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == (UInt32)IPHelper.AF_PROT.TCP || (ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP)
+                if ((ProtocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.TCP || (ProtocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.UDP)
                 {
                     if (RemotePort != remotePort)
                         return false;

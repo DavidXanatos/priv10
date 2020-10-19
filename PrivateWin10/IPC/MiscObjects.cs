@@ -10,6 +10,8 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using PrivateAPI;
+using WinFirewallAPI;
 
 namespace PrivateWin10
 {
@@ -55,20 +57,31 @@ namespace PrivateWin10
 
 
     [Serializable()]
+    [DataContract(Name = "FirewallEvent", Namespace = "http://schemas.datacontract.org/")]
     public class FirewallEvent : EventArgs
     {
+        [DataMember()]
         public int ProcessId;
+        [DataMember()]
         public string ProcessFileName;
 
+        [DataMember()]
         public FirewallRule.Actions Action;
 
+        [DataMember()]
         public UInt32 Protocol;
+        [DataMember()]
         public FirewallRule.Directions Direction;
+        [DataMember()]
         public IPAddress LocalAddress;
+        [DataMember()]
         public UInt16 LocalPort;
+        [DataMember()]
         public IPAddress RemoteAddress;
+        [DataMember()]
         public UInt16 RemotePort;
 
+        [DataMember()]
         public DateTime TimeStamp;
     }
 
@@ -252,49 +265,6 @@ namespace PrivateWin10
         };
     }
 
-
-
-    public class ProgramList
-    {
-        public enum FuzzyModes : int
-        {
-            No = 0,
-            Tag = 1,
-            Path = 2,
-            Any = 3
-        };
-
-        public static T GetProgramFuzzy<T>(SortedDictionary<ProgramID, T> Programs, ProgramID progID, FuzzyModes fuzzyMode) where T : class
-        {
-            T prog = null;
-            if (Programs.TryGetValue(progID, out prog))
-                return prog;
-
-            // Only works for services and apps 
-            if (!(progID.Type == ProgramID.Types.Service || progID.Type == ProgramID.Types.App))
-                return null;
-
-            if ((fuzzyMode & FuzzyModes.Tag) != 0 && progID.Aux.Length > 0)
-            {
-                // first drop path and try to get by serviceTag or application SID
-                ProgramID auxId = ProgramID.New(progID.Type, null, progID.Aux);
-                if (Programs.TryGetValue(auxId, out prog))
-                    return prog;
-            }
-
-            if ((fuzzyMode & FuzzyModes.Path) != 0 && progID.Path.Length > 0
-             && (progID.Type == ProgramID.Types.Service || progID.Type == ProgramID.Types.App)
-             && System.IO.Path.GetFileName(progID.Path).Equals("svchost.exe", StringComparison.OrdinalIgnoreCase) == false) // dont use this for svchost.exe
-            {
-                // than try to get an entry by path only
-                ProgramID pathId = ProgramID.New(ProgramID.Types.Program, progID.Path, null);
-                if (Programs.TryGetValue(pathId, out prog))
-                    return prog;
-            }
-
-            return null;
-        }
-    }
 
 
     public class DnsProxyServer

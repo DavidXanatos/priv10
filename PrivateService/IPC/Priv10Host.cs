@@ -12,6 +12,7 @@ using System.Diagnostics;
 using PrivateAPI;
 using static PrivateAPI.Priv10Conv;
 using System.Runtime.Serialization;
+using WinFirewallAPI;
 
 namespace PrivateWin10
 {
@@ -75,14 +76,14 @@ namespace PrivateWin10
             return PutXmlObj(Prog);
         }
 
-        protected byte[] PutConfig(ProgramSet.Config config)
+        protected byte[] PutConfig(ProgramConfig config)
         {
             return PutXmlObj(config);
         }
 
-        protected ProgramSet.Config GetConfig(byte[] value)
+        protected ProgramConfig GetConfig(byte[] value)
         {
-            return GetXmlObj<ProgramSet.Config>(value);
+            return GetXmlObj<ProgramConfig>(value);
         }
 
         protected byte[] PutRule(FirewallRuleEx rule)
@@ -135,9 +136,9 @@ namespace PrivateWin10
             return PutXmlObj(info);
         }
 
-        protected byte[] PutAppInfos(List<UwpFunc.AppInfo> infos)
+        protected byte[] PutAppInfos(Dictionary<string, UwpFunc.AppInfo> infos)
         {
-            return PutList(infos, PutAppInfo);
+            return PutMap(infos, PutStr, PutAppInfo);
         }
 
         /////////////////////////////////////////

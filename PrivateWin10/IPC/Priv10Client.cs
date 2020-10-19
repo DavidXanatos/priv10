@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Xml;
 using TweakEngine;
+using WinFirewallAPI;
 using static PrivateAPI.Priv10Conv;
 
 namespace PrivateWin10
@@ -77,14 +78,14 @@ namespace PrivateWin10
             return GetXmlObj<Program>(value);
         }
 
-        protected byte[] PutConfig(ProgramSet.Config config)
+        protected byte[] PutConfig(ProgramConfig config)
         {
             return PutXmlObj(config);
         }
 
-        protected ProgramSet.Config GetConfig(byte[] value)
+        protected ProgramConfig GetConfig(byte[] value)
         {
-            return GetXmlObj<ProgramSet.Config>(value);
+            return GetXmlObj<ProgramConfig>(value);
         }
 
         protected byte[] PutRule(FirewallRule rule)
@@ -137,9 +138,9 @@ namespace PrivateWin10
             return GetXmlObj<UwpFunc.AppInfo>(value);
         }
 
-        protected List<UwpFunc.AppInfo> GetAppInfos(byte[] data)
+        protected Dictionary<string, UwpFunc.AppInfo> GetAppInfos(byte[] data)
         {
-            return GetList(data, GetAppInfo);
+            return GetMap(data, GetStr, GetAppInfo);
         }
 
         /////////////////////////////////////////
@@ -280,7 +281,7 @@ namespace PrivateWin10
             return ret != null ? GetBool(ret[0]) : false;
         }
         
-        public bool UpdateProgram(Guid guid, ProgramSet.Config config, UInt64 expiration = 0)
+        public bool UpdateProgram(Guid guid, ProgramConfig config, UInt64 expiration = 0)
         {
             List<byte[]> args = new List<byte[]>();
             args.Add(PutGuid(guid));
@@ -341,7 +342,7 @@ namespace PrivateWin10
             return ret != null ? GetBool(ret[0]) : false;
         }
         
-        public bool RemoveRule(FirewallRule rule)
+        public bool RemoveRule(FirewallRuleEx rule)
         {
             List<byte[]> args = new List<byte[]>();
             args.Add(PutStr(rule.guid));
@@ -350,7 +351,7 @@ namespace PrivateWin10
             return ret != null ? GetBool(ret[0]) : false;
         }
 
-        public int SetRuleApproval(Priv10Engine.ApprovalMode Mode, FirewallRule rule)
+        public int SetRuleApproval(Priv10Engine.ApprovalMode Mode, FirewallRuleEx rule)
         {
             List<byte[]> args = new List<byte[]>();
             args.Add(PutStr(Mode));
@@ -430,7 +431,7 @@ namespace PrivateWin10
             return ret != null ? GetDomains(ret[0]) : null;
         }
 
-        public List<UwpFunc.AppInfo> GetAllAppPkgs(bool bReload = false)
+        public Dictionary<string, UwpFunc.AppInfo> GetAllAppPkgs(bool bReload = false)
         {
             List<byte[]> args = new List<byte[]>();
             args.Add(PutBool(bReload));
@@ -478,6 +479,7 @@ namespace PrivateWin10
         public List<DomainFilter> GetDomainFilter(DnsBlockList.Lists List)
         {
             List<byte[]> args = new List<byte[]>();
+            args.Add(PutStr(List));
             List<byte[]> ret = RemoteExec("GetDomainFilter", args);
             return ret != null ? GetFilterList(ret[0]) : null;
         }

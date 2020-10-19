@@ -67,7 +67,6 @@
     <Compile Include="API\ServiceHelper.cs" />
     <Compile Include="API\TokenManipulator.cs" />
     <Compile Include="API\UwpFunc.cs" />
-    <Compile Include="API\WindowsFirewall.cs" />
     <Compile Include="API\WinVer.cs" />
     <Compile Include="Common\AppLog.cs" />
     <Compile Include="Common\ClonableDictionary.cs" />

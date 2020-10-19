@@ -1,31 +1,38 @@
 ﻿using MiscHelpers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Runtime.Serialization;
 
-namespace PrivateWin10
+namespace WinFirewallAPI
 {
     [Serializable()]
+    [DataContract(Name = "FirewallEvent", Namespace = "http://schemas.datacontract.org/")]
     public class FirewallEvent : EventArgs
     {
+        [DataMember()]
         public int ProcessId;
+        [DataMember()]
         public string ProcessFileName;
 
+        [DataMember()]
         public FirewallRule.Actions Action;
 
+        [DataMember()]
         public UInt32 Protocol;
+        [DataMember()]
         public FirewallRule.Directions Direction;
+        [DataMember()]
         public IPAddress LocalAddress;
+        [DataMember()]
         public UInt16 LocalPort;
+        [DataMember()]
         public IPAddress RemoteAddress;
+        [DataMember()]
         public UInt16 RemotePort;
 
+        [DataMember()]
         public DateTime TimeStamp;
     }
 
@@ -227,7 +234,7 @@ namespace PrivateWin10
                 }
                 else if (PropertyValues[(int)EventProperties.Direction].ToString() == "%%14593")
                 {
-                    args.Direction = FirewallRule.Directions.Outboun;
+                    args.Direction = FirewallRule.Directions.Outbound;
                     args.LocalAddress = IPAddress.Parse(PropertyValues[(int)EventProperties.SourceAddress].ToString());
                     args.LocalPort = (UInt16)MiscFunc.parseInt(PropertyValues[(int)EventProperties.SourcePort].ToString());
                     args.RemoteAddress = IPAddress.Parse(PropertyValues[(int)EventProperties.DestAddress].ToString());

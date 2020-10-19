@@ -135,13 +135,13 @@ namespace PrivateWin10
                 tweak.Status = status;
                 tweak.LastChangeTime = DateTime.Now;
 
-                Dictionary<string, string> Params = new Dictionary<string, string>();
-                Params.Add("Name", tweak.Name);
-                Params.Add("Group", tweak.Group);
-                Params.Add("Category", tweak.Category);
-
                 if (tweak.Status == false && tweak.State != Tweak.States.Unsellected)
                 {
+                    Dictionary<string, string> Params = new Dictionary<string, string>();
+                    Params.Add("Name", tweak.Name);
+                    Params.Add("Group", tweak.Group);
+                    Params.Add("Category", tweak.Category);
+
                     TweakEventArgs.State state = TweakEventArgs.State.eChanged;
 
                     if (fixChanged == true && tweak.FixFailed == false)
@@ -162,10 +162,11 @@ namespace PrivateWin10
                     }
                     else
                     {
-                        Priv10Logger.LogWarning(Priv10Logger.EventIDs.TweakChanged, Params, Priv10Logger.EventFlags.Notifications, Translate.fmt("msg_tweak_un_done", tweak.Name, tweak.Group));
+                        Priv10Logger.LogWarning(Priv10Logger.EventIDs.TweakChanged, Params, Priv10Logger.EventFlags.AppLogEntries, Translate.fmt("msg_tweak_un_done", tweak.Name, tweak.Group));
                     }
 
-                    TweakChanged?.Invoke(this, new TweakEventArgs() { tweak = tweak, state = state });
+                    if(state == TweakEventArgs.State.eChanged)
+                        TweakChanged?.Invoke(this, new TweakEventArgs() { tweak = tweak, state = state });
                 }
             }
             return status;

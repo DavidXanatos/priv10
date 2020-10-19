@@ -1,4 +1,5 @@
 ﻿using MiscHelpers;
+using PrivateAPI;
 using PrivateWin10.Windows;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WinFirewallAPI;
 
 namespace PrivateWin10.Controls
 {
@@ -97,9 +99,9 @@ namespace PrivateWin10.Controls
             InitializeComponent();
 
             int CustomMode = 0;
-            if (firewallPreset.OnState == ProgramSet.Config.AccessLevels.CustomConfig)
+            if (firewallPreset.OnState == ProgramConfig.AccessLevels.CustomConfig)
                 CustomMode |= 1;
-            if (firewallPreset.OffState == ProgramSet.Config.AccessLevels.CustomConfig)
+            if (firewallPreset.OffState == ProgramConfig.AccessLevels.CustomConfig)
                 CustomMode |= 2;
 
             PrepPresetCmb(cmbPreset, this, CustomMode);
@@ -135,8 +137,34 @@ namespace PrivateWin10.Controls
             }
 
             label.Content = App.GetResourceStr(FwRule.Name);
-            info.Text = App.GetResourceStr(FwRule.GetDescription(true));
+            info.Text = App.GetResourceStr(GetRuleDescription(FwRule, true));
             info.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(FwRule.Action == FirewallRule.Actions.Block ? "#ffe6e9" : "#e9fce9"));
+        }
+
+        public string GetRuleDescription(FirewallRuleEx rule, bool AlwaysMake = false)
+        {
+            if (rule.Description != null && rule.Description.Length > 0 && !AlwaysMake)
+                return rule.Description;
+
+            string DescrStr = "";
+
+            switch (rule.Action)
+            {
+                case FirewallRule.Actions.Allow: DescrStr += Translate.fmt("str_allow") + " "; break;
+                case FirewallRule.Actions.Block: DescrStr += Translate.fmt("str_block") + " "; break;
+            }
+
+            switch (rule.Direction)
+            {
+                case FirewallRule.Directions.Inbound: DescrStr += Translate.fmt("str_inbound") + " "; break;
+                case FirewallRule.Directions.Outbound: DescrStr += Translate.fmt("str_outbound") + " "; break;
+            }
+
+            DescrStr += ProgramControl.FormatProgID(rule.ProgID);
+
+            // todo: add more info
+
+            return DescrStr;
         }
 
         /*private void toggle_Click(object sender, RoutedEventArgs e)

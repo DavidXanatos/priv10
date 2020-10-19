@@ -6,51 +6,52 @@
              xmlns:local="clr-namespace:PrivateWin10.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="400">
-    <Grid>
-        <Grid Margin="2,0,2,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-                <DataGrid x:Name="tweakGrid" AutoGenerateColumns="False" IsReadOnly="true" HorizontalScrollBarVisibility="Visible" GridLinesVisibility="All" >
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" />
-                        <DataGridTextColumn Header="Address:Port" Binding="{Binding Address}" />
-                        <DataGridTextColumn Header="Remote Host" Binding="{Binding RemoteHost}" />
-                        <DataGridTextColumn Header="Time Stamp" Binding="{Binding TimeStamp}" />
-                        <DataGridTextColumn Header="Process ID" Binding="{Binding ProcessID}" />
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+    <Grid Margin="2,0,2,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <!--TextBlock Grid.Row="0" Margin="10" Name="lblGuide" TextWrapping="Wrap" >
+                Some Firewall rules have been changed by a 3rd party application, 
+                please review the changed rules and approve or reject the changes.
+            </-->
+        <Grid Grid.Row="1">
+            <DataGrid x:Name="tweaksGrid" AutoGenerateColumns="False" IsReadOnly="true" HorizontalScrollBarVisibility="Visible" GridLinesVisibility="All" MouseDoubleClick="TweaksGrid_MouseDoubleClick" MouseDown="TweaksGrid_MouseDown">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Group" Binding="{Binding Group}" />
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                    <DataGridTextColumn Header="Category" Binding="{Binding Category}" />
+                    <DataGridTextColumn Header="State" Binding="{Binding State}" />
+                    <DataGridTextColumn Header="Time Stamp" Binding="{Binding TimeStamp}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+        <GroupBox Grid.Row="2" Header="Details" Name="lblDetails"  Margin="0,0,0,4">
+            <TextBox x:Name="info" Height="70" HorizontalAlignment="Stretch" Margin="2,2,2,2" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" IsReadOnly="True"/>
+        </GroupBox>
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-                <local:SplitButton Grid.Column="0" Margin="2,2,2,2" HorizontalAlignment="Left" VerticalAlignment="Top">
-                    <local:SplitButton.MenuItemsSource>
-                        <MenuItem Header="Ignore All Changed"/>
-                    </local:SplitButton.MenuItemsSource>
-                    <TextBlock Padding="4" Text="Ignore" />
-                </local:SplitButton>
+            <local:SplitButton x:Name="IgnoreSB" Grid.Column="0" Margin="2,2,2,2" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <local:SplitButton.MenuItemsSource>
+                    <MenuItem Header="Ignore All Changed" Click="BtnIgnoreAll_Click"/>
+                </local:SplitButton.MenuItemsSource>
+                <TextBlock Padding="4" Text="Ignore" MouseLeftButtonDown="BtnIgnore_Click" />
+            </local:SplitButton>
 
-                <local:SplitButton Grid.Column="1" Margin="2,2,2,2" HorizontalAlignment="Right" VerticalAlignment="Top">
-                    <local:SplitButton.MenuItemsSource>
-                        <MenuItem Header="Approve All Changed"/>
-                    </local:SplitButton.MenuItemsSource>
-                    <TextBlock Padding="4" Text="Approve" />
-                </local:SplitButton>
 
-                <local:SplitButton Grid.Column="2" Margin="2,2,2,2" HorizontalAlignment="Right" VerticalAlignment="Top">
-                    <local:SplitButton.MenuItemsSource>
-                        <MenuItem Header="Reject All Changed" />
-                    </local:SplitButton.MenuItemsSource>
-                    <TextBlock Padding="4" Text="Reject" />
-                </local:SplitButton>
-            </Grid>
+            <local:SplitButton x:Name="RestoreSB" Grid.Column="2" Margin="2,2,2,2" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <local:SplitButton.MenuItemsSource>
+                    <MenuItem Header="Restore All Tweaks" Click="BtnRestoreAll_Click" />
+                </local:SplitButton.MenuItemsSource>
+                <TextBlock Padding="4" Text="Restore" MouseLeftButtonDown="BtnRestore_Click" />
+            </local:SplitButton>
         </Grid>
     </Grid>
 </UserControl>

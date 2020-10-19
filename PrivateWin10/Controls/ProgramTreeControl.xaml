@@ -91,12 +91,12 @@
                                                     <DataTrigger Binding="{Binding AccessTag}" Value="FullAccess">
                                                         <Setter Property="TextBlock.Background" Value="LightGreen"></Setter>
                                                     </DataTrigger>
-                                                    <!--DataTrigger Binding="{Binding AccessTag}" Value="OutBoundAccess">
+                                                    <DataTrigger Binding="{Binding AccessTag}" Value="OutBoundAccess">
                                                         <Setter Property="TextBlock.Background" Value="YellowGreen"></Setter>
-                                                    </>
+                                                    </DataTrigger>
                                                     <DataTrigger Binding="{Binding AccessTag}" Value="InBoundAccess">
                                                         <Setter Property="TextBlock.Background" Value="Goldenrod"></Setter>
-                                                    </DataTrigger-->
+                                                    </DataTrigger>
                                                     <DataTrigger Binding="{Binding AccessTag}" Value="CustomConfig">
                                                         <Setter Property="TextBlock.Background" Value="Gold"></Setter>
                                                     </DataTrigger>

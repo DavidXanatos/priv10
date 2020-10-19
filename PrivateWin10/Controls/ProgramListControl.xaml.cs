@@ -1,4 +1,5 @@
 ﻿using MiscHelpers;
+using PrivateAPI;
 using PrivateWin10.Pages;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WinFirewallAPI;
 
 namespace PrivateWin10.Controls
 {
@@ -176,8 +178,8 @@ namespace PrivateWin10.Controls
             //  && !NetFunc.IsLocalHost(args.entry.FwEvent.RemoteAddress))
             //    item.SetError(true);
 
-            if ((chkNoLocal.IsChecked != true || (!NetFunc.IsLocalHost(args.entry.FwEvent.RemoteAddress) && !NetFunc.IsMultiCast(args.entry.FwEvent.RemoteAddress)))
-             && (chkNoLan.IsChecked != true || !FirewallRule.MatchAddress(args.entry.FwEvent.RemoteAddress, FirewallRule.AddrKeywordLocalSubnet))
+            if ((chkNoLocal.IsChecked != true || (args.entry.Realm != Program.LogEntry.Realms.LocalHost && args.entry.Realm != Program.LogEntry.Realms.MultiCast))
+             && (chkNoLan.IsChecked != true || args.entry.Realm != Program.LogEntry.Realms.LocalArea)
              && args.entry.FwEvent.ProcessId != ProcFunc.CurID) // Note: When DNS proxy is nabled we are always very active, so ignore it
             {
                 switch (args.entry.FwEvent.Action)

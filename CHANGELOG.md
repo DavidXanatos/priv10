@@ -3,6 +3,30 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.83] - 2020-10-19
+
+### Added
+- added fitlering mode indocator to tray
+- tweak change notification are not displayed in an own notification window tab
+- added new access presets InBoundAccess and OutBoundAccess
+- added rule hit counter
+- added protocol filter to connection log
+
+### Changed
+- cleaned up some old code
+- now all new connection notifications can be discarded at once
+- moved firewall API to own library
+- refactored the code, improved IPC structure
+
+### Fixed
+- fixed IPC issue with DNS blocklist
+- fixed issues with programwnd
+- fixed some app package ID's not being resolved
+- fixed high cpu load when sorting by program column
+- fixed potentiel crash in GetAppResourceStr
+
+
+
 ## [0.82b] - 2020-10-17
 
 ### Changed
@@ -10,7 +34,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - fied resource lea when flashign tray icon
-
 
 
 

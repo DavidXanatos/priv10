@@ -1,23 +1,26 @@
 ﻿using Microsoft.Win32;
 using MiscHelpers;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PrivateWin10
+namespace WinFirewallAPI
 {
     [Serializable()]
+    [DataContract(Name = "FirewallEvent", Namespace = "http://schemas.datacontract.org/")]
     public class RuleChangedEvent : EventArgs
     {
+        [DataMember()]
         public FirewallGuard.EventIDs EventID;
 
+        [DataMember()]
         public string ProfileChanged;
+        [DataMember()]
         public string RuleId;
+        [DataMember()]
         public string RuleName;
     }
 

@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows;
 using System.ComponentModel;
 using MiscHelpers;
+using PrivateAPI;
 
 namespace PrivateWin10.Controls
 {
@@ -26,14 +27,14 @@ namespace PrivateWin10.Controls
                 return "";
             switch (progSet.config.GetAccess())
             {
-                case ProgramSet.Config.AccessLevels.FullAccess:     return Translate.fmt("acl_allow");
-                //case ProgramSet.Config.AccessLevels.OutBoundAccess: return Translate.fmt("acl_outbound");
-                //case ProgramSet.Config.AccessLevels.InBoundAccess:  return Translate.fmt("acl_inbound");
-                case ProgramSet.Config.AccessLevels.CustomConfig:   return Translate.fmt("acl_edit");
-                case ProgramSet.Config.AccessLevels.LocalOnly:      return Translate.fmt("acl_lan");
-                case ProgramSet.Config.AccessLevels.BlockAccess:    return Translate.fmt("acl_block");
+                case ProgramConfig.AccessLevels.FullAccess:     return Translate.fmt("acl_allow");
+                case ProgramConfig.AccessLevels.OutBoundAccess: return Translate.fmt("acl_outbound");
+                case ProgramConfig.AccessLevels.InBoundAccess:  return Translate.fmt("acl_inbound");
+                case ProgramConfig.AccessLevels.CustomConfig:   return Translate.fmt("acl_edit");
+                case ProgramConfig.AccessLevels.LocalOnly:      return Translate.fmt("acl_lan");
+                case ProgramConfig.AccessLevels.BlockAccess:    return Translate.fmt("acl_block");
                 default:
-                case ProgramSet.Config.AccessLevels.Unconfigured:   return Translate.fmt("acl_none");
+                case ProgramConfig.AccessLevels.Unconfigured:   return Translate.fmt("acl_none");
             }
         }
 
@@ -50,7 +51,7 @@ namespace PrivateWin10.Controls
         public override UInt64 UpTotal => (ulong)progSet.Programs.Values.Sum(t => (long)t.TotalUpload);
         public override UInt64 DownTotal => (ulong)progSet.Programs.Values.Sum(t => (long)t.TotalDownload);
 
-        public override string Program => progSet.Programs.Count == 1 ? progSet.Programs.Values.First().ID.FormatString() : Translate.fmt("lbl_prog_set");
+        public override string Program => progSet.Programs.Count == 1 ? ProgramControl.FormatProgID(progSet.Programs.Values.First().ID) : Translate.fmt("lbl_prog_set");
         // columns END
 
         //private String _sortKey;

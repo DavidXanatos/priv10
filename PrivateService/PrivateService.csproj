@@ -69,16 +69,9 @@
     </Compile>
     <Compile Include="Core\ProcessMonitor.cs" />
     <Compile Include="Core\Program.cs" />
-    <Compile Include="Core\ProgramID.cs" />
     <Compile Include="Core\ProgramList.cs" />
     <Compile Include="Core\ProgramSet.cs" />
-    <Compile Include="Core\WindowsFirewall\FirewallGuard.cs" />
-    <Compile Include="Core\WindowsFirewall\FirewallManager.cs" />
-    <Compile Include="Core\WindowsFirewall\FirewallMonitor.cs" />
-    <Compile Include="Core\WindowsFirewall\FirewallRule.cs" />
-    <Compile Include="Core\WindowsFirewall\FirewallRuleEx.cs" />
-    <Compile Include="Core\WindowsFirewall\WinNetFwAPI.cs" />
-    <Compile Include="Core\WindowsFirewall\WinNetFwCom.cs" />
+    <Compile Include="Core\FirewallManager.cs" />
     <Compile Include="IPC\Priv10Host.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -108,17 +101,12 @@
       <Project>{35fb284f-77e2-4336-b60d-2cd39522b014}</Project>
       <Name>TweakEngine</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WinFirewallAPI\WinFirewallAPI.csproj">
+      <Project>{3a5cbf66-2e66-4ce1-aa89-7af50d9db29b}</Project>
+      <Name>WinFirewallAPI</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <COMReference Include="NetFwTypeLib">
-      <Guid>{58FBCF7C-E7A9-467C-80B3-FC65E8FCCA08}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
     <COMReference Include="NETWORKLIST">
       <Guid>{DCB00D01-570F-4A9B-8D69-199FDBA5723B}</Guid>
       <VersionMajor>1</VersionMajor>

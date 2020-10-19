@@ -1,5 +1,6 @@
 ﻿using ICSharpCode.TreeView;
 using MiscHelpers;
+using PrivateAPI;
 using PrivateWin10.Pages;
 using System;
 using System.Collections.Generic;
@@ -114,16 +115,16 @@ namespace PrivateWin10.Controls
             contextMenu.Items.Add(new Separator());
 
             menuAccess = WpfFunc.AddMenu(contextMenu, Translate.fmt("btn_access_prog"), null, TryFindResource("Icon_NetAccess"));
-            menuAccessNone = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_none"), null, null, ProgramSet.Config.AccessLevels.Unconfigured);
-            menuAccessAllow = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_allow"), null, null, ProgramSet.Config.AccessLevels.FullAccess);
-            menuAccessCustom = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_edit"), null, null, ProgramSet.Config.AccessLevels.CustomConfig);
-            //menuAccessIn = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_inbound"), null, null, ProgramSet.Config.AccessLevels.InBoundAccess);
-            //menuAccessOut = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_outbound"), null, null, ProgramSet.Config.AccessLevels.OutBoundAccess);
-            menuAccessLan = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_lan"), null, null, ProgramSet.Config.AccessLevels.LocalOnly);
-            menuAccessBlock = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_block"), null, null, ProgramSet.Config.AccessLevels.BlockAccess);
+            menuAccessNone = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_none"), null, null, ProgramConfig.AccessLevels.Unconfigured);
+            menuAccessAllow = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_allow"), null, null, ProgramConfig.AccessLevels.FullAccess);
+            menuAccessCustom = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_edit"), null, null, ProgramConfig.AccessLevels.CustomConfig);
+            menuAccessIn = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_inbound"), null, null, ProgramConfig.AccessLevels.InBoundAccess);
+            menuAccessOut = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_outbound"), null, null, ProgramConfig.AccessLevels.OutBoundAccess);
+            menuAccessLan = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_lan"), null, null, ProgramConfig.AccessLevels.LocalOnly);
+            menuAccessBlock = WpfFunc.AddMenu(menuAccess, Translate.fmt("acl_block"), null, null, ProgramConfig.AccessLevels.BlockAccess);
             foreach (MenuItem item in menuAccess.Items)
             {
-                item.Background = ProgramControl.GetAccessColor((ProgramSet.Config.AccessLevels)item.Tag);
+                item.Background = ProgramControl.GetAccessColor((ProgramConfig.AccessLevels)item.Tag);
                 //item.IsCheckable = true;
             }
 

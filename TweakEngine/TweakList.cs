@@ -381,6 +381,35 @@ namespace TweakEngine
 
                 return Name != null && Type != TweakType.None && winVer != null;
             }
+
+            public string GetInfoStr()
+            {
+                string infoStr = "";
+                switch (Type)
+                {
+                    case TweakList.TweakType.SetRegistry:
+                    case TweakList.TweakType.SetGPO:
+                        infoStr += Path + "\r\n";
+                        infoStr += Key + " = " + Value + "\r\n";
+                        break;
+                    case TweakList.TweakType.DisableTask:
+                        infoStr += "Disable Scheduled Task: " + Path + "\\" + Key + "\r\n";
+                        break;
+                    case TweakList.TweakType.DisableService:
+                        infoStr += "Disable Service: " + Key + "\r\n";
+                        break;
+                    case TweakList.TweakType.BlockFile:
+                        infoStr += "Dissable Access to: " + Path + "\r\n";
+                        break;
+                    //case TweakType.UseFirewall:
+                    //    infoStr += "Set Firewal roule" + "\r\n";
+                    //    break;
+                    default:
+                        infoStr = "Unknown Tweak Type";
+                        break;
+                }
+                return infoStr;
+            }
         }
     }
 }

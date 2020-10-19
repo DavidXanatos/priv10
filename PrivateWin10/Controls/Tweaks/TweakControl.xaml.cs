@@ -36,33 +36,7 @@ namespace PrivateWin10
 
             //OnStatusChanged(null, null);
 
-            string infoStr = "";
-
-            switch (tweak.Type)
-            {
-                case TweakList.TweakType.SetRegistry:
-                case TweakList.TweakType.SetGPO:
-                    infoStr += tweak.Path + "\r\n";
-                    infoStr += tweak.Key + " = " + tweak.Value + "\r\n";
-                    break;
-                case TweakList.TweakType.DisableTask:
-                    infoStr += "Disable Scheduled Task: " + tweak.Path + "\\" + tweak.Key + "\r\n";
-                    break;
-                case TweakList.TweakType.DisableService:
-                    infoStr += "Disable Service: " + tweak.Key + "\r\n";
-                    break;
-                case TweakList.TweakType.BlockFile:
-                    infoStr += "Dissable Access to: " + tweak.Path + "\r\n";
-                    break;
-                //case TweakType.UseFirewall:
-                //    infoStr += "Set Firewal roule" + "\r\n";
-                //    break;
-                default:
-                    infoStr = "Unknown Tweak Type";
-                    break;
-            }
-
-            info.Text = infoStr;
+            info.Text = tweak.GetInfoStr();
 
             toggle.Click += new RoutedEventHandler(toggle_Click);
 

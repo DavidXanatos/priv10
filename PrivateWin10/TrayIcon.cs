@@ -8,6 +8,7 @@ using MessageBox = System.Windows.MessageBox;
 using Application = System.Windows.Application;
 using MiscHelpers;
 using System.Drawing;
+using PrivateAPI;
 
 namespace PrivateWin10
 {
@@ -29,13 +30,22 @@ namespace PrivateWin10
 
         DispatcherTimer mTimer = new DispatcherTimer();
 
-        Icon icon;
-        Icon icon_ex;
+        Bitmap mIcon;
+        Bitmap mIcon_ex;
+        Bitmap mIcon_red;
+        Bitmap mIcon_yellow;
+        Bitmap mIcon_green;
+        Bitmap mIcon_x;
+
+        int TickTock = 0;
+        Bitmap mIconImage = null;
+        Bitmap mIconImageEx = null;
 
         public TrayIcon()
         {
             this.components = new Container();
             this.contextMenu = new ContextMenu();
+
 
             this.menuBlock = new MenuItem() { Text = Translate.fmt("mnu_block") };
             this.menuBlock.Click += new System.EventHandler(menuBlock_Click);
@@ -49,13 +59,9 @@ namespace PrivateWin10
             this.menuFwDisabled = new MenuItem() { Text = Translate.fmt("mnu_open_fw") };
             this.menuFwDisabled.Click += new System.EventHandler(menuMode_Click);
 
-            UpdateFwMode();
-
             this.menuPresets = new MenuItem() { Text = Translate.fmt("mnu_presets") };
 
             App.client.SettingsChangedNotification += Client_SettingsChangedNotification;
-
-            UpdatePresets();
 
             App.presets.PresetChange += OnPresetChanged;
 
@@ -64,16 +70,16 @@ namespace PrivateWin10
             this.menuExit.Click += new System.EventHandler(this.menuExit_Click);
 
             // Initialize contextMenu1
-            this.contextMenu.MenuItems.AddRange(new MenuItem[] { 
-                this.menuBlock, 
-                new MenuItem("-"), 
-                this.menuWhitelist, 
-                this.menuBlacklist, 
-                this.menuFwDisabled, 
-                new MenuItem("-"),  
-                this.menuPresets, 
-                new MenuItem("-"), 
-                this.menuExit 
+            this.contextMenu.MenuItems.AddRange(new MenuItem[] {
+                this.menuBlock,
+                new MenuItem("-"),
+                this.menuWhitelist,
+                this.menuBlacklist,
+                this.menuFwDisabled,
+                new MenuItem("-"),
+                this.menuPresets,
+                new MenuItem("-"),
+                this.menuExit
             });
 
             // Create the NotifyIcon.
@@ -95,26 +101,76 @@ namespace PrivateWin10
             notifyIcon.DoubleClick += new System.EventHandler(this.notifyIcon_DoubleClick);
             notifyIcon.Click += new System.EventHandler(this.notifyIcon_Click);
 
-            System.IO.Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/PrivateWin10;component/Resources/icons8-major.png")).Stream;
-            using (var bitmap = new Bitmap(iconStream))
-            {
-                var iconHandle = bitmap.GetHicon();
-                icon = Icon.FromHandle(iconHandle);
-            }
 
-            System.IO.Stream iconStream_ex = Application.GetResourceStream(new Uri("pack://application:,,,/PrivateWin10;component/Resources/icons8-major_ex_red.png")).Stream;
-            using (var bitmap_ex = new Bitmap(iconStream_ex))
-            {
-                var iconHandle_ex = bitmap_ex.GetHicon();
-                icon_ex = Icon.FromHandle(iconHandle_ex);
-            }
+            string prefix = "pack://application:,,,/PrivateWin10;component/Resources/";
+            using (System.IO.Stream iconStream = Application.GetResourceStream(new Uri(prefix + "icons8-major.png")).Stream)
+                mIcon = new Bitmap(iconStream);
+            using (System.IO.Stream iconStream = Application.GetResourceStream(new Uri(prefix + "icon_red_ex.png")).Stream)
+                mIcon_ex = new Bitmap(iconStream);
+            using (System.IO.Stream iconStream = Application.GetResourceStream(new Uri(prefix + "icon_red_dot.png")).Stream)
+                mIcon_red = new Bitmap(iconStream);
+            using (System.IO.Stream iconStream = Application.GetResourceStream(new Uri(prefix + "icon_yellow_dot.png")).Stream)
+                mIcon_yellow = new Bitmap(iconStream);
+            using (System.IO.Stream iconStream = Application.GetResourceStream(new Uri(prefix + "icon_green_dot.png")).Stream)
+                mIcon_green = new Bitmap(iconStream);
+            using (System.IO.Stream iconStream = Application.GetResourceStream(new Uri(prefix + "icon_red_x.png")).Stream)
+                mIcon_x = new Bitmap(iconStream);
+
+
+            UpdateFwMode();
+            UpdatePresets();
+
 
             mTimer.Tick += new EventHandler(OnTimerTick);
             mTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
             mTimer.Start();
         }
 
-        // todo dispose and DestroyIcon(newIcon.Handle); 
+        private void UpdateIcon(FirewallManager.FilteringModes mode = FirewallManager.FilteringModes.Unknown)
+        {
+            string InfoText = "";
+
+            mIconImage = new Bitmap(mIcon);
+            if (App.GetConfigInt("Firewall", "Enabled", 0) != 0)
+            {
+                using (Graphics graphics = Graphics.FromImage(mIconImage))
+                {
+                    if (this.menuBlock.Checked == true)
+                    {
+                        graphics.DrawImage(mIcon_x, 0, 0);
+                        InfoText = Translate.fmt("inet_blocked");
+                    }
+                    else
+                    {
+                        switch (mode)
+                        {
+                            case FirewallManager.FilteringModes.WhiteList:
+                                graphics.DrawImage(mIcon_green, 0, 0);
+                                InfoText = Translate.fmt("inet_firewall", Translate.fmt("btn_whitelist"));
+                                break;
+                            case FirewallManager.FilteringModes.BlackList:
+                                graphics.DrawImage(mIcon_yellow, 0, 0);
+                                InfoText = Translate.fmt("inet_firewall", Translate.fmt("btn_blacklist"));
+                                break;
+                            case FirewallManager.FilteringModes.NoFiltering:
+                                graphics.DrawImage(mIcon_red, 0, 0);
+                                InfoText = Translate.fmt("inet_open");
+                                break;
+                        }
+                    }
+                }
+
+                InfoText = " - " + InfoText;
+            }
+
+            notifyIcon.Text = FileVersionInfo.GetVersionInfo(App.exePath).FileDescription + InfoText;
+
+            mIconImageEx = new Bitmap(mIconImage);
+            using (Graphics graphics = Graphics.FromImage(mIconImageEx))
+                graphics.DrawImage(mIcon_ex, 0, 0);
+
+            TickTock = 1;
+        }
 
         private void Client_SettingsChangedNotification(object sender, EventArgs e)
         {
@@ -129,8 +185,7 @@ namespace PrivateWin10
             if (prog == null)
                 this.menuBlock.Enabled = false;
             else
-                this.menuBlock.Checked = prog.config.CurAccess == ProgramSet.Config.AccessLevels.BlockAccess;
-
+                this.menuBlock.Checked = prog.config.CurAccess == ProgramConfig.AccessLevels.BlockAccess;
 
             UpdateMode();
         }
@@ -142,12 +197,16 @@ namespace PrivateWin10
             this.menuWhitelist.Checked = mode == FirewallManager.FilteringModes.WhiteList;
             this.menuBlacklist.Checked = mode == FirewallManager.FilteringModes.BlackList;
             this.menuFwDisabled.Checked = mode == FirewallManager.FilteringModes.NoFiltering;
+
+            UpdateIcon(mode);
         }
+
         private void menuBlock_Click(object Sender, EventArgs e)
         {
             this.menuBlock.Checked = !this.menuBlock.Checked;
 
             App.client.BlockInternet(this.menuBlock.Checked);
+            UpdateFwMode();
         }
 
         private void menuMode_Click(object Sender, EventArgs e)
@@ -201,7 +260,9 @@ namespace PrivateWin10
             App.presets.SetPreset((Guid)((MenuItem)Sender).Tag, !((MenuItem)Sender).Checked);
         }
 
-        int TickTock = 0;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        extern static bool DestroyIcon(IntPtr handle);
 
         private void OnTimerTick(object sender, EventArgs e)
         {
@@ -218,15 +279,19 @@ namespace PrivateWin10
                     App.MainWnd.notificationWnd.ShowWnd();
             }
 
-            if (TickTock != 0)
-            {
+            IntPtr icon = IntPtr.Zero;
+            if (TickTock != 0) {
                 TickTock = 0;
-                notifyIcon.Icon = icon;
+                icon = mIconImage.GetHicon();
             }
-            else if(!App.MainWnd.notificationWnd.IsEmpty())
-            {
+            else if(!App.MainWnd.notificationWnd.IsEmpty()) {
                 TickTock = 1;
-                notifyIcon.Icon = icon_ex;
+                icon = mIconImageEx.GetHicon();
+            }
+
+            if (icon != IntPtr.Zero) {
+                notifyIcon.Icon = Icon.FromHandle(icon);
+                DestroyIcon(icon);
             }
         }
 

@@ -178,6 +178,55 @@ namespace PrivateAPI
             return list;
         }
 
+        public static byte[] PutMap<T, U>(Dictionary<T, U> map, Func<T, byte[]> store_key, Func<U, byte[]> store_val)
+        {
+            if (map == null)
+                return new byte[0];
+            using (MemoryStream dataStream = new MemoryStream())
+            {
+                using (var dataWriter = new BinaryWriter(dataStream))
+                {
+                    dataWriter.Write(map.Count);
+
+                    foreach (var item in map)
+                    {
+                        byte[] key_data = store_key(item.Key);
+                        dataWriter.Write(key_data.Length);
+                        dataWriter.Write(key_data);
+
+                        byte[] val_data = store_val(item.Value);
+                        dataWriter.Write(val_data.Length);
+                        dataWriter.Write(val_data);
+                    }
+                }
+                return dataStream.ToArray();
+            }
+        }
+
+        public static Dictionary<T, U> GetMap<T, U>(byte[] data, Func<byte[], T> load_key, Func<byte[], U> load_val)
+        {
+            if (data.Length == 0)
+                return null;
+            Dictionary<T, U> map = new Dictionary<T, U>();
+            using (MemoryStream dataStream = new MemoryStream(data))
+            {
+                var dataReader = new BinaryReader(dataStream);
+
+                int count = dataReader.ReadInt32();
+                for (int i = 0; i < count; i++)
+                {
+                    int key_length = dataReader.ReadInt32();
+                    T key = load_key(dataReader.ReadBytes(key_length));
+
+                    int val_length = dataReader.ReadInt32();
+                    U value = load_val(dataReader.ReadBytes(val_length));
+
+                    map.Add(key, value);
+                }
+            }
+            return map;
+        }
+
         public static byte[] PutGuidMMap<T>(Dictionary<Guid, List<T>> MMap, Func<T, byte[]> store)
         {
             if (MMap == null)
@@ -195,9 +244,11 @@ namespace PrivateAPI
                         foreach (T item in list.Value)
                         {
                             dataWriter.Write(list.Key.ToByteArray());
+
                             byte[] data = store(item);
                             dataWriter.Write(data.Length);
                             dataWriter.Write(data);
+
                             counter++;
                         }
                     }

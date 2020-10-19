@@ -110,10 +110,11 @@ namespace MiscHelpers
             return sResult;
         }
 
+        private Windows.Management.Deployment.PackageManager packageManager = new Windows.Management.Deployment.PackageManager();
+
+        /*
         private Dictionary<string, UwpFunc.AppInfo> AppInfosBySid = new Dictionary<string, UwpFunc.AppInfo>();
         private ReaderWriterLockSlim AppInfosBySidLock = new ReaderWriterLockSlim();
-
-        private Windows.Management.Deployment.PackageManager packageManager = new Windows.Management.Deployment.PackageManager();
 
         public UwpFunc.AppInfo GetAppInfoBySid(string sid)
         {
@@ -269,11 +270,9 @@ namespace MiscHelpers
                 {
                     if (!AppInfos.ContainsKey(appSID))
                         AppInfos.Add(appSID, info);
-                    /*
-                     UwpFunc.AppInfo old_info;
-                    if (AppInfos.TryGetValue(appSID, out old_info))
-                        AppLog.Debug("Warning an app with the SID: {0} is already listed", appSID);
-                     */
+                    // UwpFunc.AppInfo old_info;
+                    //if (AppInfos.TryGetValue(appSID, out old_info))
+                    //    AppLog.Debug("Warning an app with the SID: {0} is already listed", appSID);
                 }
             }
 
@@ -295,6 +294,7 @@ namespace MiscHelpers
             AppInfosBySidLock.ExitReadLock();
             return Apps;
         }
+        */
 
         //////////////////////////////////////////////////////////////////////////////////////////////
         // App resource handling
@@ -304,13 +304,17 @@ namespace MiscHelpers
         {
             // Note: PackageManager requirers admin privilegs
 
-            var AppResource = TextHelpers.Split2(resourcePath.Substring(2, resourcePath.Length - 3), "?");
-            var package = packageManager.FindPackage(AppResource.Item1);
-            if (package != null)
+            try
             {
-                string pathToPri = Path.Combine(package.InstalledLocation.Path, "resources.pri");
-                return MiscFunc.GetResourceStr(pathToPri, AppResource.Item2);
+                var AppResource = TextHelpers.Split2(resourcePath.Substring(2, resourcePath.Length - 3), "?");
+                var package = packageManager.FindPackage(AppResource.Item1);
+                if (package != null)
+                {
+                    string pathToPri = Path.Combine(package.InstalledLocation.Path, "resources.pri");
+                    return MiscFunc.GetResourceStr(pathToPri, AppResource.Item2);
+                }
             }
+            catch{ }
 
             return resourcePath;
         }

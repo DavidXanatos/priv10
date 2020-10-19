@@ -65,8 +65,8 @@ namespace PrivateWin10.Windows
             tabItems.Add(this.conTab, new STab() { notify = this.ConNotify, image = this.imgCon });
             this.ruleTab.Header = Translate.fmt("lbl_rule_notify");
             tabItems.Add(this.ruleTab, new STab() { notify = this.RuleNotify, image = this.imgRule });
-            //this.tweakTab.Header = Translate.fmt("lbl_tweak_notify");
-            //tabItems.Add(this.tweakTab, new STab() { notify = this.TweakNotify, image = this.imgTweak });
+            this.tweakTab.Header = Translate.fmt("lbl_tweak_notify");
+            tabItems.Add(this.tweakTab, new STab() { notify = this.TweakNotify, image = this.imgTweak });
 
             foreach (var item in tabItems) {
                 item.Value.notify.Emptied += OnEmptied;
@@ -169,12 +169,12 @@ namespace PrivateWin10.Windows
 
         public void NotifyTweak(TweakManager.TweakEventArgs args)
         {
-            /*this.tweakTab.IsEnabled = true;
+            this.tweakTab.IsEnabled = true;
             tabs.SelectedItem = this.tweakTab;
             tabItems[this.tweakTab].state = STab.EState.eNew;
             //tabItems[this.tweakTab].state = tabs.SelectedItem != this.tweakTab ? STab.EState.eNew : STab.EState.eFilled;
             if (this.TweakNotify.Add(args))
-                ShowWnd();*/
+                ShowWnd();
         }
 
         private void Tabs_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -18,6 +18,8 @@ using System.Windows.Shapes;
 using PrivateWin10.Pages;
 using PrivateWin10.Windows;
 using MiscHelpers;
+using PrivateAPI;
+using WinFirewallAPI;
 
 namespace PrivateWin10.Controls
 {
@@ -78,22 +80,24 @@ namespace PrivateWin10.Controls
             this.cmbOut.Content = Translate.fmt("str_outbound");
             this.chkNoDisabled.ToolTip = Translate.fmt("str_no_disabled");
 
-            this.rulesGrid.Columns[1].Header = Translate.fmt("lbl_name");
-            this.rulesGrid.Columns[2].Header = Translate.fmt("lbl_group");
-            this.rulesGrid.Columns[3].Header = Translate.fmt("lbl_index");
-            this.rulesGrid.Columns[4].Header = Translate.fmt("lbl_status");
-            this.rulesGrid.Columns[5].Header = Translate.fmt("lbl_profiles");
-            this.rulesGrid.Columns[6].Header = Translate.fmt("lbl_action");
-            this.rulesGrid.Columns[7].Header = Translate.fmt("lbl_direction");
-            this.rulesGrid.Columns[8].Header = Translate.fmt("lbl_protocol");
-            this.rulesGrid.Columns[9].Header = Translate.fmt("lbl_remote_ip");
-            this.rulesGrid.Columns[10].Header = Translate.fmt("lbl_local_ip");
-            this.rulesGrid.Columns[11].Header = Translate.fmt("lbl_remote_port");
-            this.rulesGrid.Columns[12].Header = Translate.fmt("lbl_local_port");
-            this.rulesGrid.Columns[13].Header = Translate.fmt("lbl_icmp");
-            this.rulesGrid.Columns[14].Header = Translate.fmt("lbl_interfaces");
-            this.rulesGrid.Columns[15].Header = Translate.fmt("lbl_edge");
-            this.rulesGrid.Columns[16].Header = Translate.fmt("lbl_program");
+            int i = 0;
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_name");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_group");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_index");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_status");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_count");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_profiles");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_action");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_direction");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_protocol");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_remote_ip");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_local_ip");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_remote_port");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_local_port");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_icmp");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_interfaces");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_edge");
+            this.rulesGrid.Columns[++i].Header = Translate.fmt("lbl_program");
 
 
             RulesList = new ObservableCollection<RuleItem>();
@@ -420,7 +424,7 @@ namespace PrivateWin10.Controls
             switch (directionFilter)
             {
                 case FirewallRule.Directions.Inbound: if (item.Rule.Direction != FirewallRule.Directions.Inbound) return false; break;
-                case FirewallRule.Directions.Outboun: if (item.Rule.Direction != FirewallRule.Directions.Outboun) return false; break;
+                case FirewallRule.Directions.Outbound: if (item.Rule.Direction != FirewallRule.Directions.Outbound) return false; break;
             }
 
             if (chkNoDisabled.IsChecked == true && item.Rule.Enabled == false)
@@ -540,7 +544,7 @@ namespace PrivateWin10.Controls
             public ImageSource Icon { get { return ImgFunc.GetIcon(Rule.ProgID.Path, 16); } }
             public string Name { get { return App.GetResourceStr(Rule.Name); } }
 
-            public string Program { get { return Rule.ProgID.FormatString(); } }
+            public string Program { get { return ProgramControl.FormatProgID(Rule.ProgID); } }
 
             public string Grouping
             {
@@ -568,6 +572,8 @@ namespace PrivateWin10.Controls
                     return strStatus;
                 }
             }
+
+            public Int64 HitCount { get { return Rule.HitCount; } }
 
             public string NameColor
             {
@@ -637,7 +643,7 @@ namespace PrivateWin10.Controls
                     switch (Rule.Direction)
                     {
                         case FirewallRule.Directions.Inbound: return Translate.fmt("str_inbound");
-                        case FirewallRule.Directions.Outboun: return Translate.fmt("str_outbound");
+                        case FirewallRule.Directions.Outbound: return Translate.fmt("str_outbound");
                         default: return Translate.fmt("str_undefined");
                     }
                 }

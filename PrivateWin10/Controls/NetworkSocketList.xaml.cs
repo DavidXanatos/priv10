@@ -17,6 +17,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MiscHelpers;
+using PrivateAPI;
+using WinFirewallAPI;
 
 namespace PrivateWin10.Controls
 {
@@ -47,10 +49,10 @@ namespace PrivateWin10.Controls
             //WpfFunc.CmbAdd(sockType, Translate.fmt("filter_sockets_raw"), FirewallPage.FilterPreset.Socket.Raw);
 
             this.txtSockFilter.LabelText = Translate.fmt("lbl_text_filter");
-            this.chkNoINet.ToolTip = Translate.fmt("str_no_inet");
-            this.chkNoLAN.ToolTip = Translate.fmt("str_no_lan");
+            //this.chkNoINet.ToolTip = Translate.fmt("str_no_inet");
+            //this.chkNoLAN.ToolTip = Translate.fmt("str_no_lan");
             //this.chkNoMulti.ToolTip = Translate.fmt("str_no_multi");
-            this.chkNoLocal.ToolTip = Translate.fmt("str_no_local");
+            //this.chkNoLocal.ToolTip = Translate.fmt("str_no_local");
 
             this.socksGrid.Columns[1].Header = Translate.fmt("lbl_name");
             this.socksGrid.Columns[2].Header = Translate.fmt("lbl_time_stamp");
@@ -81,10 +83,11 @@ namespace PrivateWin10.Controls
                 textFilter = App.GetConfig("NetSocks", "Filter", "");
                 txtSockFilter.Text = textFilter;
                 WpfFunc.CmbSelect(sockType, ((FirewallPage.FilterPreset.Socket)App.GetConfigInt("NetSocks", "Types", 0)).ToString());
-                this.chkNoLocal.IsChecked = App.GetConfigInt("NetSocks", "NoLocal", 0) == 1;
+
+                //this.chkNoLocal.IsChecked = App.GetConfigInt("NetSocks", "NoLocal", 0) == 1;
                 //this.chkNoMulti.IsChecked = App.GetConfigInt("NetSocks", "NoMulti", 0) == 1;
-                this.chkNoLAN.IsChecked = App.GetConfigInt("NetSocks", "NoLan", 0) == 1;
-                this.chkNoINet.IsChecked = App.GetConfigInt("NetSocks", "NoINet", 0) == 1;
+                //this.chkNoLAN.IsChecked = App.GetConfigInt("NetSocks", "NoLan", 0) == 1;
+                //this.chkNoINet.IsChecked = App.GetConfigInt("NetSocks", "NoINet", 0) == 1;
             }
             catch { }
 
@@ -122,7 +125,7 @@ namespace PrivateWin10.Controls
                     {
                         oldLog.Remove(socket.guid);
 
-                        Program program = ProgramList.GetProgramFuzzy(prog.Programs, socket.ProgID, ProgramList.FuzzyModes.Any);
+                        Program program = ProgramID.GetProgramFuzzy(prog.Programs, socket.ProgID, ProgramID.FuzzyModes.Any);
 
                         SocketList.Insert(0, new SocketItem(socket, program != null ? program.Description : prog.config.Name));
                     }
@@ -178,10 +181,10 @@ namespace PrivateWin10.Controls
 
         private void SocketTypeFilters_Click(object sender, RoutedEventArgs e)
         {
-            App.SetConfig("NetSocks", "NoLocal", this.chkNoLocal.IsChecked == true ? 1 : 0);
+            //App.SetConfig("NetSocks", "NoLocal", this.chkNoLocal.IsChecked == true ? 1 : 0);
             //App.SetConfig("NetSocks", "NoMulti", this.chkNoMulti.IsChecked == true ? 1 : 0);
-            App.SetConfig("NetSocks", "NoLan", this.chkNoLAN.IsChecked == true ? 1 : 0);
-            App.SetConfig("NetSocks", "NoINet", this.chkNoINet.IsChecked == true ? 1 : 0);
+            //App.SetConfig("NetSocks", "NoLan", this.chkNoLAN.IsChecked == true ? 1 : 0);
+            //App.SetConfig("NetSocks", "NoINet", this.chkNoINet.IsChecked == true ? 1 : 0);
             //UpdateConnections(true);
 
             socksGrid.Items.Filter = new Predicate<object>(item => SocksFilter(item));
@@ -196,23 +199,23 @@ namespace PrivateWin10.Controls
                 switch (socketFilter)
                 {
                     case FirewallPage.FilterPreset.Socket.TCP:
-                        if ((item.sock.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == 0)
+                        if ((item.sock.ProtocolType & 0xFF) != (UInt32)IPHelper.AF_PROT.TCP)
                             return false;
                         break;
                     case FirewallPage.FilterPreset.Socket.Client:
-                        if ((item.sock.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == 0 || item.sock.State == (int)IPHelper.MIB_TCP_STATE.LISTENING)
+                        if ((item.sock.ProtocolType & 0xFF) != (UInt32)IPHelper.AF_PROT.TCP || item.sock.State == (int)IPHelper.MIB_TCP_STATE.LISTENING)
                             return false;
                         break;
                     case FirewallPage.FilterPreset.Socket.Server:
-                        if ((item.sock.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == 0 || item.sock.State != (int)IPHelper.MIB_TCP_STATE.LISTENING)
+                        if ((item.sock.ProtocolType & 0xFF) != (UInt32)IPHelper.AF_PROT.TCP || item.sock.State != (int)IPHelper.MIB_TCP_STATE.LISTENING)
                             return false;
                         break;
                     case FirewallPage.FilterPreset.Socket.UDP:
-                        if ((item.sock.ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == 0)
+                        if ((item.sock.ProtocolType & 0xFF) != (UInt32)IPHelper.AF_PROT.UDP)
                             return false;
                         break;
                     case FirewallPage.FilterPreset.Socket.Web:
-                        if ((item.sock.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == 0 || !(item.sock.RemotePort == 80 || item.sock.RemotePort == 443))
+                        if ((item.sock.ProtocolType & 0xFF) != (UInt32)IPHelper.AF_PROT.TCP || !(item.sock.RemotePort == 80 || item.sock.RemotePort == 443))
                             return false;
                         break;
                 }
@@ -220,23 +223,23 @@ namespace PrivateWin10.Controls
 
             if (item.sock.RemoteAddress != null)
             {
-                if (NetFunc.IsLocalHost(item.sock.RemoteAddress))
+                /*if (NetFunc.IsLocalHost(item.sock.RemoteAddress))
                 {
                     if (chkNoLocal.IsChecked == true)
                         return false;
                 }
-                /*else if (NetFunc.IsMultiCast(item.sock.RemoteAddress))
+                else if (NetFunc.IsMultiCast(item.sock.RemoteAddress))
                 {
                     if (chkNoMulti.IsChecked == true)
                         return false;
-                }*/
-                else if (FirewallRule.MatchAddress(item.sock.RemoteAddress, FirewallRule.AddrKeywordLocalSubnet))
+                }
+                else if (FirewallRuleEx.MatchAddress(item.sock.RemoteAddress, FirewallRule.AddrKeywordLocalSubnet))
                 {
                     if (chkNoLAN.IsChecked == true)
                         return false;
                 }
                 else if (chkNoINet.IsChecked == true)
-                    return false;
+                    return false;*/
             }
 
             if (item.TestFilter(textFilter))
@@ -279,7 +282,7 @@ namespace PrivateWin10.Controls
             public ImageSource Icon { get { return ImgFunc.GetIcon(sock.ProgID.Path, 16); } }
 
             public string Name { get { return name; } }
-            public string Program { get { return sock.ProgID.FormatString(); } }
+            public string Program { get { return ProgramControl.FormatProgID(sock.ProgID); } }
             public DateTime TimeStamp { get { return sock.CreationTime; } }
             public string State { get { return sock.GetStateString(); } }
 

@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MiscHelpers;
+using WinFirewallAPI;
 
 namespace PrivateWin10.Controls
 {
@@ -24,10 +25,6 @@ namespace PrivateWin10.Controls
     public partial class RuleNotify : UserControl, INotificationTab
     {
         DataGridExt rulesGridExt;
-
-        TextBlock Ignore;
-        TextBlock Approve;
-        TextBlock Reject;
 
         public event EventHandler<EventArgs> Emptied;
 
@@ -52,15 +49,15 @@ namespace PrivateWin10.Controls
             this.rulesGrid.Columns[4].Header = Translate.fmt("lbl_direction");
             this.rulesGrid.Columns[5].Header = Translate.fmt("lbl_program");
 
-            Ignore = this.IgnoreSB.Content as TextBlock;
-            Approve = this.ApproveSB.Content as TextBlock;
-            Reject = this.RejectSB.Content as TextBlock;
+            var Ignore = this.IgnoreSB.Content as TextBlock;
+            var Approve = this.ApproveSB.Content as TextBlock;
+            var Reject = this.RejectSB.Content as TextBlock;
 
-            this.Ignore.Text = Translate.fmt("lbl_ignore");
+            Ignore.Text = Translate.fmt("lbl_ignore");
             (this.IgnoreSB.MenuItemsSource[0] as MenuItem).Header = Translate.fmt("lbl_ignore_all");
-            this.Approve.Text = Translate.fmt("lbl_approve");
+            Approve.Text = Translate.fmt("lbl_approve");
             (this.ApproveSB.MenuItemsSource[0] as MenuItem).Header = Translate.fmt("lbl_approve_all");
-            this.Reject.Text = Translate.fmt("lbl_reject");
+            Reject.Text = Translate.fmt("lbl_reject");
             (this.RejectSB.MenuItemsSource[0] as MenuItem).Header = Translate.fmt("lbl_reject_all");
 
             UpdateState();

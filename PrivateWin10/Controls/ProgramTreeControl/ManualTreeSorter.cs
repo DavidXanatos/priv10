@@ -1,4 +1,5 @@
 ﻿using ICSharpCode.TreeView;
+using MiscHelpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -201,7 +202,8 @@ namespace PrivateWin10.Controls
             var elapsedMs = watch.ElapsedMilliseconds;
 
 #if DEBUG
-            //AppLog.Debug("TreeView Sorting took: {0} ms and required {1} swaps", elapsedMs, SwapCount);
+            if(elapsedMs > 100)
+                AppLog.Debug("TreeView Sorting took very log: {0} ms and required {1} swaps", elapsedMs, SwapCount);
 #endif
         }
     }

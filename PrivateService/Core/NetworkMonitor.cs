@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using NetFwTypeLib;
 using NETWORKLIST;
 using System;
 using System.Collections.Generic;
@@ -14,6 +13,7 @@ using System.Threading.Tasks;
 using MiscHelpers;
 using PrivateService;
 using PrivateAPI;
+using WinFirewallAPI;
 
 namespace PrivateWin10
 {
@@ -205,7 +205,7 @@ namespace PrivateWin10
                 return;
 
             // Note: Incomming UDP packets have the endpoints swaped :/
-            if ((ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP && Type == EtwNetEventType.Recv)
+            if ((ProtocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.UDP && Type == EtwNetEventType.Recv)
             {
                 IPAddress TempAddresss = LocalAddress;
                 UInt16 TempPort = LocalPort;
@@ -331,7 +331,7 @@ namespace PrivateWin10
 
             foreach (NetworkSocket Socket in OldSocketList.GetAllValues())
             {
-                bool bIsUDPPseudoCon = (Socket.ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP && Socket.RemotePort != 0;
+                bool bIsUDPPseudoCon = (Socket.ProtocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.UDP && Socket.RemotePort != 0;
 
                 // Note: sockets observed using ETW are not yet initialized as we are missing owner informations there
                 if (Socket.ProgID == null)

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 #pragma warning disable 169 // disable warning CS0169: The field 'Test.unused' is never used
 
 
-namespace MiscHelpers
+namespace WinFirewallAPI
 {
     public static class WindowsFirewall
     {

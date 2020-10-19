@@ -161,8 +161,8 @@
                 <RibbonGroup Header="Options" Name="lblProgOpts">
                     <RibbonButton Name="btnAllowAll" Label="Full Access" SmallImageSource="{StaticResource Icon_Grant}" Click="btnSetAccess_Click"/>
                     <RibbonSplitButton Name="btnCustomCfg" Label="Custom Config" SmallImageSource="{StaticResource Icon_Custom}" Click="btnSetAccess_Click" >
-                        <!--RibbonMenuItem Name="btnInOnly" Header="Inbound" ImageSource="{StaticResource Icon_In}" Click="btnSetAccess_Click"/>
-                        <RibbonMenuItem Name="btnOutOnly" Header="Outbound" ImageSource="{StaticResource Icon_Out}" Click="btnSetAccess_Click"/-->
+                        <RibbonMenuItem Name="btnInOnly" Header="Inbound" ImageSource="{StaticResource Icon_In}" Click="btnSetAccess_Click"/>
+                        <RibbonMenuItem Name="btnOutOnly" Header="Outbound" ImageSource="{StaticResource Icon_Out}" Click="btnSetAccess_Click"/>
                         <RibbonMenuItem Name="btnLanOnly" Header="Lan Only" ImageSource="{StaticResource Icon_NoLan}" Click="btnSetAccess_Click"/>
                         <RibbonMenuItem Name="btnNoConf" Header="Unconfigured" ImageSource="{StaticResource Icon_NoConf}" Click="btnSetAccess_Click"/>
                         <!--RibbonCheckBox Name="chkNotify" Label="Stop Notify" Click="ChkNotify_Click" /-->

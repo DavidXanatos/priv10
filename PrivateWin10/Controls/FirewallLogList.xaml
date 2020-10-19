@@ -24,6 +24,11 @@
                     <ComboBoxItem Name="cmbBlock" Content="Blocked" Background="LightPink"/>
                 </ComboBox>
             </Grid>
+            <Grid Margin="2,2">
+                <ComboBox Name="sockType" Text="" MinWidth="80" Background="White" SelectionChanged="sockType_SelectionChanged">
+
+                </ComboBox>
+            </Grid>
             <Separator />
             <!--WrapPanel>
                 <Label Name="lblFilter" Content="Filter:"/>

@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MiscHelpers;
+using PrivateAPI;
 
 namespace PrivateWin10.Controls
 {
@@ -93,7 +94,7 @@ namespace PrivateWin10.Controls
                     {
                         oldLog.Remove(logEntry.guid);
 
-                        Program program = ProgramList.GetProgramFuzzy(prog.Programs, logEntry.ProgID, ProgramList.FuzzyModes.Any);
+                        Program program = ProgramID.GetProgramFuzzy(prog.Programs, logEntry.ProgID, ProgramID.FuzzyModes.Any);
 
                         LogList.Insert(0, new DnsItem(logEntry, program != null ? program.Description : prog.config.Name));
                     }
@@ -189,7 +190,7 @@ namespace PrivateWin10.Controls
             public int ConnectionCount { get { return entry.ConCounter; } }
             public UInt64 Uploaded{ get { return entry.TotalUpload; } }
             public UInt64 Downloaded { get { return entry.TotalDownload; } }
-            public string Program { get { return entry.ProgID.FormatString(); } }
+            public string Program { get { return ProgramControl.FormatProgID(entry.ProgID); } }
             
             void UpdateValue<T>(ref T value, T new_value, string Name)
             {

@@ -103,7 +103,7 @@ namespace PrivateWin10.Pages
                 App.TrayIcon.Notify(entry.strMessage, tipIcon);
             }
 
-            // todo: use wone window with a log
+            // todo: use owne window with a log
             /*if ((entry.categoryID & (short)App.EventFlags.PopUpMessages) != 0)
             {
                 MessageBoxImage boxIcon = MessageBoxImage.Information;

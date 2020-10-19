@@ -44,6 +44,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrivateService", "PrivateSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrivateAPI", "PrivateAPI\PrivateAPI.csproj", "{2370EE89-9321-408D-9806-90720B6DDEA4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFirewallAPI", "WinFirewallAPI\WinFirewallAPI.csproj", "{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -360,6 +362,30 @@ Global
 		{2370EE89-9321-408D-9806-90720B6DDEA4}.ReleaseSigning|x64.Build.0 = Release|Any CPU
 		{2370EE89-9321-408D-9806-90720B6DDEA4}.ReleaseSigning|x86.ActiveCfg = Release|Any CPU
 		{2370EE89-9321-408D-9806-90720B6DDEA4}.ReleaseSigning|x86.Build.0 = Release|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.Debug|x64.Build.0 = Debug|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.Debug|x86.Build.0 = Debug|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.DebugSigning|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.DebugSigning|Any CPU.Build.0 = Debug|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.DebugSigning|x64.ActiveCfg = Debug|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.DebugSigning|x64.Build.0 = Debug|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.DebugSigning|x86.ActiveCfg = Debug|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.DebugSigning|x86.Build.0 = Debug|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.Release|x64.ActiveCfg = Release|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.Release|x64.Build.0 = Release|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.Release|x86.ActiveCfg = Release|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.Release|x86.Build.0 = Release|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.ReleaseSigning|Any CPU.ActiveCfg = Release|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.ReleaseSigning|Any CPU.Build.0 = Release|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.ReleaseSigning|x64.ActiveCfg = Release|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.ReleaseSigning|x64.Build.0 = Release|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.ReleaseSigning|x86.ActiveCfg = Release|Any CPU
+		{3A5CBF66-2E66-4CE1-AA89-7AF50D9DB29B}.ReleaseSigning|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using PrivateAPI;
 
 namespace PrivateWin10
 {
@@ -18,73 +19,9 @@ namespace PrivateWin10
 
         [DataMember()]
         public SortedDictionary<ProgramID, Program> Programs = new SortedDictionary<ProgramID, Program>();
-
-        [Serializable()]
-        [DataContract(Name = "ProgramConfig", Namespace = "http://schemas.datacontract.org/")]
-        public class Config
-        {
-            [DataMember()]
-            public string Name = "";
-            [DataMember()]
-            public string Category = "";
-            [DataMember()]
-            public string Icon = "";
-
-            public enum AccessLevels
-            {
-                Unconfigured = 0,
-                FullAccess,
-                //OutBoundAccess,
-                //InBoundAccess,
-                CustomConfig,
-                LocalOnly,
-                BlockAccess,
-                StopNotify,
-                AnyValue,
-                WarningState
-            }
-
-            [DataMember()]
-            public bool? Notify = null;
-            public bool? GetNotify() { return IsSilenced() ? (bool?)false : Notify; }
-            public void SetNotify(bool? set) { SilenceUntill = 0; Notify = set; }
-            [DataMember()]
-            public UInt64 SilenceUntill = 0;
-            public bool IsSilenced() { return SilenceUntill != 0 && SilenceUntill > MiscFunc.GetUTCTime(); }
-            [DataMember()]
-            public AccessLevels NetAccess = AccessLevels.Unconfigured;
-            [DataMember()]
-            public AccessLevels CurAccess = AccessLevels.Unconfigured;
-            public AccessLevels GetAccess()
-            {
-                if (NetAccess == AccessLevels.Unconfigured)
-                    return CurAccess;
-                else
-                    return NetAccess;
-            }
-
-            public Config Clone()
-            {
-                var config = new Config();
-
-                config.Name = this.Name;
-                config.Category = this.Category;
-                config.Icon = this.Icon;
-
-                config.Notify = this.Notify;
-                config.SilenceUntill = this.SilenceUntill;
-                config.NetAccess = this.NetAccess;
-                config.CurAccess = this.CurAccess;
-
-                return config;
-            }
-
-            // Custom option
-            // todo
-        }
-
+        
         [DataMember()]
-        public Config config = new Config();
+        public ProgramConfig config = new ProgramConfig();
 
         public ProgramSet()
         {

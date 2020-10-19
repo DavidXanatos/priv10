@@ -38,48 +38,9 @@ namespace PrivateWin10
             return prog;
         }
 
-        public enum FuzzyModes : int
+        public Program FindProgram(ProgramID progID, bool canAdd = false, ProgramID.FuzzyModes fuzzyMode = ProgramID.FuzzyModes.No)
         {
-            No = 0,
-            Tag = 1,
-            Path = 2,
-            Any = 3
-        };
-
-        public static T GetProgramFuzzy<T>(SortedDictionary<ProgramID, T> Programs, ProgramID progID, FuzzyModes fuzzyMode) where T : class
-        {
-            T prog = null;
-            if (Programs.TryGetValue(progID, out prog))
-                return prog;
-
-            // Only works for services and apps 
-            if (!(progID.Type == ProgramID.Types.Service || progID.Type == ProgramID.Types.App))
-                return null;
-
-            if ((fuzzyMode & FuzzyModes.Tag) != 0 && progID.Aux.Length > 0)
-            {
-                // first drop path and try to get by serviceTag or application SID
-                ProgramID auxId = ProgramID.New(progID.Type, null, progID.Aux);
-                if (Programs.TryGetValue(auxId, out prog))
-                    return prog;
-            }
-
-            if ((fuzzyMode & FuzzyModes.Path) != 0 && progID.Path.Length > 0
-             && (progID.Type == ProgramID.Types.Service || progID.Type == ProgramID.Types.App)
-             && System.IO.Path.GetFileName(progID.Path).Equals("svchost.exe", StringComparison.OrdinalIgnoreCase) == false) // dont use this for svchost.exe
-            {
-                // than try to get an entry by path only
-                ProgramID pathId = ProgramID.New(ProgramID.Types.Program, progID.Path, null);
-                if (Programs.TryGetValue(pathId, out prog))
-                    return prog;
-            }
-
-            return null;
-        }
-
-        public Program FindProgram(ProgramID progID, bool canAdd = false, FuzzyModes fuzzyMode = FuzzyModes.No)
-        {
-            Program prog = GetProgramFuzzy(Programs, progID, fuzzyMode);
+            Program prog = ProgramID.GetProgramFuzzy(Programs, progID, fuzzyMode);
             
             if (prog == null && canAdd)
                 prog = AddProgram(progID);
@@ -134,7 +95,7 @@ namespace PrivateWin10
             return true;
         }
 
-        public bool UpdateProgram(Guid guid, ProgramSet.Config config, UInt64 expiration = 0)
+        public bool UpdateProgram(Guid guid, ProgramConfig config, UInt64 expiration = 0)
         {
             ProgramSet progs;
             if (!ProgramSets.TryGetValue(guid, out progs))
@@ -226,7 +187,7 @@ namespace PrivateWin10
 
                 Programs.Remove(progID);
 
-                foreach (FirewallRule rule in prog.Rules.Values)
+                foreach (FirewallRuleEx rule in prog.Rules.Values)
                     App.engine.FirewallManager.RemoveRule(rule.guid);
 
                 foreach (NetworkSocket socket in prog.Sockets.Values)

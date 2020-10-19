@@ -1,5 +1,4 @@
 ﻿using MiscHelpers;
-using NetFwTypeLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,14 +8,11 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
-using System.Threading.Tasks;
-using PrivateService;
-using static MiscHelpers.WindowsFirewall;
-using PrivateAPI;
+using static WinFirewallAPI.WindowsFirewall;
 
-namespace PrivateWin10
+namespace WinFirewallAPI
 {
-    public class WinNetFwAPI : IDisposable
+    public class FirewallInterface : IDisposable
     {
         public static ushort fwApiVersion = GetApiVersion();
 
@@ -55,7 +51,7 @@ namespace PrivateWin10
         int RuleCounter = 0;
         Dictionary<string, NetFwRule> Rules = new Dictionary<string, NetFwRule>();
 
-        public WinNetFwAPI()
+        public FirewallInterface()
         {
             FWOpenPolicyStore(fwApiVersion, null, FW_STORE_TYPE.FW_STORE_TYPE_LOCAL, FW_POLICY_ACCESS_RIGHT.FW_POLICY_ACCESS_RIGHT_READ_WRITE, FW_POLICY_STORE_FLAGS.FW_POLICY_STORE_FLAGS_NONE, out policyHandle);
             //FWOpenPolicyStore(fwApiVersion, null, FW_STORE_TYPE.FW_STORE_TYPE_DYNAMIC, FW_POLICY_ACCESS_RIGHT.FW_POLICY_ACCESS_RIGHT_READ_WRITE, FW_POLICY_STORE_FLAGS.FW_POLICY_STORE_FLAGS_NONE, out policyHandle); // for testing only
@@ -65,6 +61,11 @@ namespace PrivateWin10
         {
             FWClosePolicyStore(policyHandle);
             policyHandle = IntPtr.Zero;
+        }
+
+        public virtual void LogError(string message, params object[] args)
+        {
+            Console.WriteLine("Log: " + string.Format(message, args));
         }
 
         private class RuleCompat : IDisposable
@@ -353,19 +354,19 @@ namespace PrivateWin10
                 catch { }
 
                 if(message != null)
-                    Priv10Logger.LogError("Failed to Write rule, status-code: {0} ({1})", entry.Status.ToString(), message);
+                    LogError("Failed to Write rule, status-code: {0} ({1})", entry.Status.ToString(), message);
                 else
-                    Priv10Logger.LogError("Failed to Write rule, error-code: {0} ({1})", uRet.ToString(), new Win32Exception((int)uRet).Message);
+                    LogError("Failed to Write rule, error-code: {0} ({1})", uRet.ToString(), new Win32Exception((int)uRet).Message);
             }
             else if (bAdd)
             {
                 rule.Index = RuleCounter++;
 
                 Rules.Add(rule.guid, FwRule);
-                Priv10Logger.LogInfo("Added rule: {0}", FwRule.Rule.Name);
+                //LogInfo("Added rule: {0}", FwRule.Rule.Name);
             }
-            else
-                Priv10Logger.LogInfo("Updated rule: {0}", FwRule.Rule.Name);
+            //else
+            //    LogInfo("Updated rule: {0}", FwRule.Rule.Name);
 
             return uRet == ERROR_SUCCESS;
         }
@@ -378,11 +379,11 @@ namespace PrivateWin10
 
             uint uRet = FWDeleteFirewallRule(policyHandle, FwRule.Rule.guid); // FwRule.Entry.wszRuleId
             if (uRet != ERROR_SUCCESS)
-                Priv10Logger.LogError("Failed to Remove rule, error-code: " + uRet.ToString());
+                LogError("Failed to Remove rule, error-code: " + uRet.ToString());
             else
             {
                 Rules.Remove(guid);
-                Priv10Logger.LogInfo("Removed rule: {0}", FwRule.Rule.Name);
+                //LogInfo("Removed rule: {0}", FwRule.Rule.Name);
             }
 
             return uRet == ERROR_SUCCESS;
@@ -397,28 +398,6 @@ namespace PrivateWin10
             if(entry.wSchemaVersion >= (ushort)FW_BINARY_VERSION.FW_BINARY_VERSION_WIN8)
                 rule.AppSID = entry.wszPackageId;
 
-            ProgramID progID;
-            string fullPath = entry.wszLocalApplication != null ? Environment.ExpandEnvironmentVariables(entry.wszLocalApplication) : null;
-            if (entry.wszLocalApplication != null && entry.wszLocalApplication.Equals("System", StringComparison.OrdinalIgnoreCase))
-                progID = ProgramID.NewID(ProgramID.Types.System);
-            // Win 8+
-            else if (entry.wSchemaVersion >= (ushort)FW_BINARY_VERSION.FW_BINARY_VERSION_WIN8 && entry.wszPackageId != null)
-            {
-                if (entry.wszLocalService != null)
-                    AppLog.Debug("Firewall paremeter conflict in rule: {0}", rule.Name);
-                progID = ProgramID.NewAppID(entry.wszPackageId, fullPath);
-            }
-            //
-            else if (entry.wszLocalService != null)
-                progID = ProgramID.NewSvcID(entry.wszLocalService, fullPath);
-            else if (entry.wszLocalApplication != null)
-                progID = ProgramID.NewProgID(fullPath);
-            else // if nothing is configured than its a global roule
-                progID = ProgramID.NewID(ProgramID.Types.Global);
-
-            rule.ProgID = Priv10Engine.AdjustProgID(progID);
-
-            //AppLog.Debug("test: {0}", entry.wszLocalApplication);
 
             rule.Name = entry.wszName;
             rule.Description = entry.wszDescription;
@@ -429,7 +408,7 @@ namespace PrivateWin10
             switch (entry.Direction)
             {
                 case FW_DIRECTION.FW_DIR_IN: rule.Direction = FirewallRule.Directions.Inbound; break;
-                case FW_DIRECTION.FW_DIR_OUT: rule.Direction = FirewallRule.Directions.Outboun; break;
+                case FW_DIRECTION.FW_DIR_OUT: rule.Direction = FirewallRule.Directions.Outbound; break;
                 default:
                     AppLog.Debug("Unsupported direction in rule: {0}", rule.Name);
                     break;
@@ -537,32 +516,6 @@ namespace PrivateWin10
             if (entry.wSchemaVersion >= (ushort)FW_BINARY_VERSION.FW_BINARY_VERSION_WIN8)
                 entry.wszPackageId = rule.AppSID;
 
-            /*
-            switch (rule.ProgID.Type)
-            {
-                case ProgramID.Types.Global:
-                    entry.wszLocalApplication = null;
-                    break;
-                case ProgramID.Types.System:
-                    entry.wszLocalApplication = "System";
-                    break;
-                default:
-                    if (rule.ProgID.Path != null && rule.ProgID.Path.Length > 0)
-                        entry.wszLocalApplication = rule.ProgID.RawPath != null ? rule.ProgID.RawPath : rule.ProgID.Path;
-                    break;
-            }
-            // Win 8+
-            if (entry.wSchemaVersion >= (ushort)FW_BINARY_VERSION.FW_BINARY_VERSION_WIN8 && rule.ProgID.Type == ProgramID.Types.App)
-                entry.wszPackageId = rule.ProgID.GetPackageSID();
-            else
-                entry.wszPackageId = null;
-            //
-            if (rule.ProgID.Type == ProgramID.Types.Service)
-                entry.wszLocalService = rule.ProgID.GetServiceId();
-            else
-                entry.wszLocalService = null;
-            */
-
 
             entry.wszName = rule.Name;
             entry.wszDescription = rule.Description;
@@ -574,7 +527,7 @@ namespace PrivateWin10
             switch (rule.Direction)
             {
                 case FirewallRule.Directions.Inbound: entry.Direction = FW_DIRECTION.FW_DIR_IN; break;
-                case FirewallRule.Directions.Outboun: entry.Direction = FW_DIRECTION.FW_DIR_OUT; break;
+                case FirewallRule.Directions.Outbound: entry.Direction = FW_DIRECTION.FW_DIR_OUT; break;
             }
 
             switch (rule.Action)
@@ -1479,11 +1432,11 @@ namespace PrivateWin10
             return true;
         }
 
-        public List<UwpFunc.AppInfo> GetAllAppPkgs(bool bUpdate = false)
+        public Dictionary<string, UwpFunc.AppInfo> GetAllAppPkgs(bool bUpdate = false)
         {
             if (bUpdate || AppPackages.Count == 0 || (DateTime.Now - LastAppReload).TotalMilliseconds > 3000)
                 LoadAppPkgs();
-            return AppPackages.Values.ToList();
+            return AppPackages;
         }
 
         public UwpFunc.AppInfo GetAppPkgBySid(string SID)

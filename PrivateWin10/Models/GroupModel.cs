@@ -1,4 +1,5 @@
-﻿using PrivateWin10.Controls;
+﻿using PrivateAPI;
+using PrivateWin10.Controls;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ namespace PrivateWin10
             Dictionary<Guid, List<FirewallRuleEx>> rules = App.client.GetRules();
             foreach (var ruleEntry in rules)
             {
-                foreach (FirewallRule rule in ruleEntry.Value)
+                foreach (FirewallRuleEx rule in ruleEntry.Value)
                 {
                     if (rule.Grouping != null && rule.Grouping.Length > 0)
                     {

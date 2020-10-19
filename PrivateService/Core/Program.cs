@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Xml;
 using PrivateService;
 using PrivateAPI;
+using WinFirewallAPI;
+using System.Diagnostics;
 
 namespace PrivateWin10
 {
@@ -127,12 +129,18 @@ namespace PrivateWin10
                     break;
                 case ProgramID.Types.Service:
                     Name = ID.GetServiceId();
-                    Info = ID.GetServiceName();
+                    Info = ServiceHelper.GetServiceName(Name);
                     break;
                 case ProgramID.Types.App:
-                    Name = ID.GetPackageName();
-                    var AppPkg = App.engine.FirewallManager.GetAppPkgBySid(ID.GetPackageSID());
-                    Info = App.GetResourceStr(AppPkg?.Name);
+                    var SID = ID.GetPackageSID();
+                    var AppPkg = App.engine.FirewallManager.GetAppPkgBySid(SID);
+                    if (AppPkg != null)
+                    {
+                        Name = AppPkg.ID;
+                        Info = App.GetResourceStr(AppPkg.Name);
+                    }
+                    else
+                        Name = SID;
                     break;
             }
 
@@ -176,11 +184,11 @@ namespace PrivateWin10
                     Entry.TotalDownload += Socket.Stats.ReceivedBytes;
                 }
 
-                if ((Socket.ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP)
+                if ((Socket.ProtocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.UDP)
                 {
                     SocketsUdp++;
                 }
-                else if ((Socket.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == (UInt32)IPHelper.AF_PROT.TCP)
+                else if ((Socket.ProtocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.TCP)
                 {
                     SocketsTcp++;
                     if (Socket.RemotePort == 80 || Socket.RemotePort == 443)
@@ -239,9 +247,14 @@ namespace PrivateWin10
             switch (ID.Type)
             {
                 case ProgramID.Types.Program:   return !PathMissing;
-                case ProgramID.Types.Service:   return (ServiceHelper.GetServiceState(ID.GetServiceId()) != ServiceHelper.ServiceState.NotFound) && !PathMissing;
-                case ProgramID.Types.App:       return App.engine.FirewallManager.GetAppPkgBySid(ID.GetPackageSID()) != null && !PathMissing;
-                default:        return true;
+
+                case ProgramID.Types.Service:   var State = ServiceHelper.GetServiceState(ID.GetServiceId());
+                                                return (State != ServiceHelper.ServiceState.NotFound) && !PathMissing;
+
+                case ProgramID.Types.App:       var package = App.engine.FirewallManager.GetAppPkgBySid(ID.GetPackageSID());
+                                                return package != null && !PathMissing;
+
+                default:                        return true;
             }
         }
 
@@ -269,7 +282,7 @@ namespace PrivateWin10
         {
             int BlockRules = 0;
             int AllowRules = 0;
-            foreach (FirewallRule rule in Rules.Values)
+            foreach (FirewallRuleEx rule in Rules.Values)
             {
                 if (!rule.Enabled)
                     continue;
@@ -281,10 +294,12 @@ namespace PrivateWin10
                     continue;
                 if (rule.Interface != (int)FirewallRule.Interfaces.All && (int)NicInfo.Type != rule.Interface)
                     continue;
-                if (!FirewallRule.MatchEndpoint(rule.RemoteAddresses, rule.RemotePorts, FwEvent.RemoteAddress, FwEvent.RemotePort, NicInfo))
+                if (!FirewallManager.MatchEndpoint(rule.RemoteAddresses, rule.RemotePorts, FwEvent.RemoteAddress, FwEvent.RemotePort, NicInfo))
                     continue;
-                if (!FirewallRule.MatchEndpoint(rule.LocalAddresses, rule.LocalPorts, FwEvent.RemoteAddress, FwEvent.RemotePort, NicInfo))
+                if (!FirewallManager.MatchEndpoint(rule.LocalAddresses, rule.LocalPorts, FwEvent.RemoteAddress, FwEvent.RemotePort, NicInfo))
                     continue;
+
+                rule.HitCount++;
 
                 if (rule.Action == FirewallRule.Actions.Allow)
                     AllowRules++;
@@ -308,9 +323,9 @@ namespace PrivateWin10
             int BlockInProfiles = 0;
 
             int Protocol = 0;
-            if ((Socket.ProtocolType & (UInt32)IPHelper.AF_PROT.TCP) == (UInt32)IPHelper.AF_PROT.TCP)
+            if ((Socket.ProtocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.TCP)
                 Protocol = (int)IPHelper.AF_PROT.TCP;
-            else if ((Socket.ProtocolType & (UInt32)IPHelper.AF_PROT.UDP) == (UInt32)IPHelper.AF_PROT.UDP)
+            else if ((Socket.ProtocolType & 0xFF) == (UInt32)IPHelper.AF_PROT.UDP)
                 Protocol = (int)IPHelper.AF_PROT.UDP;
             else
                 return Tuple.Create(0, 0);
@@ -324,15 +339,15 @@ namespace PrivateWin10
                     continue;
                 if (Protocol == (int)IPHelper.AF_PROT.TCP)
                 {
-                    if (!FirewallRule.MatchEndpoint(rule.RemoteAddresses, rule.RemotePorts, Socket.RemoteAddress, Socket.RemotePort))
+                    if (!FirewallManager.MatchEndpoint(rule.RemoteAddresses, rule.RemotePorts, Socket.RemoteAddress, Socket.RemotePort))
                         continue;
                 }
-                if (!FirewallRule.MatchEndpoint(rule.LocalAddresses, rule.LocalPorts, Socket.LocalAddress, Socket.LocalPort))
+                if (!FirewallManager.MatchEndpoint(rule.LocalAddresses, rule.LocalPorts, Socket.LocalAddress, Socket.LocalPort))
                     continue;
 
                 switch (rule.Direction)
                 {
-                    case FirewallRule.Directions.Outboun:
+                    case FirewallRule.Directions.Outbound:
                     {
                         if (rule.Action == FirewallRule.Actions.Allow)
                             AllowOutProfiles |= rule.Profile;
@@ -390,6 +405,17 @@ namespace PrivateWin10
             [DataMember()]
             public FirewallEvent FwEvent;
 
+            public enum Realms
+            {
+                Undefined = 0,
+                LocalHost,
+                MultiCast,
+                LocalArea,
+                Internet
+            }
+            [DataMember()]
+            public Realms Realm = Realms.Undefined; 
+
             public enum States
             {
                 Undefined = 0,
@@ -433,6 +459,15 @@ namespace PrivateWin10
                 guid = Guid.NewGuid();
                 FwEvent = Event;
                 ProgID = progID;
+
+                if (NetFunc.IsLocalHost(FwEvent.RemoteAddress))
+                    Realm = Realms.LocalHost;
+                else if (NetFunc.IsMultiCast(FwEvent.RemoteAddress))
+                    Realm = Realms.MultiCast;
+                else if (FirewallManager.MatchAddress(FwEvent.RemoteAddress, FirewallRule.AddrKeywordLocalSubnet))
+                    Realm = Realms.LocalArea;
+                else
+                    Realm = Realms.Internet;
             }
         }
 
@@ -644,7 +679,7 @@ namespace PrivateWin10
                     if (id.Load(node))
                     {
                         // COMPAT: remove service tag
-                        ID = Priv10Engine.AdjustProgID(id);
+                        ID = FirewallRuleEx.AdjustProgID(id);
                     }
                 }
                 else if (node.Name == "Description")
@@ -658,7 +693,7 @@ namespace PrivateWin10
                     foreach (XmlNode childNode in node.ChildNodes)
                     {
                         FirewallRuleEx rule = new FirewallRuleEx();
-                        rule.ProgID = ID;
+                        rule.ProgID = ID; // todo: remove later, load loads this amyways
                         if (rule.Load(childNode) && !Rules.ContainsKey(rule.guid))
                         {
                             // COMPAT: update entry, old version did not save these data separatly

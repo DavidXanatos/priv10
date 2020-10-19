@@ -89,7 +89,7 @@ namespace PrivateWin10
             }
             else
             {
-                Program prog = App.engine.ProgramList.FindProgram(ProgID, true, ProgramList.FuzzyModes.Any);
+                Program prog = App.engine.ProgramList.FindProgram(ProgID, true, ProgramID.FuzzyModes.Any);
                 prog?.LogDomain(Event.HostName, Event.TimeStamp);
             }
         }

@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using PrivateAPI;
 
 namespace PrivateWin10
 {
@@ -104,6 +105,17 @@ namespace PrivateWin10
             public ProgramID ProgID;
             [DataMember()]
             public FirewallEvent FwEvent;
+
+            public enum Realms
+            {
+                Undefined = 0,
+                LocalHost,
+                MultiCast,
+                LocalArea,
+                Internet
+            }
+            [DataMember()]
+            public Realms Realm = Realms.Undefined; 
 
             public enum States
             {

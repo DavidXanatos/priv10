@@ -292,12 +292,7 @@ namespace PrivateWin10
                 return resourceStr;
 
             if (resourcePath.Length > 2 && resourcePath.Substring(0, 2) == "@{")
-            {
-                //if (App.engine != null)
-                //    resourceStr = App.engine?.PkgMgr?.GetAppResourceStr(resourcePath) ?? resourcePath;
-                //else // xxxxx
-                    resourceStr = App.client.GetAppPkgRes(resourcePath);
-            }
+                resourceStr = App.client.GetAppPkgRes(resourcePath);
             else
                 resourceStr = MiscFunc.GetResourceStr(resourcePath);
 

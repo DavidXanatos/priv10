@@ -31,8 +31,8 @@ namespace PrivateWin10
             
 
             mStrings.Add("name_system", "Windows NT-Kernel/System");
-            mStrings.Add("name_service", "{0} (service: {1})");
-            mStrings.Add("name_app", "{0} (app: {1})");
+            mStrings.Add("name_service", "Service:");
+            mStrings.Add("name_app", "App:");
             mStrings.Add("name_global", "All Processes");
             mStrings.Add("prefix_app", "App: ");
             mStrings.Add("sort_no", "Unsorted");
@@ -141,6 +141,7 @@ namespace PrivateWin10
             mStrings.Add("lbl_group", "Group");
             mStrings.Add("lbl_index", "Index");
             mStrings.Add("lbl_status", "Status");
+            mStrings.Add("lbl_count", "Hit Count");
             mStrings.Add("wnd_notify", "PrivateWin10 Notifications");
             mStrings.Add("lbl_prev", "Previous");
             mStrings.Add("lbl_next", "Next");
@@ -151,6 +152,8 @@ namespace PrivateWin10
             mStrings.Add("lbl_approve_all", "Approve All");
             mStrings.Add("lbl_reject", "Reject");
             mStrings.Add("lbl_reject_all", "Reject All");
+            mStrings.Add("lbl_restore", "Restore");
+            mStrings.Add("lbl_restore_all", "Restore All");
             mStrings.Add("lbl_apply", "Apply");
             mStrings.Add("lbl_direction", "Direction");
             mStrings.Add("lbl_protocol", "Protocol");
@@ -307,6 +310,8 @@ namespace PrivateWin10
             mStrings.Add("filter_sockets_server", "TCP Server");
             mStrings.Add("filter_sockets_udp", "UDP Sockets");
             mStrings.Add("filter_sockets_raw", "Raw Sockets");
+            mStrings.Add("filter_protocols_any", "Any Protocol");
+            mStrings.Add("filter_protocols_other", "Other Sockets");
             mStrings.Add("filter_sockets_none", "Without");
             mStrings.Add("filter_rules", "Rules:");
             mStrings.Add("filter_rules_not", "[No Filter]");
@@ -445,8 +450,8 @@ namespace PrivateWin10
             mStrings.Add("lbl_rule_guide", "Some Firewall rules have been changed by a 3rd party application, please review the changed rules and approve or reject the changes.");
             mStrings.Add("lbl_rule_details", "Rule details");
             mStrings.Add("lbl_con_notify", "New Connections");
-            mStrings.Add("lbl_rule_notify", "Changed Rules");
-            mStrings.Add("lbl_tweak_notify", "Changed Tweaks");
+            mStrings.Add("lbl_rule_notify", "Firewall Rules");
+            mStrings.Add("lbl_tweak_notify", "Privacy Tweaks");
             mStrings.Add("msg_engine_fail", "Failed to start engine process");
             mStrings.Add("mnu_presets", "Control presets");
             mStrings.Add("keep_tweak", "Don't Change");
@@ -470,6 +475,11 @@ namespace PrivateWin10
             mStrings.Add("str_added", "added");
             mStrings.Add("str_removed", "removed");
             mStrings.Add("msg_preset_select", "Sellect Preset or enter a new Name:");
+            mStrings.Add("lbl_control", "Control Groups");
+            mStrings.Add("inet_blocked", "Internet is Blocked");
+            mStrings.Add("inet_open", "Firewall is DISABLED");
+            mStrings.Add("inet_firewall", "Firewall Mode: {0}");
+
 
             //mStrings.Add("", "");
 

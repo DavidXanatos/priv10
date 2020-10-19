@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PrivateAPI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +12,8 @@ namespace PrivateWin10
     public class FirewallPreset: PresetItem
     {
         public Guid ProgSetId;
-        public ProgramSet.Config.AccessLevels OnState;
-        public ProgramSet.Config.AccessLevels OffState;
+        public ProgramConfig.AccessLevels OnState;
+        public ProgramConfig.AccessLevels OffState;
 
         public struct SingleRule
         {
@@ -54,7 +55,7 @@ namespace PrivateWin10
             if (!App.client.UpdateProgram(ProgSetId, progSet.config))
                 return false;
 
-            if (progSet.config.NetAccess == ProgramSet.Config.AccessLevels.CustomConfig)
+            if (progSet.config.NetAccess == ProgramConfig.AccessLevels.CustomConfig)
             {
                 var progRules = App.client.GetRules(progs.Select(x => x.guid).ToList());
 

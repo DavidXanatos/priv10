@@ -60,13 +60,20 @@
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="191*"/>
-                <ColumnDefinition Width="451*"/>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="btnIgnore" Grid.Column="0" Content="Ignore" HorizontalAlignment="Left" Margin="2,2,0,2" VerticalAlignment="Stretch" Width="75" Click="btnIgnore_Click"/>
-            <ComboBox x:Name="cmbAccess" Margin="2,2,2,0" Grid.Column="1" VerticalAlignment="Top" SelectionChanged="cmbAccess_SelectionChanged" Grid.ColumnSpan="2" />
-            <Button x:Name="btnApply" Grid.Column="3" Content="Apply" HorizontalAlignment="Right" Margin="0,2,2,2" VerticalAlignment="Stretch" Width="75" Click="btnApply_Click"/>
+
+            <local:SplitButton x:Name="IgnoreSB" Grid.Column="0" Margin="2,2,2,2" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <local:SplitButton.MenuItemsSource>
+                    <MenuItem Header="Ignore All Changed" Click="BtnIgnoreAll_Click"/>
+                </local:SplitButton.MenuItemsSource>
+                <TextBlock Padding="4" Text="Ignore" MouseLeftButtonDown="BtnIgnore_Click" />
+            </local:SplitButton>
+
+            <!--Button x:Name="btnIgnore" Grid.Column="0" Content="Ignore" HorizontalAlignment="Left" Margin="2,2,0,2" VerticalAlignment="Stretch" Width="75" Click="btnIgnore_Click"/-->
+            <ComboBox x:Name="cmbAccess" Margin="2,2,2,2" Grid.Column="1" VerticalContentAlignment="Center" VerticalAlignment="Stretch" SelectionChanged="cmbAccess_SelectionChanged" MinWidth="125" HorizontalAlignment="Right"/>
+            <Button x:Name="btnApply" Grid.Column="2" Content="Apply" HorizontalAlignment="Right" Margin="0,2,2,2" VerticalAlignment="Stretch" Width="75" Click="btnApply_Click"/>
             <!--Controls:SplitButton Name="btnApply" Grid.Column="2" Margin="2,2,2,2" Width="75" HorizontalAlignment="Center" VerticalAlignment="Stretch" HorizontalContentAlignment="Left" DisplayMemberPath="Content">
                     <Controls:SplitButton.Icon>
                         <iconPacks:PackIconModern Margin="6" Kind="Alert" />

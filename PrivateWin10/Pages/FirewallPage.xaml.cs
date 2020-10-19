@@ -11,8 +11,8 @@ using System.Windows.Controls.Ribbon;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-
-
+using PrivateAPI;
+using WinFirewallAPI;
 
 namespace PrivateWin10.Pages
 {
@@ -43,6 +43,7 @@ namespace PrivateWin10.Pages
                 Client,
                 Server,
                 UDP,
+                Other,
                 //Raw,
                 None
             }
@@ -58,7 +59,7 @@ namespace PrivateWin10.Pages
             }
             public Rule Rules = Rule.Not;
 
-            public ProgramSet.Config.AccessLevels Access = ProgramSet.Config.AccessLevels.AnyValue;
+            public ProgramConfig.AccessLevels Access = ProgramConfig.AccessLevels.AnyValue;
 
             public List<string> Types = new List<string>();
 
@@ -101,6 +102,8 @@ namespace PrivateWin10.Pages
         public FirewallPage()
         {
             InitializeComponent();
+
+            ProgramID.PackageNameResolver = (sid) => { return AppModel.GetInstance().GetAppPkgBySid(sid)?.ID ?? sid; };
 
             ruleList.SetPage(this);
             consList.firewallPage = this;
@@ -150,17 +153,17 @@ namespace PrivateWin10.Pages
             WpfFunc.CmbAdd(cmbRules, Translate.fmt("filter_rules_none"), FilterPreset.Rule.None);
 
             this.lblAccess.Label = Translate.fmt("filter_access");
-            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_any"), ProgramSet.Config.AccessLevels.AnyValue);
-            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_none"), ProgramSet.Config.AccessLevels.Unconfigured);
-            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_allow"), ProgramSet.Config.AccessLevels.FullAccess);
-            //WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_outbound"), ProgramSet.Config.AccessLevels.OutBoundAccess);
-            //WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_inbound"), ProgramSet.Config.AccessLevels.InBoundAccess);
-            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_edit"), ProgramSet.Config.AccessLevels.CustomConfig);
-            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_lan"), ProgramSet.Config.AccessLevels.LocalOnly);
-            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_block"), ProgramSet.Config.AccessLevels.BlockAccess);
-            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_warn"), ProgramSet.Config.AccessLevels.WarningState);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_any"), ProgramConfig.AccessLevels.AnyValue);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_none"), ProgramConfig.AccessLevels.Unconfigured);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_allow"), ProgramConfig.AccessLevels.FullAccess);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_outbound"), ProgramConfig.AccessLevels.OutBoundAccess);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_inbound"), ProgramConfig.AccessLevels.InBoundAccess);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_edit"), ProgramConfig.AccessLevels.CustomConfig);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_lan"), ProgramConfig.AccessLevels.LocalOnly);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_block"), ProgramConfig.AccessLevels.BlockAccess);
+            WpfFunc.CmbAdd(cmbAccess, Translate.fmt("acl_warn"), ProgramConfig.AccessLevels.WarningState);
             foreach (RibbonGalleryItem item in (cmbAccess.Items[0] as RibbonGalleryCategory).Items)
-                item.Background = ProgramControl.GetAccessColor((ProgramSet.Config.AccessLevels)item.Tag);
+                item.Background = ProgramControl.GetAccessColor((ProgramConfig.AccessLevels)item.Tag);
 
             this.rbbFilters.Header = Translate.fmt("filter_program");
             this.lblTypes.Text = Translate.fmt("filter_types");
@@ -265,13 +268,13 @@ namespace PrivateWin10.Pages
 
             //this.cmbViewMode.SelectionChanged += CmdViewMode_SelectionChanged;
 
-            btnAllowAll.Tag = ProgramSet.Config.AccessLevels.FullAccess;
-            btnCustomCfg.Tag = ProgramSet.Config.AccessLevels.CustomConfig;
-            //btnInOnly.Tag = ProgramSet.Config.AccessLevels.InBoundAccess;
-            //btnOutOnly.Tag = ProgramSet.Config.AccessLevels.OutBoundAccess;
-            btnLanOnly.Tag = ProgramSet.Config.AccessLevels.LocalOnly;
-            btnNoConf.Tag = ProgramSet.Config.AccessLevels.Unconfigured;
-            btnBlockAll.Tag = ProgramSet.Config.AccessLevels.BlockAccess;
+            btnAllowAll.Tag = ProgramConfig.AccessLevels.FullAccess;
+            btnCustomCfg.Tag = ProgramConfig.AccessLevels.CustomConfig;
+            btnInOnly.Tag = ProgramConfig.AccessLevels.InBoundAccess;
+            btnOutOnly.Tag = ProgramConfig.AccessLevels.OutBoundAccess;
+            btnLanOnly.Tag = ProgramConfig.AccessLevels.LocalOnly;
+            btnNoConf.Tag = ProgramConfig.AccessLevels.Unconfigured;
+            btnBlockAll.Tag = ProgramConfig.AccessLevels.BlockAccess;
 
             progTree.SetPage(this);
 
@@ -404,7 +407,7 @@ namespace PrivateWin10.Pages
 
             if (args.entry.State == Program.LogEntry.States.UnRuled 
                 //&& args.entry.FwEvent.Action == FirewallRule.Actions.Block
-                && !NetFunc.IsLocalHost(args.entry.FwEvent.RemoteAddress)
+                && args.entry.Realm != Program.LogEntry.Realms.LocalHost
               )
             {
                 bool? Notify = prog.config.GetNotify();
@@ -657,8 +660,6 @@ namespace PrivateWin10.Pages
                     {
                         if (TextHelpers.CompareWildcard(_id.GetServiceId(), Filter) != bNot)
                             return false;
-                        if (TextHelpers.CompareWildcard(_id.GetServiceName(), Filter) != bNot)
-                            return false;
                     }
                     else if (_id.Type == ProgramID.Types.App)
                     {
@@ -778,11 +779,11 @@ namespace PrivateWin10.Pages
             }
 
             //Access
-            if (Filter.Access != ProgramSet.Config.AccessLevels.AnyValue)
+            if (Filter.Access != ProgramConfig.AccessLevels.AnyValue)
             {
-                if (Filter.Access == ProgramSet.Config.AccessLevels.WarningState)
+                if (Filter.Access == ProgramConfig.AccessLevels.WarningState)
                 {
-                    if ((prog.config.NetAccess == ProgramSet.Config.AccessLevels.Unconfigured || prog.config.CurAccess == prog.config.NetAccess) && prog.Programs.Sum(t => t.Value.ChgedRules) == 0)
+                    if ((prog.config.NetAccess == ProgramConfig.AccessLevels.Unconfigured || prog.config.CurAccess == prog.config.NetAccess) && prog.Programs.Sum(t => t.Value.ChgedRules) == 0)
                         return true;
                 }
                 else if (Filter.Access != prog.config.GetAccess())
@@ -895,7 +896,6 @@ namespace PrivateWin10.Pages
         public void btnAdd_Click(object sender, RoutedEventArgs e)
         {
             ProgramWnd progWnd = new ProgramWnd(null);
-
             if (progWnd.ShowDialog() != true)
                 return;
 
@@ -1003,7 +1003,7 @@ namespace PrivateWin10.Pages
             {
                 var config = progSet.config.Clone();
 
-                config.NetAccess = (ProgramSet.Config.AccessLevels)(sender as Control).Tag;
+                config.NetAccess = (ProgramConfig.AccessLevels)(sender as Control).Tag;
                 App.client.UpdateProgram(progSet.guid, config);
             }
         }
@@ -1134,7 +1134,7 @@ namespace PrivateWin10.Pages
             this.dnsList.ClearLog();
         }
 
-        public void ShowRuleWindow(FirewallRule rule)
+        public void ShowRuleWindow(FirewallRuleEx rule)
         {
             List<Program> progs = new List<Program>();
 
@@ -1160,7 +1160,7 @@ namespace PrivateWin10.Pages
             // if no rule was given it means create a new rule for one of the current programs
             if (rule == null)
             {
-                rule = new FirewallRule() { guid = null, Profile = (int)FirewallRule.Profiles.All, Interface = (int)FirewallRule.Interfaces.All, Enabled = true };
+                rule = new FirewallRuleEx() { guid = null, Profile = (int)FirewallRule.Profiles.All, Interface = (int)FirewallRule.Interfaces.All, Enabled = true };
                 rule.Grouping = FirewallManager.RuleGroup;
                 rule.Direction = FirewallRule.Directions.Bidirectiona;
 
@@ -1275,7 +1275,7 @@ namespace PrivateWin10.Pages
             if (this.cmbAccess.SelectedItem != null)
             {
                 this.lblAccess.Background = (this.cmbAccess.SelectedItem as RibbonGalleryItem).Background;
-                CurFilter.Access = (ProgramSet.Config.AccessLevels)(this.cmbAccess.SelectedItem as RibbonGalleryItem).Tag;
+                CurFilter.Access = (ProgramConfig.AccessLevels)(this.cmbAccess.SelectedItem as RibbonGalleryItem).Tag;
             }
 
             //Types
@@ -1338,7 +1338,7 @@ namespace PrivateWin10.Pages
             Enum.TryParse(App.GetConfig(Section, "Recent"), out Filter.Recently);
             Enum.TryParse(App.GetConfig(Section, "Sockets"), out Filter.Sockets);
             Enum.TryParse(App.GetConfig(Section, "Rules"), out Filter.Rules);
-            Enum.TryParse(App.GetConfig(Section, "Access", ProgramSet.Config.AccessLevels.AnyValue.ToString()), out Filter.Access);
+            Enum.TryParse(App.GetConfig(Section, "Access", ProgramConfig.AccessLevels.AnyValue.ToString()), out Filter.Access);
             Filter.Types = TextHelpers.SplitStr(App.GetConfig(Section, "Types"), ",");
             Filter.Categories = TextHelpers.SplitStr(App.GetConfig(Section, "Categories"), ",");
             Filter.Filter = App.GetConfig(Section, "Filter");

@@ -36,7 +36,7 @@
                 </TabItem.Header>
                 <controls:RuleNotify x:Name="RuleNotify"/>
             </TabItem>
-            <!--TabItem Name="tweakTab" Visibility="Visible">
+            <TabItem Name="tweakTab" Visibility="Visible">
                 <TabItem.Header>
                     <WrapPanel>
                         <TextBlock Text="Twekas"/>
@@ -44,7 +44,7 @@
                     </WrapPanel>
                 </TabItem.Header>
                 <controls:TweakNotify x:Name="TweakNotify"/>
-            </-->
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

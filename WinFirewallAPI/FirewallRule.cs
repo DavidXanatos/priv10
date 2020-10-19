@@ -1,11 +1,6 @@
 ﻿using MiscHelpers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 // Why is that not defined in the apropriate headers?
@@ -17,7 +12,7 @@ enum NET_FW_EDGE_TRAVERSAL_TYPE_ // values as used by INetFwRule2.EdgeTraversalO
     NET_FW_EDGE_TRAVERSAL_TYPE_DEFER_TO_USER // 3
 }
 
-namespace PrivateWin10
+namespace WinFirewallAPI
 {
     [Serializable()]
     public class FirewallRule
@@ -25,7 +20,7 @@ namespace PrivateWin10
         public enum Directions
         {
             Unknown = 0,
-            Outboun = 1,
+            Outbound = 1,
             Inbound = 2,
             Bidirectiona = 3
         }
@@ -58,7 +53,6 @@ namespace PrivateWin10
         public const string PortKeywordRpc = "RPC";
         public const string PortKeywordRpcEp = "RPC-EPMap";
         public const string PortKeywordTeredo = "Teredo";
-#if (!FW_COM_ITF)
         // sinve win7
         public const string PortKeywordIpTlsIn = "IPHTTPSIn";
         public const string PortKeywordIpTlsOut = "IPHTTPSOut";
@@ -71,7 +65,6 @@ namespace PrivateWin10
         public const string PortKeywordCortan = "Cortana";
         // since 1903
         public const string PortKeywordProximalTcpCdn = "ProximalTcpCdn"; // wtf is that?
-#endif
 
         // supported address keywords:
         public const string AddrKeywordLocalSubnet = "LocalSubnet"; // indicates any local address on the local subnet.
@@ -79,7 +72,6 @@ namespace PrivateWin10
         public const string AddrKeywordDHCP = "DHCP";
         public const string AddrKeywordWINS = "WINS";
         public const string AddrKeywordDefaultGateway = "DefaultGateway";
-#if (!FW_COM_ITF)
         // since win8
         public const string AddrKeywordIntrAnet = "LocalIntranet";
         public const string AddrKeywordRmtIntrAnet = "RemoteIntranet";
@@ -87,7 +79,6 @@ namespace PrivateWin10
         public const string AddrKeywordPly2Renders = "Ply2Renders";
         // since 1903
         public const string AddrKeywordCaptivePortal = "CaptivePortal";
-#endif
 
 
         public string guid = null; // Note: usually this is a guid but some default windows rules use a sting name instead
@@ -96,36 +87,6 @@ namespace PrivateWin10
         public string BinaryPath;
         public string ServiceTag;
         public string AppSID;
-        public ProgramID ProgID;
-
-        public void SetProgID(ProgramID progID)
-        {
-            ProgID = progID;
-
-            switch (progID.Type)
-            {
-                case ProgramID.Types.Global:
-                    BinaryPath = null;
-                    break;
-                case ProgramID.Types.System:
-                    BinaryPath = "System";
-                    break;
-                default:
-                    if (progID.Path != null && progID.Path.Length > 0)
-                        BinaryPath = progID.Path;
-                    break;
-            }
-
-            if (progID.Type == ProgramID.Types.App)
-                AppSID = progID.GetPackageSID();
-            else
-                AppSID = null;
-
-            if (progID.Type == ProgramID.Types.Service)
-                ServiceTag = progID.GetServiceId();
-            else
-                ServiceTag = null;
-        }
         
 
         public string Name;
@@ -161,12 +122,7 @@ namespace PrivateWin10
         {
         }
 
-        public FirewallRule(ProgramID progID)
-        {
-            SetProgID(progID);
-        }
-
-        public void Assign(FirewallRule rule)
+        public virtual void Assign(FirewallRule rule)
         {
             this.guid = rule.guid;
             this.Index = rule.Index;
@@ -174,7 +130,6 @@ namespace PrivateWin10
             this.BinaryPath = rule.BinaryPath;
             this.ServiceTag = rule.ServiceTag;
             this.AppSID = rule.AppSID;
-            this.ProgID = rule.ProgID;
 
             this.Name = rule.Name;
             this.Grouping = rule.Grouping;
@@ -338,8 +293,6 @@ namespace PrivateWin10
             if (ServiceTag != null) writer.WriteElementString("ServiceTag", ServiceTag);
             if (AppSID != null) writer.WriteElementString("AppSID", AppSID);
 
-            ProgID.Store(writer, "ProgID");
-
             if (Name != null) writer.WriteElementString("Name", Name);
             if (Grouping != null) writer.WriteElementString("Grouping", Grouping);
             if (Description != null) writer.WriteElementString("Description", Description);
@@ -379,11 +332,6 @@ namespace PrivateWin10
                     ServiceTag = node.InnerText;
                 else if (node.Name == "AppSID")
                     AppSID = node.InnerText;
-                else if (node.Name == "ProgID")
-                {
-                    ProgID = new ProgramID();
-                    ProgID.Load(node);
-                }
 
                 else if (node.Name == "Name")
                     Name = node.InnerText;
@@ -398,7 +346,12 @@ namespace PrivateWin10
                 else if (node.Name == "Action")
                     Enum.TryParse<Actions>(node.InnerText, out Action);
                 else if (node.Name == "Direction")
-                    Enum.TryParse<Directions>(node.InnerText, out Direction);
+                {
+                    if (node.InnerText.Equals("Outboun")) // bugfix for type remove later
+                        Direction = Directions.Outbound;
+                    else
+                        Enum.TryParse<Directions>(node.InnerText, out Direction);
+                }
                 else if (node.Name == "Profile")
                     int.TryParse(node.InnerText, out Profile);
 
@@ -423,19 +376,19 @@ namespace PrivateWin10
 
             }
 
-            return ProgID != null && guid != null;
+            return guid != null;
         }
 
 
         ///////////////////////////////////////////////////////////////////////////////
         // Helpers
-
+        
         public static bool IsEmptyOrStar(string str)
         {
             return str == null || str == "" || str == "*";
         }
 
-        public static bool MatchPort(UInt16 numPort, string strPorts)
+        /*public static bool MatchPort(UInt16 numPort, string strPorts)
         {
             foreach (string range in strPorts.Split(','))
             {
@@ -608,5 +561,6 @@ namespace PrivateWin10
                 return null;
             return string.Join(",", IpRanges.ToArray());
         }
+        */
     }
 }

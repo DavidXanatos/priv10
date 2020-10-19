@@ -1,4 +1,6 @@
-﻿using PrivateWin10.Controls;
+﻿using MiscHelpers;
+using PrivateAPI;
+using PrivateWin10.Controls;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -37,14 +39,28 @@ namespace PrivateWin10
             public string Group { get; set; }
         }
 
+        private Dictionary<string, UwpFunc.AppInfo> AppPackages = new Dictionary<string, UwpFunc.AppInfo>();
+        DateTime LastAppReload = DateTime.Now;
+
+        public UwpFunc.AppInfo GetAppPkgBySid(string SID)
+        {
+            UwpFunc.AppInfo AppContainer = null;
+            if (AppPackages.Count == 0 || (!AppPackages.TryGetValue(SID, out AppContainer) && (DateTime.Now - LastAppReload).TotalMilliseconds > 250))
+            {
+                AppPackages = App.client.GetAllAppPkgs(true);
+                AppPackages.TryGetValue(SID, out AppContainer);
+            }
+            return AppContainer;
+        }
+
         public IEnumerable GetApps()
         {
             Apps.Clear();
 
-            var AppPkgs = App.client.GetAllAppPkgs(true);
-            if (AppPkgs != null)
+            AppPackages = App.client.GetAllAppPkgs(true);
+            if (AppPackages != null)
             {
-                foreach (var AppPkg in AppPkgs)
+                foreach (var AppPkg in AppPackages.Values)
                 {
                     Apps.Add(new AppPkg()
                     {

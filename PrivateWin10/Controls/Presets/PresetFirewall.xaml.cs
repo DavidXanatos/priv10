@@ -1,4 +1,5 @@
 ﻿using MiscHelpers;
+using PrivateAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +84,7 @@ namespace PrivateWin10.Controls
             if (SuspendChange > 0)
                 return;
 
-            FirewallPreset.OnState =  (ProgramSet.Config.AccessLevels)(cmbOnAccess.SelectedItem as ComboBoxItem).Tag;
+            FirewallPreset.OnState =  (ProgramConfig.AccessLevels)(cmbOnAccess.SelectedItem as ComboBoxItem).Tag;
             cmbOnAccess.Background = ProgramControl.GetAccessColor(FirewallPreset.OnState);
 
             LoadRules();
@@ -94,7 +95,7 @@ namespace PrivateWin10.Controls
             if (SuspendChange > 0)
                 return;
 
-            FirewallPreset.OffState =  (ProgramSet.Config.AccessLevels)(cmbOffAccess.SelectedItem as ComboBoxItem).Tag;
+            FirewallPreset.OffState =  (ProgramConfig.AccessLevels)(cmbOffAccess.SelectedItem as ComboBoxItem).Tag;
             cmbOffAccess.Background = ProgramControl.GetAccessColor(FirewallPreset.OffState);
 
             LoadRules();

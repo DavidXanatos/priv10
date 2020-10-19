@@ -32,7 +32,7 @@ namespace PrivateWin10.Controls
         public override UInt64 UpTotal => prog.TotalUpload;
         public override UInt64 DownTotal => prog.TotalDownload;
 
-        public override string Program => prog.ID.FormatString();
+        public override string Program => ProgramControl.FormatProgID(prog.ID);
         // columns END
 
         public Program prog { get; protected set; }

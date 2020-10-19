@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using MiscHelpers;
 using PrivateWin10.Controls;
+using PrivateAPI;
 
 namespace PrivateWin10.Windows
 {
@@ -93,7 +94,7 @@ namespace PrivateWin10.Windows
             if (ID == null)
             {
                 radProgram.IsChecked = true;
-                ID = ProgramID.NewID(ProgramID.Types.Program);
+                //ID = ProgramID.NewID(ProgramID.Types.Program);
             }
             else
             {
@@ -101,6 +102,7 @@ namespace PrivateWin10.Windows
                 {
                     case ProgramID.Types.Program:
                         radProgram.IsChecked = true;
+                        cmbPath.Text = ID.GetPath();
                         break;
                     case ProgramID.Types.Service:
                         radService.IsChecked = true;
@@ -121,12 +123,12 @@ namespace PrivateWin10.Windows
                         {
                             if (MiscFunc.StrCmp(app.Value, ID.GetPackageSID()))
                             {
-                                cmbService.SelectedItem = app;
+                                cmbApp.SelectedItem = app;
                                 break;
                             }
                         }
                         if (cmbApp.SelectedItem == null)
-                            cmbApp.Text = ID.GetPackageName();
+                            cmbApp.Text = ID.GetPackageSID();
                         break;
                 }
             }
@@ -166,8 +168,8 @@ namespace PrivateWin10.Windows
 
         private void radType_Checked(object sender, RoutedEventArgs e)
         {
-            //if (SuspendChange > 0)
-            //    return;
+            if (SuspendChange > 0)
+                return;
 
             cmbPath.IsEnabled = radService.IsChecked != true; //radProgram.IsEnabled == true;
             cmbService.IsEnabled = radService.IsChecked == true;

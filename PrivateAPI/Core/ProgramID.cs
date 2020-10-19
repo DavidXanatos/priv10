@@ -7,9 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace PrivateWin10
+namespace PrivateAPI
 {
     [Serializable()]
+    [DataContract(Name = "ProgramID", Namespace = "http://schemas.datacontract.org/")]
     public class ProgramID : IComparable
     {
         public enum Types
@@ -21,8 +22,11 @@ namespace PrivateWin10
             App
         }
 
+        [DataMember()]
         public Types Type { get; protected set; } = Types.Program;
+        [DataMember()]
         public string Path { get; protected set; } = ""; // process path
+        [DataMember()]
         public string Aux { get; protected set; } = ""; // service name or app package sid
 
         //[NonSerialized()]
@@ -52,7 +56,7 @@ namespace PrivateWin10
         {
             return new ProgramID(type, path, aux);
         }
-
+        
         public ProgramID()
         {
         }
@@ -102,15 +106,6 @@ namespace PrivateWin10
             return Aux;
         }
 
-        public string GetPackageName()
-        {
-            if (Type != Types.App)
-                return null;
-            // ToDo: xxx pull that through the core
-            //return App.engine.FirewallManager.GetAppPkgBySid(Aux)?.ID; // this only works from core but we need to work from the UI to
-            return AppManager.SidToAppPackage(Aux);
-        }
-
         public string GetServiceId()
         {
             if (Type != Types.Service)
@@ -118,12 +113,6 @@ namespace PrivateWin10
             return Aux;
         }
 
-        public string GetServiceName()
-        {
-            if (Type != Types.Service)
-                return null;
-            return ServiceHelper.GetServiceName(Aux);
-        }
 
         public void Store(XmlWriter writer, string nodeName = "ID")
         {
@@ -149,19 +138,6 @@ namespace PrivateWin10
                 return false;
             }
             return true;
-        }
-
-        public string FormatString()
-        {
-            switch (Type)
-            {
-                case Types.System: return MiscFunc.NtOsKrnlPath;
-                case Types.Service: return Translate.fmt("name_service", Path, Aux);
-                case Types.Program: return Path;
-                case Types.App: return Translate.fmt("name_app", Path, GetPackageName());
-                default:
-                case Types.Global: return Translate.fmt("name_global");
-            }
         }
 
         public string AsString()
@@ -218,6 +194,61 @@ namespace PrivateWin10
         public bool IsApp()
         {
             return Type == Types.App;
+        }
+
+        private string AppPackageName = null;
+        public static Func<string, string> PackageNameResolver = null;
+
+        public string GetPackageName()
+        {
+            if (Type != Types.App)
+                return null;
+            if (AppPackageName == null && PackageNameResolver != null)
+                AppPackageName = PackageNameResolver(Aux);
+            return AppPackageName;
+        }
+
+
+        /////////////////////////////////////////////
+        // comparison helper
+
+        public enum FuzzyModes : int
+        {
+            No = 0,
+            Tag = 1,
+            Path = 2,
+            Any = 3
+        };
+
+        public static T GetProgramFuzzy<T>(SortedDictionary<ProgramID, T> Programs, ProgramID progID, FuzzyModes fuzzyMode) where T : class
+        {
+            T prog = null;
+            if (Programs.TryGetValue(progID, out prog))
+                return prog;
+
+            // Only works for services and apps 
+            if (!(progID.Type == ProgramID.Types.Service || progID.Type == ProgramID.Types.App))
+                return null;
+
+            if ((fuzzyMode & FuzzyModes.Tag) != 0 && progID.Aux.Length > 0)
+            {
+                // first drop path and try to get by serviceTag or application SID
+                ProgramID auxId = new ProgramID(progID.Type, null, progID.Aux);
+                if (Programs.TryGetValue(auxId, out prog))
+                    return prog;
+            }
+
+            if ((fuzzyMode & FuzzyModes.Path) != 0 && progID.Path.Length > 0
+             && (progID.Type == ProgramID.Types.Service || progID.Type == ProgramID.Types.App)
+             && System.IO.Path.GetFileName(progID.Path).Equals("svchost.exe", StringComparison.OrdinalIgnoreCase) == false) // dont use this for svchost.exe
+            {
+                // than try to get an entry by path only
+                ProgramID pathId = new ProgramID(ProgramID.Types.Program, progID.Path, null);
+                if (Programs.TryGetValue(pathId, out prog))
+                    return prog;
+            }
+
+            return null;
         }
     }
 

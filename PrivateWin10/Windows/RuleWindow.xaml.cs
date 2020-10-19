@@ -13,6 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using MiscHelpers;
+using PrivateAPI;
+using WinFirewallAPI;
 
 namespace PrivateWin10.Windows
 {
@@ -21,11 +23,11 @@ namespace PrivateWin10.Windows
     /// </summary>
     public partial class RuleWindow : Window
     {
-        protected FirewallRule Rule;
+        protected FirewallRuleEx Rule;
 
         private readonly RuleWindowViewModel viewModel;
 
-        public RuleWindow(List<Program> progs, FirewallRule rule)
+        public RuleWindow(List<Program> progs, FirewallRuleEx rule)
         {
             InitializeComponent();
 
@@ -96,14 +98,14 @@ namespace PrivateWin10.Windows
             }
             else
             {
-                ContentControl program = new ContentControl() { Content = Rule.ProgID.FormatString(), Tag = Rule.ProgID };
+                ContentControl program = new ContentControl() { Content = ProgramControl.FormatProgID(Rule.ProgID), Tag = Rule.ProgID };
                 cmbProgram.Items.Add(program);
                 cmbProgram.SelectedItem = program;
             }
 
             txtPath.Text = rule.BinaryPath ?? "";
             txtService.Text = rule.ServiceTag ?? "";
-            txtApp.Text = rule.AppSID != null ? AppManager.SidToAppPackage(rule.AppSID) : ""; // ToDo: xxx pull that through the core
+            txtApp.Text = rule.AppSID != null ? AppModel.GetInstance().GetAppPkgBySid(rule.AppSID)?.ID ?? rule.AppSID : "";
 
             cmbAction.Items.Add(new ContentControl() { Content = Translate.fmt("str_allow"), Tag = FirewallRule.Actions.Allow });
             cmbAction.Items.Add(new ContentControl() { Content = Translate.fmt("str_block"), Tag = FirewallRule.Actions.Block });
@@ -142,7 +144,7 @@ namespace PrivateWin10.Windows
 
             if (bNew)
                 cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_inandout"), Tag = FirewallRule.Directions.Bidirectiona });
-            cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_outbound"), Tag = FirewallRule.Directions.Outboun });
+            cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_outbound"), Tag = FirewallRule.Directions.Outbound });
             cmbDirection.Items.Add(new ContentControl() { Content = Translate.fmt("str_inbound"), Tag = FirewallRule.Directions.Inbound });
             WpfFunc.CmbSelect(cmbDirection, Rule.Direction.ToString());
 
@@ -188,10 +190,11 @@ namespace PrivateWin10.Windows
             switch (id.Type)
             {
                 case ProgramID.Types.Service:
-                    txtService.Text = id.GetServiceName() + " (" + id.GetServiceId() + ")";
+                    txtService.Text = id.GetServiceId();
                     break;
                 case ProgramID.Types.App:
-                    txtApp.Text = id.GetPackageName();
+                    string SID = id.GetPackageSID();
+                    txtApp.Text = SID != null ? AppModel.GetInstance().GetAppPkgBySid(SID)?.ID ?? "" : "";
                     break;
             }
             txtService.IsEnabled = id.Type == ProgramID.Types.Service;
@@ -283,7 +286,7 @@ namespace PrivateWin10.Windows
                 cmbRemotePorts.Items.Add(new ContentControl() { Content = Translate.fmt("port_any"), Tag = "*" });
                 cmbLocalPorts.Items.Add(new ContentControl() { Content = Translate.fmt("port_any"), Tag = "*" });
 
-                if (Rule.Direction == FirewallRule.Directions.Outboun)
+                if (Rule.Direction == FirewallRule.Directions.Outbound)
                 {
                     if (curProtocol == (int)FirewallRule.KnownProtocols.TCP)
                     {
