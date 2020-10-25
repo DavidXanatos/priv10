@@ -52,6 +52,9 @@
     <Compile Include="IPC\PipeIPC.cs" />
     <Compile Include="IPC\Priv10Conv.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+		<Compile Include="..\SharedAssemblyInfo.cs">
+		  <Link>Properties\SharedAssemblyInfo.cs</Link>
+		</Compile>
     <Compile Include="IPC\Priv10Logger.cs" />
   </ItemGroup>
   <ItemGroup>

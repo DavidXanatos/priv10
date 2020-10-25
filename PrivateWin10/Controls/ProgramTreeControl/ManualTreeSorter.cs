@@ -201,10 +201,8 @@ namespace PrivateWin10.Controls
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
 
-#if DEBUG
             if(elapsedMs > 100)
                 AppLog.Debug("TreeView Sorting took very log: {0} ms and required {1} swaps", elapsedMs, SwapCount);
-#endif
         }
     }
 }

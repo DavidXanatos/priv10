@@ -151,7 +151,7 @@ namespace PrivateWin10
                 LoadLogAsync();
 
             LoadFwRules();
-            CleanupFwRules();
+            CleanupFwRules(true); // startup cleanup, remove temp rules imminetly
 
             AppLog.Debug("Starting Process Monitor...");
             ProcessMonitor = new ProcessMonitor();
@@ -323,7 +323,7 @@ namespace PrivateWin10
         {
             public FirewallEvent FwEvent;
             public NetworkMonitor.AdapterInfo NicInfo;
-            public List<ServiceHelper.ServiceInfo> Services;
+            public List<ProcessMonitor.ServiceInfo> Services;
         }
 
         List<QueuedFwEvent> QueuedFwEvents = new List<QueuedFwEvent>();
@@ -342,7 +342,7 @@ namespace PrivateWin10
                 ProgID = ProgramID.NewID(ProgramID.Types.System);
             else
             {
-                List<ServiceHelper.ServiceInfo> Services = ServiceHelper.GetServicesByPID(FwEvent.ProcessId);
+                List<ProcessMonitor.ServiceInfo> Services = ProcessMonitor.GetServicesByPID(FwEvent.ProcessId);
                 if (Services == null || Services.Count == 1)
                 {
                     ProgID = GetProgIDbyPID(FwEvent.ProcessId, Services == null ? null : Services[0].ServiceName, FwEvent.ProcessFileName);
@@ -426,7 +426,7 @@ namespace PrivateWin10
                 List<ProgramID> machingIDs = new List<ProgramID>();
                 List<ProgramID> unruledIDs = new List<ProgramID>();
                 List<String> services = new List<String>();
-                foreach (ServiceHelper.ServiceInfo info in cur.Services)
+                foreach (ProcessMonitor.ServiceInfo info in cur.Services)
                 {
                     services.Add(info.ServiceName);
 
@@ -977,6 +977,7 @@ namespace PrivateWin10
                     {
                         if (App.engine.FirewallManager.RemoveRule(rule.guid))
                         {
+                            Priv10Logger.LogInfo("Removed expired/temporary rule: {0}", App.GetResourceStr(rule.Name));
                             bRemoved = true;
                             prog.Rules.Remove(rule.guid);
                             Count++;
@@ -987,6 +988,93 @@ namespace PrivateWin10
                 if(bRemoved)
                     OnRulesUpdated(prog);
             }
+            return Count;
+        }
+
+        public int CleanupFwDuplicates(CleanupMode Mode)
+        {
+            //var watch = System.Diagnostics.Stopwatch.StartNew();
+            
+            int Count = 0;
+            foreach (Program prog in ProgramList.Programs.Values)
+            {
+                bool bRemoved = false;
+
+                List<FirewallRuleEx> Rules = prog.Rules.Values.ToList();
+
+                Action<FirewallRuleEx> RemoveRule = (rule) =>
+                {
+                    Rules.Remove(rule);
+/*#if DEBUG
+                    if(!bRemoved)
+                        Debug.WriteLine("\r\nChecking for Duplicat Rules: " +  prog.Description); // thats sooo slow !!!!
+                    Debug.WriteLine("Removed Duplicat Rule: " + App.GetResourceStr(rule.Name)); // thats sooo slow !!!!
+#endif*/
+                    if (App.engine.FirewallManager.RemoveRule(rule.guid))
+                    {
+                        Priv10Logger.LogInfo("Removed duplicate rule: {0}", App.GetResourceStr(rule.Name));
+                        bRemoved = true;
+                        prog.Rules.Remove(rule.guid);
+                        Count++;
+                    }
+                };
+
+
+                Func<FirewallRuleEx, FirewallRuleEx, int> TestRule = (CurRule, NextRule) =>
+                {
+                    int dropCur = CurRule.HasRealGuid() ? -1 : 0;
+                    int dropNext = NextRule.HasRealGuid() ? 1 : 0;
+                    if (dropCur == 0 && dropNext == 0)
+                        return 0; // if booth rules have custom string guids we cant drop any
+
+                    FirewallRule.MatchResult match = CurRule.Match(NextRule);
+                    if (match == FirewallRule.MatchResult.Identical || match == FirewallRule.MatchResult.NameChanged)
+                        return dropNext != 0 ? dropNext : dropCur; // identical, may be except the name, remove duplicate
+                    if (match == FirewallRule.MatchResult.StateChanged)
+                    {
+                        if (CurRule.Enabled != NextRule.Enabled)
+                            return CurRule.Enabled ? dropNext : dropCur; // keep the enaled rule
+
+                        if (CurRule.Action == NextRule.Action)
+                            return 0; // this can't happen but in case
+
+                        if (Mode == CleanupMode.RemoveDuplicatesAllow) // keep the allow rule
+                            return CurRule.Action == FirewallRule.Actions.Allow ? dropNext : dropCur;
+                        else if (Mode == CleanupMode.RemoveDuplicatesBlock) // keep the block rule
+                            return CurRule.Action == FirewallRule.Actions.Block ? dropNext : dropCur;
+                    }
+                    //if (match == FirewallRule.MatchResult.TargetChanged || match == FirewallRule.MatchResult.DataChanged)
+                    return 0;
+                };
+
+                for (int i = 0; i < Rules.Count; i++)
+                {
+                    FirewallRuleEx CurRule = Rules[i];
+                    for (int j = i + 1; j < Rules.Count;)
+                    {
+                        FirewallRuleEx NextRule = Rules[j];
+                        int remove = TestRule(CurRule, NextRule);
+                        if (remove == 1)
+                            RemoveRule(NextRule);
+                        else if (remove == -1)
+                        {
+                            RemoveRule(CurRule);
+                            CurRule = NextRule;
+                        }
+                        else
+                            j++;
+                    }
+                }
+
+                if(bRemoved)
+                    OnRulesUpdated(prog);
+            }
+
+            //watch.Stop();
+            //var elapsedMs = watch.ElapsedMilliseconds;
+
+            //AppLog.Debug("CleanupFwDuplicates took: " + elapsedMs + "ms");
+
             return Count;
         }
 
@@ -1359,10 +1447,22 @@ namespace PrivateWin10
             }));
         }
 
-        public int CleanUpRules()
+        public enum CleanupMode
+        {
+            RemoveExpired = 0,
+            RemoveTemporary,
+            RemoveDuplicates,
+            RemoveDuplicatesAllow,
+            RemoveDuplicatesBlock,
+        }
+
+        public int CleanUpRules(CleanupMode Mode)
         {
             return mDispatcher.Invoke(new Func<int>(() => {
-                return CleanupFwRules(true);
+                if(Mode == CleanupMode.RemoveExpired || Mode == CleanupMode.RemoveTemporary)
+                    return CleanupFwRules(Mode == CleanupMode.RemoveTemporary);
+                else
+                    return CleanupFwDuplicates(Mode);
             }));
         }
 
@@ -1421,10 +1521,10 @@ namespace PrivateWin10
             }));
         }
 
-        public Dictionary<string, UwpFunc.AppInfo> GetAllAppPkgs(bool bReload = false)
+        public Dictionary<string, UwpFunc.AppInfo> GetAllAppPkgs(bool bWithPackageDetails = true)
         {
             return mDispatcher.Invoke(new Func<Dictionary<string, UwpFunc.AppInfo>>(() => {
-                return FirewallManager.GetAllAppPkgs(bReload);
+                return FirewallManager.GetAllAppPkgs(bWithPackageDetails, true);
             }));
         }
 

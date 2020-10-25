@@ -18,7 +18,7 @@ namespace PrivateAPI
         [DataMember()]
         public string Category = "";
         [DataMember()]
-        public string Icon = "";
+        public string Icon = null;
 
         public enum AccessLevels
         {

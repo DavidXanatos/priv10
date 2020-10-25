@@ -331,6 +331,15 @@ namespace PrivateWin10
             RestoreRules,
             ApproveChanges
         }
+
+        public enum CleanupMode
+        {
+            RemoveExpired = 0,
+            RemoveTemporary,
+            RemoveDuplicates,
+            RemoveDuplicatesAllow,
+            RemoveDuplicatesBlock,
+        }
     }
 
 

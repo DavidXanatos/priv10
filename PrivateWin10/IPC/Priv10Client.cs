@@ -392,9 +392,10 @@ namespace PrivateWin10
             return ret != null ? GetInt(ret[0]) : 0;
         }
 
-        public int CleanUpRules()
+        public int CleanUpRules(Priv10Engine.CleanupMode Mode)
         {
             List<byte[]> args = new List<byte[]>();
+            args.Add(PutStr(Mode));
             List<byte[]> ret = RemoteExec("CleanUpRules", args);
             return ret != null ? GetInt(ret[0]) : 0;
         }
@@ -431,10 +432,10 @@ namespace PrivateWin10
             return ret != null ? GetDomains(ret[0]) : null;
         }
 
-        public Dictionary<string, UwpFunc.AppInfo> GetAllAppPkgs(bool bReload = false)
+        public Dictionary<string, UwpFunc.AppInfo> GetAllAppPkgs(bool bWithPackageDetails = true)
         {
             List<byte[]> args = new List<byte[]>();
-            args.Add(PutBool(bReload));
+            args.Add(PutBool(bWithPackageDetails));
             List<byte[]> ret = RemoteExec("GetAllAppPkgs", args);
             return ret != null ? GetAppInfos(ret[0]) : null;
         }

@@ -49,7 +49,7 @@ namespace PrivateWin10.Controls
 
         public bool IsEmpty()
         {
-            return true;
+            return tweaksGrid.Items.IsEmpty;
         }
 
         public bool Add(TweakManager.TweakEventArgs args)

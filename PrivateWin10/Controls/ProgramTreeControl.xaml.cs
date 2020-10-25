@@ -316,7 +316,10 @@ namespace PrivateWin10.Controls
 
             HoldSelection = true;
 
-            ManualTreeSorter.Sort(root.Children, SortMember, Direction);
+            using (var suspend = Dispatcher.DisableProcessing())
+            {
+                ManualTreeSorter.Sort(root.Children, SortMember, Direction);
+            }
 
             HoldSelection = false;
 

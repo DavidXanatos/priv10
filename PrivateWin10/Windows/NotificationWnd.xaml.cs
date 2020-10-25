@@ -91,7 +91,7 @@ namespace PrivateWin10.Windows
 
         private void OnTimerTick(object sender, EventArgs e)
         {
-            foreach(var item in tabItems)
+            foreach (var item in tabItems)
             {
                 switch (item.Value.state)
                 {
@@ -112,7 +112,7 @@ namespace PrivateWin10.Windows
                 }
             }
 
-            if(SavePosChange)
+            if (SavePosChange)
                 App.StoreWnd(this, "Notify");
         }
 
@@ -143,38 +143,36 @@ namespace PrivateWin10.Windows
                     tabs.SelectedItem = item.Key;
             }
 
-            if(tabs.SelectedItem == null)
+            if (tabs.SelectedItem == null)
                 HideWnd();
         }
 
         public void AddCon(ProgramSet prog, Priv10Engine.FwEventArgs args)
         {
-            this.conTab.IsEnabled = true;
-            tabs.SelectedItem = this.conTab;
-            tabItems[this.conTab].state = STab.EState.eNew;
-            //tabItems[this.conTab].state = tabs.SelectedItem != this.conTab ? STab.EState.eNew : STab.EState.eFilled;
             if (this.ConNotify.Add(prog, args))
-                ShowWnd();
+                ShowTab(this.conTab);
         }
 
         public void NotifyRule(Priv10Engine.ChangeArgs args)
         {
-            this.ruleTab.IsEnabled = true;
-            tabs.SelectedItem = this.ruleTab;
-            tabItems[this.ruleTab].state = STab.EState.eNew;
-            //tabItems[this.ruleTab].state = tabs.SelectedItem != this.ruleTab ? STab.EState.eNew : STab.EState.eFilled;
             if (this.RuleNotify.Add(args))
-                ShowWnd();
+                ShowTab(this.ruleTab);
         }
 
         public void NotifyTweak(TweakManager.TweakEventArgs args)
         {
-            this.tweakTab.IsEnabled = true;
-            tabs.SelectedItem = this.tweakTab;
-            tabItems[this.tweakTab].state = STab.EState.eNew;
-            //tabItems[this.tweakTab].state = tabs.SelectedItem != this.tweakTab ? STab.EState.eNew : STab.EState.eFilled;
             if (this.TweakNotify.Add(args))
-                ShowWnd();
+                ShowTab(this.tweakTab);
+        }
+
+        private void ShowTab(TabItem item)
+        {
+            item.IsEnabled = true;
+            tabs.SelectedItem = item;
+            tabItems[item].state = STab.EState.eNew;
+            //tabItems[item].state = tabs.SelectedItem != item ? STab.EState.eNew : STab.EState.eFilled;
+
+            ShowWnd();
         }
 
         private void Tabs_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -35,7 +35,7 @@ namespace MiscHelpers
         public static string GetProcessFileNameByPID(int pid)
         {
             if (pid == ProcFunc.SystemPID)
-                return MiscFunc.NtOsKrnlPath;
+                return NtUtilities.NtOsKrnlPath;
 
             // todo add cache, may be?
             var processHandle = OpenProcess(0x1000/*PROCESS_QUERY_LIMITED_INFORMATION*/, false, pid);

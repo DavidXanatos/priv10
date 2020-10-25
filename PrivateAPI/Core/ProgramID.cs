@@ -95,7 +95,7 @@ namespace PrivateAPI
             if (Type == Types.Global)
                 return null;
             if (Type == Types.System)
-                return MiscFunc.NtOsKrnlPath;
+                return NtUtilities.NtOsKrnlPath;
             return Path;
         }
 
@@ -187,7 +187,7 @@ namespace PrivateAPI
                 return true;
 
             if (WindowsBinary == null)
-                WindowsBinary = MiscFunc.IsWindowsBinary(Path);
+                WindowsBinary = NtUtilities.IsWindowsBinary(Path);
             return WindowsBinary.Value;
         }
 

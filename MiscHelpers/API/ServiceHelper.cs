@@ -537,121 +537,12 @@ namespace MiscHelpers
             Critical = 0x00000003
         }
 
-        private static string GetServiceImagePath(string serviceName)
+        public static string GetServiceImagePath(string serviceName)
         {
             RegistryKey regkey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\services\" + serviceName);
             if (regkey.GetValue("ImagePath") == null)
                 return null;
             return regkey.GetValue("ImagePath").ToString();
-        }
-
-        public class ServiceInfo
-        {
-            public ServiceInfo(ServiceController sc)
-            {
-                ServiceName = sc.ServiceName;
-                var ImagePath = GetServiceImagePath(sc.ServiceName);
-                ServicePath = ImagePath != null ? ProcFunc.GetPathFromCmdLine(ImagePath) : "";
-                DisplayName = sc.DisplayName;
-                if (sc.Status == ServiceControllerStatus.Stopped)
-                    LastKnownPID = -1;
-                else
-                {
-                    var ssp = GetServiceStatus(sc.ServiceName);
-                    LastKnownPID = ssp != null ? (int)ssp.dwProcessId : -1;
-                }
-            }
-            public string ServiceName;
-            public string ServicePath;
-            public string DisplayName;
-            public int LastKnownPID;
-        }
-
-        private static DateTime ServiceCacheTime = DateTime.MinValue;
-        private static MultiValueDictionary<int, ServiceInfo> ServiceCacheByPID = new MultiValueDictionary<int, ServiceInfo>();
-        private static Dictionary<string, ServiceInfo> ServiceCache = new Dictionary<string, ServiceInfo>();
-        private static ReaderWriterLockSlim ServiceCacheLock = new ReaderWriterLockSlim();
-
-
-        private static void RefreshServices()
-        {
-            ServiceCacheLock.EnterWriteLock();
-            ServiceCacheTime = DateTime.Now;
-            ServiceCache.Clear();
-            ServiceCacheByPID.Clear();
-            foreach (ServiceController sc in ServiceController.GetServices())
-            {
-                ServiceInfo info = new ServiceInfo(sc);
-                if (!ServiceCache.ContainsKey(sc.ServiceName)) // should not happen but in case
-                    ServiceCache.Add(sc.ServiceName, info);
-                if (info.LastKnownPID != -1)
-                    ServiceCacheByPID.Add(info.LastKnownPID, info);
-            }
-            // this takes roughly 30 ms
-            ServiceCacheLock.ExitWriteLock();
-        }
-
-        public static List<ServiceInfo> GetServicesByPID(int pid)
-        {
-            bool doUpdate = false;
-            if (pid == -1) // -1 means get all and we always want a fresh list
-                doUpdate = true;
-            else
-            {
-                ServiceCacheLock.EnterReadLock();
-                doUpdate = ServiceCacheTime <= DateTime.FromFileTimeUtc(ProcFunc.GetProcessCreationTime(pid)).ToLocalTime();
-                ServiceCacheLock.ExitReadLock();
-            }
-            if (doUpdate)
-                RefreshServices();
-
-            ServiceCacheLock.EnterReadLock();
-            CloneableList<ServiceInfo> values;
-            if (pid == -1)
-                values = ServiceCacheByPID.GetAllValues();
-            else if (!ServiceCacheByPID.TryGetValue(pid, out values))
-                values = null;
-            ServiceCacheLock.ExitReadLock();
-            return (values != null && values.Count == 0) ? null : values;
-        }
-
-        public static List<ServiceInfo> GetAllServices()
-        {
-            ServiceCacheLock.EnterReadLock();
-            bool doUpdate = ServiceCacheTime < DateTime.Now.AddSeconds(-30);
-            ServiceCacheLock.ExitReadLock();
-            if (doUpdate)
-                RefreshServices();
-
-            ServiceCacheLock.EnterReadLock();
-            List<ServiceInfo> list = ServiceCache.Values.ToList();
-            ServiceCacheLock.ExitReadLock();
-            return list;
-        }
-
-        public static string GetServiceName(string name)
-        {
-            if (name == null || name.Length == 0)
-                return "";
-
-            ServiceCacheLock.EnterReadLock();
-            ServiceInfo info = null;
-            bool found = ServiceCache.TryGetValue(name, out info);
-            ServiceCacheLock.ExitReadLock();
-
-            if (!found)
-            {
-                ServiceController sc = new ServiceController(name);
-                try { info = new ServiceInfo(sc); } catch { }
-                sc.Close();
-
-                ServiceCacheLock.EnterWriteLock();
-                if (info != null && !ServiceCache.ContainsKey(sc.ServiceName)) // should not happen but in case
-                    ServiceCache.Add(sc.ServiceName, info);
-                ServiceCacheLock.ExitWriteLock();
-            }
-
-            return info == null ? "" : info.DisplayName;
         }
     }
 }

@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\EtwLogger.cs" />
+    <Compile Include="API\ProcessUtilities.cs" />
     <Compile Include="Common\AdminFunc.cs" />
     <Compile Include="Core\DnsInspector.cs" />
     <Compile Include="Core\DnsInspector\DnsCacheMonitor.cs" />
@@ -75,6 +76,9 @@
     <Compile Include="IPC\Priv10Host.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+		<Compile Include="..\SharedAssemblyInfo.cs">
+		  <Link>Properties\SharedAssemblyInfo.cs</Link>
+		</Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

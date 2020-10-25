@@ -242,6 +242,5 @@ namespace PrivateAPI
             return ProgID != null;
         }
 
-        
     }
 }

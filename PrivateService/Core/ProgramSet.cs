@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using PrivateService;
 using PrivateAPI;
+using System.Diagnostics;
 
 namespace PrivateWin10
 {
@@ -194,7 +195,7 @@ namespace PrivateWin10
                     AppLog.Debug("Unknown Program Value, '{0}':{1}", node.Name, node.InnerText);
             }
 
-            if(Programs.Count > 0 && config.Name == null || config.Name.Substring(0,2) == "@{")
+            if (Programs.Count > 0 && (config.Name == null || config.Name.Substring(0, 2) == "@{"))
                 config.Name = Programs.First().Value.Description;
 
             return Programs.Count > 0 && config.Name != null;

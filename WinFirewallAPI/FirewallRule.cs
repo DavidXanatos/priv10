@@ -178,7 +178,7 @@ namespace WinFirewallAPI
         public bool SafeEqualsArr<T>(T[] L, T[] R)
         {
             if (L == null || L.Length == 0 || R == null || R.Length == 0)
-                return ((L == null || L.Length == 0) && (R == null || L.Length == 0));
+                return ((L == null || L.Length == 0) && (R == null || R.Length == 0));
             if (L.Length != R.Length)
                 return false;
             for (int i = 0; i < L.Length; i++)
@@ -197,6 +197,8 @@ namespace WinFirewallAPI
             DataChanged = 3,
             TargetChanged = 4
         };
+
+        public bool HasRealGuid() { return guid != null && guid.Length > 2 && guid.Substring(0, 1).Equals("{") && guid.Substring(guid.Length-1, 1).Equals("}"); }
 
         public MatchResult Match(FirewallRule other)
         {

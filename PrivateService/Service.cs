@@ -178,9 +178,6 @@ namespace PrivateService
             AppLog.Debug("FirstChanceException event raised in {0}: {1}\r\n{2}", AppDomain.CurrentDomain.FriendlyName, e.Exception.Message, e.Exception.StackTrace);
         }
 
-        static private Dictionary<string, string> AppResourceStrCache = new Dictionary<string, string>();
-        static private ReaderWriterLockSlim AppResourceStrLock = new ReaderWriterLockSlim();
-
         static public string GetResourceStr(string resourcePath)
         {
             if (resourcePath == null)
@@ -188,29 +185,12 @@ namespace PrivateService
             if (resourcePath.Length == 0 || resourcePath[0] != '@')
                 return resourcePath;
 
-            string resourceStr = null;
-            AppResourceStrLock.EnterReadLock();
-            AppResourceStrCache.TryGetValue(resourcePath, out resourceStr);
-            AppResourceStrLock.ExitReadLock();
-            if (resourceStr != null)
-                return resourceStr;
-
+            // modern app resource string
             if (resourcePath.Length > 2 && resourcePath.Substring(0, 2) == "@{")
-            {
-                //if (App.engine != null)
-                    resourceStr = App.engine?.PkgMgr?.GetAppResourceStr(resourcePath) ?? resourcePath;
-                //else // xxxxxx
-                //    resourceStr = App.client.GetAppPkgRes(resourcePath);
-            }
-            else
-                resourceStr = MiscFunc.GetResourceStr(resourcePath);
-
-            AppResourceStrLock.EnterWriteLock();
-            if (!AppResourceStrCache.ContainsKey(resourcePath))
-                AppResourceStrCache.Add(resourcePath, resourceStr);
-            AppResourceStrLock.ExitWriteLock();
-
-            return resourceStr;
+                return App.engine?.PkgMgr?.GetAppResourceStr(resourcePath) ?? resourcePath;
+            
+            // classic win32 resource string
+            return MiscFunc.GetResourceStr(resourcePath);
         }
         
         /////////////////////////////////////////////////////////////////////////////////////////////////////////

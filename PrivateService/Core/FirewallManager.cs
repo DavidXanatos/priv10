@@ -685,5 +685,71 @@ namespace PrivateWin10
             return true;
         }
 
+        ////////////////////////////////////////////////
+        // App Package List
+
+        Dictionary<string, UwpFunc.AppInfo> AppPackages = new Dictionary<string, UwpFunc.AppInfo>();
+        DateTime LastAppReload = DateTime.Now;
+        bool HasPackageDetails = false;
+
+        public bool LoadAppPkgs(bool bWithPackageDetails = false)
+        {
+            AppPackages.Clear();
+            LastAppReload = DateTime.Now;
+
+            if (UwpFunc.IsWindows7OrLower)
+                return false;
+
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
+            var AppContainers = GetAppContainers();
+            foreach (var AppContainer in AppContainers)
+            {
+                string SID = AppContainer.appContainerSid.ToString();
+                if (AppPackages.ContainsKey(SID))
+                    continue;
+
+                UwpFunc.AppInfo AppInfo = new UwpFunc.AppInfo();
+                AppInfo.ID = AppContainer.appContainerName;
+                AppInfo.SID = SID;
+                AppInfo.Name = AppContainer.displayName;
+
+                if (bWithPackageDetails)
+                {
+                    var AppInfo2 = App.engine?.PkgMgr?.GetAppInfoByID(AppInfo.ID);
+                    AppInfo.Logo = AppInfo2?.Logo;
+                }
+
+                AppPackages.Add(SID, AppInfo);
+            }
+
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+
+            AppLog.Debug("LoadAppPkgs took: " + elapsedMs + "ms");
+
+            return true;
+        }
+
+        public Dictionary<string, UwpFunc.AppInfo> GetAllAppPkgs(bool bWithPackageDetails, bool bUpdate = false)
+        {
+            if (bUpdate || AppPackages.Count == 0 || (DateTime.Now - LastAppReload).TotalMilliseconds > 30*1000 || (bWithPackageDetails && !HasPackageDetails))
+                LoadAppPkgs(bWithPackageDetails);
+            return AppPackages;
+        }
+
+        public UwpFunc.AppInfo GetAppPkgBySid(string SID)
+        {
+            if (UwpFunc.IsWindows7OrLower || SID == null)
+                return null;
+
+            UwpFunc.AppInfo AppContainer = null;
+            if (AppPackages.Count == 0 || (!AppPackages.TryGetValue(SID, out AppContainer) && (DateTime.Now - LastAppReload).TotalMilliseconds > 250))
+            {
+                LoadAppPkgs();
+                AppPackages.TryGetValue(SID, out AppContainer);
+            }
+            return AppContainer;
+        }
     }
 }

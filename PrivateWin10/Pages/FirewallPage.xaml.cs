@@ -907,6 +907,8 @@ namespace PrivateWin10.Pages
 
         public void btnAddSub_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true; // or else btnAdd_Click will be triggered to
+
             var SelectedProgramSets = GetSelectedProgramSets();
             if (SelectedProgramSets.Count != 1)
                 return;
@@ -999,6 +1001,8 @@ namespace PrivateWin10.Pages
 
         public void btnSetAccess_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true; // fix for ribbon split button missbehavioure
+
             foreach (var progSet in GetSelectedProgramSets())
             {
                 var config = progSet.config.Clone();

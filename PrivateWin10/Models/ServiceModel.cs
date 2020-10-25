@@ -23,7 +23,6 @@ namespace PrivateWin10
         {
             if (mInstance == null)
                 mInstance = new ServiceModel();
-            mInstance.Reload();
             return mInstance;
         }
 
@@ -40,8 +39,13 @@ namespace PrivateWin10
 
             Services.Add(new Service() { Content = Translate.fmt("svc_all"), Value="*", Group = Translate.fmt("lbl_selec") });
 
-            foreach (ServiceHelper.ServiceInfo svc in ServiceHelper.GetAllServices().OrderBy(x => x.DisplayName))
-                Services.Add(new Service() { Value = svc.ServiceName, Path = svc.ServicePath, Content = svc.DisplayName + " (" + svc.ServiceName + ")", Group = Translate.fmt("lbl_known") });
+            foreach (ServiceController svc in ServiceController.GetServices())
+            {
+                var ImagePath = ServiceHelper.GetServiceImagePath(svc.ServiceName);
+                var ServicePath = ImagePath != null ? ProcFunc.GetPathFromCmdLine(ImagePath) : "";
+
+                Services.Add(new Service() { Value = svc.ServiceName, Path = ServicePath, Content = svc.DisplayName + " (" + svc.ServiceName + ")", Group = Translate.fmt("lbl_known") });
+            }
         }
 
         public class Service : ContentControl
@@ -53,6 +57,8 @@ namespace PrivateWin10
 
         public IEnumerable GetServices()
         {
+            Reload();
+
             ListCollectionView lcv = new ListCollectionView(Services);
             lcv.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
             lcv.SortDescriptions.Add(new SortDescription("Content", ListSortDirection.Ascending));

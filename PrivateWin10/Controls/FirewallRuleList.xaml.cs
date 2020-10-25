@@ -154,8 +154,9 @@ namespace PrivateWin10.Controls
 
             // translate
             firewallPage.btnCreateRule.Label = Translate.fmt("btn_mk_rule");
-            firewallPage.btnReload.Label = Translate.fmt("btn_reload");
-            firewallPage.btnCleanUp.Label = Translate.fmt("btn_cleanup_rules");
+            firewallPage.btnReloadRules.Label = Translate.fmt("btn_reload");
+            firewallPage.btnCleanUpRules.Label = Translate.fmt("btn_cleanup_rules");
+            //todo: localize btnDeDup and otehrs
 
             firewallPage.btnEnableRule.Label = Translate.fmt("btn_enable_rule");
             firewallPage.btnDisableRule.Label = Translate.fmt("btn_disable_rule");
@@ -174,8 +175,12 @@ namespace PrivateWin10.Controls
 
             // and connect
             firewallPage.btnCreateRule.Click += btnCreateRule_Click;
-            firewallPage.btnReload.Click += btnReload_Click;
-            firewallPage.btnCleanUp.Click += btnCleanup_Click;
+            firewallPage.btnReloadRules.Click += btnReload_Click;
+            firewallPage.btnCleanUpRules.Click += btnCleanup_Click;
+
+            firewallPage.btnDeDupRules.Click += btnCleanup_Click;
+            firewallPage.btnDeDupAllow.Click += btnCleanup_Click;
+            firewallPage.btnDeDupBlock.Click += btnCleanup_Click;
 
             firewallPage.btnEditRule.Click += btnEditRule_Click;
             firewallPage.btnEnableRule.Click += btnEnableRule_Click;
@@ -253,7 +258,19 @@ namespace PrivateWin10.Controls
 
         private void btnCleanup_Click(object sender, RoutedEventArgs e)
         {
-            int Count = App.client.CleanUpRules();
+            e.Handled = true; // fix for ribbon split button missbehavioure
+
+            Priv10Engine.CleanupMode Mode = Priv10Engine.CleanupMode.RemoveExpired;
+            if (sender == firewallPage.btnCleanUpRules)
+                Mode = Priv10Engine.CleanupMode.RemoveTemporary;
+            else if (sender == firewallPage.btnDeDupRules)
+                Mode = Priv10Engine.CleanupMode.RemoveDuplicates;
+            else if (sender == firewallPage.btnDeDupAllow)
+                Mode = Priv10Engine.CleanupMode.RemoveDuplicatesAllow;
+            else if (sender == firewallPage.btnDeDupBlock)
+                Mode = Priv10Engine.CleanupMode.RemoveDuplicatesBlock;
+
+            int Count = App.client.CleanUpRules(Mode);
 
             MessageBox.Show(Translate.fmt("msg_clean_res", Count), App.Title, MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -351,6 +368,8 @@ namespace PrivateWin10.Controls
 
         private void btnApproveAllRules_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true; // or else btnApproveRule_Click will be triggered to
+
             if (MessageBox.Show(Translate.fmt("msg_approve_all"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
@@ -359,6 +378,8 @@ namespace PrivateWin10.Controls
 
         private void btnRestoreAllRules_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true; // or else btnRestoreRule_Click will be triggered to
+
             if (MessageBox.Show(Translate.fmt("msg_restore_all"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 
@@ -367,6 +388,8 @@ namespace PrivateWin10.Controls
 
         private void btnRedoAllRules_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true; // or else btnRedoRule_Click will be triggered to
+
             if (MessageBox.Show(Translate.fmt("msg_apply_all"), App.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 return;
 

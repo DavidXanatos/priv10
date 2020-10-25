@@ -15,7 +15,7 @@
             <RowDefinition Height="100*"/>
         </Grid.RowDefinitions>
 
-        <ribbon:Ribbon Grid.Row="0" Loaded="Ribbon_Loaded" Name="rbbBar" SelectedIndex="0">
+        <ribbon:Ribbon Grid.Row="0" Loaded="Ribbon_Loaded" Name="rbbBar" SelectedIndex="1">
             <Ribbon.QuickAccessToolBar>
                 <RibbonQuickAccessToolBar />
             </Ribbon.QuickAccessToolBar>
@@ -160,7 +160,7 @@
 
                 <RibbonGroup Header="Options" Name="lblProgOpts">
                     <RibbonButton Name="btnAllowAll" Label="Full Access" SmallImageSource="{StaticResource Icon_Grant}" Click="btnSetAccess_Click"/>
-                    <RibbonSplitButton Name="btnCustomCfg" Label="Custom Config" SmallImageSource="{StaticResource Icon_Custom}" Click="btnSetAccess_Click" >
+                    <RibbonSplitButton Name="btnCustomCfg" Label="Custom Config" SmallImageSource="{StaticResource Icon_Custom}" Click="btnSetAccess_Click" Margin="-2,0,0,0">
                         <RibbonMenuItem Name="btnInOnly" Header="Inbound" ImageSource="{StaticResource Icon_In}" Click="btnSetAccess_Click"/>
                         <RibbonMenuItem Name="btnOutOnly" Header="Outbound" ImageSource="{StaticResource Icon_Out}" Click="btnSetAccess_Click"/>
                         <RibbonMenuItem Name="btnLanOnly" Header="Lan Only" ImageSource="{StaticResource Icon_NoLan}" Click="btnSetAccess_Click"/>
@@ -189,8 +189,12 @@
             <RibbonTab Header="Rules" Name="rbbRules">
                 <RibbonGroup Header="Rules" Name="rbbRule">
                     <RibbonButton Name="btnCreateRule" Label="Create Rule" LargeImageSource="{StaticResource Icon_Plus}"/>
-                    <RibbonButton Name="btnReload" Label="Reload Rules" SmallImageSource="{StaticResource Icon_Refresh}"/>
-                    <RibbonButton Name="btnCleanUp" Label="Clean up Rules" SmallImageSource="{StaticResource Icon_CleanUp}"/>
+                    <RibbonButton Name="btnReloadRules" Label="Reload Rules" SmallImageSource="{StaticResource Icon_Refresh}"/>
+                    <RibbonButton Name="btnCleanUpRules" Label="Clean up Rules" SmallImageSource="{StaticResource Icon_CleanUp}"/>
+                    <RibbonSplitButton Name="btnDeDupRules" Label="Clear Copies" SmallImageSource="{StaticResource Icon_Filter}" Margin="-2,0,0,0" >
+                        <RibbonMenuItem Header="Allow on conflict" Name="btnDeDupAllow"/>
+                        <RibbonMenuItem Header="Block on conflict" Name="btnDeDupBlock"/>
+                    </RibbonSplitButton>
                 </RibbonGroup>
                 <RibbonGroup Header="Sellected Rules" Name="rbbRuleEdit">
                     <RibbonButton Name="btnEditRule" Label="Edit Rule" LargeImageSource="{StaticResource Icon_EditL}"/>
@@ -203,13 +207,13 @@
                 </RibbonGroup>
                 <RibbonGroup Header="Rule Guard" Name="rbbRuleGuard">
                     <RibbonSplitButton Name="btnApprove" Label="Approve Current" SmallImageSource="{StaticResource Icon_Approve}" >
-                        <RibbonMenuItem Header="Approve All"/>
+                        <RibbonMenuItem Header="Approve All" Name="btnApproveAll"/>
                     </RibbonSplitButton>
                     <RibbonSplitButton Name="btnRestore" Label="Restore Original" SmallImageSource="{StaticResource Icon_Undo}" >
-                        <RibbonMenuItem Header="Restore All"/>
+                        <RibbonMenuItem Header="Restore All" Name="btnRestoreAll"/>
                     </RibbonSplitButton>
                     <RibbonSplitButton Name="btnApply" Label="Redo Changes" SmallImageSource="{StaticResource Icon_Redo}" >
-                        <RibbonMenuItem Header="Restore All"/>
+                        <RibbonMenuItem Header="Restore All" Name="btnApplyAll"/>
                     </RibbonSplitButton>
                 </RibbonGroup>
             </RibbonTab>

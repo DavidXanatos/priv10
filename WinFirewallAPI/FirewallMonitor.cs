@@ -211,7 +211,7 @@ namespace WinFirewallAPI
 
                 args.ProcessId = (int)(UInt64)PropertyValues[(int)EventProperties.ProcessID];
                 string fileName = PropertyValues[(int)EventProperties.ProcessFileName].ToString();
-                args.ProcessFileName = fileName.Equals("System", StringComparison.OrdinalIgnoreCase) ? "System" : MiscFunc.parsePath(fileName);
+                args.ProcessFileName = fileName.Equals("System", StringComparison.OrdinalIgnoreCase) ? "System" : NtUtilities.parsePath(fileName);
 
                 args.Action = FirewallRule.Actions.Undefined;
 

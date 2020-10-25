@@ -20,7 +20,15 @@ namespace MiscHelpers
         private static Dictionary<string, ImageSource> IconCache = new Dictionary<string, ImageSource>();
         private static ReaderWriterLockSlim IconCacheLock = new ReaderWriterLockSlim();
 
-        public static ImageSource ExeIcon16 = GetIcon(MiscFunc.NtOsKrnlPath, 16);
+        public static ImageSource ExeIcon16 = GetIcon(NtUtilities.NtOsKrnlPath, 16);
+
+        public static bool IsImageFileName(string fileName)
+        {
+            return fileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase)
+            || fileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)
+            || fileName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)
+            || fileName.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase);
+        }
 
         public static ImageSource GetIcon(string path, double size)
         {
@@ -37,25 +45,33 @@ namespace MiscHelpers
             {
                 var pathIndex = TextHelpers.Split2(path, "|");
 
-                IconExtractor extractor = new IconExtractor(pathIndex.Item1);
-                int index = MiscFunc.parseInt(pathIndex.Item2);
-                if (index < extractor.Count)
-                    image = ToImageSource(extractor.GetIcon(index, new System.Drawing.Size((int)size, (int)size)));
+                if (IsImageFileName(pathIndex.Item1))
+                {
+                    try
+                    {
+                        image = new BitmapImage(new Uri(pathIndex.Item1));
+                    }
+                    catch { }
+                }
+                else
+                {
+                    IconExtractor extractor = new IconExtractor(pathIndex.Item1);
+                    int index = MiscFunc.parseInt(pathIndex.Item2);
+                    if (index < extractor.Count)
+                        image = ToImageSource(extractor.GetIcon(index, new System.Drawing.Size((int)size, (int)size)));
+                }
 
                 if (image == null)
                 {
-                    if (File.Exists(MiscFunc.NtOsKrnlPath)) // if running in WOW64 this does not exist
-                        image = ToImageSource(Icon.ExtractAssociatedIcon(MiscFunc.NtOsKrnlPath));
+                    if (File.Exists(NtUtilities.NtOsKrnlPath)) // if running in WOW64 this does not exist
+                        image = ToImageSource(Icon.ExtractAssociatedIcon(NtUtilities.NtOsKrnlPath));
                     else // fall back to an other icon
-                        image = ToImageSource(Icon.ExtractAssociatedIcon(MiscFunc.Shell32Path));
+                        image = ToImageSource(Icon.ExtractAssociatedIcon(NtUtilities.Shell32Path));
                 }
 
                 image.Freeze();
             }
-            catch (Exception err)
-            {
-                //AppLog.Exception(err);
-            }
+            catch { }
 
             IconCacheLock.EnterWriteLock();
             if (!IconCache.ContainsKey(key))

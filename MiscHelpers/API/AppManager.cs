@@ -80,7 +80,7 @@ namespace MiscHelpers
         const int ERROR_INSUFFICIENT_BUFFER = 0x7a;
         const int ERROR_SUCCESS = 0x0;
 
-        public string GetAppPackageByPID_(int PID)
+        public string GetAppPackageByPID(int PID)
         {
             // WARNING: this is not consistent with the windows firewall, we need to go by the proces token
 
@@ -112,22 +112,9 @@ namespace MiscHelpers
 
         private Windows.Management.Deployment.PackageManager packageManager = new Windows.Management.Deployment.PackageManager();
 
-        /*
-        private Dictionary<string, UwpFunc.AppInfo> AppInfosBySid = new Dictionary<string, UwpFunc.AppInfo>();
-        private ReaderWriterLockSlim AppInfosBySidLock = new ReaderWriterLockSlim();
-
-        public UwpFunc.AppInfo GetAppInfoBySid(string sid)
+        public UwpFunc.AppInfo GetAppInfoByID(string appPackageID)
         {
             UwpFunc.AppInfo info = null;
-            AppInfosBySidLock.EnterReadLock();
-            AppInfosBySid.TryGetValue(sid, out info);
-            AppInfosBySidLock.ExitReadLock();
-            if (info != null)
-                return info;
-
-            string appPackageID = SidToAppPackage(sid);
-            if (appPackageID == null || appPackageID.Length == 0)
-                return null;
 
             IEnumerable<Windows.ApplicationModel.Package> packages;
 
@@ -142,37 +129,30 @@ namespace MiscHelpers
 
             foreach (var package in packages)
             {
-                info = GetInfo(package, sid);
+                info = GetInfo(package);
                 if (info != null)
-                {
-                    AppInfosBySidLock.EnterWriteLock();
-                    if (!AppInfosBySid.ContainsKey(sid))
-                        AppInfosBySid.Add(sid, info);
-                    AppInfosBySidLock.ExitWriteLock();
                     break;
-                }
             }
 
             return info;
         }
 
-
-        private UwpFunc.AppInfo GetInfo(Windows.ApplicationModel.Package package, string sid)
+        private UwpFunc.AppInfo GetInfo(Windows.ApplicationModel.Package package)
         {
             string path;
+            string manifest;
             try
             {
-                path = package.InstalledLocation.Path;
+                path = package.InstalledLocation.Path; // that call takes a long time
+
+                manifest = Path.Combine(path, !package.IsBundle ? @"AppxManifest.xml" : @"AppxMetadata\AppxBundleManifest.xml");
+                if (!File.Exists(manifest))
+                    return null;
             }
             catch
             {
                 return null;
             }
-
-            string manifest = Path.Combine(path, "AppxManifest.xml");
-
-            if (!File.Exists(manifest))
-                return null;
 
             XElement xelement;
             try
@@ -209,7 +189,7 @@ namespace MiscHelpers
                 Uri result;
                 if (Uri.TryCreate(displayName, UriKind.Absolute, out result))
                 {
-                    string pathToPri = Path.Combine(package.InstalledLocation.Path, "resources.pri");
+                    string pathToPri = Path.Combine(path, "resources.pri");
                     string resourceKey1 = "ms-resource://" + package.Id.Name + "/resources/" + ((IEnumerable<string>)result.Segments).Last<string>();
                     string stringFromPriFile = MiscFunc.GetResourceStr(pathToPri, resourceKey1);
                     if (!string.IsNullOrEmpty(stringFromPriFile.Trim()))
@@ -226,24 +206,33 @@ namespace MiscHelpers
 
                 if (logoPath != null)
                 {
-                    string path1 = Path.Combine(package.InstalledLocation.Path, logoPath);
-                    if (File.Exists(path1))
-                        logoPath = path1;
-                    else
+                    List<string> extensions = new List<string> { "", "scale-100.png", "scale-125.png", "scale-150.png", "scale-200.png", "scale-400.png" };
+                    List<string> sub_dirs = new List<string> { "", "en-us" };
+
+                    string foundPath = null;
+                    foreach (string extension in extensions)
                     {
-                        string path2 = Path.Combine(package.InstalledLocation.Path, Path.ChangeExtension(path1, "scale-100.png"));
-                        if (File.Exists(path2))
-                            logoPath = path2;
-                        else
+                        foreach (string sub_dir in sub_dirs)
                         {
-                            string path3 = Path.Combine(Path.Combine(package.InstalledLocation.Path, "en-us"), logoPath);
-                            string path4 = Path.Combine(package.InstalledLocation.Path, Path.ChangeExtension(path3, "scale-100.png"));
-                            if (File.Exists(path4))
-                                logoPath = path4;
-                            else
-                                logoPath = null;
+                            string testPath = path;
+                            if(sub_dir.Length > 0)
+                                testPath = Path.Combine(testPath, sub_dir);
+
+                            string testName = logoPath;
+                            if(extension.Length > 0)
+                                testName = Path.ChangeExtension(testName, extension);
+
+                            testPath = Path.Combine(testPath, testName);
+                            if (File.Exists(testPath))
+                            {
+                                foundPath = testPath;
+                                goto done;
+                            }
                         }
                     }
+
+                done:
+                    logoPath = foundPath;
                 }
             }
             catch (Exception err)
@@ -251,7 +240,52 @@ namespace MiscHelpers
                 AppLog.Exception(err);
             }
 
-            return new UwpFunc.AppInfo() { Name = displayName, Logo = logoPath, ID = package.Id.FamilyName, SID = sid };
+            return new UwpFunc.AppInfo() { Name = displayName, Logo = logoPath, ID = package.Id.FamilyName, Path = path};
+        }
+
+        /*
+        private Dictionary<string, UwpFunc.AppInfo> AppInfosBySid = new Dictionary<string, UwpFunc.AppInfo>();
+        private ReaderWriterLockSlim AppInfosBySidLock = new ReaderWriterLockSlim();
+
+        public UwpFunc.AppInfo GetAppInfoBySid(string sid)
+        {
+            UwpFunc.AppInfo info = null;
+            AppInfosBySidLock.EnterReadLock();
+            AppInfosBySid.TryGetValue(sid, out info);
+            AppInfosBySidLock.ExitReadLock();
+            if (info != null)
+                return info;
+
+            string appPackageID = SidToAppPackage(sid);
+            if (appPackageID == null || appPackageID.Length == 0)
+                return null;
+
+            IEnumerable<Windows.ApplicationModel.Package> packages;
+
+            try
+            {
+                packages = packageManager.FindPackages(appPackageID);
+            }
+            catch
+            {
+                return null;
+            }
+
+            foreach (var package in packages)
+            {
+                info = GetInfo(package);
+                if (info != null)
+                {
+                    info.SID = sid;
+                    AppInfosBySidLock.EnterWriteLock();
+                    if (!AppInfosBySid.ContainsKey(sid))
+                        AppInfosBySid.Add(sid, info);
+                    AppInfosBySidLock.ExitWriteLock();
+                    break;
+                }
+            }
+
+            return info;
         }
 
         bool FullListFetched = false;

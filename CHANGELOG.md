@@ -3,11 +3,35 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+
+
+
+## [0.84] - 2020-10-25
+
+### Added
+ - added duplicate rule cleanup option
+ - added support for loading modern app package icons
+ - added default service icon
+ 
+### Changed
+- refactored some helper functions
+
+### Fixed
+- improved verbose view sorting performance
+- fixed issue prematurly closing the notification window
+- fixed version numbering on service exe and api dll
+- fixed crash bug in ruls comperation helper
+- fixed handling issue with RibbonSplitButton
+- fixed crash issue with presets fw rule sync
+- fixed tray exclamation mark sometimes blinking unnececerly
+
+
+
 ## [0.83] - 2020-10-19
 
 ### Added
 - added fitlering mode indocator to tray
-- tweak change notification are not displayed in an own notification window tab
+- tweak change notification are now displayed in an own notification window tab
 - added new access presets InBoundAccess and OutBoundAccess
 - added rule hit counter
 - added protocol filter to connection log

@@ -45,19 +45,19 @@ namespace PrivateWin10
         public UwpFunc.AppInfo GetAppPkgBySid(string SID)
         {
             UwpFunc.AppInfo AppContainer = null;
-            if (AppPackages.Count == 0 || (!AppPackages.TryGetValue(SID, out AppContainer) && (DateTime.Now - LastAppReload).TotalMilliseconds > 250))
+            if (AppPackages.Count == 0 || (!AppPackages.TryGetValue(SID, out AppContainer) && (DateTime.Now - LastAppReload).TotalMilliseconds > 5*1000))
             {
-                AppPackages = App.client.GetAllAppPkgs(true);
+                AppPackages = App.client.GetAllAppPkgs();
                 AppPackages.TryGetValue(SID, out AppContainer);
             }
             return AppContainer;
         }
 
-        public IEnumerable GetApps()
+        public void Reload()
         {
             Apps.Clear();
 
-            AppPackages = App.client.GetAllAppPkgs(true);
+            AppPackages = App.client.GetAllAppPkgs();
             if (AppPackages != null)
             {
                 foreach (var AppPkg in AppPackages.Values)
@@ -72,6 +72,12 @@ namespace PrivateWin10
 
                 //Apps.Add(new AppPkg() { Content = Translate.fmt("app_reload"), Value = null });
             }
+        }
+
+        public IEnumerable GetApps()
+        {
+            if (AppPackages.Count == 0 || (DateTime.Now - LastAppReload).TotalMilliseconds > 5*1000)
+                Reload();
 
             ListCollectionView lcv = new ListCollectionView(Apps);
             lcv.GroupDescriptions.Add(new PropertyGroupDescription("Group"));

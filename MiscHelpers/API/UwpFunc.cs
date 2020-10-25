@@ -92,6 +92,8 @@ namespace MiscHelpers
             public string ID;
             [DataMember()]
             public string SID;
+            [DataMember()]
+            public string Path;
         }
 
         public static void AddBinding(System.Windows.Controls.Control ctrl, KeyGesture keyGesture, ExecutedRoutedEventHandler executed)

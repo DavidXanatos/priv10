@@ -19,21 +19,39 @@ namespace PrivateWin10
 
         [DataMember()]
         public SortedDictionary<ProgramID, Program> Programs = new SortedDictionary<ProgramID, Program>();
-        
+
         [DataMember()]
         public ProgramConfig config = new ProgramConfig();
 
         public ProgramSet()
         {
         }
-        
+
+        public static string SvcIconPath = Environment.ExpandEnvironmentVariables(@"%windir%\system32\filemgmt.dll");
+
         public string GetIcon()
         {
             if (config.Icon != null && config.Icon.Length > 0)
                 return config.Icon;
             if (Programs.Count == 0)
-                return MiscFunc.Shell32Path;
-            return Programs.First().Key.Path;
+                return NtUtilities.Shell32Path;
+            
+            return GetIcon(Programs.First().Key);
+        }
+
+        public static string GetIcon(ProgramID ProgId)
+        {
+            if (ProgId.Type == ProgramID.Types.App)
+            {
+                var AppPkg = AppModel.GetInstance().GetAppPkgBySid(ProgId.GetPackageSID());
+                if (AppPkg != null && AppPkg.Logo != null)
+                    return AppPkg.Logo;
+            }
+
+            if (ProgId.Type == ProgramID.Types.Service) // || (ProgId.IsSystem() && ProgId.Path.Length == 0))
+                return SvcIconPath;
+
+            return ProgId.Path;
         }
 
         public bool IsSpecial()

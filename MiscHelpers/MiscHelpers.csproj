@@ -61,7 +61,7 @@
     <Compile Include="API\IPHelper.cs" />
     <Compile Include="API\MiscStats.cs" />
     <Compile Include="API\NetFunc.cs" />
-    <Compile Include="API\ProcessUtilities.cs" />
+    <Compile Include="API\NtUtilities.cs" />
     <Compile Include="API\ProcFunc.cs" />
     <Compile Include="API\RegistryMonitor.cs" />
     <Compile Include="API\ServiceHelper.cs" />

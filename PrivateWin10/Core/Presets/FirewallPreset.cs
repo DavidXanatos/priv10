@@ -133,12 +133,14 @@ namespace PrivateWin10
         public override bool Sync(bool CleanUp = false)
         {
             var rules = App.client.GetRules(new List<Guid>() { ProgSetId });
-            if (rules == null)
+
+            List<FirewallRuleEx> list;
+            if (rules == null || !rules.TryGetValue(ProgSetId, out list))
                 return false;
 
             Dictionary<string, SingleRule> oldRules = new Dictionary<string, SingleRule>(Rules);
 
-            foreach (var rule in rules[ProgSetId])
+            foreach (var rule in list)
             {
                 if (Rules.ContainsKey(rule.guid))
                     oldRules.Remove(rule.guid);

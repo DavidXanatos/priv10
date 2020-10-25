@@ -81,7 +81,7 @@ namespace PrivateWin10
             foreach (IPAddress remoteAddress in Event.RemoteAddresses)
                 OnHostName(remoteAddress, Event.HostName, NameSources.CapturedQuery, Event.ProcessId);
 
-            List<ServiceHelper.ServiceInfo> Services = ServiceHelper.GetServicesByPID(Event.ProcessId);
+            List<ProcessMonitor.ServiceInfo> Services = ProcessMonitor.GetServicesByPID(Event.ProcessId);
             ProgramID ProgID = App.engine.GetProgIDbyPID(Event.ProcessId, (Services == null || Services.Count > 1) ? null : Services[0].ServiceName);
             if (ProgID == null)
             {

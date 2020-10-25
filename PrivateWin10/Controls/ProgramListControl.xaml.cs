@@ -96,6 +96,7 @@ namespace PrivateWin10.Controls
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
+            //using (var suspend = Dispatcher.DisableProcessing())
             ProgramList.UpdateItems(progs);
 
             watch.Stop();

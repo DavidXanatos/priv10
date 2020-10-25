@@ -238,7 +238,9 @@ namespace PrivateWin10
             if (!File.Exists(App.dataPath + @"\Programs.xml"))
                 return false;
 
+#if !DEBUG
             try
+#endif
             {
                 XmlDocument xDoc = new XmlDocument();
                 xDoc.Load(App.dataPath + @"\Programs.xml");
@@ -287,11 +289,13 @@ namespace PrivateWin10
                     Priv10Logger.LogError("Failed to load {0} program entry out of {1}", ErrorCount, TotalCount);
                 Priv10Logger.LogInfo("ProgramList loaded {0} entries", TotalCount - ErrorCount);
             }
+#if !DEBUG
             catch (Exception err)
             {
                 AppLog.Exception(err);
                 return false;
             }
+#endif
             return true;
         }
 

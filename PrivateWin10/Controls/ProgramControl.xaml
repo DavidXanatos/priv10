@@ -64,9 +64,9 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Image x:Name="icon" Grid.Column="0" HorizontalAlignment="Left" Height="48" Margin="2,2,0,0" VerticalAlignment="Top" Width="48"
-                   MouseLeftButtonDown="icon_MouseLeftButtonDown"
-                   />
+                <Border x:Name="iconBG" Grid.Column="0" HorizontalAlignment="Left" Height="48" Margin="2,2,0,0" VerticalAlignment="Top" Width="48" >
+                    <Image x:Name="icon" Stretch="Fill" MouseLeftButtonDown="icon_MouseLeftButtonDown" />
+                </Border>
                 <TextBox x:Name="name" Grid.Column="1" HorizontalAlignment="Stretch" Margin="2,3,3,0" VerticalAlignment="Top" Height="Auto"
                      BorderBrush="Transparent"
                      IsReadOnly="True" LostFocus="name_LostFocus" MouseDoubleClick="name_MouseDoubleClick" KeyDown="name_KeyDown"

@@ -110,7 +110,7 @@ namespace PrivateWin10
             Description = GetDescription();
         }
         
-        public string GetDescription()
+        protected string GetDescription()
         {
             string Name = "";
             string Info = null;
@@ -125,11 +125,11 @@ namespace PrivateWin10
                     break;
                 case ProgramID.Types.Program:
                     Name = System.IO.Path.GetFileName(ID.Path);
-                    Info = MiscFunc.GetExeDescription(ID.Path);
+                    Info = NtUtilities.GetExeDescription(ID.Path);
                     break;
                 case ProgramID.Types.Service:
                     Name = ID.GetServiceId();
-                    Info = ServiceHelper.GetServiceName(Name);
+                    Info = ProcessMonitor.GetServiceName(Name);
                     break;
                 case ProgramID.Types.App:
                     var SID = ID.GetPackageSID();

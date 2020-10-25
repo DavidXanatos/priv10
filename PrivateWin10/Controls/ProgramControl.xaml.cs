@@ -65,7 +65,7 @@ namespace PrivateWin10
         public ProgramControl(ProgramSet prog, CategoryModel Categories)
         {
             InitializeComponent();
-
+            
             chkNotify.Content = Translate.fmt("lbl_notify");
             btnAdd.Content = Translate.fmt("lbl_add");
             btnSplit.Content = Translate.fmt("lbl_split");
@@ -123,7 +123,12 @@ namespace PrivateWin10
 
             SuspendChange++;
 
-            ImgFunc.GetIconAsync(progSet.GetIcon(), icon.Width, (ImageSource src) => {
+            string iconStr = progSet.GetIcon();
+
+            if(ImgFunc.IsImageFileName(iconStr))
+                iconBG.Background = new SolidColorBrush(Colors.DodgerBlue);
+
+            ImgFunc.GetIconAsync(iconStr, iconBG.Width, (ImageSource src) => {
                 if (Application.Current != null)
                 {
                     Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -321,7 +326,13 @@ namespace PrivateWin10
                 {
                     progSet.config.Icon = iconFile;
                     App.client.UpdateProgram(progSet.guid, progSet.config);
-                    icon.Source = ImgFunc.GetIcon(progSet.GetIcon(), icon.Width);
+
+                    string iconStr = progSet.GetIcon();
+
+                    if(ImgFunc.IsImageFileName(iconStr))
+                        iconBG.Background = new SolidColorBrush(Colors.Transparent);
+
+                    icon.Source = ImgFunc.GetIcon(iconStr, iconBG.Width);
                 }
             }
         }
@@ -350,7 +361,7 @@ namespace PrivateWin10
             switch (ProgID.Type)
             {
                 case ProgramID.Types.System: 
-                    Path = MiscFunc.NtOsKrnlPath; 
+                    Path = NtUtilities.NtOsKrnlPath; 
                     break;
                 case ProgramID.Types.Program: 
                     break;
@@ -385,7 +396,7 @@ namespace PrivateWin10
                 Prog = prog;
             }
 
-            public ImageSource Icon { get { return ImgFunc.GetIcon(Prog.ID.Path, 16); } }
+            public ImageSource Icon { get { return ImgFunc.GetIcon(ProgramSet.GetIcon(Prog.ID), 16); } }
 
             public string Name { get { return Prog.Description; } }
 

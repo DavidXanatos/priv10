@@ -296,7 +296,7 @@ namespace PrivateWin10
                 }
                 else if (func == "CleanUpRules")
                 {
-                    ret.Add(PutInt(App.engine.CleanUpRules()));
+                    ret.Add(PutInt(App.engine.CleanUpRules(GetEnum<Priv10Engine.CleanupMode>(args[0]))));
                 }
                 else if (func == "GetConnections")
                 {

@@ -1403,56 +1403,6 @@ namespace WinFirewallAPI
             return fwAppContainers;
         }
 
-        Dictionary<string, UwpFunc.AppInfo> AppPackages = new Dictionary<string, UwpFunc.AppInfo>();
-        DateTime LastAppReload = DateTime.Now;
-
-        public bool LoadAppPkgs()
-        {
-            AppPackages.Clear();
-            LastAppReload = DateTime.Now;
-
-            if (UwpFunc.IsWindows7OrLower)
-                return false;
-
-            var AppContainers = GetAppContainers();
-            foreach (var AppContainer in AppContainers)
-            {
-                string SID = AppContainer.appContainerSid.ToString();
-                if (AppPackages.ContainsKey(SID))
-                    continue;
-
-                UwpFunc.AppInfo AppInfo = new UwpFunc.AppInfo();
-                AppInfo.ID = AppContainer.appContainerName;
-                AppInfo.SID = SID;
-                AppInfo.Name = AppContainer.displayName;
-
-                AppPackages.Add(SID, AppInfo);
-            }
-
-            return true;
-        }
-
-        public Dictionary<string, UwpFunc.AppInfo> GetAllAppPkgs(bool bUpdate = false)
-        {
-            if (bUpdate || AppPackages.Count == 0 || (DateTime.Now - LastAppReload).TotalMilliseconds > 3000)
-                LoadAppPkgs();
-            return AppPackages;
-        }
-
-        public UwpFunc.AppInfo GetAppPkgBySid(string SID)
-        {
-            if (UwpFunc.IsWindows7OrLower || SID == null)
-                return null;
-
-            UwpFunc.AppInfo AppContainer = null;
-            if (AppPackages.Count == 0 || (!AppPackages.TryGetValue(SID, out AppContainer) && (DateTime.Now - LastAppReload).TotalMilliseconds > 250))
-            {
-                LoadAppPkgs();
-                AppPackages.TryGetValue(SID, out AppContainer);
-            }
-            return AppContainer;
-        }
-
         ////////////////////////////////////////////////
         // Network List
 

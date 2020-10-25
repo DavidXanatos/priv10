@@ -128,7 +128,7 @@ namespace PrivateSetup
                     }
                 }
 
-                string Message = (Install ? "Installing:" : "Extracting: ") + ExtractPath + @"\" + file.FileName;
+                string Message = (Install ? "Installing: " : "Extracting: ") + ExtractPath + @"\" + file.FileName;
                 Progress?.Invoke(this, new ProgressArgs() { Progress = (Install ? 75 : 100) * i / files.Count, Message = Message });
 
                 Message = null;
@@ -212,7 +212,7 @@ namespace PrivateSetup
                 Progress?.Invoke(this, new ProgressArgs() { Progress = -1, Message = "Failed to create Service", Show = true });
             Thread.Sleep(100);
 
-            Progress?.Invoke(this, new ProgressArgs() { Progress = 95, Message = "Creatign Start Menu Entries..." });
+            Progress?.Invoke(this, new ProgressArgs() { Progress = 95, Message = "Creating Start Menu Entries..." });
             if (!CreateLinks())
                 Progress?.Invoke(this, new ProgressArgs() { Progress = -1, Message = "Failed to create Start Menu Entries", Show = true });
             Thread.Sleep(100);
