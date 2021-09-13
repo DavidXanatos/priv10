@@ -450,6 +450,9 @@ namespace PrivateWin10.Pages
 
         void OnRuleChange(object sender, Priv10Engine.ChangeArgs args)
         {
+            if (args.action == Priv10Engine.RuleFixAction.Restored || args.action == Priv10Engine.RuleFixAction.Deleted)
+                return;
+
             App.MainWnd.notificationWnd.NotifyRule(args);
         }
 
@@ -1619,6 +1622,11 @@ namespace PrivateWin10.Pages
         {
             ProgList_SelectionChanged(null, null);
         }
+
+        /*private void chkTree_Click(object sender, RoutedEventArgs e)
+        {
+            ProgList_SelectionChanged(null, null);
+        }*/
 
         private void BtnViewMode_Click(object sender, RoutedEventArgs e)
         {

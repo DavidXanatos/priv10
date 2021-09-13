@@ -155,9 +155,10 @@ namespace MiscHelpers
             }
 
             XElement xelement;
+            string manifestXML;
             try
             {
-                string manifestXML = File.ReadAllText(manifest);
+                manifestXML = File.ReadAllText(manifest);
 
                 int startIndex = manifestXML.IndexOf("<Properties>", StringComparison.Ordinal);
                 int num = manifestXML.IndexOf("</Properties>", StringComparison.Ordinal);
@@ -165,7 +166,7 @@ namespace MiscHelpers
             }
             catch (Exception err)
             {
-                AppLog.Exception(err);
+                //AppLog.Exception(err);
                 return null;
             }
 

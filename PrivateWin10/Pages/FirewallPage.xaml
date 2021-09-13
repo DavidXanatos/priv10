@@ -29,6 +29,8 @@
                     <RibbonCheckBox Name="chkAll" Label="Show All"/>
                 </-->
                 <StackPanel Orientation="Horizontal" Margin="0,1,20,0">
+                    <!--RibbonToggleButton Name="chkTree" ToolTip="Tree View" SmallImageSource="{StaticResource Icon_TreeView}" Click="chkTree_Click"/>
+                    <RibbonSeparator/-->
                     <RibbonToggleButton Name="btnNormalView" ToolTip="Normal View" SmallImageSource="{StaticResource Icon_NormalView}" Click="BtnViewMode_Click"/>
                     <RibbonToggleButton Name="btnFullHeight" ToolTip="Full Height" SmallImageSource="{StaticResource Icon_FullHeight}" Click="BtnViewMode_Click"/>
                     <RibbonToggleButton Name="btnFullWidth" ToolTip="Full Width" SmallImageSource="{StaticResource Icon_FullWidth}" Click="BtnViewMode_Click"/>

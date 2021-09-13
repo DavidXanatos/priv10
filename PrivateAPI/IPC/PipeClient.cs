@@ -166,7 +166,7 @@ namespace PrivateAPI
 #endif
             {
                 if (clientPipe == null) // && Connect(3000, true) == 0)
-                    throw new Exception("Not Connected");
+                    return null;
 
                 ret = clientPipe.RemoteExec(func, args);
             }

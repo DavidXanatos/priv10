@@ -171,6 +171,7 @@
     <Compile Include="Controls\Notify\TweakNotify.xaml.cs">
       <DependentUpon>TweakNotify.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Core\Presets\ControlPreset.cs" />
     <Compile Include="Core\Presets\CustomPreset.cs" />
     <Compile Include="Core\Presets\FirewallPreset.cs" />
     <Compile Include="Core\Presets\PresetGroup.cs" />
@@ -399,8 +400,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="..\SharedAssemblyInfo.cs">
-  		<Link>Properties\SharedAssemblyInfo.cs</Link>
-		</Compile>
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -600,6 +601,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\icon_red_x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons8-plus-48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\tree_view.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

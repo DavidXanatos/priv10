@@ -469,6 +469,7 @@ namespace PrivateWin10
             mStrings.Add("msg_preset_progset", "Sellect Program Set to be added:");
             mStrings.Add("msg_preset_tweak", "Sellect Tweak Groupe to be added:");
             mStrings.Add("msg_preset_item_failed", "Failed to add preset item!");
+            mStrings.Add("msg_preset_item_control", "Select preset to be controlled");
             mStrings.Add("lbl_undo", "Undo Preset {0}");
             mStrings.Add("lbl_undo_never", "Don't undo Preset");
             mStrings.Add("str_changed", "changed");

@@ -14,6 +14,7 @@ namespace PrivateWin10
         Firewall,
         //Terminator,
         //Dns,
+        Control,
         Custom
     }
 
@@ -32,6 +33,7 @@ namespace PrivateWin10
             {
                 case PresetType.Tweak:     item = new TweakPreset(); break;
                 case PresetType.Firewall:  item = new FirewallPreset(); break;
+                case PresetType.Control:   item = new ControlPreset(); break;
                 case PresetType.Custom:    item = new CustomPreset(); break;
                 default: return null;
             }

@@ -36,11 +36,16 @@ namespace PrivateWin10
         Func<T, bool> Filter;
 
         public ControlList(ScrollViewer itemScroll, Func<U, T>itemFactory, Func<U, string> getGuid, Action<List<T>> sorter = null, Func<T, bool> filter = null)
+            : this(itemScroll, (Grid)itemScroll.Content, itemFactory, getGuid, sorter, filter)
+        {
+        }
+
+        public ControlList(ScrollViewer itemScroll, Grid itemGrid, Func<U, T>itemFactory, Func<U, string> getGuid, Action<List<T>> sorter = null, Func<T, bool> filter = null)
         {
             ItemScroll = itemScroll;
             ItemScroll.PreviewKeyDown += process_KeyEventHandler;
 
-            ItemGrid = (Grid)ItemScroll.Content;
+            ItemGrid = itemGrid;
 
             ItemFactory = itemFactory;
             GetGuid = getGuid;

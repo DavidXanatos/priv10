@@ -101,9 +101,16 @@ namespace MiscHelpers
 
             if (mLogName != null)
             {
-                mEventWatcher = new EventLogWatcher(new EventLogQuery(mLogName, PathType.LogName));
-                mEventWatcher.EventRecordWritten += new EventHandler<EventRecordWrittenEventArgs>(OnLogEntry);
-                mEventWatcher.Enabled = true;
+                try
+                {
+                    mEventWatcher = new EventLogWatcher(new EventLogQuery(mLogName, PathType.LogName));
+                    mEventWatcher.EventRecordWritten += new EventHandler<EventRecordWrittenEventArgs>(OnLogEntry);
+                    mEventWatcher.Enabled = true;
+                }
+                catch 
+                {
+                    // todo: fix me, why does this happend to someone?
+                }
             }
         }
 

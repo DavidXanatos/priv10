@@ -77,13 +77,8 @@ namespace PrivateService
             AppLog.ExceptionLogID = (long)Priv10Logger.EventIDs.Exception;
             AppLog.ExceptionCategory = (short)Priv10Logger.EventFlags.DebugEvents;
 
-            if (startMode == StartModes.Normal)
-            {
-                Log.EnableLogging();
-                Log.LoadLog(); 
-            }
             // When running as worker we need the windows event log
-            else if (!Log.UsingEventLog())
+            if (!Log.UsingEventLog())
                 Log.SetupEventLog(Key);
 
             // load current version

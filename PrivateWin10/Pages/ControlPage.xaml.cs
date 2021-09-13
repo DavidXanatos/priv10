@@ -40,7 +40,7 @@ namespace PrivateWin10.Pages
             cmbUndo.Items.Add(new ComboBoxItem() { Content = Translate.fmt("lbl_undo", "1 h"), Tag = 60 * 60 });
             cmbUndo.Items.Add(new ComboBoxItem() { Content = Translate.fmt("lbl_undo", "24 h"), Tag = 24 * 60 * 60 });
 
-            PresetList = new ControlList<PresetControl, PresetGroup>(this.presetScroll, (preset) => { return new PresetControl(preset); }, (preset) => preset.guid.ToString());
+            PresetList = new ControlList<PresetControl, PresetGroup>(this.presetScroll, this.presetGrid, (preset) => { return new PresetControl(preset); }, (preset) => preset.guid.ToString());
             PresetList.SingleSellection = false;
 
             PresetList.UpdateItems(App.presets.Presets.Values.ToList());
@@ -86,7 +86,7 @@ namespace PrivateWin10.Pages
             WpfFunc.CmbSelect(this.cmbUndo, CurrentPreset.AutoUndo.ToString());
 
             foreach(var item in CurrentPreset.Items.Values)
-                item.Sync();
+                item.Sync(true);
 
             PresetItemList.UpdateItems(CurrentPreset.Items.Values.ToList());
             CollapseAll();
@@ -179,7 +179,8 @@ namespace PrivateWin10.Pages
             List<string> Categories = new List<string>();
             Categories.Add(PresetType.Tweak.ToString());
             Categories.Add(PresetType.Firewall.ToString());
-            //Categories.Add(PresetType.Custom.ToString()); // todo:
+            Categories.Add(PresetType.Control.ToString());
+            Categories.Add(PresetType.Custom.ToString());
 
             InputWnd wnd = new InputWnd(Translate.fmt("msg_preset_item"), Categories, "", false, App.Title);
             if (wnd.ShowDialog() != true || wnd.Value.Length == 0)
@@ -227,6 +228,20 @@ namespace PrivateWin10.Pages
                 item.ProgSetId = prog.guid;
                 newItem = item;
             }
+            else if (wnd.Value == PresetType.Control.ToString())
+            {
+                Dictionary<string, Guid> Presets = new Dictionary<string, Guid>();
+                foreach (var preset in App.presets.Presets.Values)
+                    Presets.Add(preset.Name, preset.guid);
+
+                InputWnd wnd2 = new InputWnd(Translate.fmt("msg_preset_item_control"), Presets.Keys.ToList(), "", false, App.Title);
+                if (wnd2.ShowDialog() != true || wnd2.Value.Length == 0)
+                    return;
+
+                ControlPreset item = new ControlPreset();   
+                item.Name = wnd2.Value;
+                newItem = item;
+            }
             else if (wnd.Value == PresetType.Custom.ToString())
             {
                 InputWnd wnd2 = new InputWnd(Translate.fmt("msg_preset_item_name"), "", App.Title);                
@@ -269,7 +284,7 @@ namespace PrivateWin10.Pages
             CollapseAll();
         }
 
-        private void BtnSyncItems_Click(object sender, RoutedEventArgs e)
+        /*private void BtnSyncItems_Click(object sender, RoutedEventArgs e)
         {
             if (PresetItemList.SelectedItems.Count > 0)
             {
@@ -278,7 +293,7 @@ namespace PrivateWin10.Pages
 
                 OnPresetItemChanged(null, null);
             }
-        }
+        }*/
 
         public static string SelectTweakName()
         { 

@@ -662,6 +662,16 @@ namespace TweakEngine
             });
 
 
+            // *** Disable Windows Insider Service ***
+
+            Group noInsider = new Group("Disable Windows Insider Services");
+            updateCat.Add(noInsider);
+            noInsider.Add(new Tweak("Disable Windows Insider Service", TweakType.DisableService, WinVer.Win10)
+            {
+                Key = "wisvc"
+            });
+
+
             /*  
             *  #########################################
             *          Privacy & Advertisement

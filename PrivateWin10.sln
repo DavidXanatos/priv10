@@ -11,6 +11,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{63DEFD3C-663C-45E6-B325-7630B398D543}"
 	ProjectSection(SolutionItems) = preProject
 		CHANGELOG.md = CHANGELOG.md
+		SharedAssemblyInfo.cs = SharedAssemblyInfo.cs
 		TODO.md = TODO.md
 	EndProjectSection
 EndProject

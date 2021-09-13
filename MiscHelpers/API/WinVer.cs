@@ -30,15 +30,16 @@ namespace MiscHelpers
         protected const int ten19H1 = 18362; // 19H1
         protected const int ten19H2 = 18363; // 19H2
         protected const int ten20H1 = 19041;
-        //protected const int ten20H2
-        //protected const int ten21H1
+        protected const int ten20H2 = 19042;
+        protected const int ten21H1 = 19043;
+        protected const int ten21H2 = 20303;
         //...
 
         static public WinVer Win2k          { get { return new WinVer() { minVer = ver2k }; } }
         static public WinVer WinXP          { get { return new WinVer() { minVer = verXP }; } }
         static public WinVer WinXPonly      { get { return new WinVer() { minVer = verXP, maxVer = verXP }; } }
         static public WinVer WinXPto7       { get { return new WinVer() { minVer = verXP, maxVer = ver7 }; } }
-        static public WinVer WinXPto10       { get { return new WinVer() { minVer = verXP, maxVer = ver10 }; } }
+        static public WinVer WinXPto10      { get { return new WinVer() { minVer = verXP, maxVer = ver10 }; } }
         static public WinVer Win6           { get { return new WinVer() { minVer = ver6 }; } }
         static public WinVer Win6to7        { get { return new WinVer() { minVer = ver6, maxVer = ver7 }; } }
         static public WinVer Win7           { get { return new WinVer() { minVer = ver7 }; } }
@@ -59,6 +60,9 @@ namespace MiscHelpers
         static public WinVer Win19H1        { get { return new WinVer() { minVer = ver10, build10 = ten19H1 }; } }
         static public WinVer Win19H2        { get { return new WinVer() { minVer = ver10, build10 = ten19H2 }; } }
         static public WinVer Win20H1        { get { return new WinVer() { minVer = ver10, build10 = ten20H1 }; } }
+        static public WinVer Win20H2        { get { return new WinVer() { minVer = ver10, build10 = ten20H2 }; } }
+        static public WinVer Win21H1        { get { return new WinVer() { minVer = ver10, build10 = ten21H1 }; } }
+        static public WinVer Win21H2        { get { return new WinVer() { minVer = ver10, build10 = ten21H2 }; } }
 
 
         public enum Edition10

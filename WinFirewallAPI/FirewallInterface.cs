@@ -18,7 +18,9 @@ namespace WinFirewallAPI
 
         private static ushort GetApiVersion()
         {
-            if (WinVer.Win19H1.TestHost() || WinVer.Win19H2.TestHost())
+            if (WinVer.Win21H2.TestHost())
+                return (ushort)FW_BINARY_VERSION.FW_BINARY_VERSION_21H2;
+            else if (WinVer.Win19H1.TestHost() || WinVer.Win19H2.TestHost()) // or newer
                 return (ushort)FW_BINARY_VERSION.FW_BINARY_VERSION_19Hx;
             else if (WinVer.Win1803.TestHost() || WinVer.Win1809.TestHost())
                 return (ushort)FW_BINARY_VERSION.FW_BINARY_VERSION_180x;
@@ -139,7 +141,6 @@ namespace WinFirewallAPI
             //wFlags |= FW_ENUM_RULES_FLAGS.FW_ENUM_RULES_FLAG_RESOLVE_APPLICATION;
             //wFlags |= FW_ENUM_RULES_FLAGS.FW_ENUM_RULES_FLAG_RESOLVE_KEYWORD; // for testing only dynamic_store
 
-
             uint dwNumRules;
             IntPtr fwRules;
             if (FWEnumFirewallRules(policyHandle, FW_RULE_STATUS_CLASS.FW_RULE_STATUS_CLASS_ALL, FW_PROFILE_TYPE.FW_PROFILE_TYPE_ALL, wFlags, out dwNumRules, out fwRules) != ERROR_SUCCESS)
@@ -169,6 +170,7 @@ namespace WinFirewallAPI
 
             Compat.Dispose();
 
+            // 21H2 crashes when the version is 0x21E despite its own AuthFWSnapin using that version, if we use the one anounced for server 2022 0x21F this works fine WTF
             FWFreeFirewallRules(fwRules);
 
             return rules;

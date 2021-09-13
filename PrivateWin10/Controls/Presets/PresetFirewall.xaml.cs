@@ -73,7 +73,7 @@ namespace PrivateWin10.Controls
         private void LoadRules()
         {
             var rules = App.client.GetRules(new List<Guid>() { FirewallPreset.ProgSetId });
-            Rules = rules?.First().Value;
+            Rules = rules?.Count > 0 ? rules?.First().Value : new List<FirewallRuleEx>();
 
             RuleList.UpdateItems(null);
             RuleList.UpdateItems(FirewallPreset.Rules.Values.ToList());

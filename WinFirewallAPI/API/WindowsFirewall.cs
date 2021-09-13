@@ -29,7 +29,8 @@ namespace WinFirewallAPI
             FW_BINARY_VERSION_REDSTONE1 = 0x021A, // 1607
             FW_BINARY_VERSION_170x = 0x021B, // Redstone 2 & Redstone 3
             FW_BINARY_VERSION_180x = 0x021C, // Redstone 4 & Redstone 5
-            FW_BINARY_VERSION_19Hx = 0x021E
+            FW_BINARY_VERSION_19Hx = 0x021E,
+            FW_BINARY_VERSION_21H2 = 0x021F  // 21H2 - Server 2022 LTSC
         }
 
         public const int ERROR_SUCCESS = 0x0;

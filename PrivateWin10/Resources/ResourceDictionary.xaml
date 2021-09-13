@@ -135,6 +135,8 @@
     <BitmapImage x:Key="Icon_Minus" UriSource="icons8-minus-mathe-16.png" />
     <BitmapImage x:Key="Icon_Remove" UriSource="icons8-remove-16.png" />
 
+    <BitmapImage x:Key="Icon_Add" UriSource="icons8-plus-48.png" />
+
     <BitmapImage x:Key="Icon_Merge" UriSource="icons8-data-merge-16.png" />
     <BitmapImage x:Key="Icon_Split" UriSource="icons8-data-split-16.png" />
 
@@ -196,6 +198,7 @@
     <BitmapImage x:Key="Icon_SetIcon" UriSource="icons8-xlarge-symbole-16.png" />
     <BitmapImage x:Key="Icon_Category" UriSource="icons8-ordner-öffnen-16.png" />
 
+    <BitmapImage x:Key="Icon_TreeView" UriSource="tree_view.png" />
     <BitmapImage x:Key="Icon_NormalView" UriSource="normal_view.png" />
     <BitmapImage x:Key="Icon_FullScreen" UriSource="full_screen.png" />
     <BitmapImage x:Key="Icon_FullHeight" UriSource="full_height.png" />

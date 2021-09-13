@@ -716,9 +716,9 @@ namespace PrivateWin10
             if (rule.Name.IndexOf(FirewallManager.TempRulePrefix) == 0) // Note: all temporary rules start with priv10temp - 
                 knownRule.Expiration = MiscFunc.GetUTCTime(); // expire now
 
-            prog.Rules.Add(knownRule.guid, knownRule);
             if (bApproved)
             {
+                prog.Rules.Add(knownRule.guid, knownRule);
                 knownRule.SetApplied();
                 return;
             }
@@ -728,12 +728,23 @@ namespace PrivateWin10
             RuleFixAction actionTaken = RuleFixAction.None;
 
             FirewallGuard.Mode Mode = (FirewallGuard.Mode)App.GetConfigInt("Firewall", "GuardMode", 0);
-            if (knownRule.Enabled && (Mode == FirewallGuard.Mode.Fix || Mode == FirewallGuard.Mode.Disable))
+
+            if (Mode == FirewallGuard.Mode.Fix)
             {
-                knownRule.Backup = knownRule.Duplicate();
-                knownRule.Enabled = false;
-                FirewallManager.UpdateRule(knownRule);
-                actionTaken = RuleFixAction.Disabled;
+                FirewallManager.RemoveRule(knownRule.guid);
+                actionTaken = RuleFixAction.Deleted;
+            }
+            else
+            {
+                prog.Rules.Add(knownRule.guid, knownRule);
+
+                if (knownRule.Enabled && Mode == FirewallGuard.Mode.Disable)
+                {
+                    knownRule.Backup = knownRule.Duplicate();
+                    knownRule.Enabled = false;
+                    FirewallManager.UpdateRule(knownRule);
+                    actionTaken = RuleFixAction.Disabled;
+                }
             }
 
             LogRuleEvent(prog, knownRule, RuleEventType.Added, actionTaken);
@@ -747,7 +758,7 @@ namespace PrivateWin10
                 if (knownRule.State == FirewallRuleEx.States.Changed || knownRule.State == FirewallRuleEx.States.Deleted)
                 {
                     knownRule.State = FirewallRuleEx.States.Approved; // it seams the rule recivered
-                    LogRuleEvent(prog, knownRule, RuleEventType.UnChanged, RuleFixAction.None);
+                    //LogRuleEvent(prog, knownRule, RuleEventType.UnChanged, RuleFixAction.None);
                 }
                 return;
             }
@@ -869,7 +880,9 @@ namespace PrivateWin10
             {
                 knownRule.State = FirewallRuleEx.States.Deleted;
 
-                FirewallManager.UpdateRule(knownRule);
+                if (FirewallManager.UpdateRule(knownRule))
+                    knownRule.State = FirewallRuleEx.States.Approved;
+
                 actionTaken = RuleFixAction.Restored;
             }
             else
@@ -938,6 +951,7 @@ namespace PrivateWin10
             switch (action)
             {
                 case RuleFixAction.Disabled:    Message = string.Format("Firewall rule \"{0}\" for \"{1}\" was {2}, the rule has been disabled.", RuleName, prog.Description, strEvent); break;
+                case RuleFixAction.Deleted:     Message = string.Format("Firewall rule \"{0}\" for \"{1}\" was {2}, it was removed.", RuleName, prog.Description, strEvent); break;
                 case RuleFixAction.Restored:    Message = string.Format("Firewall rule \"{0}\" for \"{1}\" was {2}, the original rule was restored.", RuleName, prog.Description, strEvent); break;
                 default:                        Message = string.Format("Firewall rule \"{0}\" for \"{1}\" was {2}.", RuleName, prog.Description, strEvent); break;
             }

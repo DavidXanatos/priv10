@@ -6,6 +6,20 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [0.85] - 2021-09-12
+
+### Changed
+- presets now always clean up firewall rules
+- fixed when in rule restoration mode new unsolicited rules are deleted instead of disabled 
+-- no notification is shown as no user action is to be taken
+
+### Fixed
+- fixed auto undo issue
+- fixed potential crash when loading fw presets
+- fixed compatybility issue with windows insider 21H2
+
+
+
 ## [0.84] - 2020-10-25
 
 ### Added

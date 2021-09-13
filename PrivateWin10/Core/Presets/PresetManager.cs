@@ -30,7 +30,7 @@ namespace PrivateWin10
             // on restart disable any left over presets
             foreach (PresetGroup preset in Presets.Values)
             {
-                if (preset.State == true && preset.AutoUndo != null)
+                if (preset.State == true && preset.AutoUndo != 0)
                     preset.SetState(false);
             }
 
